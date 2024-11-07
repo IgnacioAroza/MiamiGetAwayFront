@@ -7,7 +7,7 @@ import { motion } from 'framer-motion';
 import "slick-carousel/slick/slick.css"; 
 import "slick-carousel/slick/slick-theme.css";
 
-import ImageCarousel from '../components/ImageCarousel';
+import ImageCarousel from '../components/images/ImageCarousel';
 import WhatsAppIcon from '../components/WhatsAppIcon';
 
 import carService from '../services/carService';

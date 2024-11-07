@@ -1,6 +1,6 @@
 import React from 'react';
 import { Typography, Container } from '@mui/material';
-import AdminDashboard from '../components/AdminDashboard';
+import AdminDashboard from '../components/admin/AdminDashboard';
 
 const AdminPanel = () => {
   return (

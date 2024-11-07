@@ -7,7 +7,7 @@ import WhatsAppIcon from '../components/WhatsAppIcon';
 import Services from './Services';
 import About from './About';
 import Reviews from '../components/ReviewsManager';
-import AboutFounder from '../components/AboutFounder';
+import AboutFounder from '../components/about/AboutFounder';
 
 const Home = () => {
   const theme = useTheme();

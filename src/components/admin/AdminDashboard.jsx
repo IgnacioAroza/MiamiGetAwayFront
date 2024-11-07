@@ -26,13 +26,13 @@ import AddIcon from '@mui/icons-material/Add';
 import EditIcon from '@mui/icons-material/Edit';
 import DeleteIcon from '@mui/icons-material/Delete';
 
-import Navbar from './NavBar';
-import CarForm from './CarForm';
-import YachtForm from './YachtForm';
-import PropertyForm from './PropertyForm';
-import UserForm from './UserForm';
-import ImageUploader from './ImageUploader';
-import AdminReviews from './AdminReviews';
+import Navbar from '../NavBar';
+import CarForm from '../form/CarForm';
+import YachtForm from '../form/YachtForm';
+import PropertyForm from '../form/PropertyForm';
+import UserForm from '../form/UserForm';
+import ImageUploader from '../images/ImageUploader';
+import AdminReviews from '../admin/AdminReviews';
 
 import { 
   fetchServices, 
@@ -42,18 +42,18 @@ import {
   setSelectedService,
   setCurrentItem,
   clearError as clearServiceError
-} from '../redux/serviceSlice';
+} from '../../redux/serviceSlice';
 
 import {
   fetchUsers,
   clearError as clearUserError,
   selectUserCount,
   selectUserInfo
-} from '../redux/userSlice';
+} from '../../redux/userSlice';
 
 import {
   clearError as clearReviewError
-} from '../redux/reviewSlice';
+} from '../../redux/reviewSlice';
 
 const AdminDashboard = () => {
   const dispatch = useDispatch();

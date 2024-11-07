@@ -9,7 +9,7 @@ import {
   Alert
 } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
-import adminService from '../services/adminService';
+import adminService from '../../services/adminService';
 
 const AdminLogin = () => {
   const [username, setUsername] = useState('');

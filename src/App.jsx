@@ -9,9 +9,9 @@ import Services from './pages/Services';
 import ServiceList from './pages/ServiceList';
 import ServiceDetails from './pages/ServiceDetails';
 import About from './pages/About';
-import AboutFounder from './components/AboutFounder';
 import AdminPanel from './pages/AdminPanel';
-import AdminLogin from './components/AdminLogin';
+import AboutFounder from './components/about/AboutFounder';
+import AdminLogin from './components/admin/AdminLogin';
 
 const theme = createTheme({
   palette: {
