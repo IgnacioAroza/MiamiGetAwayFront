@@ -1,0 +1,129 @@
+{
+  "general": {
+    "welcome": "Miami Get Away",
+    "loading": "Loading...",
+    "error": "An error occurred. Please try again.",
+    "submit": "Submit",
+    "viewMore": "View More",
+    "viewDetails": "View Details",
+    "notAvailable": "N/A",
+    "confirm": "Confirm",
+    "cancel": "Cancel"
+  },
+  "navigation": {
+    "home": "Home",
+    "services": "Services",
+    "about": "About",
+    "aboutFounder": "Founder",
+    "reviews": "Reviews",
+    "contact": "Contact",
+    "backToHome": "Back to Home",
+    "backTo": "Back to {{type}}"
+  },
+  "home": {
+    "hero": {
+      "title": "Experience Luxury in Miami",
+      "subtitle": "Discover our exclusive services and indulge in the ultimate getaway"
+    }
+  },
+  "about": {
+    "title": "About Us",
+    "description": "Miami Get Away specializes in turning every stay in Miami into an experience of unparalleled luxury, quality and comfort. Offering a variety of services, from car rentals of all kinds and properties for any type of need, to yachts of different categories, Miami Get Away adapts to the needs and expectations of each client, providing a completely personalized attention.",
+    "mission": "Whether you are looking for an absolute relaxing vacation or a vibrant city experience, Miami Get Away takes care of every detail, ensuring comfort, style and excellence in every aspect of your visit. With headquarters in Miami and a team of U.S.-trained professionals, we are the perfect partner for those who want much more than just a visit; we offer an authentic quality experience every step of the way during your stay in Miami."
+  },
+  "services": {
+    "title": "Our Luxury Services",
+    "types": {
+      "cars": "Cars",
+      "yachts": "Yachts",
+      "apartments": "Apartments",
+      "villas": "Villas"
+    },
+    "brand": "Brand",
+    "model": "Model",
+    "name": "Name",
+    "price": "Price",
+    "noServiceFound": "No service found",
+    "descriptions": {
+      "cars": "Experience the thrill of driving the world's finest automobiles.",
+      "yachts": "Set sail on crystal-clear waters with our premium yacht rentals.",
+      "apartments": "Stay in style with our carefully selected luxury apartments.",
+      "villas": "Indulge in the ultimate privacy and comfort of our exclusive villas."
+    },
+    "description": "Description",
+    "capacity": "Capacity",
+    "address": "Address",
+    "noServicesFound": "No services found."
+  },
+  "reviews": {
+    "title": "Customer Reviews",
+    "anonymous": "Anonymous",
+    "noComment": "No comment provided",
+    "noReviews": "No reviews available",
+    "addReview": "Add Review",
+    "firstName": "Name",
+    "lastName": "LastName",
+    "rating": "Rating",
+    "comment": "Comment",
+    "submitReview": "Submit Review",
+    "success": "Review submitted successfully!",
+    "error": "Error submitting review. Please try again."
+  },
+  "contact": {
+    "title": "Contact Us",
+    "form": {
+      "name": "Name",
+      "email": "Email",
+      "message": "Message",
+      "send": "Send Message"
+    },
+    "info": {
+      "address": "123 Luxury Lane, Miami, FL 33101",
+      "phone": "+1 (305) 555-1234",
+      "email": "info@miamigetaway.com"
+    }
+  },
+  "footer": {
+    "rights": "© 2024 Miami Getaway. All rights reserved.",
+    "privacy": "Privacy Policy",
+    "terms": "Terms of Service"
+  },
+  "errors": {
+    "invalidServiceType": "Invalid service type: {{type}}",
+    "fetchingServices": "Error fetching services:",
+    "fetchingReviews": "Error fetching reviews"
+  },
+  "units": {
+    "day": "day",
+    "feet": "ft",
+    "people": "people"
+  },
+  "bookingForm": {
+    "title": "Book Now",
+    "name": "Name",
+    "lastName": "Last Name",
+    "email": "E-mail",
+    "selectDates": "Select Dates",
+    "reserve": "Reserve",
+    "selectReservationDates": "Select Reservation Dates",
+    "startDate": "Start Date",
+    "endDate": "End Date",
+    "errors": {
+      "incompleteFields": "Please complete all fields.",
+      "selectDates": "Please select reservation dates.",
+      "savingUserData": "Error saving user data:",
+      "tryAgain": "There was an error saving the data. Please try again."
+    }
+  },
+  "whatsappMessage": "Hello, I would like to book the {{serviceName}} from {{startDate}} to {{endDate}}. My name is {{name}} {{lastName}}.",
+  "aboutFounder": {
+      "title": "About Facundo",
+      "imageAlt": "Facundo, founder of Miami Get Away",
+      "paragraph1": "With a clear vision and a solid background in international business, Facundo has positioned his concierge company in Miami as one of the most outstanding in offering unique and exclusive experiences to his clients.",
+      "paragraph2": "For nine years, he has made the United States his home, and his journey through different states has allowed him to capture the best of each place to give his company a singular approach.",
+      "paragraph3": "Graduated in International Business and with an MBA specialized in marketing, he combined his academic knowledge with his passion for service and hospitality. As a real estate agent, he also brings an additional level of professionalism and access to exclusive properties, making each stay in Miami unforgettable and unprecedented.",
+      "paragraph4": "His company Miami Get Away specializes in renting vehicles, properties, yachts of various categories, among other services, adapting to the needs of each client and offering completely personalized attention. Whether for those looking for a vacation of absolute rest or a vibrant experience in the city.",
+      "paragraph5": "Facundo and his team take care of every detail, guaranteeing comfort, style and excellence. Thanks to a combination of experience, empathy and dedication, Facundo has become a reference for those who wish to discover Miami from a truly exclusive and sophisticated perspective.",
+      "paragraph6": "His personalized approach and deep knowledge of the market make him the perfect ally for those seeking much more than a simple visit: an authentic quality experience in every aspect of their stay in Miami."
+    }
+}

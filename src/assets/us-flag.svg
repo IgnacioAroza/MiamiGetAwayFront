@@ -1,0 +1,37 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 912 600">
+  <rect width="912" height="600" fill="#bf0a30"/>
+  <g fill="#ffffff">
+    <rect width="912" height="46.15" y="46.15"/>
+    <rect width="912" height="46.15" y="138.45"/>
+    <rect width="912" height="46.15" y="230.75"/>
+    <rect width="912" height="46.15" y="323.05"/>
+    <rect width="912" height="46.15" y="415.35"/>
+    <rect width="912" height="46.15" y="507.65"/>
+  </g>
+  <rect width="364.8" height="323.1" fill="#002868"/>
+  <g fill="#ffffff">
+    <g id="s18">
+      <g id="s9">
+        <g id="s5">
+          <g id="s4">
+            <path id="s" d="M24.3,13.9 L26.6,20.9 L20.6,16.4 L28.6,16.4 L22.6,20.9z"/>
+            <use href="#s" y="26.2"/>
+            <use href="#s" y="52.4"/>
+            <use href="#s" y="78.6"/>
+          </g>
+          <use href="#s" y="104.8"/>
+        </g>
+        <use href="#s5" x="30.4"/>
+        <use href="#s5" x="60.8"/>
+        <use href="#s5" x="91.2"/>
+      </g>
+      <use href="#s9" x="121.6"/>
+    </g>
+    <use href="#s18" y="26.2"/>
+    <use href="#s9" y="52.4"/>
+    <use href="#s9" x="91.2" y="52.4"/>
+    <use href="#s18" y="78.6"/>
+    <use href="#s9" y="104.8"/>
+    <use href="#s9" x="91.2" y="104.8"/>
+  </g>
+</svg>

@@ -1,0 +1,129 @@
+{
+  "general": {
+    "welcome": "Miami Get Away",
+    "loading": "Cargando...",
+    "error": "Ocurrió un error. Por favor, inténtelo de nuevo.",
+    "submit": "Enviar",
+    "viewMore": "Ver Más",
+    "viewDetails": "Ver Detalles",
+    "notAvailable": "N/D",
+     "confirm": "Confirmar",
+     "cancel": "Canelar"
+  },
+  "navigation": {
+    "home": "Inicio",
+    "services": "Servicios",
+    "about": "Nosotros",
+    "aboutFounder": "Fundador",
+    "reviews": "Reseñas",
+    "contact": "Contacto",
+    "backToHome": "Volver al Inicio",
+    "backTo": "Volver a {{type}}"
+  },
+  "home": {
+    "hero": {
+      "title": "Experimenta el Lujo en Miami",
+      "subtitle": "Descubre nuestros servicios exclusivos y disfruta de la escapada definitiva"
+    }
+  },
+  "about": {
+    "title": "Sobre Nosotros",
+    "description": "Miami Get Away se especializa en convertir cada estadía en Miami en una experiencia de lujo, calidad y confort inigualables. Ofreciendo una variedad de servicios, desde la renta de vehículos de todo tipo y propiedades para cualquier tipo de necesidad, hasta yates de diferentes categorías, Miami Get Away se adapta a las necesidades y expectativas de cada cliente, brindando una atención completamente personalizada.",
+    "mission": "Ya sea que busques unas vacaciones de descanso absoluto o una experiencia vibrante en la ciudad, Miami Get Away cuida cada detalle, asegurando comodidad, estilo y excelencia en cada aspecto de tu visita. Con sede en Miami y un equipo de profesionales capacitados en Estados Unidos, somos el aliado perfecto para quienes desean mucho más que una simple visita; ofrecemos una auténtica experiencia de calidad en cada momento de tu estadía en Miami."
+  },
+  "services": {
+    "title": "Nuestros Servicios de Lujo",
+    "types": {
+      "cars": "Autos",
+      "yachts": "Yates",
+      "apartments": "Departamentos",
+      "villas": "Villas"
+    },
+    "brand": "Marca",
+    "model": "Modelo",
+    "name": "Nombre",
+    "price": "Precio",
+    "noServiceFound": "No se encontró el servicio",
+    "descriptions": {
+      "cars": "Experimente la emoción de conducir los mejores automóviles del mundo.",
+      "yachts": "Navegue en aguas cristalinas con nuestros alquileres de yates premium.",
+      "apartments": "Alójese con estilo en nuestros apartamentos de lujo cuidadosamente seleccionados.",
+      "villas": "Disfrute de la máxima privacidad y comodidad en nuestras villas exclusivas."
+    },
+    "description": "Descripción",
+    "capacity": "Capacidad",
+    "address": "Dirección",
+    "noServicesFound": "No se encontraron servicios."
+  },
+  "reviews": {
+    "title": "Reseñas de Clientes",
+    "anonymous": "Anónimo",
+    "noComment": "No se proporcionó comentario",
+    "noReviews": "No hay reseñas disponibles",
+    "addReview": "Agregar tu Reseña",
+    "firstName": "Nombre",
+    "lastName": "Apellido",
+    "rating": "Calificación",
+    "comment": "Comentario",
+    "submitReview": "Enviar Reseña",
+    "success": "¡Reseña enviada con éxito!",
+    "error": "Error al enviar la reseña. Por favor, inténtelo de nuevo."
+  },
+  "contact": {
+    "title": "Contáctenos",
+    "form": {
+      "name": "Nombre",
+      "email": "Correo Electrónico",
+      "message": "Mensaje",
+      "send": "Enviar Mensaje"
+    },
+    "info": {
+      "address": "123 Calle del Lujo, Miami, FL 33101",
+      "phone": "+1 (305) 555-1234",
+      "email": "info@miamigetaway.com"
+    }
+  },
+  "footer": {
+    "rights": "© 2024 Miami Getaway. Todos los derechos reservados.",
+    "privacy": "Política de Privacidad",
+    "terms": "Términos de Servicio"
+  },
+  "errors": {
+    "invalidServiceType": "Tipo de servicio inválido: {{type}}",
+    "fetchingServices": "Error al obtener los servicios:",
+    "fetchingReviews": "Error al obtener las reseñas"
+  },
+  "units": {
+    "day": "día",
+    "feet": "pies",
+    "people": "personas"
+  },
+  "bookingForm": {
+    "title": "Reservar Ahora",
+    "name": "Nombre",
+    "lastName": "Apellido",
+    "email": "Correo Electrónico",
+    "selectDates": "Seleccionar Fechas",
+    "reserve": "Reservar",
+    "selectReservationDates": "Seleccionar Fechas de Reserva",
+    "startDate": "Fecha de Inicio",
+    "endDate": "Fecha de Fin",
+    "errors": {
+      "incompleteFields": "Por favor, complete todos los campos.",
+      "selectDates": "Por favor, seleccione las fechas de reserva.",
+      "savingUserData": "Error al guardar los datos del usuario:",
+      "tryAgain": "Hubo un error al guardar los datos. Por favor, intente de nuevo."
+    }
+  },
+  "whatsappMessage": "Hola, me gustaría reservar el {{serviceName}} desde el {{startDate}} hasta el {{endDate}}. Mi nombre es {{name}} {{lastName}}.",
+  "aboutFounder": {
+      "title": "Sobre Facundo",
+      "imageAlt": "Facundo, fundador de Miami Get Away",
+      "paragraph1": "Con una visión clara y una sólida formación en negocios internacionales, Facundo ha posicionado su empresa de conserjería en Miami como una de las más destacadas en ofrecer experiencias únicas y exclusivas a sus clientes.",
+      "paragraph2": "Desde hace nueve años, ha hecho de Estados Unidos su hogar, y su recorrido por diferentes estados, le ha permitido capturar lo mejor de cada lugar para darle un enfoque singular a su empresa.",
+      "paragraph3": "Graduado en International Business y con un MBA especializado en marketing, combinó sus conocimientos académicos con su pasión por el servicio y la hospitalidad. Como agente de bienes raíces, aporta además un nivel de profesionalismo adicional y acceso a propiedades exclusivas, haciendo que cada estadía en Miami sea inolvidable y sin precedentes.",
+      "paragraph4": "Su empresa Miami Get Away se especializa en la renta de vehículos, propiedades, yates de diversas categorías, entre otros servicios, adaptándose a las necesidades de cada cliente y ofreciendo una atención completamente personalizada. Ya sea para quienes buscan unas vacaciones de descanso absoluto o una experiencia vibrante en la ciudad.",
+      "paragraph5": "Facundo y su equipo cuidan cada detalle, garantizando comodidad, estilo y excelencia. Gracias a una combinación de experiencia, empatía y dedicación, Facundo se ha convertido en un referente para aquellos que desean descubrir Miami desde una perspectiva verdaderamente exclusiva y sofisticada.",
+      "paragraph6": "Su enfoque personalizado y profundo conocimiento del mercado lo convierten en el aliado perfecto para quienes buscan mucho más que una simple visita: una auténtica experiencia de calidad en cada aspecto de su estadía en Miami."
+    }
+}
