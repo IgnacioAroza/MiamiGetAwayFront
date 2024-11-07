@@ -38,7 +38,19 @@ function BookingForm({ service }) {
     }));
   };
 
+  const resetForm = () => {
+    setUserData({
+      name: '',
+      lastName: '',
+      email: ''
+    });
+    setStartDate(null);
+    setEndDate(null);
+    setError('');
+  };
+
   const handleSubmit = async (event) => {
+    const phoneNumber = import.meta.env.VITE_WHATSAPP_NUMBER;
     event.preventDefault();
     setError('');
     if (!userData.name || !userData.lastName || !userData.email) {
@@ -50,16 +62,11 @@ function BookingForm({ service }) {
       return;
     }
     try {
-      const result = await userService.createUser(userData);
-      const message = t('bookingForm.whatsappMessage', {
-        serviceName: service.name || `${service.brand} ${service.model}`,
-        startDate: startDate.toLocaleDateString(),
-        endDate: endDate.toLocaleDateString(),
-        name: userData.name,
-        lastName: userData.lastName
-        });
-      const whatsappUrl = `https://wa.me/+5493564648293?text=${encodeURIComponent(message)}`;
+      await userService.createUser(userData);
+      const message =`Hola, me gustaría reservar ${service.name || `${service.brand} ${service.model}`} desde el ${startDate.toLocaleDateString('es-ES', { day: '2-digit', month: '2-digit', year: 'numeric' })} hasta el ${endDate.toLocaleDateString('es-ES', { day: '2-digit', month: '2-digit', year: 'numeric' })}. Mi nombre es ${userData.name} ${userData.lastName}.`;;
+      const whatsappUrl = `https://wa.me/${phoneNumber}?text=${encodeURIComponent(message)}`;
       window.open(whatsappUrl, '_blank');
+      resetForm();
     } catch (error) {
       console.error(t('bookingForm.errors.savingUserData'), error);
       setError(t('bookingForm.errors.tryAgain'));

@@ -2,9 +2,11 @@ import React from 'react';
 import { Fab, Tooltip } from '@mui/material';
 import WhatsAppIcon from '@mui/icons-material/WhatsApp';
 
-const WhatsAppButton = ({ phoneNumber }) => {
+const WhatsAppButton = () => {
+  const phoneNumber = import.meta.env.VITE_WHATSAPP_NUMBER;
   const handleClick = () => {
-    window.open(`https://wa.me/${phoneNumber}`, '_blank');
+    const message = encodeURIComponent('Hola, me gustaría obtener más información sobre sus servicios.');
+    window.open(`https://wa.me/${phoneNumber}?text=${message}`, '_blank');
   };
 
   return (

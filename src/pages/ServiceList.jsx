@@ -177,7 +177,7 @@ function ServiceList() {
           </MotionGrid>
         ))}
       </Grid2>
-      <WhatsAppIcon phoneNumber={'1234567890'} />
+      <WhatsAppIcon />
     </Container>
   );
 }

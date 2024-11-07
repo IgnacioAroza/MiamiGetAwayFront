@@ -8,7 +8,7 @@ import "slick-carousel/slick/slick.css";
 import "slick-carousel/slick/slick-theme.css";
 
 import ImageCarousel from '../components/images/ImageCarousel';
-import BookingForm from '../components/form/BookingForm';
+import BookingForm from '../components/Form/BookingForm';
 import WhatsAppButton from '../components/WhatsAppIcon';
 
 import carService from '../services/carService';
@@ -180,7 +180,7 @@ function ServiceDetails() {
           <Button variant="contained" onClick={() => navigate(`/services/${type}`)}>{t('navigation.backTo', { type: t(`services.types.${type}`) })}</Button>
         </Box>
       </Container>
-      <WhatsAppButton phoneNumber={'1234567890'} />
+      <WhatsAppButton />
     </Box>
   );
 }

@@ -110,7 +110,7 @@ const Home = () => {
         </Container>
       </Box>
 
-      <WhatsAppIcon phoneNumber={'1234567890'} />
+      <WhatsAppIcon />
     </Box>
   );
 };
