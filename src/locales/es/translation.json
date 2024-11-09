@@ -32,7 +32,7 @@
     "mission": "Ya sea que busques unas vacaciones de descanso absoluto o una experiencia vibrante en la ciudad, Miami Get Away cuida cada detalle, asegurando comodidad, estilo y excelencia en cada aspecto de tu visita. Con sede en Miami y un equipo de profesionales capacitados en Estados Unidos, somos el aliado perfecto para quienes desean mucho más que una simple visita; ofrecemos una auténtica experiencia de calidad en cada momento de tu estadía en Miami."
   },
   "services": {
-    "title": "Nuestros Servicios de Lujo",
+    "title": "Nuestros Lujo",
     "types": {
       "cars": "Autos",
       "yachts": "Yates",
@@ -60,6 +60,8 @@
     "anonymous": "Anónimo",
     "noComment": "No se proporcionó comentario",
     "noReviews": "No hay reseñas disponibles",
+    "yourStay": "Tu experiencia",
+    "yourStory": "Tu historia",
     "addReview": "Agregar tu Reseña",
     "firstName": "Nombre",
     "lastName": "Apellido",
@@ -125,5 +127,16 @@
       "paragraph4": "Su empresa Miami Get Away se especializa en la renta de vehículos, propiedades, yates de diversas categorías, entre otros servicios, adaptándose a las necesidades de cada cliente y ofreciendo una atención completamente personalizada. Ya sea para quienes buscan unas vacaciones de descanso absoluto o una experiencia vibrante en la ciudad.",
       "paragraph5": "Facundo y su equipo cuidan cada detalle, garantizando comodidad, estilo y excelencia. Gracias a una combinación de experiencia, empatía y dedicación, Facundo se ha convertido en un referente para aquellos que desean descubrir Miami desde una perspectiva verdaderamente exclusiva y sofisticada.",
       "paragraph6": "Su enfoque personalizado y profundo conocimiento del mercado lo convierten en el aliado perfecto para quienes buscan mucho más que una simple visita: una auténtica experiencia de calidad en cada aspecto de su estadía en Miami."
+    },
+    "contactUs": {
+      "name": "Nombre",
+      "lastName": "Apellido",
+      "email": "E-mail",
+      "phone": "Teléfono",
+      "message": "Mensaje",
+      "send": "Enviar",
+      "subtitle": "No dudes en contactarnos y te responderemos a la brevedad.",
+      "title": "Contactanos",
+      "sending": "Enviando..."
     }
 }

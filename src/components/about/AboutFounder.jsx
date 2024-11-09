@@ -64,9 +64,9 @@ const AboutFounder = () => {
                 viewport={{ once: true }}
                 sx={{
                   position: 'absolute',
-                  top: { xs: '20px', md: '40px' },
-                  left: { xs: '20px', md: '40px' },
-                  width: { xs: '150px', md: '300px' },
+                  bottom: { xs: '-40px', md: '20px' },
+                  right: { xs: '-10px', md: '-20px' },
+                  width: { xs: '150px', md: '250px' },
                   height: 'auto',
                   zIndex: 2,
                 }}

@@ -44,6 +44,8 @@ const ServiceCard = ({ service, isMobile, isTablet, delay = 0.3 }) => {
       }}
     >
       <Card 
+        component={Link} 
+        to={service.path} 
         sx={{ 
           height: '100%', 
           display: 'flex', 
@@ -53,37 +55,27 @@ const ServiceCard = ({ service, isMobile, isTablet, delay = 0.3 }) => {
             transform: 'scale(1.05)',
             boxShadow: '0 8px 16px 0 rgba(0,0,0,0.2)',
           },
+          textDecoration:'none'
         }}
       >
         <CardMedia
           component="img"
-          height={isMobile ? "100" : isTablet ? "140" : "220"}
+          height={isMobile ? "100" : isTablet ? "140" : "210"}
           image={service.image}
           alt={t(service.nameKey)}
         />
-        <CardContent sx={{ flexGrow: 1, display: 'flex', flexDirection: 'column' }}>
+        <CardContent sx={{ flexGrow: 1, display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
           <Typography 
-            gutterBottom 
             variant="h6" 
             component="div" 
             sx={{ 
               fontSize: isMobile ? '1rem' : isTablet ? '1.1rem' : '1.25rem',
               flexGrow: 1,
-              textAlign: 'center'
+              textAlign: 'center',
             }}
           >
             {t(service.nameKey)}
           </Typography>
-          <Button 
-            component={Link} 
-            to={service.path} 
-            variant="outlined" 
-            color="primary" 
-            fullWidth
-            sx={{ mt: 2 }}
-          >
-            {t('general.viewMore')}
-          </Button>
         </CardContent>
       </Card>
     </MotionGrid2>

@@ -32,7 +32,7 @@
     "mission": "Whether you are looking for an absolute relaxing vacation or a vibrant city experience, Miami Get Away takes care of every detail, ensuring comfort, style and excellence in every aspect of your visit. With headquarters in Miami and a team of U.S.-trained professionals, we are the perfect partner for those who want much more than just a visit; we offer an authentic quality experience every step of the way during your stay in Miami."
   },
   "services": {
-    "title": "Our Luxury Services",
+    "title": "Our Services",
     "types": {
       "cars": "Cars",
       "yachts": "Yachts",
@@ -60,6 +60,8 @@
     "anonymous": "Anonymous",
     "noComment": "No comment provided",
     "noReviews": "No reviews available",
+    "yourStay": "Your Experience",
+    "yourStory": "Your History",
     "addReview": "Add Review",
     "firstName": "Name",
     "lastName": "LastName",
@@ -125,5 +127,16 @@
       "paragraph4": "His company Miami Get Away specializes in renting vehicles, properties, yachts of various categories, among other services, adapting to the needs of each client and offering completely personalized attention. Whether for those looking for a vacation of absolute rest or a vibrant experience in the city.",
       "paragraph5": "Facundo and his team take care of every detail, guaranteeing comfort, style and excellence. Thanks to a combination of experience, empathy and dedication, Facundo has become a reference for those who wish to discover Miami from a truly exclusive and sophisticated perspective.",
       "paragraph6": "His personalized approach and deep knowledge of the market make him the perfect ally for those seeking much more than a simple visit: an authentic quality experience in every aspect of their stay in Miami."
+    },
+    "contactUs": {
+      "name": "Name",
+      "lastName": "Last Name",
+      "email": "E-mail",
+      "phone": "Phone",
+      "message": "Message",
+      "send": "Send",
+      "subtitle": "Do not hesitate to contact us and we will get back to you as soon as possible.",
+      "title": "Contact us",
+      "sending": "Sending..."
     }
 }

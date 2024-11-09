@@ -71,7 +71,7 @@ function ServiceList() {
       case 'cars':
         return (
           <>
-            <Typography sx={{ mb: 1 }} variant="h6">{`${service.brand} ${service.model}`}</Typography>
+            <Typography sx={{ mb: 1 }} variant="h5" fontWeight= 'bold'>{`${service.brand} ${service.model}`}</Typography>
             <Typography>{t('services.description')}: {service.description}</Typography>
           </>
         );
@@ -79,7 +79,7 @@ function ServiceList() {
       case 'villas':
         return (
           <>
-            <Typography variant="h6">{service.name}</Typography>
+            <Typography variant="h5" fontWeight= 'bold'>{service.name}</Typography>
             <Typography>{t('services.description')}: {service.description}</Typography>
             <Typography>{t('services.capacity')}: {service.capacity}</Typography>
             <Typography>{t('services.address')}: {service.address}</Typography>
@@ -88,7 +88,7 @@ function ServiceList() {
       case 'yachts':
         return (
           <>
-            <Typography variant="h6">{service.name}</Typography>
+            <Typography variant="h5" fontWeight= 'bold'>{service.name}</Typography>
             <Typography>{t('services.description')}: {service.description} {t('units.feet')}</Typography>
             <Typography>{t('services.capacity')}: {service.capacity} {t('units.people')}</Typography>
           </>
@@ -108,7 +108,7 @@ function ServiceList() {
 
   if (error) {
     return (
-      <Container sx={{ py: 8 }} maxWidth="md">
+      <Container sx={{ py: 8, display: 'flex', flexDirection: 'column', justifyContent: 'center' }} maxWidth="md">
         <Typography color="error">{error}</Typography>
         <Button component={Link} to="/" variant="contained" sx={{ mt: 2 }}>
           {t('navigation.backToHome')}
@@ -119,7 +119,7 @@ function ServiceList() {
 
   if (!services || services.length === 0) {
     return (
-      <Container sx={{ py: 8 }} maxWidth="md">
+      <Container sx={{ py: 8, display: 'flex', flexDirection: 'column', justifyContent: 'center', width: '20vw' }} maxWidth="md">
         <Typography>{t('services.noServicesFound')}</Typography>
         <Button component={Link} to="/" variant="contained" sx={{ mt: 2 }}>
           {t('navigation.backToHome')}
@@ -149,10 +149,13 @@ function ServiceList() {
       </Typography>
       <Grid2 container spacing={4} sx={{ display: 'flex', justifyContent: 'center', alignContent: 'center' }}>
         {services.map((service) => (
-          <MotionGrid item xs={12} sm={6} md={4} lg={3} key={service.id}
+          <MotionGrid item xs={12} sm={6} md={4} lg={3} key={service.id }
             variants={cardVariants}
             initial="hidden"
             animate="visible"
+            component={Link}
+            to={`/services/${type}/${service.id}`}
+            sx={{ textDecoration: 'none' }}
           >
             <MotionCard sx={{ height: '100%', display: 'flex', flexDirection: 'column', width: 400 }}
               whileHover={{ scale: 1.05 }}
@@ -166,12 +169,12 @@ function ServiceList() {
               />
               <CardContent sx={{ flexGrow: 1, mt: 2, ml: 2 }}>
                 {renderServiceDetails(service)}
-                <Typography sx={{ mt: 2 }}>
+                <Typography sx={{ mt: 2, fontWeight: 'bold', variant: 'h6', fontSize: '1.3rem', boxShadow: '0 3px 4px 0 rgba(255,255,255,0.2)', width: '10vw', textAlign: 'center' }}>
                   ${service.price ? parseFloat(service.price).toFixed(2) : t('general.notAvailable')}/{t('units.day')}
                 </Typography>
               </CardContent>
               <CardActions>
-                <Button sx={{ ml: 2, mb: 2 }} size="small" component={Link} to={`/services/${type}/${service.id}`}>{t('general.viewDetails')}</Button>
+                <Button sx={{ ml: 2, mb: 2 }} size="mediun" component={Link} variant='outlined' to={`/services/${type}/${service.id}`}>{t('general.viewDetails')}</Button>
               </CardActions>
             </MotionCard>
           </MotionGrid>

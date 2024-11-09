@@ -70,7 +70,7 @@ function ServiceDetails() {
   const renderServiceDetails = () => {
     if (!service) return null;
   
-    const textStyle = { fontSize: '1.2rem' };
+    const textStyle = { fontWeight: 'bold' };
   
     return (
       <>
@@ -78,33 +78,33 @@ function ServiceDetails() {
         {type === 'cars' && (
           <>
             <Grid2 item xs={12}>
-              <Typography sx={textStyle}>{t('services.brand')}: {service.brand}</Typography>
+              <Typography fontSize= '1.5rem'  sx={textStyle}>{t('services.brand')}: {service.brand}</Typography>
             </Grid2>
             <Grid2 item xs={12}>
-              <Typography sx={textStyle}>{t('services.model')}: {service.model}</Typography>
+              <Typography fontSize= '1.2rem' sx={textStyle}>{t('services.model')}: {service.model}</Typography>
             </Grid2>
           </>
         )}
         {(type === 'apartments' || type === 'villas') && (
           <>
             <Grid2 item xs={12}>
-              <Typography sx={textStyle}>{t('services.name')}: {service.name}</Typography>
+              <Typography fontSize= '1.5rem' sx={textStyle}>{t('services.name')}: {service.name}</Typography>
             </Grid2>
             <Grid2 item xs={12}>
-              <Typography sx={textStyle}>{t('services.address')}: {service.address}</Typography>
+              <Typography fontSize= '1.2rem' sx={textStyle}>{t('services.address')}: {service.address}</Typography>
             </Grid2>
             <Grid2 item xs={12}>
-              <Typography sx={textStyle}>{t('services.capacity')}: {`${service.capacity} ${t('units.people')}`}</Typography>
+              <Typography fontSize= '1.2rem' sx={textStyle}>{t('services.capacity')}: {`${service.capacity} ${t('units.people')}`}</Typography>
             </Grid2>
           </>
         )}
         {type === 'yachts' && (
           <>
             <Grid2 item xs={12}>
-              <Typography sx={textStyle}>{t('services.name')}: {service.name}</Typography>
+              <Typography fontSize= '1.5rem' sx={textStyle}>{t('services.name')}: {service.name}</Typography>
             </Grid2>
             <Grid2 item xs={12}>
-              <Typography sx={textStyle}>{t('services.capacity')}: {`${service.capacity} ${t('units.people')}`}</Typography>
+              <Typography fontSize= '1.2rem' sx={textStyle}>{t('services.capacity')}: {`${service.capacity} ${t('units.people')}`}</Typography>
             </Grid2>
           </>
         )}
@@ -160,8 +160,8 @@ function ServiceDetails() {
           <ImageCarousel 
             images={Array.isArray(service.images) ? service.images : [service.images]} 
             width='95%' 
-            height={isMobile ? '250px' : '400px'} 
-            objectPosition='center -12rem'
+            height={isMobile ? '250px' : '480px'} 
+            objectPosition='center auto'
           />
           <CardContent>
             <Grid2 container spacing={2}>
@@ -169,8 +169,12 @@ function ServiceDetails() {
                 {renderServiceDetails()}
               </Grid2>
               <Grid2 xs={12} sx={{ ml: 2 }}>
-                <Typography variant="h6" gutterBottom>{t('services.price')}</Typography>
-                <Typography >${service.price ? parseFloat(service.price).toFixed(2) : t('general.notAvailable')}/{t('units.day')}</Typography>
+                <Typography variant="h5" fontWeight='bold' fontSize='1.5rem' gutterBottom>
+                  {t('services.price')}
+                </Typography>
+                <Typography variant='h5' fontSize='1.2rem'>
+                  ${service.price ? parseFloat(service.price).toFixed(2) : t('general.notAvailable')}/{t('units.day')}
+                </Typography>
               </Grid2>
             </Grid2>
           </CardContent>

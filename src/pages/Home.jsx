@@ -8,6 +8,7 @@ import Services from './Services';
 import About from './About';
 import Reviews from '../components/ReviewsManager';
 import AboutFounder from '../components/about/AboutFounder';
+import ContactForm from '../components/form/ContactForm';
 
 const Home = () => {
   const theme = useTheme();
@@ -107,6 +108,15 @@ const Home = () => {
       }}>
         <Container maxWidth="xl">
           <AboutFounder />
+        </Container>
+      </Box>
+
+      <Box sx={{ 
+        py: { xs: 4, sm: 6, md: 8 }, 
+        backgroundColor: '#1e1e1e',
+      }}>
+        <Container sx={{ mt: -10 }}>
+          <ContactForm />
         </Container>
       </Box>
 
