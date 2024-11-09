@@ -84,7 +84,6 @@ const AdminReviews = () => {
           <TableHead>
             <TableRow>
               <TableCell>Name</TableCell>
-              <TableCell>Rating</TableCell>
               <TableCell>Comment</TableCell>
               <TableCell>Actions</TableCell>
             </TableRow>
@@ -92,10 +91,7 @@ const AdminReviews = () => {
           <TableBody>
             {Array.isArray(reviews) && reviews.map((review) => (
               <TableRow key={review.id}>
-                <TableCell>{`${review.name} ${review.lastname}`}</TableCell>
-                <TableCell>
-                  <Rating value={review.rating} readOnly size="small" />
-                </TableCell>
+                <TableCell>{`${review.name}`}</TableCell>
                 <TableCell>{review.comment}</TableCell>
                 <TableCell>
                   <Button
