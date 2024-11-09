@@ -195,6 +195,7 @@ const ReviewsManager = () => {
                       flexDirection: 'column',
                       backgroundColor: 'rgba(255, 255, 255, 0.05)',
                       backdropFilter: 'blur(10px)',
+                      minHeight: '200px'
                     }}
                   >
                     <CardContent sx={{ p: 4, flexGrow: 1, display: 'flex', flexDirection: 'column' }}>
@@ -218,7 +219,7 @@ const ReviewsManager = () => {
                           fontStyle: 'italic',
                           position: 'absolute',
                           left: '70%',
-                          top: '85%'
+                          bottom: '5%'
                         }}
                       >
                         {capitalizeFirstLetter(review.name)}
