@@ -1,8 +1,9 @@
 import React from 'react';
-import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
+import { BrowserRouter as Router, Route, Routes, useLocation } from 'react-router-dom';
 import { ThemeProvider, createTheme } from '@mui/material/styles';
 import CssBaseline from '@mui/material/CssBaseline';
 import Header from './components/Header';
+import Footer from './components/Footer';
 import Home from './pages/Home';
 import Services from './pages/Services';
 import ServiceList from './pages/ServiceList';
@@ -33,28 +34,38 @@ const theme = createTheme({
   },
 });
 
+function AppContent() {
+  const location = useLocation();
+  const isAdminRoute = location.pathname.startsWith('/admin') || location.pathname === '/adminPanel';
+
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
+      <Header />
+      <main style={{ flexGrow: 1 }}>
+        <Routes>
+          <Route path="/" element={<Home />} />
+          <Route path="/services" element={<Services />} />
+          <Route path="/services/:type" element={<ServiceList />} />
+          <Route path="/services/:type/:id" element={<ServiceDetails />} />
+          <Route path="/about" element={<About />} />
+          <Route path="/aboutFounder" element={<AboutFounder />} />
+          <Route path="/contactUs" element={<ContactForm />} />
+          <Route path="/reviews" element={<ReviewsManager />} />
+          <Route path="/adminPanel" element={<AdminPanel />} />
+          <Route path="/admin" element={<AdminLogin />} />
+        </Routes>
+      </main>
+      {!isAdminRoute && <Footer />}
+    </div>
+  );
+}
+
 function App() {
   return (
     <ThemeProvider theme={theme}>
       <CssBaseline />
       <Router>
-        <div style={{ display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
-          <Header />
-          <main style={{ flexGrow: 1 }}>
-            <Routes>
-              <Route path="/" element={<Home />} />
-              <Route path="/services" element={<Services />} />
-              <Route path="/services/:type" element={<ServiceList />} />
-              <Route path="/services/:type/:id" element={<ServiceDetails />} />
-              <Route path="/about" element={<About />} />
-              <Route path="/aboutFounder" element={<AboutFounder />} />
-              <Route path="/contactUs" element={<ContactForm />} />
-              <Route path="/reviews" element={<ReviewsManager />} />
-              <Route path="/adminPanel" element={<AdminPanel />} />
-              <Route path="/admin" element={<AdminLogin />} />
-            </Routes>
-          </main>
-        </div>
+        <AppContent />
       </Router>
     </ThemeProvider>
   );

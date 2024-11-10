@@ -31,7 +31,7 @@ const Footer = () => {
 
   return (
     <Box 
-      component="footer" 
+      component="footer"
       sx={{ 
         bgcolor: '#262626',
         color: 'white',

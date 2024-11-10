@@ -122,8 +122,6 @@ const Home = () => {
       </Box>
 
       <WhatsAppIcon />
-
-      <Footer />
     </Box>
   );
 };
