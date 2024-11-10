@@ -6,6 +6,7 @@ import WhatsAppIcon from '../components/WhatsAppIcon';
 
 import Services from './Services';
 import About from './About';
+import Footer from '../components/Footer';
 import Reviews from '../components/ReviewsManager';
 import AboutFounder from '../components/about/AboutFounder';
 import ContactForm from '../components/form/ContactForm';
@@ -121,6 +122,8 @@ const Home = () => {
       </Box>
 
       <WhatsAppIcon />
+
+      <Footer />
     </Box>
   );
 };
