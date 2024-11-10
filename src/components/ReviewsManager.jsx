@@ -10,12 +10,13 @@ import {
   CardContent,
   Button,
   TextField,
-  Rating,
   CircularProgress,
   Container,
   IconButton,
   useTheme,
-  useMediaQuery
+  useMediaQuery,
+  Snackbar,
+  Alert
 } from '@mui/material';
 import { motion, AnimatePresence } from 'framer-motion';
 import ChevronLeftIcon from '@mui/icons-material/ChevronLeft';
@@ -39,6 +40,12 @@ const ReviewsManager = () => {
     name: '',
     comment: ''
   });
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [snackbar, setSnackbar] = useState({
+    open: false,
+    message: '',
+    severity: 'success'
+  });
 
   const reviewsPerPage = isMobile ? 1 : 3;
   const totalPages = Math.ceil(reviews.length / reviewsPerPage);
@@ -49,10 +56,8 @@ const ReviewsManager = () => {
   }, [currentPage, reviewsPerPage, reviews]);
 
   useEffect(() => {
-    if (status === 'idle') {
       dispatch(fetchReviews());
-    }
-  }, [status, dispatch]);
+  }, [dispatch]);
 
   useEffect(() => {
     let timer;
@@ -79,17 +84,32 @@ const ReviewsManager = () => {
     setNewReview(prev => ({ ...prev, [name]: value }));
   };
 
-  const handleRatingChange = (_, newValue) => {
-    setNewReview(prev => ({ ...prev, rating: newValue }));
-  };
-
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setIsSubmitting(true);
     try {
-      await dispatch(createReview(newReview)).unwrap();
-      setNewReview({ name: '', lastName: '', rating: 0, comment: '' });
+      const resultAction = await dispatch(createReview(newReview));
+      if (createReview.fulfilled.match(resultAction)) {
+        setNewReview({ name: '', comment: '' });
+        dispatch(fetchReviews());
+        setCurrentPage(0);
+        setSnackbar({
+          open: true,
+          message: t('reviews.success'),
+          severity: 'success'
+        });
+      } else {
+        throw new Error(resultAction.error.message);
+      }
     } catch (err) {
       console.error('Failed to create review:', err);
+      setSnackbar({
+        open: true,
+        message: t('reviews.error'),
+        severity: 'error'
+      });
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -97,7 +117,14 @@ const ReviewsManager = () => {
     return string.charAt(0).toUpperCase() + string.slice(1);
   };
 
-  if (status === 'loading') {
+  const handleCloseSnackbar = (event, reason) => {
+    if (reason === 'clickaway') {
+      return;
+    }
+    setSnackbar({ ...snackbar, open: false });
+  };
+
+  if (status === 'loading' && reviews.length === 0) {
     return (
       <Box sx={{ display: 'flex', justifyContent: 'center', p: 3, mt: 3 }}>
         <CircularProgress />
@@ -114,7 +141,7 @@ const ReviewsManager = () => {
   }
 
   return (
-    <Container maxWidth="xl" sx={{ py: 8 }}>
+    <Container maxWidth="lg" sx={{ py: 8 }}>
       <Box textAlign="center" mb={8}>
         <motion.div
           initial={{ opacity: 0, y: 20 }}
@@ -327,6 +354,7 @@ const ReviewsManager = () => {
                   type="submit" 
                   variant="contained" 
                   size="large"
+                  disabled={isSubmitting}
                   sx={{
                     mt: 2,
                     backgroundColor: 'primary.light',
@@ -335,13 +363,19 @@ const ReviewsManager = () => {
                     }
                   }}
                 >
-                  {t('reviews.submitReview')}
+                  {isSubmitting ? t('reviews.submitting') : t('reviews.submitReview')}
                 </Button>
               </Grid2>
             </Grid2>
           </form>
         </CardContent>
       </Paper>
+
+      <Snackbar open={snackbar.open} autoHideDuration={6000} onClose={handleCloseSnackbar}>
+        <Alert onClose={handleCloseSnackbar} severity={snackbar.severity} sx={{ width: '100%' }}>
+          {snackbar.message}
+        </Alert>
+      </Snackbar>
     </Container>
   );
 };

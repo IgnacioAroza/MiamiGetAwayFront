@@ -88,7 +88,7 @@ const Footer = () => {
             </Typography>
             <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
               <Link 
-                href="https://instagram.com/luxuryservices" 
+                href="https://www.instagram.com/miami.getaway/#" 
                 target="_blank"
                 color="inherit"
                 sx={{ 
@@ -100,7 +100,7 @@ const Footer = () => {
               >
                 <InstagramIcon sx={{ mr: 1 }} /> @luxuryservices
               </Link>
-              <Link 
+              {/* <Link 
                 href="https://facebook.com/luxuryservices" 
                 target="_blank"
                 color="inherit"
@@ -130,7 +130,7 @@ const Footer = () => {
                   alt="TikTok"
                   sx={{ width: 24, height: 24, mr: 1, backgroundColor: '#ffffff' }}
                 /> @luxuryservices
-              </Link>
+              </Link> */}
             </Box>
           </Grid>
 

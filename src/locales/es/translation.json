@@ -69,7 +69,8 @@
     "comment": "Comentario",
     "submitReview": "Enviar Reseña",
     "success": "¡Reseña enviada con éxito!",
-    "error": "Error al enviar la reseña. Por favor, inténtelo de nuevo."
+    "error": "Error al enviar la reseña. Por favor, inténtelo de nuevo.",
+    "submitting": "Enviando..."
   },
   "contact": {
     "title": "Contáctenos",
@@ -142,6 +143,6 @@
       "subtitle": "No dudes en contactarnos y te responderemos a la brevedad.",
       "title": "Contactanos",
       "sending": "Enviando...",
-      "prefix": "Prefijo"
+      "prefix": "Area"
     }
 }

@@ -12,6 +12,8 @@ import About from './pages/About';
 import AdminPanel from './pages/AdminPanel';
 import AboutFounder from './components/about/AboutFounder';
 import AdminLogin from './components/admin/AdminLogin';
+import ContactForm from './components/form/ContactForm';
+import ReviewsManager from './components/ReviewsManager';
 
 const theme = createTheme({
   palette: {
@@ -43,10 +45,12 @@ function App() {
             <Routes>
               <Route path="/" element={<Home />} />
               <Route path="/services" element={<Services />} />
-              <Route path="/about" element={<About />} />
-              <Route path="/aboutFounder" element={<AboutFounder />} />
               <Route path="/services/:type" element={<ServiceList />} />
               <Route path="/services/:type/:id" element={<ServiceDetails />} />
+              <Route path="/about" element={<About />} />
+              <Route path="/aboutFounder" element={<AboutFounder />} />
+              <Route path="/contactUs" element={<ContactForm />} />
+              <Route path="/reviews" element={<ReviewsManager />} />
               <Route path="/adminPanel" element={<AdminPanel />} />
               <Route path="/admin" element={<AdminLogin />} />
             </Routes>

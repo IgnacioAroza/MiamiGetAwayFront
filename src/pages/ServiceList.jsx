@@ -169,7 +169,7 @@ function ServiceList() {
               />
               <CardContent sx={{ flexGrow: 1, mt: 2, ml: 2 }}>
                 {renderServiceDetails(service)}
-                <Typography sx={{ mt: 2, fontWeight: 'bold', variant: 'h6', fontSize: '1.3rem', boxShadow: '0 3px 4px 0 rgba(255,255,255,0.2)', width: '10vw', textAlign: 'center' }}>
+                <Typography sx={{ mt: 2, fontWeight: 'bold', variant: 'h6', fontSize: '1.3rem' }}>
                   ${service.price ? parseFloat(service.price).toFixed(2) : t('general.notAvailable')}/{t('units.day')}
                 </Typography>
               </CardContent>

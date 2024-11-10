@@ -116,7 +116,7 @@ export default function ContactForm() {
   };
 
   return (
-    <Card sx={{ maxWidth: '4xl', mx: 'auto', mt: 10 }}>
+    <Card sx={{ maxWidth: 'lg', mx: 'auto', mt: 10 }}>
       <CardContent sx={{ p: { xs: 3, sm: 5 } }}>
         <Typography variant="h4" component="h1" gutterBottom color="text.primary">
           {t('contactUs.title')}

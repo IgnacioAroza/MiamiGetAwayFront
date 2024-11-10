@@ -123,6 +123,8 @@ const Header = () => {
               <MenuItem onClick={handleClose} component={Link} to="/services">{t('navigation.services')}</MenuItem>
               <MenuItem onClick={handleClose} component={Link} to="/about">{t('navigation.about')}</MenuItem>
               <MenuItem onClick={handleClose} component={Link} to="/aboutFounder">{t('navigation.aboutFounder')}</MenuItem>
+              <MenuItem onClick={handleClose} component={Link} to="/reviews">{t('navigation.reviews')}</MenuItem>
+              <MenuItem onClick={handleClose} component={Link} to="/contactUs">{t('navigation.contact')}</MenuItem>
             </Menu>
           </>
         ) : (
@@ -158,6 +160,20 @@ const Header = () => {
             <Button 
               color="inherit" 
               component={Link} 
+              to="/reviews"
+              sx={{ 
+                mx: 1, 
+                '&:hover': { 
+                  backgroundColor: 'rgba(255,255,255,0.1)',
+                  transition: 'background-color 0.3s'
+                } 
+              }}
+            >
+              {t('navigation.reviews')}
+            </Button>
+            <Button 
+              color="inherit" 
+              component={Link} 
               to="/aboutFounder"
               sx={{ 
                 mx: 1, 
@@ -168,6 +184,20 @@ const Header = () => {
               }}
             >
               {t('navigation.aboutFounder')}
+            </Button>
+            <Button 
+              color="inherit" 
+              component={Link} 
+              to="/contactUs"
+              sx={{ 
+                mx: 1, 
+                '&:hover': { 
+                  backgroundColor: 'rgba(255,255,255,0.1)',
+                  transition: 'background-color 0.3s'
+                } 
+              }}
+            >
+              {t('navigation.contact')}
             </Button>
             <IconButton
               color="inherit"

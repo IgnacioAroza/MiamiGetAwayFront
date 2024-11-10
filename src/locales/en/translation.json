@@ -69,7 +69,8 @@
     "comment": "Comment",
     "submitReview": "Submit Review",
     "success": "Review submitted successfully!",
-    "error": "Error submitting review. Please try again."
+    "error": "Error submitting review. Please try again.",
+    "submitting": "Sending..."
   },
   "contact": {
     "title": "Contact Us",
@@ -142,6 +143,6 @@
       "subtitle": "Do not hesitate to contact us and we will get back to you as soon as possible.",
       "title": "Contact us",
       "sending": "Sending...",
-      "prefix": "Prefix"
+      "prefix": "Area"
     }
 }
