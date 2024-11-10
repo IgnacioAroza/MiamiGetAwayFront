@@ -86,9 +86,13 @@
     }
   },
   "footer": {
-    "rights": "© 2024 Miami Getaway. Todos los derechos reservados.",
-    "privacy": "Política de Privacidad",
-    "terms": "Términos de Servicio"
+    "company": "COMPANY",
+    "aboutUs": "Nosotros",
+    "founder": "Fundador",
+    "services": "Servicios",
+    "followUs": "FOLLOW US",
+    "contactUs": "CONTACT US",
+    "credit": "Web design and website programming by Ignacio Aroza"
   },
   "errors": {
     "invalidServiceType": "Tipo de servicio inválido: {{type}}",
@@ -106,7 +110,7 @@
     "lastName": "Apellido",
     "email": "Correo Electrónico",
     "selectDates": "Seleccionar Fechas",
-    "reserve": "Reservar",
+    "reserve": "Reservar por WhatsApp",
     "selectReservationDates": "Seleccionar Fechas de Reserva",
     "startDate": "Fecha de Inicio",
     "endDate": "Fecha de Fin",
@@ -137,6 +141,7 @@
       "send": "Enviar",
       "subtitle": "No dudes en contactarnos y te responderemos a la brevedad.",
       "title": "Contactanos",
-      "sending": "Enviando..."
+      "sending": "Enviando...",
+      "prefix": "Prefijo"
     }
 }

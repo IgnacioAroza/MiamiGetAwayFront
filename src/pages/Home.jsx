@@ -54,7 +54,7 @@ const Home = () => {
               <Container 
                 sx={{
                   position: 'absolute',
-                  top: '70%',
+                  top: '50%',
                   left: '50%',
                   transform: 'translate(-50%, -50%)',
                   textAlign: 'center',

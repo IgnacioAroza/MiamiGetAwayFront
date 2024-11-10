@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { 
   Card, 
   CardContent, 
@@ -7,10 +7,15 @@ import {
   Typography, 
   Grid, 
   Snackbar,
-  Alert
+  Alert,
+  FormControl,
+  InputLabel,
+  Select,
+  MenuItem
 } from "@mui/material";
 import { useTranslation } from "react-i18next";
 import emailjs from '@emailjs/browser';
+import axios from "axios";
 
 export default function ContactForm() {
   const { t } = useTranslation();
@@ -18,13 +23,37 @@ export default function ContactForm() {
   const [openSnackbar, setOpenSnackbar] = useState(false);
   const [snackbarMessage, setSnackbarMessage] = useState("");
   const [snackbarSeverity, setSnackbarSeverity] = useState("success");
+  const [countries, setCountries] = useState([]);
   const [formData, setFormData] = useState({
     firstName: "",
     lastName: "",
     email: "",
+    phonePrefix: "",
     phone: "",
     message: ""
   });
+
+  useEffect(() => {
+    const fetchCountries = async () => {
+      try {
+        const response = await axios.get('https://restcountries.com/v3.1/all?fields=name,flags,idd');
+        const sortedCountries = response.data
+          .filter(country => country.idd.root)
+          .map(country => ({
+            name: country.name.common,
+            code: `${country.idd.root}${country.idd.suffixes ? country.idd.suffixes[0] : ''}`,
+            flag: country.flags.svg
+          }))
+          .sort((a, b) => a.name.localeCompare(b.name));
+        setCountries(sortedCountries);
+        setFormData(prev => ({ ...prev, phonePrefix: sortedCountries[0]?.code || '' }));
+      } catch (error) {
+        console.error('Error fetching countries:', error);
+      }
+    };
+
+    fetchCountries();
+  }, []);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -49,7 +78,7 @@ export default function ContactForm() {
         {
           from_name: `${formData.firstName} ${formData.lastName}`,
           from_email: formData.email,
-          phone: formData.phone,
+          phone: `${formData.phonePrefix} ${formData.phoneNumber}`,
           message: formData.message,
         },
         publicKey
@@ -65,6 +94,7 @@ export default function ContactForm() {
         firstName: "",
         lastName: "",
         email: "",
+        phonePrefix: countries[0]?.code || "",
         phone: "",
         message: ""
       });
@@ -131,15 +161,42 @@ export default function ContactForm() {
               />
             </Grid>
             <Grid item xs={12} sm={6}>
-              <TextField
-                fullWidth
-                name="phone"
-                type="tel"
-                label={t('contactUs.phone')}
-                value={formData.phone}
-                onChange={handleChange}
-                variant="outlined"
-              />
+              <Grid container spacing={2}>
+                <Grid item xs={4}>
+                  <FormControl fullWidth variant="outlined">
+                    <InputLabel id="phone-prefix-label">{t('contactUs.prefix')}</InputLabel>
+                    <Select
+                      labelId="phone-prefix-label"
+                      name="phonePrefix"
+                      value={formData.phonePrefix}
+                      onChange={handleChange}
+                      label={t('contactUs.prefix')}
+                    >
+                      {countries.map((country) => (
+                        <MenuItem key={country.code} value={country.code}>
+                          <img 
+                            src={country.flag} 
+                            alt={`${country.name} flag`} 
+                            style={{ width: '20px', marginRight: '10px' }}
+                          />
+                          {country.code}
+                        </MenuItem>
+                      ))}
+                    </Select>
+                  </FormControl>
+                </Grid>
+                <Grid item xs={8}>
+                  <TextField
+                    fullWidth
+                    name="phoneNumber"
+                    type="tel"
+                    label={t('contactUs.phone')}
+                    value={formData.phoneNumber}
+                    onChange={handleChange}
+                    variant="outlined"
+                  />
+                </Grid>
+              </Grid>
             </Grid>
             <Grid item xs={12}>
               <TextField
