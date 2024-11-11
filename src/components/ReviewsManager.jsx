@@ -126,7 +126,7 @@ const ReviewsManager = () => {
 
   if (status === 'loading' && reviews.length === 0) {
     return (
-      <Box sx={{ display: 'flex', justifyContent: 'center', p: 3, mt: 3 }}>
+      <Box sx={{ display: 'flex', justifyContent: 'center', p: 3, mt: 6 }}>
         <CircularProgress />
       </Box>
     );

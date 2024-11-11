@@ -5,6 +5,7 @@ import CssBaseline from '@mui/material/CssBaseline';
 import Header from './components/Header';
 import Footer from './components/Footer';
 import Home from './pages/Home';
+import ScrollToTop from './components/ScrollToTop';
 import Services from './pages/Services';
 import ServiceList from './pages/ServiceList';
 import ServiceDetails from './pages/ServiceDetails';
@@ -40,6 +41,7 @@ function AppContent() {
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
+      <ScrollToTop />
       <Header />
       <main style={{ flexGrow: 1 }}>
         <Routes>
