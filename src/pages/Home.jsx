@@ -62,7 +62,7 @@ const Home = () => {
       >
       <Box
         sx={{
-          height: { xs: '60vh', sm: '80vh', md: '100vh' },
+          height: { xs: '100vh', sm: '100vh', md: '100vh' },
           width: '100%',
           position: 'relative',
           overflow: 'hidden',
