@@ -70,7 +70,9 @@
     "submitReview": "Submit Review",
     "success": "Review submitted successfully!",
     "error": "Error submitting review. Please try again.",
-    "submitting": "Sending..."
+    "submitting": "Sending...",
+    "noReviewsYet": "No rewies yet...",
+    "beTheFirst": "Be the first to comment"
   },
   "contact": {
     "title": "Contact Us",

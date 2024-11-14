@@ -70,7 +70,9 @@
     "submitReview": "Enviar Reseña",
     "success": "¡Reseña enviada con éxito!",
     "error": "Error al enviar la reseña. Por favor, inténtelo de nuevo.",
-    "submitting": "Enviando..."
+    "submitting": "Enviando...",
+    "noReviewsYet": "Aún no hay comentarios...",
+    "beTheFirst": "Se el primero en comentar"
   },
   "contact": {
     "title": "Contáctenos",

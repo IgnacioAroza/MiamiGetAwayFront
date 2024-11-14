@@ -140,6 +140,107 @@ const ReviewsManager = () => {
     );
   }
 
+  if (reviews.length === 0) {
+    return (
+      <Container maxWidth="lg" sx={{ py: 8 }}>
+        <Box textAlign="center" mb={8}>
+          <Typography 
+            variant="h2" 
+            component="h2" 
+            sx={{ 
+              color: 'primary.light',
+              fontSize: { xs: '2.5rem', md: '3.5rem' },
+              fontWeight: '700',
+              fontFamily: 'Nanum Myeongjo',
+              fontStyle: 'italic'
+            }}
+          >
+            {t('reviews.yourStay')}
+          </Typography>
+          <Typography 
+            variant="h3" 
+            component="h3" 
+            sx={{ 
+              color: 'primary.light',
+              fontSize: { xs: '2rem', md: '3rem' },
+              fontWeight: 'light',
+              fontFamily: 'Nanum Myeongjo',
+              fontStyle: 'italic',
+              mt: 2
+            }}
+          >
+            {t('reviews.noReviewsYet')}
+          </Typography>
+        </Box>
+
+        <Paper 
+          sx={{ 
+            maxWidth: 'md', 
+            mx: 'auto', 
+            mt: 8,
+            backgroundColor: 'rgba(255, 255, 255, 0.05)',
+            backdropFilter: 'blur(10px)',
+          }}
+        >
+          <CardContent>
+            <Typography variant="h5" component="h3" gutterBottom color="primary.light">
+              {t('reviews.beTheFirst')}
+            </Typography>
+            <form onSubmit={handleSubmit}>
+              <Grid2 container spacing={2}>
+                <Grid2 item xs={12} sm={6}>
+                  <TextField
+                    fullWidth
+                    label={t('reviews.firstName')}
+                    name="name"
+                    value={newReview.name}
+                    onChange={handleInputChange}
+                    required
+                  />
+                </Grid2>
+                <Grid2 item xs={12} sx={{ width: '30vw' }}>
+                  <TextField
+                    fullWidth
+                    label={t('reviews.comment')}
+                    name="comment"
+                    value={newReview.comment}
+                    onChange={handleInputChange}
+                    required
+                    multiline
+                    rows={1}
+                  />
+                </Grid2>
+                <Grid2 item xs={12}>
+                  <Button 
+                    type="submit" 
+                    variant="contained" 
+                    size="large"
+                    disabled={isSubmitting}
+                    sx={{
+                      mt: 2,
+                      backgroundColor: 'primary.light',
+                      '&:hover': {
+                        backgroundColor: 'primary.main'
+                      }
+                    }}
+                  >
+                    {isSubmitting ? t('reviews.submitting') : t('reviews.submitReview')}
+                  </Button>
+                </Grid2>
+              </Grid2>
+            </form>
+          </CardContent>
+        </Paper>
+
+        <Snackbar open={snackbar.open} autoHideDuration={6000} onClose={handleCloseSnackbar}>
+          <Alert onClose={handleCloseSnackbar} severity={snackbar.severity} sx={{ width: '100%' }}>
+            {snackbar.message}
+          </Alert>
+        </Snackbar>
+      </Container>
+    );
+  }
+
   return (
     <Container maxWidth="lg" sx={{ py: 8 }}>
       <Box textAlign="center" mb={8}>
