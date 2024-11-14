@@ -74,6 +74,7 @@ const Home = () => {
           loop
           muted
           playsInline
+          preload='auto'
           style={{
             position: 'absolute',
             top: '50%',
@@ -86,7 +87,7 @@ const Home = () => {
             objectFit: 'cover',
           }}
         >
-          <source src="https://res.cloudinary.com/dbvpwfh07/video/upload/v1731594006/utils/backgroundVideo.mp4" type="video/mp4" />
+          <source src="https://res.cloudinary.com/dbvpwfh07/video/upload/v1731624295/utils/ekbygvacheqg3stkp1il.mp4" type="video/mp4" />
           Your browser does not support the video tag.
         </video>
        <AnimatePresence>
