@@ -44,7 +44,7 @@ const AboutFounder = () => {
             <Box sx={{ position: 'relative' }}>
               <Box
                 component="img"
-                src="https://res.cloudinary.com/dcxa0ozit/image/upload/v1730849323/utils/aboutFounder.jpg"
+                src="https://res.cloudinary.com/dbvpwfh07/image/upload/v1731593600/utils/founder.jpg"
                 alt="Facundo, founder of Miami Get Away"
                 sx={{
                   width: '100%',
@@ -56,7 +56,7 @@ const AboutFounder = () => {
               />
               <MotionBox
                 component="img"
-                src="https://res.cloudinary.com/dcxa0ozit/image/upload/v1730934621/utils/Signature.png"
+                src="https://res.cloudinary.com/dbvpwfh07/image/upload/v1731593575/utils/signature.png"
                 alt="Facundo's signature"
                 initial={{ opacity: 0, y: -20 }}
                 whileInView={{ opacity: 1, y: 0 }}

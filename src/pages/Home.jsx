@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Container, Box, useTheme, useMediaQuery } from '@mui/material';
 import { motion, AnimatePresence } from 'framer-motion';
 
@@ -13,16 +13,17 @@ import ContactForm from '../components/form/ContactForm';
 const Home = () => {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
-  const [isBackgroundLoaded, setIsBackgroundLoaded] = useState(false);
+  const [isVideoLoaded, setIsVideoLoaded] = useState(false);
   const [isLogoVisible, setIsLogoVisible] = useState(false);
+  const videoRef = useRef(null);
 
   useEffect(() => {
-    const backgroundImage = new Image();
-    backgroundImage.src = "https://res.cloudinary.com/dcxa0ozit/image/upload/v1730482060/utils/backgrounImage.jpg";
-    backgroundImage.onload = () => {
-      setIsBackgroundLoaded(true);
-      setTimeout(() => setIsLogoVisible(true), 500);
-    };
+    if (videoRef.current) {
+      videoRef.current.addEventListener('loadeddata', () => {
+        setIsVideoLoaded(true);
+        setTimeout(() => setIsLogoVisible(true), 500)
+      })
+    }
   }, []);
 
   const backgroundVariants = {
@@ -56,22 +57,38 @@ const Home = () => {
     <Box sx={{ position: 'relative' }}>
       <motion.div
         initial="hidden"
-        animate={isBackgroundLoaded ? "visible" : "hidden"}
+        animate={isVideoLoaded  ? "visible" : "hidden"}
         variants={backgroundVariants} 
       >
       <Box
         sx={{
           height: { xs: '60vh', sm: '80vh', md: '100vh' },
           width: '100%',
-          backgroundImage: 'url("https://res.cloudinary.com/dcxa0ozit/image/upload/v1730482060/utils/backgrounImage.jpg")',
-          backgroundSize: 'cover',
-          backgroundPosition: 'center',
-          backgroundAttachment: isMobile ? 'scroll' : 'fixed',
           position: 'relative',
-          opacity: isBackgroundLoaded ? 1 : 0,
-          transition: 'opacity 2s ease-in-out',
+          overflow: 'hidden',
         }}
       >
+        <video
+          ref={videoRef}
+          autoPlay
+          loop
+          muted
+          playsInline
+          style={{
+            position: 'absolute',
+            top: '50%',
+            left: '50%',
+            minWidth: '100%',
+            minHeight: '100%',
+            width: 'auto',
+            height: 'auto',
+            transform: 'translate(-50%, -50%)',
+            objectFit: 'cover',
+          }}
+        >
+          <source src="https://res.cloudinary.com/dbvpwfh07/video/upload/v1731594006/utils/backgroundVideo.mp4" type="video/mp4" />
+          Your browser does not support the video tag.
+        </video>
        <AnimatePresence>
           {isLogoVisible && (
             <motion.div
@@ -97,7 +114,7 @@ const Home = () => {
               >
                 <Box 
                   component='img'
-                  src='https://res.cloudinary.com/dcxa0ozit/image/upload/v1730483874/utils/logoSmoke.png'
+                  src='https://res.cloudinary.com/dbvpwfh07/image/upload/v1731593617/utils/logo.png'
                   alt='Miami Get Away Logo'
                   sx={{
                     maxWidth: '500px',
