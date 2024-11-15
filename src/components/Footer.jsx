@@ -151,7 +151,7 @@ const Footer = () => {
                   '&:hover': { color: 'primary.light' }
                 }}
               >
-                <PhoneIcon sx={{ mr: 1 }} /> +54 9 3564503454
+                <PhoneIcon sx={{ mr: 1 }} /> +{import.meta.env.VITE_WHATSAPP_NUMBER}
               </Link>
               <Link 
                 href="mailto:boeroandboero@gmail.com"
