@@ -46,7 +46,8 @@ export default function ContactForm() {
           }))
           .sort((a, b) => a.name.localeCompare(b.name));
         setCountries(sortedCountries);
-        setFormData(prev => ({ ...prev, phonePrefix: sortedCountries[0]?.code || '' }));
+        const argentina = sortedCountries.find(country => country.code === '+54');
+        setFormData(prev => ({ ...prev, phonePrefix: argentina ? argentina.code : sortedCountries[0]?.code || '' }));
       } catch (error) {
         console.error('Error fetching countries:', error);
       }

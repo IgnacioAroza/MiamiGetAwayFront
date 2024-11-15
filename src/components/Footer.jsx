@@ -98,7 +98,7 @@ const Footer = () => {
                   '&:hover': { color: 'primary.light' }
                 }}
               >
-                <InstagramIcon sx={{ mr: 1 }} /> @luxuryservices
+                <InstagramIcon sx={{ mr: 1 }} /> @Miami GetAway
               </Link>
               {/* <Link 
                 href="https://facebook.com/luxuryservices" 
