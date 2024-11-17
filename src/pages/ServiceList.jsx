@@ -15,6 +15,8 @@ import apartmentService from '../services/apartmentService';
 import yachtService from '../services/yachtService';
 import villaService from '../services/villaService';
 
+import { BathtubOutlined, BedOutlined } from '@mui/icons-material';
+
 const MotionGrid = motion.create(Grid2);
 const MotionCard = motion.create(Card);
 
@@ -83,6 +85,12 @@ function ServiceList() {
             <Typography>{t('services.description')}: {service.description}</Typography>
             <Typography>{t('services.capacity')}: {service.capacity}</Typography>
             <Typography>{t('services.address')}: {service.address}</Typography>
+            <Typography sx={{ display: 'flex', alignItems: 'center', mt: 1 }}>
+              <BathtubOutlined sx={{ mr: 1 }} /> {service.bathrooms} {t('services.bathrooms')}
+            </Typography>
+            <Typography sx={{ display: 'flex', alignItems: 'center', mt: 1 }}>
+              <BedOutlined sx={{ mr: 1 }} /> {service.rooms} {t('services.rooms')}
+            </Typography>
           </>
         );
       case 'yachts':

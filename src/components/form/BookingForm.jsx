@@ -64,8 +64,20 @@ function BookingForm({ service }) {
     try {
       await userService.createUser(userData);
       const message =`Hola, me gustaría reservar ${service.name || `${service.brand} ${service.model}`} desde el ${startDate.toLocaleDateString('es-ES', { day: '2-digit', month: '2-digit', year: 'numeric' })} hasta el ${endDate.toLocaleDateString('es-ES', { day: '2-digit', month: '2-digit', year: 'numeric' })}. Mi nombre es ${userData.name} ${userData.lastName}.`;
-      const whatsappUrl = `https://wa.me/${phoneNumber}?text=${encodeURIComponent(message)}`;
-      window.open(whatsappUrl, '_blank');
+      const encodedMessage = encodeURIComponent(message);
+      const whatsappUrl = `https://wa.me/${phoneNumber}?text=${encodedMessage}`;
+      const mobileWhatsappUrl = `whatsapp://send?phone=${phoneNumber}&text=${encodedMessage}`;
+
+      window.location.href = mobileWhatsappUrl;
+
+      setTimeout(() => {
+        if (document.hidden) {
+          console.log(userData);
+        } else {
+          window.location.href = whatsappUrl
+        }
+      }, 1000);
+
       resetForm();
     } catch (error) {
       console.error(t('bookingForm.errors.savingUserData'), error);

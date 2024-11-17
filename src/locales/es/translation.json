@@ -53,6 +53,8 @@
     "description": "Descripción",
     "capacity": "Capacidad",
     "address": "Dirección",
+    "bathrooms": "Baños",
+    "rooms": "Habitaciones",
     "noServicesFound": "No se encontraron servicios."
   },
   "reviews": {

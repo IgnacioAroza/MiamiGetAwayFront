@@ -115,7 +115,7 @@ const Home = () => {
               >
                 <Box 
                   component='img'
-                  src='https://res.cloudinary.com/dbvpwfh07/image/upload/v1731593617/utils/logo.png'
+                  src='https://res.cloudinary.com/dbvpwfh07/image/upload/v1731678802/utils/whiteLogo.png'
                   alt='Miami Get Away Logo'
                   sx={{
                     maxWidth: '500px',

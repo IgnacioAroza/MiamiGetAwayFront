@@ -39,6 +39,24 @@ const PropertyForm = ({ property, setProperty }) => {
           onChange={(e) => setProperty({...property, capacity: e.target.value})}
         />
       </Grid2>
+      <Grid2 item xs={12} sm={6} md={3}>
+        <TextField
+          fullWidth
+          label="Bathrooms"
+          type="number"
+          value={property.bathrooms || ''}
+          onChange={(e) => setProperty({...property, bathrooms: e.target.value})}
+        />
+      </Grid2>
+      <Grid2 item xs={12} sm={6} md={3}>
+        <TextField
+          fullWidth
+          label="Rooms"
+          type="number"
+          value={property.rooms || ''}
+          onChange={(e) => setProperty({...property, rooms: e.target.value})}
+        />
+      </Grid2>
       <Grid2 item xs={12} sm={6}>
         <TextField
           fullWidth

@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { Container, Typography, Grid2, Card, CardContent, Button, Box, useTheme, useMediaQuery } from '@mui/material';
+import { Container, Typography, Grid2, Card, CardContent, Button, Box, useTheme, useMediaQuery, Divider } from '@mui/material';
 import { useTranslation } from 'react-i18next';
 import { motion } from 'framer-motion';
 
@@ -15,6 +15,8 @@ import carService from '../services/carService';
 import apartmentService from '../services/apartmentService';
 import yachtService from '../services/yachtService';
 import villaService from '../services/villaService';
+
+import { BathtubOutlined, BedOutlined, DirectionsCar, LocationOn, People } from '@mui/icons-material';
 
 const MotionCard = motion.create(Card);
 const MotionTypography = motion.create(Typography);
@@ -73,48 +75,77 @@ function ServiceDetails() {
     const textStyle = { fontWeight: 'bold' };
   
     return (
-      <>
-        <Grid2 container spacing={2} direction="column" alignItems="center" justifyContent="center">
-        {type === 'cars' && (
-          <>
-            <Grid2 item xs={12}>
-              <Typography fontSize= '1.5rem'  sx={textStyle}>{t('services.brand')}: {service.brand}</Typography>
-            </Grid2>
-            <Grid2 item xs={12}>
-              <Typography fontSize= '1.2rem' sx={textStyle}>{t('services.model')}: {service.model}</Typography>
-            </Grid2>
-          </>
-        )}
+      <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+        {/* Name */}
+        <Typography variant="h4" fontWeight="bold" textAlign= 'center' gutterBottom sx={{ textStyle }}>
+          {type === 'cars' ? `${service.brand} ${service.model}` : service.name}
+        </Typography>
+
+        {/* Location for apartments and villas */}
         {(type === 'apartments' || type === 'villas') && (
-          <>
-            <Grid2 item xs={12}>
-              <Typography fontSize= '1.5rem' sx={textStyle}>{t('services.name')}: {service.name}</Typography>
-            </Grid2>
-            <Grid2 item xs={12}>
-              <Typography fontSize= '1.2rem' sx={textStyle}>{t('services.address')}: {service.address}</Typography>
-            </Grid2>
-            <Grid2 item xs={12}>
-              <Typography fontSize= '1.2rem' sx={textStyle}>{t('services.capacity')}: {`${service.capacity} ${t('units.people')}`}</Typography>
-            </Grid2>
-          </>
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+            <LocationOn />
+            <Typography>{service.address}</Typography>
+          </Box>
         )}
-        {type === 'yachts' && (
-          <>
-            <Grid2 item xs={12}>
-              <Typography fontSize= '1.5rem' sx={textStyle}>{t('services.name')}: {service.name}</Typography>
-            </Grid2>
-            <Grid2 item xs={12}>
-              <Typography fontSize= '1.2rem' sx={textStyle}>{t('services.capacity')}: {`${service.capacity} ${t('units.people')}`}</Typography>
-            </Grid2>
-          </>
+
+        {/* Capacity for non-car services */}
+        {type !== 'cars' && (
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+            <People />
+            <Typography>
+              {t('services.capacity')}: {service.capacity} {t('units.people')}
+            </Typography>
+          </Box>
         )}
-      </Grid2>
-  
-        <Box sx={{ mt: 0, p: 2, borderRadius: '8px' }}>
-          <Typography variant="h6" gutterBottom>{t('services.description')}</Typography>
-          <Typography sx={{ fontSize: '1.2rem' }}>{service.description}</Typography>
+
+        {/* Car specific details */}
+        {type === 'cars' && (
+          <Box sx={{ display: 'flex', gap: 1, flexDirection: 'column', ml: 2 }}>
+            <Grid2>
+              <Typography>
+                {t('services.brand')}: {service.brand}
+              </Typography>
+            </Grid2>
+            <Grid2>
+              <Typography>
+                {t('services.model')}: {service.model}
+              </Typography>
+            </Grid2>
+          </Box>
+        )}
+
+        {/* Rooms and Bathrooms for apartments and villas */}
+        {(type === 'apartments' || type === 'villas') && (
+          <Box sx={{ display: 'flex', gap: 4, alignItems: 'center' }}>
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+              <BathtubOutlined />
+              <Typography>{service.bathrooms} {t('services.bathrooms')}</Typography>
+            </Box>
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+              <BedOutlined />
+              <Typography>{service.rooms} {t('services.rooms')}</Typography>
+            </Box>
+          </Box>
+        )}
+
+        {/* Description */}
+        <Box sx={{ mt: 2 }}>
+          <Typography variant="h6" gutterBottom>
+            {t('services.description')}
+          </Typography>
+          <Typography>{service.description}</Typography>
         </Box>
-      </>
+
+        <Divider sx={{ my: 2 }} />
+
+        {/* Price at the bottom */}
+        <Box sx={{ mt: 'auto' }}>
+          <Typography variant="h5" fontWeight="bold" color="primary">
+            ${service.price ? parseFloat(service.price).toFixed(2) : t('general.notAvailable')}/{t('units.day')}
+          </Typography>
+        </Box>
+      </Box>
     );
   };
 
@@ -143,17 +174,78 @@ function ServiceDetails() {
   if (!service) return <Typography sx={{ mt: 10, ml: 4 }}>{t('services.noServiceFound')}</Typography>;
 
   return (
-    <Box sx={{ py: 4, minHeight: '100vh', mt: 8  }}>
+    // <Box sx={{ py: 4, minHeight: '100vh', mt: 8  }}>
+    //   <Container maxWidth="md">
+    //     <MotionTypography component="h1" variant="h4" align="center" color="text.primary" gutterBottom
+    //       initial={{ opacity: 0, y: -50 }}
+    //       animate={{ opacity: 1, y: 0 }}
+    //       transition={{ duration: 0.5 }}
+    //     >
+    //       {service.name || `${service.brand} ${service.model}`}
+    //     </MotionTypography>
+    //     <MotionCard sx={{ width: '100%', mb: 4 }}
+    //       variants={cardVariants}
+    //       initial="hidden"
+    //       animate="visible"
+    //     >
+    //       <ImageCarousel 
+    //         images={Array.isArray(service.images) ? service.images : [service.images]} 
+    //         width='95%' 
+    //         height={isMobile ? '250px' : '480px'} 
+    //         objectPosition='center auto'
+    //       />
+    //       <CardContent>
+    //         <Grid2 container spacing={2}>
+    //           <Grid2 xs={12}>
+    //             {renderServiceDetails()}
+    //           </Grid2>
+    //           <Grid2 xs={12} sx={{ ml: 2 }}>
+    //             <Typography variant="h5" fontWeight='bold' fontSize='1.5rem' gutterBottom>
+    //               {t('services.price')}
+    //             </Typography>
+    //             <Typography variant='h5' fontSize='1.2rem'>
+    //               ${service.price ? parseFloat(service.price).toFixed(2) : t('general.notAvailable')}/{t('units.day')}
+    //             </Typography>
+    //           </Grid2>
+    //         </Grid2>
+    //       </CardContent>
+    //     </MotionCard>
+    //     <BookingForm service={service} />
+    //     <Box sx={{ display: 'flex', justifyContent: 'center', mt: 4 }}>
+    //       <Button variant="contained" onClick={() => navigate(`/services/${type}`)}>{t('navigation.backTo', { type: t(`services.types.${type}`) })}</Button>
+    //     </Box>
+    //   </Container>
+    //   <WhatsAppButton />
+    // </Box>
+    <Box sx={{ 
+      py: 4, 
+      minHeight: '100vh',
+      mt: 8,
+      bgcolor: 'background.default',
+      color: 'text.primary'
+    }}>
       <Container maxWidth="md">
-        <MotionTypography component="h1" variant="h4" align="center" color="text.primary" gutterBottom
-          initial={{ opacity: 0, y: -50 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5 }}
-        >
-          {service.name || `${service.brand} ${service.model}`}
-        </MotionTypography>
-        <MotionCard sx={{ width: '100%', mb: 4 }}
-          variants={cardVariants}
+        <MotionCard 
+          sx={{ 
+            width: '100%', 
+            mb: 4,
+            bgcolor: 'background.paper',
+            borderRadius: 2,
+            overflow: 'hidden'
+          }}
+          variants={{
+            hidden: { opacity: 0, y: 50 },
+            visible: { 
+              opacity: 1, 
+              y: 0,
+              transition: { 
+                type: "spring",
+                stiffness: 100,
+                damping: 15,
+                mass: 1
+              }
+            }
+          }}
           initial="hidden"
           animate="visible"
         >
@@ -161,27 +253,22 @@ function ServiceDetails() {
             images={Array.isArray(service.images) ? service.images : [service.images]} 
             width='95%' 
             height={isMobile ? '250px' : '480px'} 
-            objectPosition='center auto'
+            objectPosition='center center'
           />
-          <CardContent>
-            <Grid2 container spacing={2}>
-              <Grid2 xs={12}>
-                {renderServiceDetails()}
-              </Grid2>
-              <Grid2 xs={12} sx={{ ml: 2 }}>
-                <Typography variant="h5" fontWeight='bold' fontSize='1.5rem' gutterBottom>
-                  {t('services.price')}
-                </Typography>
-                <Typography variant='h5' fontSize='1.2rem'>
-                  ${service.price ? parseFloat(service.price).toFixed(2) : t('general.notAvailable')}/{t('units.day')}
-                </Typography>
-              </Grid2>
-            </Grid2>
+          <CardContent sx={{ p: 4 }}>
+            {renderServiceDetails()}
           </CardContent>
         </MotionCard>
+
         <BookingForm service={service} />
+
         <Box sx={{ display: 'flex', justifyContent: 'center', mt: 4 }}>
-          <Button variant="contained" onClick={() => navigate(`/services/${type}`)}>{t('navigation.backTo', { type: t(`services.types.${type}`) })}</Button>
+          <Button 
+            variant="contained" 
+            onClick={() => navigate(`/services/${type}`)}
+          >
+            {t('navigation.backTo', { type: t(`services.types.${type}`) })}
+          </Button>
         </Box>
       </Container>
       <WhatsAppButton />

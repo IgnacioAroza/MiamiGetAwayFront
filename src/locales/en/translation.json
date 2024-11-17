@@ -53,6 +53,8 @@
     "description": "Description",
     "capacity": "Capacity",
     "address": "Address",
+    "bathrooms": "Bathrooms",
+    "rooms": "Rooms",
     "noServicesFound": "No services found."
   },
   "reviews": {
