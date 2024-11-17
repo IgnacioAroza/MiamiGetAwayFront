@@ -6,17 +6,16 @@ import {
   Grid, 
   Link, 
   useTheme,
-  useMediaQuery
+  useMediaQuery,
 } from '@mui/material';
 import { useTranslation } from 'react-i18next';
 import InstagramIcon from '@mui/icons-material/Instagram';
-import FacebookIcon from '@mui/icons-material/Facebook';
 import WhatsAppIcon from '@mui/icons-material/WhatsApp';
+import AccountCircleIcon from '@mui/icons-material/AccountCircle';
 import PhoneIcon from '@mui/icons-material/Phone';
 import EmailIcon from '@mui/icons-material/Email';
 import { Link as RouterLink } from 'react-router-dom';
 
-import tiktokLogo from '../assets/tiktok-icon.svg';
 
 const Footer = () => {
   const phoneNumber = import.meta.env.VITE_WHATSAPP_NUMBER;
@@ -78,6 +77,19 @@ const Footer = () => {
                   </Link>
                 </li>
               ))}
+              <Link
+              component={RouterLink}
+              to="/admin"
+              sx={{
+                display: 'flex',
+                alignItems: 'center',
+                color: 'inherit',
+                textDecoration: 'none',
+                '&:hover': { color: 'primary.light' }
+              }}
+            >
+              <AccountCircleIcon sx={{ mr: 1, mt: 1 }} />
+            </Link>
             </Box>
           </Grid>
 
@@ -100,37 +112,6 @@ const Footer = () => {
               >
                 <InstagramIcon sx={{ mr: 1 }} /> @Miami GetAway
               </Link>
-              {/* <Link 
-                href="https://facebook.com/luxuryservices" 
-                target="_blank"
-                color="inherit"
-                sx={{ 
-                  display: 'flex', 
-                  alignItems: 'center',
-                  textDecoration: 'none',
-                  '&:hover': { color: 'primary.light' }
-                }}
-              >
-                <FacebookIcon sx={{ mr: 1 }} /> @luxuryservices
-              </Link>
-              <Link 
-                href="https://tiktok.com/@luxuryservices" 
-                target="_blank"
-                color="inherit"
-                sx={{ 
-                  display: 'flex', 
-                  alignItems: 'center',
-                  textDecoration: 'none',
-                  '&:hover': { color: 'primary.light' }
-                }}
-              >
-                <Box 
-                  component="img" 
-                  src={tiktokLogo} 
-                  alt="TikTok"
-                  sx={{ width: 24, height: 24, mr: 1, backgroundColor: '#ffffff' }}
-                /> @luxuryservices
-              </Link> */}
             </Box>
           </Grid>
 

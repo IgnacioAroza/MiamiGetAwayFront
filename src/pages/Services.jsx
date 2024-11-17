@@ -1,6 +1,6 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
-import { Typography, Card, CardContent, CardMedia, Grid2, Button, Container, useTheme, useMediaQuery } from '@mui/material';
+import { Typography, Card, CardContent, CardMedia, Grid2, Container, useTheme, useMediaQuery } from '@mui/material';
 import { Link } from 'react-router-dom';
 import { motion, useAnimation } from 'framer-motion';
 import { useInView } from 'react-intersection-observer';
@@ -42,6 +42,11 @@ const ServiceCard = ({ service, isMobile, isTablet, delay = 0.3 }) => {
         visible: { opacity: 1, y: 0, transition: { duration: 0.5, delay } },
         hidden: { opacity: 0, y: 20 }
       }}
+      sx={{
+        display: 'flex',
+        flexDirection: 'column',
+        height: '100%',
+      }}
     >
       <Card 
         component={Link} 
@@ -55,7 +60,10 @@ const ServiceCard = ({ service, isMobile, isTablet, delay = 0.3 }) => {
             transform: 'scale(1.05)',
             boxShadow: '0 8px 16px 0 rgba(0,0,0,0.2)',
           },
-          textDecoration:'none'
+          textDecoration:'none',
+          WebkitTransform: 'translate3d(0, 0, 0)',
+          WebkitBackfaceVisibility: 'hidden',
+          WebkitPerspective: 1000,
         }}
       >
         <CardMedia
@@ -64,7 +72,7 @@ const ServiceCard = ({ service, isMobile, isTablet, delay = 0.3 }) => {
           image={service.image}
           alt={t(service.nameKey)}
         />
-        <CardContent sx={{ flexGrow: 1, display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
+        <CardContent sx={{ flexGrow: 1, display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center' }}>
           <Typography 
             variant="h6" 
             component="div" 
@@ -91,11 +99,19 @@ const Services = () => {
 
 
   return (
-    <Container maxWidth="xl" sx={{ mt: 10 }}>
+    <Container maxWidth="xl" sx={{ mt: 10, overflow: 'hidden' }}>
       <Typography variant="h4" component="h2" gutterBottom sx={{ textAlign: 'center', mb: 6 }}>
         {t('services.title')}
       </Typography>
-        <Grid2 container spacing={2} justifyContent="center" sx={{ pb: 4 }}>
+        <Grid2 
+        container 
+        spacing={2} 
+        justifyContent="center" 
+        sx={{ 
+          pb: 4, 
+          display: 'flex',
+          flexWrap: 'wrap', 
+        }}>
           {services.map((service) => (
             <ServiceCard
               key={service.id}

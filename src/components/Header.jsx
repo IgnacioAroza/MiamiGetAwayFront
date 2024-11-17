@@ -207,15 +207,6 @@ const Header = () => {
             >
               <LanguageIcon />
             </IconButton>
-            <IconButton
-              color="inherit"
-              aria-label={t('navigation.account')}
-              component={Link}
-              to="/admin"
-              sx={{ ml: 1 }}
-            >
-              <AccountCircleIcon />
-            </IconButton>
           </Box>
         )}
       </Toolbar>
