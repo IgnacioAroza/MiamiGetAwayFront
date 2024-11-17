@@ -72,80 +72,79 @@ function ServiceDetails() {
   const renderServiceDetails = () => {
     if (!service) return null;
   
-    const textStyle = { fontWeight: 'bold' };
+    const textStyle = { fontSize: '1.2rem' };
+    const headingStyle = { fontSize: '1.5rem', fontWeight: 'bold' };
   
     return (
       <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
-        {/* Name */}
-        <Typography variant="h4" fontWeight="bold" textAlign= 'center' gutterBottom sx={{ textStyle }}>
-          {type === 'cars' ? `${service.brand} ${service.model}` : service.name}
-        </Typography>
+      {/* Name */}
+      <Typography variant="h4" fontWeight="bold" textAlign="center" gutterBottom sx={{ ...headingStyle, fontSize: '2rem' }}>
+        {type === 'cars' ? `${service.brand} ${service.model}` : service.name}
+      </Typography>
 
-        {/* Location for apartments and villas */}
-        {(type === 'apartments' || type === 'villas') && (
-          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-            <LocationOn />
-            <Typography>{service.address}</Typography>
-          </Box>
-        )}
+      {/* Location for apartments and villas */}
+      {(type === 'apartments' || type === 'villas') && (
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+          <LocationOn sx={{ fontSize: '1.5rem' }} />
+          <Typography sx={textStyle}>{service.address}</Typography>
+        </Box>
+      )}
 
-        {/* Capacity for non-car services */}
-        {type !== 'cars' && (
-          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-            <People />
-            <Typography>
-              {t('services.capacity')}: {service.capacity} {t('units.people')}
+      {/* Capacity for non-car services */}
+      {type !== 'cars' && (
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+          <People sx={{ fontSize: '1.5rem' }} />
+          <Typography sx={textStyle}>
+            {t('services.capacity')}: {service.capacity} {t('units.people')}
+          </Typography>
+        </Box>
+      )}
+
+      {/* Car specific details */}
+      {type === 'cars' && (
+        <Box sx={{ display: 'flex', gap: 1, flexDirection: 'column', ml: 2 }}>
+          <Grid2>
+            <Typography sx={textStyle}>
+              {t('services.brand')}: {service.brand}
             </Typography>
-          </Box>
-        )}
-
-        {/* Car specific details */}
-        {type === 'cars' && (
-          <Box sx={{ display: 'flex', gap: 1, flexDirection: 'column', ml: 2 }}>
-            <Grid2>
-              <Typography>
-                {t('services.brand')}: {service.brand}
-              </Typography>
-            </Grid2>
-            <Grid2>
-              <Typography>
-                {t('services.model')}: {service.model}
-              </Typography>
-            </Grid2>
-          </Box>
-        )}
-
-        {/* Rooms and Bathrooms for apartments and villas */}
-        {(type === 'apartments' || type === 'villas') && (
-          <Box sx={{ display: 'flex', gap: 4, alignItems: 'center' }}>
-            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-              <BathtubOutlined />
-              <Typography>{service.bathrooms} {t('services.bathrooms')}</Typography>
-            </Box>
-            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-              <BedOutlined />
-              <Typography>{service.rooms} {t('services.rooms')}</Typography>
-            </Box>
-          </Box>
-        )}
-
-        {/* Description */}
-        <Box sx={{ mt: 2 }}>
-          <Typography variant="h6" gutterBottom>
-            {t('services.description')}
-          </Typography>
-          <Typography>{service.description}</Typography>
+          </Grid2>
+          <Grid2>
+            <Typography sx={textStyle}>
+              {t('services.model')}: {service.model}
+            </Typography>
+          </Grid2>
         </Box>
+      )}
 
-        <Divider sx={{ my: 2 }} />
-
-        {/* Price at the bottom */}
-        <Box sx={{ mt: 'auto' }}>
-          <Typography variant="h5" fontWeight="bold" color="primary">
-            ${service.price ? parseFloat(service.price).toFixed(2) : t('general.notAvailable')}/{t('units.day')}
-          </Typography>
+      {/* Rooms and Bathrooms for apartments and villas */}
+      {(type === 'apartments' || type === 'villas') && (
+        <Box sx={{ display: 'flex', gap: 4, alignItems: 'center' }}>
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+            <BathtubOutlined sx={{ fontSize: '1.5rem' }} />
+            <Typography sx={textStyle}>{service.bathrooms} {t('services.bathrooms')}</Typography>
+          </Box>
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+            <BedOutlined sx={{ fontSize: '1.5rem' }} />
+            <Typography sx={textStyle}>{service.rooms} {t('services.rooms')}</Typography>
+          </Box>
         </Box>
+      )}
+
+      {/* Description */}
+      <Box sx={{ mt: 2 }}>
+        <Typography variant="h6" gutterBottom sx={headingStyle}>
+          {t('services.description')}
+        </Typography>
+        <Typography sx={textStyle}>{service.description}</Typography>
       </Box>
+
+      {/* Price at the bottom */}
+      <Box sx={{ mt: 'auto' }}>
+        <Typography variant="h5" fontWeight="bold" color="primary" sx={{ ...headingStyle, fontSize: '1.5rem' }}>
+          ${service.price ? parseFloat(service.price).toFixed(2) : t('general.notAvailable')}/{t('units.day')}
+        </Typography>
+      </Box>
+    </Box>
     );
   };
 
@@ -174,49 +173,6 @@ function ServiceDetails() {
   if (!service) return <Typography sx={{ mt: 10, ml: 4 }}>{t('services.noServiceFound')}</Typography>;
 
   return (
-    // <Box sx={{ py: 4, minHeight: '100vh', mt: 8  }}>
-    //   <Container maxWidth="md">
-    //     <MotionTypography component="h1" variant="h4" align="center" color="text.primary" gutterBottom
-    //       initial={{ opacity: 0, y: -50 }}
-    //       animate={{ opacity: 1, y: 0 }}
-    //       transition={{ duration: 0.5 }}
-    //     >
-    //       {service.name || `${service.brand} ${service.model}`}
-    //     </MotionTypography>
-    //     <MotionCard sx={{ width: '100%', mb: 4 }}
-    //       variants={cardVariants}
-    //       initial="hidden"
-    //       animate="visible"
-    //     >
-    //       <ImageCarousel 
-    //         images={Array.isArray(service.images) ? service.images : [service.images]} 
-    //         width='95%' 
-    //         height={isMobile ? '250px' : '480px'} 
-    //         objectPosition='center auto'
-    //       />
-    //       <CardContent>
-    //         <Grid2 container spacing={2}>
-    //           <Grid2 xs={12}>
-    //             {renderServiceDetails()}
-    //           </Grid2>
-    //           <Grid2 xs={12} sx={{ ml: 2 }}>
-    //             <Typography variant="h5" fontWeight='bold' fontSize='1.5rem' gutterBottom>
-    //               {t('services.price')}
-    //             </Typography>
-    //             <Typography variant='h5' fontSize='1.2rem'>
-    //               ${service.price ? parseFloat(service.price).toFixed(2) : t('general.notAvailable')}/{t('units.day')}
-    //             </Typography>
-    //           </Grid2>
-    //         </Grid2>
-    //       </CardContent>
-    //     </MotionCard>
-    //     <BookingForm service={service} />
-    //     <Box sx={{ display: 'flex', justifyContent: 'center', mt: 4 }}>
-    //       <Button variant="contained" onClick={() => navigate(`/services/${type}`)}>{t('navigation.backTo', { type: t(`services.types.${type}`) })}</Button>
-    //     </Box>
-    //   </Container>
-    //   <WhatsAppButton />
-    // </Box>
     <Box sx={{ 
       py: 4, 
       minHeight: '100vh',

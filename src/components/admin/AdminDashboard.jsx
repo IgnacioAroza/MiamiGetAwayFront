@@ -220,6 +220,103 @@ const AdminDashboard = () => {
     }
   };
 
+  const renderTableHeaders = () => {
+    switch(selectedService) {
+      case 'cars':
+        return (
+          <TableRow>
+            <TableCell>Brand</TableCell>
+            <TableCell>Model</TableCell>
+            <TableCell>Description</TableCell>
+            <TableCell>Price</TableCell>
+            <TableCell>Images</TableCell>
+            <TableCell>Actions</TableCell>
+          </TableRow>
+        );
+      case 'yachts':
+        return (
+          <TableRow>
+            <TableCell>Name</TableCell>
+            <TableCell>Description</TableCell>
+            <TableCell>Capacity</TableCell>
+            <TableCell>Price</TableCell>
+            <TableCell>Images</TableCell>
+            <TableCell>Actions</TableCell>
+          </TableRow>
+        );
+      case 'apartments':
+      case 'villas':
+        return (
+          <TableRow>
+            <TableCell>Name</TableCell>
+            <TableCell>Description</TableCell>
+            <TableCell>Address</TableCell>
+            <TableCell>Capacity</TableCell>
+            <TableCell>Bathrooms</TableCell>
+            <TableCell>Bedrooms</TableCell>
+            <TableCell>Price</TableCell>
+            <TableCell>Images</TableCell>
+            <TableCell>Actions</TableCell>
+          </TableRow>
+        );
+      default:
+        return null;
+    }
+  };
+
+  const renderTableRow = (service) => {
+    switch(selectedService) {
+      case 'cars':
+        return (
+          <TableRow key={service.id}>
+            <TableCell>{service.brand}</TableCell>
+            <TableCell>{service.model}</TableCell>
+            <TableCell>{service.description}</TableCell>
+            <TableCell>${service.price}</TableCell>
+            <TableCell>{service.images ? service.images.length : 0} images</TableCell>
+            <TableCell>
+              <Button startIcon={<EditIcon />} onClick={() => handleEdit(service)}>Edit</Button>
+              <Button startIcon={<DeleteIcon />} onClick={() => handleDeleteClick(service)}>Delete</Button>
+            </TableCell>
+          </TableRow>
+        );
+      case 'yachts':
+        return (
+          <TableRow key={service.id}>
+            <TableCell>{service.name}</TableCell>
+            <TableCell>{service.description}</TableCell>
+            <TableCell>{service.capacity}</TableCell>
+            <TableCell>${service.price}</TableCell>
+            <TableCell>{service.images ? service.images.length : 0} images</TableCell>
+            <TableCell>
+              <Button startIcon={<EditIcon />} onClick={() => handleEdit(service)}>Edit</Button>
+              <Button startIcon={<DeleteIcon />} onClick={() => handleDeleteClick(service)}>Delete</Button>
+            </TableCell>
+          </TableRow>
+        );
+      case 'apartments':
+      case 'villas':
+        return (
+          <TableRow key={service.id}>
+            <TableCell>{service.name}</TableCell>
+            <TableCell>{service.description}</TableCell>
+            <TableCell>{service.address}</TableCell>
+            <TableCell>{service.capacity}</TableCell>
+            <TableCell>{service.bathrooms}</TableCell>
+            <TableCell>{service.rooms}</TableCell>
+            <TableCell>${service.price}</TableCell>
+            <TableCell>{service.images ? service.images.length : 0} images</TableCell>
+            <TableCell>
+              <Button startIcon={<EditIcon />} onClick={() => handleEdit(service)}>Edit</Button>
+              <Button startIcon={<DeleteIcon />} onClick={() => handleDeleteClick(service)}>Delete</Button>
+            </TableCell>
+          </TableRow>
+        );
+      default:
+        return null;
+    }
+  };
+
   const renderContent = () => {
     if (selectedService === 'users') {
       if (userStatus === 'loading') {
@@ -293,41 +390,12 @@ const AdminDashboard = () => {
 
     return (
       <TableContainer component={Paper}>
-        <Table size="small">
+        <Table size='small'>
           <TableHead>
-            <TableRow>
-              <TableCell>Name/Brand</TableCell>
-              <TableCell>Model</TableCell>
-              <TableCell>Description</TableCell>
-              <TableCell>Price</TableCell>
-              <TableCell>Images</TableCell>
-              <TableCell>Actions</TableCell>
-            </TableRow>
+            {renderTableHeaders()}
           </TableHead>
           <TableBody>
-            {services.map((service) => (
-              <TableRow key={service.id}>
-                <TableCell>{service.name || service.brand}</TableCell>
-                <TableCell>{service.model}</TableCell>
-                <TableCell>{service.description}</TableCell>
-                <TableCell>${service.price}</TableCell>
-                <TableCell>{service.images ? service.images.length : 0} images</TableCell>
-                <TableCell>
-                  <Button
-                    startIcon={<EditIcon />}
-                    onClick={() => handleEdit(service)}
-                  >
-                    Edit
-                  </Button>
-                  <Button
-                    startIcon={<DeleteIcon />}
-                    onClick={() => handleDeleteClick(service)}
-                  >
-                    Delete
-                  </Button>
-                </TableCell>
-              </TableRow>
-            ))}
+            {services.map((service) => renderTableRow(service))}
           </TableBody>
         </Table>
       </TableContainer>
@@ -335,35 +403,46 @@ const AdminDashboard = () => {
   };
 
   return (
-    <Box sx={{ flexGrow: 1 }}>
+    <Box sx={{ 
+      flexGrow: 1, 
+      height: '100vh', 
+      display: 'flex', 
+      flexDirection: 'column'
+    }}>
       <Navbar 
         selectedService={selectedService}
         onServiceSelect={handleServiceSelect}
         onLogout={handleLogout}
       />
-      <Container maxWidth="lg" sx={{ mt: 4, mb: 4 }}>
-        {selectedService && (
-          <>
-            <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
-              <Typography variant="h4" component="h1" gutterBottom>
-                {selectedService.charAt(0).toUpperCase() + selectedService.slice(1)}
-              </Typography>
-              {selectedService !== 'users' && (
-                <Button 
-                  variant="contained" 
-                  startIcon={<AddIcon />} 
-                  onClick={handleCreateNew}
-                >
-                  Create New
-                </Button>
-              )}
-            </Box>
-            <Paper sx={{ p: 2, display: 'flex', flexDirection: 'column' }}>
-              {renderContent()}
-            </Paper>
-          </>
-        )}
-      </Container>
+     <Box sx={{ 
+        flexGrow: 1, 
+        overflowY: 'auto', 
+        p: 3
+      }}>
+        <Container maxWidth="xl">
+          {selectedService && (
+            <>
+              <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
+                <Typography variant="h4" component="h1" gutterBottom>
+                  {selectedService.charAt(0).toUpperCase() + selectedService.slice(1)}
+                </Typography>
+                {selectedService !== 'users' && (
+                  <Button 
+                    variant="contained" 
+                    startIcon={<AddIcon />} 
+                    onClick={handleCreateNew}
+                  >
+                    Create New
+                  </Button>
+                )}
+              </Box>
+              <Paper sx={{ p: 2, display: 'flex', flexDirection: 'column' }}>
+                {renderContent()}
+              </Paper>
+            </>
+          )}
+        </Container>
+      </Box>
       <Dialog open={dialogOpen} onClose={handleDialogClose} maxWidth="md" fullWidth>
         <form onSubmit={handleDialogSave}>
           <DialogTitle>{currentItem?.id ? 'Edit' : 'Create'} {selectedService}</DialogTitle>
