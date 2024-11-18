@@ -15,15 +15,17 @@ import AccountCircleIcon from '@mui/icons-material/AccountCircle';
 import PhoneIcon from '@mui/icons-material/Phone';
 import EmailIcon from '@mui/icons-material/Email';
 import { Link as RouterLink } from 'react-router-dom';
+import { formatPhoneNumber } from '../utils/phoneFormater';
 
 
 const Footer = () => {
-  const phoneNumber = import.meta.env.VITE_WHATSAPP_NUMBER;
+  const usPhoneNumber = import.meta.env.VITE_WHATSAPP_NUMBER;
+  const argPhoneNumber = import.meta.env.VITE_ARGENTINA_WHATSAPP_NUMBER;
   const { t } = useTranslation();
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
 
-  const handleClick = () => {
+  const handleClick = (phoneNumber) => {
     const message = encodeURIComponent('Hola, me gustaría obtener más información sobre sus servicios.');
     window.open(`https://wa.me/${phoneNumber}?text=${message}`, '_blank');
   };
@@ -100,7 +102,7 @@ const Footer = () => {
             </Typography>
             <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
               <Link 
-                href="https://www.instagram.com/miami.getaway/#" 
+                href="https://www.instagram.com/miami.getaway" 
                 target="_blank"
                 color="inherit"
                 sx={{ 
@@ -123,7 +125,7 @@ const Footer = () => {
             <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
               <Link 
                 component="button"
-                onClick={handleClick}
+                onClick={() => handleClick(argPhoneNumber)}
                 color="inherit"
                 sx={{ 
                   display: 'flex', 
@@ -132,7 +134,20 @@ const Footer = () => {
                   '&:hover': { color: 'primary.light' }
                 }}
               >
-                <PhoneIcon sx={{ mr: 1 }} /> +{import.meta.env.VITE_WHATSAPP_NUMBER}
+                <PhoneIcon sx={{ mr: 1 }} /> {formatPhoneNumber(argPhoneNumber)} (Argentina)
+              </Link>
+              <Link 
+                component="button"
+                onClick={() => handleClick(usPhoneNumber)}
+                color="inherit"
+                sx={{ 
+                  display: 'flex', 
+                  alignItems: 'center',
+                  textDecoration: 'none',
+                  '&:hover': { color: 'primary.light' }
+                }}
+              >
+                <PhoneIcon sx={{ mr: 1 }} /> {formatPhoneNumber(usPhoneNumber)} (US)
               </Link>
               <Link 
                 href="mailto:boeroandboero@gmail.com"
