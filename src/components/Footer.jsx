@@ -17,6 +17,8 @@ import EmailIcon from '@mui/icons-material/Email';
 import { Link as RouterLink } from 'react-router-dom';
 import { formatPhoneNumber } from '../utils/phoneFormater';
 
+import arg_flag from '../assets/arg_flag.svg';
+import us_flag from '../assets/us-flag.svg';
 
 const Footer = () => {
   const usPhoneNumber = import.meta.env.VITE_WHATSAPP_NUMBER;
@@ -28,6 +30,13 @@ const Footer = () => {
   const handleClick = (phoneNumber) => {
     const message = encodeURIComponent('Hola, me gustaría obtener más información sobre sus servicios.');
     window.open(`https://wa.me/${phoneNumber}?text=${message}`, '_blank');
+  };
+
+  const flagStyle = {
+    width: '24px',
+    height: '16px',
+    marginRight: '8px',
+    verticalAlign: 'middle'
   };
 
   return (
@@ -134,7 +143,7 @@ const Footer = () => {
                   '&:hover': { color: 'primary.light' }
                 }}
               >
-                <PhoneIcon sx={{ mr: 1 }} /> {formatPhoneNumber(argPhoneNumber)} (Argentina)
+                <PhoneIcon sx={{ mr: 1 }} /> <img src={arg_flag} alt="Arg Flag" style={flagStyle} /> {formatPhoneNumber(argPhoneNumber)}
               </Link>
               <Link 
                 component="button"
@@ -147,7 +156,7 @@ const Footer = () => {
                   '&:hover': { color: 'primary.light' }
                 }}
               >
-                <PhoneIcon sx={{ mr: 1 }} /> {formatPhoneNumber(usPhoneNumber)} (US)
+                <PhoneIcon sx={{ mr: 1 }} /> <img src={us_flag} alt="ES Flag" style={flagStyle} /> {formatPhoneNumber(usPhoneNumber)}
               </Link>
               <Link 
                 href="mailto:boeroandboero@gmail.com"
