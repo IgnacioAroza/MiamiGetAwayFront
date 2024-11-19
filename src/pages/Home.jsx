@@ -87,7 +87,7 @@ const Home = () => {
             objectFit: 'cover',
           }}
         >
-          <source src="https://res.cloudinary.com/dbvpwfh07/video/upload/v1731679497/utils/finalVideo.mp4" type="video/mp4" />
+          <source src="https://res.cloudinary.com/dbvpwfh07/video/upload/v1731975863/utils/backgroundVideo.mp4" type="video/mp4" />
           Your browser does not support the video tag.
         </video>
        <AnimatePresence>
