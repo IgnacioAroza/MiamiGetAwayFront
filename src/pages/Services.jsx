@@ -1,6 +1,14 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
-import { Typography, Card, CardContent, CardMedia, Grid2, Container, useTheme, useMediaQuery } from '@mui/material';
+import { 
+  Typography,
+  Card,
+  CardContent,
+  CardMedia,
+  Grid,
+  Container,
+  useTheme,
+  useMediaQuery } from '@mui/material';
 import { Link } from 'react-router-dom';
 import { motion, useAnimation } from 'framer-motion';
 import { useInView } from 'react-intersection-observer';
@@ -12,7 +20,7 @@ const services = [
   { id: 4, nameKey: 'services.types.villas', image: 'https://images.unsplash.com/photo-1580587771525-78b9dba3b914?ixlib=rb-1.2.1&auto=format&fit=crop&w=1950&q=80', path: '/services/villas' },
 ];
 
-const MotionGrid2 = motion.create(Grid2);
+const MotionGrid = motion.create(Grid);
 
 const ServiceCard = ({ service, isMobile, isTablet, delay = 0.3 }) => {
   const { t } = useTranslation();
@@ -29,14 +37,14 @@ const ServiceCard = ({ service, isMobile, isTablet, delay = 0.3 }) => {
   }, [controls, inView]);
 
   return (
-    <MotionGrid2 
+    <MotionGrid
       item
-      xs={6} 
+      xs={12} 
       sm={6} 
       md={6} 
       lg={3} 
       ref={ref}
-      animate={controls}
+      animate={inView ? "visible" : "hidden"}
       initial="hidden"
       variants={{
         visible: { opacity: 1, y: 0, transition: { duration: 0.5, delay } },
@@ -61,18 +69,18 @@ const ServiceCard = ({ service, isMobile, isTablet, delay = 0.3 }) => {
             boxShadow: '0 8px 16px 0 rgba(0,0,0,0.2)',
           },
           textDecoration:'none',
-          WebkitTransform: 'translate3d(0, 0, 0)',
-          WebkitBackfaceVisibility: 'hidden',
-          WebkitPerspective: 1000,
         }}
       >
         <CardMedia
           component="img"
-          height={isMobile ? "100" : isTablet ? "140" : "210"}
+          sx={{
+            height: isMobile ? 100 : isTablet ? 140 : 210,
+            objectFit: 'cover',
+          }}
           image={service.image}
           alt={t(service.nameKey)}
         />
-        <CardContent sx={{ flexGrow: 1, display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center' }}>
+        <CardContent sx={{ flexGrow: 1, display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
           <Typography 
             variant="h6" 
             component="div" 
@@ -86,7 +94,7 @@ const ServiceCard = ({ service, isMobile, isTablet, delay = 0.3 }) => {
           </Typography>
         </CardContent>
       </Card>
-    </MotionGrid2>
+    </MotionGrid>
   );
 };
 
@@ -95,32 +103,29 @@ const Services = () => {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
   const isTablet = useMediaQuery(theme.breakpoints.between('sm', 'md'));
-  const isLargeScreen = useMediaQuery(theme.breakpoints.up('lg'));
-
 
   return (
     <Container maxWidth="xl" sx={{ mt: 10, overflow: 'hidden' }}>
       <Typography variant="h4" component="h2" gutterBottom sx={{ textAlign: 'center', mb: 6 }}>
         {t('services.title')}
       </Typography>
-        <Grid2 
+        <Grid
         container 
         spacing={2} 
         justifyContent="center" 
         sx={{ 
           pb: 4, 
-          display: 'flex',
-          flexWrap: 'wrap', 
         }}>
-          {services.map((service) => (
+          {services.map((service, index) => (
             <ServiceCard
               key={service.id}
               service={service}
               isMobile={isMobile}
               isTablet={isTablet}
+              delay={index * 0.1}
             />
           ))}
-        </Grid2>
+        </Grid>
     </Container>
   );
 };

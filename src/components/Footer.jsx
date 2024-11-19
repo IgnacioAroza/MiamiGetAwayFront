@@ -172,7 +172,7 @@ const Footer = () => {
               </Link>
               <Link 
                 component="button"
-                onClick={handleClick}
+                onClick={() => handleClick(argPhoneNumber)}
                 color="inherit"
                 sx={{ 
                   display: 'flex', 

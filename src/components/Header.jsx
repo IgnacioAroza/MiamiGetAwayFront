@@ -86,17 +86,6 @@ const Header = () => {
               </IconButton>
               <IconButton
                 size="large"
-                edge="start"
-                color="inherit"
-                aria-label={t('navigation.account')}
-                component={Link}
-                to="/admin"
-                sx={{ mr: 2 }}
-              >
-                <AccountCircleIcon />
-              </IconButton>
-              <IconButton
-                size="large"
                 edge="end"
                 color="inherit"
                 aria-label={t('navigation.menu')}
