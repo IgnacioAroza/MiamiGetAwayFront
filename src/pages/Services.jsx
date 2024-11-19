@@ -14,10 +14,10 @@ import { motion, useAnimation } from 'framer-motion';
 import { useInView } from 'react-intersection-observer';
 
 const services = [
-  { id: 1, nameKey: 'services.types.cars', image: 'https://images.unsplash.com/photo-1503376780353-7e6692767b70?ixlib=rb-1.2.1&auto=format&fit=crop&w=1950&q=80', path: '/services/cars' },
-  { id: 2, nameKey: 'services.types.yachts', image: 'https://images.unsplash.com/photo-1540946485063-a40da27545f8?ixlib=rb-1.2.1&auto=format&fit=crop&w=1950&q=80', path: '/services/yachts' },
-  { id: 3, nameKey: 'services.types.apartments', image: 'https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?ixlib=rb-1.2.1&auto=format&fit=crop&w=1950&q=80', path: '/services/apartments' },
-  { id: 4, nameKey: 'services.types.villas', image: 'https://images.unsplash.com/photo-1580587771525-78b9dba3b914?ixlib=rb-1.2.1&auto=format&fit=crop&w=1950&q=80', path: '/services/villas' },
+  { id: 1, nameKey: 'services.types.cars', image: 'https://res.cloudinary.com/dbvpwfh07/image/upload/v1732024218/utils/Services/car.png', path: '/services/cars' },
+  { id: 2, nameKey: 'services.types.yachts', image: 'https://res.cloudinary.com/dbvpwfh07/image/upload/v1732024229/utils/Services/yacht.png', path: '/services/yachts' },
+  { id: 3, nameKey: 'services.types.apartments', image: 'https://res.cloudinary.com/dbvpwfh07/image/upload/v1732024735/utils/Services/apartment.png', path: '/services/apartments' },
+  { id: 4, nameKey: 'services.types.villas', image: 'https://res.cloudinary.com/dbvpwfh07/image/upload/v1732024225/utils/Services/villa.png', path: '/services/villas' },
 ];
 
 const MotionGrid = motion.create(Grid);

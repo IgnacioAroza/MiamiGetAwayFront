@@ -118,7 +118,7 @@ const Home = () => {
                   src='https://res.cloudinary.com/dbvpwfh07/image/upload/v1731678802/utils/whiteLogo.png'
                   alt='Miami Get Away Logo'
                   sx={{
-                    maxWidth: '500px',
+                    maxWidth: '600px',
                     width: '100%',
                   }}
                 />
