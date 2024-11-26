@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
-import { Container, Typography, Grid2, Card, CardContent, CardActions, Button, CircularProgress, useMediaQuery, useTheme } from '@mui/material';
+import { Container, Typography, Grid, Card, CardContent, CardActions, Button, CircularProgress, useMediaQuery, useTheme } from '@mui/material';
 import { useTranslation } from 'react-i18next';
 import { motion } from 'framer-motion';
 
@@ -17,7 +17,7 @@ import villaService from '../services/villaService';
 
 import { BathtubOutlined, BedOutlined } from '@mui/icons-material';
 
-const MotionGrid = motion.create(Grid2);
+const MotionGrid = motion.create(Grid);
 const MotionCard = motion.create(Card);
 
 function ServiceList() {
@@ -28,6 +28,7 @@ function ServiceList() {
   const [error, setError] = useState(null);
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
+  const isTablet = useMediaQuery(theme.breakpoints.between('sm', 'md'));
 
   useEffect(() => {
     const fetchServices = async () => {
@@ -155,9 +156,9 @@ function ServiceList() {
       <Typography component="h1" variant="h2" align="center" color="text.primary" fontWeight='400' gutterBottom>
         {t(`services.types.${type}`)}
       </Typography>
-      <Grid2 container spacing={4} sx={{ display: 'flex', justifyContent: 'center', alignContent: 'center' }}>
+      <Grid container spacing={4} sx={{ display: 'flex', justifyContent: 'center', alignContent: 'center' }}>
         {services.map((service) => (
-          <MotionGrid item xs={12} sm={6} md={4} lg={3} key={service.id }
+          <MotionGrid item xs={12} sm={6} md={4} key={service.id }
             variants={cardVariants}
             initial="hidden"
             animate="visible"
@@ -165,15 +166,15 @@ function ServiceList() {
             to={`/services/${type}/${service.id}`}
             sx={{ textDecoration: 'none' }}
           >
-            <MotionCard sx={{ height: '100%', display: 'flex', flexDirection: 'column', width: 400 }}
+            <MotionCard sx={{ height: '100%', display: 'flex', flexDirection: 'column', width: '100%' }}
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
             >
               <ImageCarousel 
               images={Array.isArray(service.images) ? service.images : [service.images]} 
-              height={isMobile ? '250px' : '270px'}
+              height={isMobile ? '250px' : isTablet ? '220px' : '250px'}
               width='95%'
-              objectPosition='center auto'
+              aspectRatio='16/9'
               />
               <CardContent sx={{ flexGrow: 1, mt: 2, ml: 2 }}>
                 {renderServiceDetails(service)}
@@ -187,7 +188,7 @@ function ServiceList() {
             </MotionCard>
           </MotionGrid>
         ))}
-      </Grid2>
+      </Grid>
       <WhatsAppIcon />
     </Container>
   );
