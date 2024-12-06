@@ -14,6 +14,7 @@ import WhatsAppIcon from '@mui/icons-material/WhatsApp';
 import AccountCircleIcon from '@mui/icons-material/AccountCircle';
 import PhoneIcon from '@mui/icons-material/Phone';
 import EmailIcon from '@mui/icons-material/Email';
+import ApartmentIcon from '@mui/icons-material/Apartment';
 import { Link as RouterLink } from 'react-router-dom';
 import { formatPhoneNumber } from '../utils/phoneFormater';
 
@@ -55,7 +56,7 @@ const Footer = () => {
           {/* Logo */}
           <Grid item xs={12}>
             <Box component="img" 
-                 src="https://res.cloudinary.com/dcxa0ozit/image/upload/v1730483874/utils/logoSmoke.png" 
+                 src="https://res.cloudinary.com/dbvpwfh07/image/upload/v1731867103/utils/whiteLogo.png" 
                  alt="logo" 
                  sx={{ height: 150, ml: -5 }}
             />
@@ -159,7 +160,20 @@ const Footer = () => {
                 <PhoneIcon sx={{ mr: 1 }} /> <img src={us_flag} alt="ES Flag" style={flagStyle} /> {formatPhoneNumber(usPhoneNumber)}
               </Link>
               <Link 
-                href="mailto:boeroandboero@gmail.com"
+                color="inherit"
+                component='div'
+                sx={{ 
+                  display: 'flex', 
+                  alignItems: 'center',
+                  textDecoration: 'none',
+                  '&:hover': { color: 'primary.light' },
+                  width: '25rem'
+                }}
+              >
+                <ApartmentIcon sx={{ mr: 1 }} /> 1001 N Federal Highway, #252 Hallandale Beach, FL 33009 United States
+              </Link>
+              <Link 
+                href="mailto:facundo@miami-getaway.com"
                 color="inherit"
                 sx={{ 
                   display: 'flex', 
@@ -168,7 +182,7 @@ const Footer = () => {
                   '&:hover': { color: 'primary.light' }
                 }}
               >
-                <EmailIcon sx={{ mr: 1 }} /> boeroandboero@gmail.com
+                <EmailIcon sx={{ mr: 1 }} /> facundo@miami-getaway.com
               </Link>
               <Link 
                 component="button"
