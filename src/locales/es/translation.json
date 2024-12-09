@@ -107,7 +107,8 @@
   "units": {
     "day": "día",
     "feet": "pies",
-    "people": "personas"
+    "people": "personas",
+    "hour": "hora"
   },
   "bookingForm": {
     "title": "Reservar Ahora",

@@ -76,6 +76,9 @@ function ServiceList() {
           <>
             <Typography sx={{ mb: 1 }} variant="h5" fontWeight= 'bold'>{`${service.brand} ${service.model}`}</Typography>
             <Typography>{t('services.description')}: {service.description}</Typography>
+            <Typography sx={{ mt: 2, fontWeight: 'bold', variant: 'h6', fontSize: '1.3rem' }}>
+              ${service.price ? parseFloat(service.price).toFixed(2) : t('general.notAvailable')}/{t('units.day')}
+            </Typography>
           </>
         );
       case 'apartments':
@@ -92,6 +95,9 @@ function ServiceList() {
             <Typography sx={{ display: 'flex', alignItems: 'center', mt: 1 }}>
               <BedOutlined sx={{ mr: 1 }} /> {service.rooms} {t('services.rooms')}
             </Typography>
+            <Typography sx={{ mt: 2, fontWeight: 'bold', variant: 'h6', fontSize: '1.3rem' }}>
+              ${service.price ? parseFloat(service.price).toFixed(2) : t('general.notAvailable')}/{t('units.day')}
+            </Typography>
           </>
         );
       case 'yachts':
@@ -100,6 +106,10 @@ function ServiceList() {
             <Typography variant="h5" fontWeight= 'bold'>{service.name}</Typography>
             <Typography>{t('services.description')}: {service.description} {t('units.feet')}</Typography>
             <Typography>{t('services.capacity')}: {service.capacity} {t('units.people')}</Typography>
+            <Typography sx={{ mt: 2, fontWeight: 'bold', variant: 'h6', fontSize: '1.3rem' }}>
+              ${service.price ? parseFloat(service.price).toFixed(2) : t('general.notAvailable')}/
+              {type === 'yachts' ? t('units.hour') : t('units.day')}
+            </Typography>
           </>
         );
       default:
@@ -178,9 +188,6 @@ function ServiceList() {
               />
               <CardContent sx={{ flexGrow: 1, mt: 2, ml: 2 }}>
                 {renderServiceDetails(service)}
-                <Typography sx={{ mt: 2, fontWeight: 'bold', variant: 'h6', fontSize: '1.3rem' }}>
-                  ${service.price ? parseFloat(service.price).toFixed(2) : t('general.notAvailable')}/{t('units.day')}
-                </Typography>
               </CardContent>
               <CardActions>
                 <Button sx={{ ml: 2, mb: 2 }} size="mediun" component={Link} variant='outlined' to={`/services/${type}/${service.id}`}>{t('general.viewDetails')}</Button>

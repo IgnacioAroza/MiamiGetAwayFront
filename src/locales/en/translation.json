@@ -107,7 +107,8 @@
   "units": {
     "day": "day",
     "feet": "ft",
-    "people": "people"
+    "people": "people",
+    "hour": "hour"
   },
   "bookingForm": {
     "title": "Book Now",

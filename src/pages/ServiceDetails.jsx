@@ -163,8 +163,9 @@ function ServiceDetails() {
       </Box>
 
       <Box sx={{ mt: 'auto' }}>
-        <Typography variant="h5" fontWeight="bold" color="primary" sx={{ ...headingStyle, fontSize: '1.5rem' }}>
-          ${service.price ? parseFloat(service.price).toFixed(2) : t('general.notAvailable')}/{t('units.day')}
+        <Typography sx={{ mt: 2, fontWeight: 'bold', variant: 'h6', fontSize: '1.3rem' }}>
+          ${service.price ? parseFloat(service.price).toFixed(2) : t('general.notAvailable')}/
+          {type === 'yachts' ? t('units.hour') : t('units.day')}
         </Typography>
       </Box>
     </Box>
