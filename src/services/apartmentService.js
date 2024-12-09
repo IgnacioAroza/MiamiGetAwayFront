@@ -21,9 +21,9 @@ const carService = {
         }
     },
 
-    createApartment: async (carData) => {
+    createApartment: async (apartmentData) => {
         try {
-            const response = await api.post('/apartments', carData)
+            const response = await api.post('/apartments', apartmentData)
             return response.data
         } catch (error) {
             console.error('Error creating apartment:', error)
@@ -31,9 +31,9 @@ const carService = {
         }
     },
 
-    updateApartment: async (id, carData) => {
+    updateApartment: async (id, apartmentData) => {
         try {
-            const response = await api.put(`/apartments/${id}`, carData)
+            const response = await api.put(`/apartments/${id}`, apartmentData)
             return response.data
         } catch (error) {
             console.error(`Error updating apartment with id ${id}:`, error)
