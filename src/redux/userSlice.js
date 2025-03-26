@@ -52,6 +52,11 @@ export const selectUserInfo = (state) => {
         id: user.id,
         firstName: user.name,
         lastName: user.lastname,
-        email: user.email
+        email: user.email,
+        phone: user.phone,
+        address: user.address,
+        city: user.city,
+        country: user.country,
+        notes: user.notes,
     }));
 };
