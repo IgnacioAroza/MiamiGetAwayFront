@@ -13,15 +13,16 @@ import {
   MenuItem,
 } from '@mui/material';
 import MenuIcon from '@mui/icons-material/Menu';
-import CarRentalIcon from '@mui/icons-material/CarRental';
-import SailingIcon from '@mui/icons-material/Sailing';
+import DashboardIcon from '@mui/icons-material/Dashboard';
+import BookOnlineIcon from '@mui/icons-material/BookOnline';
+import PaymentsIcon from '@mui/icons-material/Payments';
 import ApartmentIcon from '@mui/icons-material/Apartment';
-import HouseIcon from '@mui/icons-material/House';
-import PeopleIcon from '@mui/icons-material/People';
 import ReviewsIcon from '@mui/icons-material/Reviews';
+import { useNavigate } from 'react-router-dom';
 
-const Navbar = ({ selectedService, onServiceSelect, onLogout }) => {
+const Navbar = ({ onLogout }) => {
   const theme = useTheme();
+  const navigate = useNavigate();
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
   const [anchorEl, setAnchorEl] = React.useState(null);
 
@@ -33,26 +34,46 @@ const Navbar = ({ selectedService, onServiceSelect, onLogout }) => {
     setAnchorEl(null);
   };
 
-  const handleServiceSelect = (service) => {
-    onServiceSelect(service);
+  const handleNavigation = (path) => {
+    navigate(path);
     handleClose();
   };
 
-  const serviceIcons = {
-    cars: <CarRentalIcon />,
-    yachts: <SailingIcon />,
-    apartments: <ApartmentIcon />,
-    villas: <HouseIcon />,
-    users: <PeopleIcon />,
-    reviews: <ReviewsIcon />
-  };
+  const menuItems = [
+    { 
+      label: 'Dashboard', 
+      icon: <DashboardIcon />, 
+      path: '/admin' 
+    },
+    { 
+      label: 'Reservations', 
+      icon: <BookOnlineIcon />, 
+      path: '/admin/reservations' 
+    },
+    { 
+      label: 'Payments', 
+      icon: <PaymentsIcon />, 
+      path: '/admin/payments' 
+    },
+    { 
+      label: 'Apartments', 
+      icon: <ApartmentIcon />, 
+      path: '/admin/apartments' 
+    },
+    { 
+      label: 'Reviews', 
+      icon: <ReviewsIcon />, 
+      path: '/admin/reviews' 
+    }
+  ];
 
   return (
     <AppBar position="static">
       <Toolbar>
         <Typography variant="h6" component="div" sx={{ flexGrow: 0, mr: 2 }}>
-          Admin Dashboard
+          Miami GetAway
         </Typography>
+
         {isMobile ? (
           <>
             <Box sx={{ flexGrow: 1 }} />
@@ -80,11 +101,14 @@ const Navbar = ({ selectedService, onServiceSelect, onLogout }) => {
               open={Boolean(anchorEl)}
               onClose={handleClose}
             >
-              {Object.entries(serviceIcons).map(([service, icon]) => (
-                <MenuItem key={service} onClick={() => handleServiceSelect(service)}>
+              {menuItems.map((item) => (
+                <MenuItem 
+                  key={item.path} 
+                  onClick={() => handleNavigation(item.path)}
+                >
                   <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                    {icon}
-                    <Typography sx={{ ml: 1 }}>{service.charAt(0).toUpperCase() + service.slice(1)}</Typography>
+                    {item.icon}
+                    <Typography sx={{ ml: 1 }}>{item.label}</Typography>
                   </Box>
                 </MenuItem>
               ))}
@@ -94,13 +118,13 @@ const Navbar = ({ selectedService, onServiceSelect, onLogout }) => {
         ) : (
           <>
             <Box sx={{ display: 'flex', alignItems: 'center' }}>
-              {Object.entries(serviceIcons).map(([service, icon]) => (
-                <Tooltip key={service} title={service.charAt(0).toUpperCase() + service.slice(1)}>
+              {menuItems.map((item) => (
+                <Tooltip key={item.path} title={item.label}>
                   <IconButton
-                    color={selectedService === service ? 'secondary' : 'inherit'}
-                    onClick={() => onServiceSelect(service)}
+                    color="inherit"
+                    onClick={() => handleNavigation(item.path)}
                   >
-                    {icon}
+                    {item.icon}
                   </IconButton>
                 </Tooltip>
               ))}

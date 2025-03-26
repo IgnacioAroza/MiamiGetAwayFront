@@ -37,7 +37,6 @@ export const fetchServices = createAsyncThunk(
     async (serviceType, { rejectWithValue }) => {
         try {
             const response = await api.get(`/${serviceType}`);
-            console.log('API response:', response.data);
             return { serviceType, data: response.data };
         } catch (error) {
             console.error('API error:', error);

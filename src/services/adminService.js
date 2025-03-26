@@ -3,33 +3,33 @@ import api from '../utils/api';
 const adminService = {
     login: async (username, password) => {
         try {
-            const response = await api.post('auth/login', { username, password })
+            const response = await api.post('auth/login', { username, password });
             if (response.data.token) {
-                localStorage.setItem('adminToken', response.data.token)
-                return response.data
+                return response.data;
             }
-            return null
+            return null;
         } catch (error) {
-            throw error.response?.data?.message || 'Authentication failed'
+            throw error.response?.data?.message || 'Error de autenticación';
         }
     },
 
     logout: () => {
-        localStorage.removeItem('adminToken')
+        localStorage.removeItem('adminToken');
     },
 
     isAuthenticated: () => {
-        return !!localStorage.getItem('adminToken')
+        const token = localStorage.getItem('adminToken');
+        return !!token;
     },
 
     getProfile: async () => {
         try {
-            const response = await api.get('/admins')
-            return response.data
+            const response = await api.get('/admins');
+            return response.data;
         } catch (error) {
-            throw error.response?.data?.message || 'Failed to fetch profile'
+            throw error.response?.data?.message || 'Error al obtener el perfil';
         }
     }
-}
+};
 
 export default adminService;

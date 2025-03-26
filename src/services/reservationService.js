@@ -98,6 +98,15 @@ const reservationService = {
         } catch (error) {
             throw error.response?.data?.message || 'Error sending PDF by email';
         }
+    },
+
+    searchReservations: async (searchParams) => {
+        try {
+            const response = await api.get('/reservations/search', { params: searchParams });
+            return response.data;
+        } catch (error) {
+            throw error.response?.data?.message || 'Error searching reservations';
+        }
     }
 }
 

@@ -8,26 +8,31 @@ import {
   Paper,
   Alert
 } from '@mui/material';
-import { useNavigate } from 'react-router-dom';
-import adminService from '../../services/adminService';
+import { useNavigate, useLocation } from 'react-router-dom';
+import adminService from '../../../services/adminService';
 
 const AdminLogin = () => {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const navigate = useNavigate();
+  const location = useLocation();
 
   const handleLogin = async (e) => {
     e.preventDefault();
     setError('');
 
     try {
-      const response = await adminService.login(username, password)
+      const response = await adminService.login(username, password);
       if (response) {
-        navigate('/adminPanel')
+        localStorage.setItem('adminToken', response.token);
+        // Redirigir a la página anterior o al dashboard por defecto
+        const from = location.state?.from || '/admin';
+        navigate(from, { replace: true });
       }
     } catch (error) {
-      setError(error.message || 'Invalid username or password')
+      setError(error.message || 'User or password incorrect');
+      localStorage.removeItem('adminToken'); // Limpiamos el token si hay error
     }
   };
 

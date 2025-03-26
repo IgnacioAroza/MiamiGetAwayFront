@@ -11,7 +11,7 @@ const api = axios.create({
 
 api.interceptors.request.use(
     (config) => {
-        const token = localStorage.getItem('token')
+        const token = localStorage.getItem('adminToken')
         if (token) {
             config.headers['Authorization'] = `Bearer ${token}`
         }
@@ -27,7 +27,9 @@ api.interceptors.response.use(
     (error) => {
         if (error.response && error.response.status === 401) {
             localStorage.removeItem('adminToken')
-            window.location.href = '/adminPanel'
+            if (window.location.pathname.startsWith('/admin')) {
+                window.location.href = '/admin/login'
+            }
         }
         return Promise.reject(error)
     }

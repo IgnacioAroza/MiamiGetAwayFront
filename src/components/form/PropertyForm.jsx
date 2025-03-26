@@ -2,13 +2,17 @@ import React from 'react';
 import { TextField, Grid2 } from '@mui/material';
 
 const PropertyForm = ({ property, setProperty }) => {
+  if (!property) {
+    return null;
+  }
+
   return (
     <Grid2 container spacing={2} sx={{ mt: 2 }}>
       <Grid2 item xs={12}>
         <TextField
           fullWidth
           label="Name"
-          value={property.name || ''}
+          value={property?.name || ''}
           onChange={(e) => setProperty({...property, name: e.target.value})}
         />
       </Grid2>
@@ -18,7 +22,7 @@ const PropertyForm = ({ property, setProperty }) => {
           label="Description"
           multiline
           rows={4}
-          value={property.description || ''}
+          value={property?.description || ''}
           onChange={(e) => setProperty({...property, description: e.target.value})}
         />
       </Grid2>
@@ -26,7 +30,7 @@ const PropertyForm = ({ property, setProperty }) => {
         <TextField
           fullWidth
           label="Address"
-          value={property.address || ''}
+          value={property?.address || ''}
           onChange={(e) => setProperty({...property, address: e.target.value})}
         />
       </Grid2>
@@ -35,7 +39,7 @@ const PropertyForm = ({ property, setProperty }) => {
           fullWidth
           label="Capacity"
           type="number"
-          value={property.capacity || ''}
+          value={property?.capacity || ''}
           onChange={(e) => setProperty({...property, capacity: e.target.value})}
         />
       </Grid2>
@@ -44,7 +48,7 @@ const PropertyForm = ({ property, setProperty }) => {
           fullWidth
           label="Bathrooms"
           type="number"
-          value={property.bathrooms || ''}
+          value={property?.bathrooms || ''}
           onChange={(e) => setProperty({...property, bathrooms: e.target.value})}
         />
       </Grid2>
@@ -53,7 +57,7 @@ const PropertyForm = ({ property, setProperty }) => {
           fullWidth
           label="Rooms"
           type="number"
-          value={property.rooms || ''}
+          value={property?.rooms || ''}
           onChange={(e) => setProperty({...property, rooms: e.target.value})}
         />
       </Grid2>
@@ -62,7 +66,7 @@ const PropertyForm = ({ property, setProperty }) => {
           fullWidth
           label="Price"
           type="number"
-          value={property.price || ''}
+          value={property?.price || ''}
           onChange={(e) => setProperty({...property, price: e.target.value})}
         />
       </Grid2>

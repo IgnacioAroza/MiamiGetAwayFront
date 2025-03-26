@@ -20,7 +20,7 @@ import {
   DialogTitle
 } from '@mui/material';
 import DeleteIcon from '@mui/icons-material/Delete';
-import { fetchReviews, deleteReview } from '../../redux/reviewSlice';
+import { fetchReviews, deleteReview } from '../../../redux/reviewSlice';
 
 const AdminReviews = () => {
   const dispatch = useDispatch();

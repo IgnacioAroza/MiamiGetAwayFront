@@ -20,11 +20,23 @@ import {
   DialogContentText,
   Snackbar,
   Alert,
-  CircularProgress
+  CircularProgress,
+  Grid,
+  Card,
+  CardContent,
+  CardHeader,
+  IconButton,
 } from '@mui/material';
 import AddIcon from '@mui/icons-material/Add';
 import EditIcon from '@mui/icons-material/Edit';
 import DeleteIcon from '@mui/icons-material/Delete';
+import {
+  People as PeopleIcon,
+  Apartment as ApartmentIcon,
+  BookOnline as BookOnlineIcon,
+  Payment as PaymentIcon,
+  Reviews as ReviewsIcon,
+} from '@mui/icons-material';
 
 import Navbar from '../NavBar';
 import CarForm from '../form/CarForm';
@@ -32,7 +44,7 @@ import YachtForm from '../form/YachtForm';
 import PropertyForm from '../form/PropertyForm';
 import UserForm from '../form/UserForm';
 import ImageUploader from '../images/ImageUploader';
-import AdminReviews from '../admin/AdminReviews';
+import AdminReviews from './reviews/AdminReviews';
 
 import { 
   fetchServices, 
@@ -70,12 +82,50 @@ const AdminDashboard = () => {
   const [newImages, setNewImages] = useState([]);
   const [openSnackbar, setOpenSnackbar] = useState(false);
 
-  useEffect(() => {
-    const token = localStorage.getItem('adminToken');
-    if (!token) {
-      navigate('/admin');
+  // Aquí puedes agregar los selectores que necesites de Redux
+  const totalUsers = useSelector(state => state.users?.total || 0);
+  const totalApartments = useSelector(state => state.adminApartments?.apartments?.length || 0);
+  const totalReservations = useSelector(state => state.reservations?.reservations?.length || 0);
+  const totalPayments = useSelector(state => state.reservationPayments?.payments?.length || 0);
+  const totalReviews = useSelector(state => state.reviews?.total || 0);
+
+  const dashboardItems = [
+    {
+      title: 'Usuarios',
+      count: totalUsers,
+      icon: <PeopleIcon sx={{ fontSize: 40 }} />,
+      color: '#1976d2',
+      path: '/admin'
+    },
+    {
+      title: 'Apartamentos',
+      count: totalApartments,
+      icon: <ApartmentIcon sx={{ fontSize: 40 }} />,
+      color: '#2e7d32',
+      path: '/admin/apartments'
+    },
+    {
+      title: 'Reservaciones',
+      count: totalReservations,
+      icon: <BookOnlineIcon sx={{ fontSize: 40 }} />,
+      color: '#ed6c02',
+      path: '/admin/reservations'
+    },
+    {
+      title: 'Pagos',
+      count: totalPayments,
+      icon: <PaymentIcon sx={{ fontSize: 40 }} />,
+      color: '#9c27b0',
+      path: '/admin/payments'
+    },
+    {
+      title: 'Reseñas',
+      count: totalReviews,
+      icon: <ReviewsIcon sx={{ fontSize: 40 }} />,
+      color: '#d32f2f',
+      path: '/admin/reviews'
     }
-  }, [navigate]);
+  ];
 
   useEffect(() => {
     if (selectedService === 'users' && userStatus === 'idle') {
@@ -103,7 +153,17 @@ const AdminDashboard = () => {
   };
 
   const handleCreateNew = () => {
-    dispatch(setCurrentItem(selectedService === 'users' ? {} : { images: [] }));
+    const initialState = {
+      name: '',
+      description: '',
+      address: '',
+      capacity: '',
+      bathrooms: '',
+      rooms: '',
+      price: '',
+      images: []
+    };
+    dispatch(setCurrentItem(initialState));
     setNewImages([]);
     setDialogOpen(true);
   };
@@ -345,6 +405,11 @@ const AdminDashboard = () => {
                   <TableCell>First Name</TableCell>
                   <TableCell>Last Name</TableCell>
                   <TableCell>Email</TableCell>
+                  <TableCell>Phone</TableCell>
+                  <TableCell>Address</TableCell>
+                  <TableCell>City</TableCell>
+                  <TableCell>Country</TableCell>
+                  <TableCell>Notes</TableCell>
                 </TableRow>
               </TableHead>
               <TableBody>
@@ -353,6 +418,11 @@ const AdminDashboard = () => {
                     <TableCell>{user.firstName}</TableCell>
                     <TableCell>{user.lastName}</TableCell>
                     <TableCell>{user.email}</TableCell>
+                    <TableCell>{user.phone}</TableCell>
+                    <TableCell>{user.address}</TableCell>
+                    <TableCell>{user.city}</TableCell>
+                    <TableCell>{user.country}</TableCell>
+                    <TableCell>{user.notes}</TableCell>
                   </TableRow>
                 ))}
               </TableBody>
@@ -402,116 +472,242 @@ const AdminDashboard = () => {
     );
   };
 
-  return (
-    <Box sx={{ 
-      flexGrow: 1, 
-      height: '100vh', 
-      display: 'flex', 
-      flexDirection: 'column'
-    }}>
-      <Navbar 
-        selectedService={selectedService}
-        onServiceSelect={handleServiceSelect}
-        onLogout={handleLogout}
-      />
-     <Box sx={{ 
-        flexGrow: 1, 
-        overflowY: 'auto', 
-        p: 3
-      }}>
-        <Container maxWidth="xl">
+  const handleCardClick = (path) => {
+    navigate(path);
+  };
+
+  const renderDashboard = () => (
+    <Box sx={{ backgroundColor: '#121212', minHeight: '100vh', p: 3 }}>
+      <Container maxWidth="xl" sx={{ mx: 'auto', mt: 4 }}>
+        <Grid container spacing={3} sx={{ mb: 4 }}>
+          {dashboardItems.map((item) => (
+            <Grid item xs={12} sm={6} md={4} key={item.title}>
+              <Card 
+                sx={{ 
+                  cursor: 'pointer',
+                  transition: 'transform 0.2s',
+                  backgroundColor: '#1e1e1e',
+                  '&:hover': {
+                    transform: 'translateY(-4px)',
+                    boxShadow: '0 4px 20px 0 rgba(0,0,0,0.12)'
+                  }
+                }}
+                onClick={() => handleCardClick(item.path)}
+              >
+                <CardContent>
+                  <Box 
+                    sx={{ 
+                      display: 'flex', 
+                      alignItems: 'center', 
+                      justifyContent: 'space-between',
+                      color: '#fff'
+                    }}
+                  >
+                    <Box>
+                      <Typography variant="h6" component="div" sx={{ color: '#fff' }}>
+                        {item.title}
+                      </Typography>
+                      <Typography variant="h3" component="div" sx={{ mt: 2, fontWeight: 'bold', color: '#fff' }}>
+                        {item.count}
+                      </Typography>
+                    </Box>
+                    <Box 
+                      sx={{ 
+                        backgroundColor: `${item.color}15`,
+                        borderRadius: '50%',
+                        p: 2,
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center'
+                      }}
+                    >
+                      {React.cloneElement(item.icon, { sx: { color: item.color, fontSize: 40 } })}
+                    </Box>
+                  </Box>
+                </CardContent>
+              </Card>
+            </Grid>
+          ))}
+        </Grid>
+
+        {/* Sección de servicios */}
+        <Paper sx={{ p: 3, backgroundColor: '#1e1e1e', maxWidth: '100%', overflow: 'auto' }}>
+          <Typography variant="h5" gutterBottom sx={{ color: '#fff', mb: 3 }}>
+            Servicios
+          </Typography>
+          <Grid container spacing={2} sx={{ mb: 3 }}>
+            {['cars', 'yachts', 'apartments', 'villas'].map((service) => (
+              <Grid item xs={12} sm={6} md={3} key={service}>
+                <Button
+                  fullWidth
+                  variant={selectedService === service ? 'contained' : 'outlined'}
+                  onClick={() => handleServiceSelect(service)}
+                  sx={{ 
+                    textTransform: 'capitalize',
+                    color: '#fff',
+                    borderColor: selectedService === service ? 'transparent' : '#fff',
+                    backgroundColor: selectedService === service ? 'rgba(255,255,255,0.12)' : 'transparent',
+                    '&:hover': {
+                      borderColor: '#fff',
+                      backgroundColor: selectedService === service ? 'rgba(255,255,255,0.16)' : 'rgba(255,255,255,0.08)'
+                    }
+                  }}
+                >
+                  {service}
+                </Button>
+              </Grid>
+            ))}
+          </Grid>
+
+          {/* Contenido del servicio seleccionado */}
           {selectedService && (
-            <>
-              <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
-                <Typography variant="h4" component="h1" gutterBottom>
+            <Box sx={{ mt: 3 }}>
+              <Box sx={{ 
+                display: 'flex', 
+                justifyContent: 'space-between', 
+                alignItems: 'center', 
+                mb: 3,
+                flexWrap: 'wrap',
+                gap: 2
+              }}>
+                <Typography variant="h6" sx={{ color: '#fff' }}>
                   {selectedService.charAt(0).toUpperCase() + selectedService.slice(1)}
                 </Typography>
-                {selectedService !== 'users' && (
-                  <Button 
-                    variant="contained" 
-                    startIcon={<AddIcon />} 
-                    onClick={handleCreateNew}
-                  >
-                    Create New
-                  </Button>
-                )}
+                <Button 
+                  variant="contained" 
+                  startIcon={<AddIcon />} 
+                  onClick={handleCreateNew}
+                  sx={{
+                    backgroundColor: '#2196f3',
+                    color: '#fff',
+                    '&:hover': {
+                      backgroundColor: '#1976d2'
+                    }
+                  }}
+                >
+                  Crear Nuevo
+                </Button>
               </Box>
-              <Paper sx={{ p: 2, display: 'flex', flexDirection: 'column' }}>
+              <Box sx={{ overflowX: 'auto' }}>
                 {renderContent()}
-              </Paper>
-            </>
+              </Box>
+            </Box>
           )}
-        </Container>
-      </Box>
-      <Dialog open={dialogOpen} onClose={handleDialogClose} maxWidth="md" fullWidth>
+        </Paper>
+
+        {/* Estadísticas recientes */}
+        <Grid container spacing={3} sx={{ mt: 3 }}>
+          <Grid item xs={12} md={6}>
+            <Paper sx={{ p: 3, backgroundColor: '#1e1e1e' }}>
+              <Typography variant="h6" gutterBottom sx={{ color: '#fff' }}>
+                Reservaciones Recientes
+              </Typography>
+              {/* Contenido de reservaciones recientes */}
+            </Paper>
+          </Grid>
+          <Grid item xs={12} md={6}>
+            <Paper sx={{ p: 3, backgroundColor: '#1e1e1e' }}>
+              <Typography variant="h6" gutterBottom sx={{ color: '#fff' }}>
+                Últimos Pagos
+              </Typography>
+              {/* Contenido de pagos recientes */}
+            </Paper>
+          </Grid>
+        </Grid>
+      </Container>
+
+      {/* Mantener los diálogos existentes */}
+      <Dialog 
+        open={dialogOpen} 
+        onClose={handleDialogClose} 
+        maxWidth="md" 
+        fullWidth
+        PaperProps={{
+          sx: {
+            backgroundColor: '#1e1e1e',
+            color: '#fff'
+          }
+        }}
+      >
+        <DialogTitle sx={{ color: '#fff' }}>
+          {currentItem?.id ? 'Editar' : 'Crear Nuevo'} {selectedService?.charAt(0).toUpperCase() + selectedService?.slice(1)}
+        </DialogTitle>
         <form onSubmit={handleDialogSave}>
-          <DialogTitle>{currentItem?.id ? 'Edit' : 'Create'} {selectedService}</DialogTitle>
           <DialogContent>
-            {currentItem && renderForm()}
+            {renderForm()}
             {selectedService !== 'users' && (
-              <ImageUploader 
-                images={currentItem?.images || []}
-                newImages={newImages}
-                onImageUpload={handleImageUpload}
-                onRemoveImage={handleRemoveImage}
-              />
+              <Box sx={{ mt: 2 }}>
+                <Typography variant="subtitle1" gutterBottom sx={{ color: '#fff' }}>
+                  Imágenes
+                </Typography>
+                <ImageUploader
+                  images={currentItem?.images || []}
+                  newImages={newImages}
+                  onUpload={handleImageUpload}
+                  onRemove={handleRemoveImage}
+                />
+              </Box>
             )}
           </DialogContent>
           <DialogActions>
-            <Button onClick={handleDialogClose}>Cancel</Button>
-            <Button type="submit">Save</Button>
+            <Button onClick={handleDialogClose} sx={{ color: '#fff' }}>
+              Cancelar
+            </Button>
+            <Button type="submit" variant="contained" color="primary">
+              Guardar
+            </Button>
           </DialogActions>
         </form>
       </Dialog>
+
+      {/* Diálogo de confirmación para eliminar */}
       <Dialog
         open={deleteDialogOpen}
         onClose={handleDeleteCancel}
-        aria-labelledby="alert-dialog-title"
-        aria-describedby="alert-dialog-description"
+        PaperProps={{
+          sx: {
+            backgroundColor: '#1e1e1e',
+            color: '#fff'
+          }
+        }}
       >
-        <DialogTitle id="alert-dialog-title">{"Confirm Deletion"}</DialogTitle>
+        <DialogTitle sx={{ color: '#fff' }}>
+          Confirmar eliminación
+        </DialogTitle>
         <DialogContent>
-          <DialogContentText id="alert-dialog-description">
-            Are you sure you want to delete this item? This action cannot be undone.
+          <DialogContentText sx={{ color: 'rgba(255,255,255,0.7)' }}>
+            ¿Está seguro que desea eliminar este elemento? Esta acción no se puede deshacer.
           </DialogContentText>
         </DialogContent>
         <DialogActions>
-          <Button onClick={handleDeleteCancel}>Cancel</Button>
-          <Button onClick={handleDeleteConfirm} autoFocus>
-            Delete
+          <Button onClick={handleDeleteCancel} sx={{ color: '#fff' }}>
+            Cancelar
+          </Button>
+          <Button onClick={handleDeleteConfirm} color="error" autoFocus>
+            Eliminar
           </Button>
         </DialogActions>
       </Dialog>
 
-      <Snackbar open={openSnackbar} autoHideDuration={6000} onClose={() => {
-        setOpenSnackbar(false);
-        if (selectedService === 'users') {
-          dispatch(clearUserError());
-        } else if (selectedService === 'reviews') {
-          dispatch(clearReviewError());
-        } else if(selectedService) {
-          dispatch(clearServiceError(selectedService));
-        }
-      }}>
-        <Alert onClose={() => {
-          setOpenSnackbar(false);
-          if (selectedService === 'users') {
-            dispatch(clearUserError());
-          } else if (selectedService === 'reviews') {
-            dispatch(clearReviewError());
-          } else if (selectedService) {
-            dispatch(clearServiceError(selectedService));
-          }
-        }} severity="error" sx={{ width: '100%' }}>
-          {selectedService === 'users' 
-            ? userError 
-            : (selectedService === 'reviews' 
-              ? reviewError 
-              : (selectedService && error[selectedService]))}
+      <Snackbar 
+        open={openSnackbar} 
+        autoHideDuration={6000} 
+        onClose={() => setOpenSnackbar(false)}
+      >
+        <Alert 
+          onClose={() => setOpenSnackbar(false)} 
+          severity="error" 
+          sx={{ width: '100%' }}
+        >
+          {(selectedService === 'users' && userError) || 
+           (selectedService === 'reviews' && reviewError) ||
+           (selectedService && error[selectedService])}
         </Alert>
       </Snackbar>
     </Box>
   );
+
+  return renderDashboard();
 };
 
 export default AdminDashboard;

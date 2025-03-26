@@ -8,6 +8,8 @@ const initialState = {
     status: 'idle',
     error: null,
     loading: false,
+    lastSynced: null,
+    syncStatus: 'idle'
 };
 
 // Thunks para operaciones principales
