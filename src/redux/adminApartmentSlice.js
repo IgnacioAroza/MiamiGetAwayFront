@@ -22,13 +22,9 @@ api.interceptors.request.use(
 // Thunks para operaciones CRUD
 export const fetchAdminApartments = createAsyncThunk(
     'adminApartments/fetchAll',
-    async (_, { rejectWithValue }) => {
-        try {
-            const response = await api.get('/admin-apartments');
-            return response.data;
-        } catch (error) {
-            return rejectWithValue(error.response?.data?.message || 'Error fetching apartments');
-        }
+    async () => {
+        const response = await api.get('/apartments');
+        return response.data;
     }
 );
 
@@ -36,7 +32,7 @@ export const fetchAdminApartmentById = createAsyncThunk(
     'adminApartments/fetchById',
     async (id, { rejectWithValue }) => {
         try {
-            const response = await api.get(`/admin-apartments/${id}`);
+            const response = await api.get(`/apartments/${id}`);
             return response.data;
         } catch (error) {
             return rejectWithValue(error.response?.data?.message || 'Error fetching apartment by id');
@@ -46,69 +42,25 @@ export const fetchAdminApartmentById = createAsyncThunk(
 
 export const createAdminApartment = createAsyncThunk(
     'adminApartments/create',
-    async (apartmentData, { rejectWithValue }) => {
-        try {
-            const formData = new FormData();
-            // Manejo de datos para form-data
-            Object.keys(apartmentData).forEach(key => {
-                if (key === 'images') {
-                    apartmentData[key].forEach(image => {
-                        formData.append('images', image);
-                    });
-                } else {
-                    formData.append(key, apartmentData[key]);
-                }
-            });
-
-            const response = await api.post('/admin-apartments', formData, {
-                headers: {
-                    'Content-Type': 'multipart/form-data',
-                },
-            });
-            return response.data;
-        } catch (error) {
-            return rejectWithValue(error.response?.data?.message || 'Error creating apartment');
-        }
+    async (apartmentData) => {
+        const response = await api.post('/apartments', apartmentData);
+        return response.data;
     }
 );
 
 export const updateAdminApartment = createAsyncThunk(
     'adminApartments/update',
-    async ({ id, apartmentData }, { rejectWithValue }) => {
-        try {
-            const formData = new FormData();
-            // Manejo de datos para form-data
-            Object.keys(apartmentData).forEach(key => {
-                if (key === 'images') {
-                    apartmentData[key].forEach(image => {
-                        formData.append('images', image);
-                    });
-                } else {
-                    formData.append(key, apartmentData[key]);
-                }
-            });
-
-            const response = await api.put(`/admin-apartments/${id}`, formData, {
-                headers: {
-                    'Content-Type': 'multipart/form-data',
-                },
-            });
-            return response.data;
-        } catch (error) {
-            return rejectWithValue(error.response?.data?.message || 'Error updating apartment');
-        }
+    async ({ id, data }) => {
+        const response = await api.put(`/apartments/${id}`, data);
+        return response.data;
     }
 );
 
 export const deleteAdminApartment = createAsyncThunk(
     'adminApartments/delete',
-    async (id, { rejectWithValue }) => {
-        try {
-            await api.delete(`/admin-apartments/${id}`);
-            return id;
-        } catch (error) {
-            return rejectWithValue(error.response?.data?.message || 'Error deleting apartment');
-        }
+    async (id) => {
+        await api.delete(`/apartments/${id}`);
+        return id;
     }
 );
 
@@ -145,10 +97,11 @@ const adminApartmentSlice = createSlice({
                 state.status = 'succeeded';
                 state.apartments = action.payload;
                 state.loading = false;
+                state.error = null;
             })
             .addCase(fetchAdminApartments.rejected, (state, action) => {
                 state.status = 'failed';
-                state.error = action.payload;
+                state.error = action.error.message;
                 state.loading = false;
             })
             // Fetch By Id
@@ -163,12 +116,16 @@ const adminApartmentSlice = createSlice({
             })
             .addCase(fetchAdminApartmentById.rejected, (state, action) => {
                 state.status = 'failed';
-                state.error = action.payload;
+                state.error = action.error.message;
                 state.loading = false;
             })
             // Create
             .addCase(createAdminApartment.fulfilled, (state, action) => {
                 state.apartments.push(action.payload);
+                state.error = null;
+            })
+            .addCase(createAdminApartment.rejected, (state, action) => {
+                state.error = action.error.message;
             })
             // Update
             .addCase(updateAdminApartment.fulfilled, (state, action) => {
@@ -179,6 +136,10 @@ const adminApartmentSlice = createSlice({
                 if (state.selectedApartment?.id === action.payload.id) {
                     state.selectedApartment = action.payload;
                 }
+                state.error = null;
+            })
+            .addCase(updateAdminApartment.rejected, (state, action) => {
+                state.error = action.error.message;
             })
             // Delete
             .addCase(deleteAdminApartment.fulfilled, (state, action) => {
@@ -186,10 +147,20 @@ const adminApartmentSlice = createSlice({
                 if (state.selectedApartment?.id === action.payload) {
                     state.selectedApartment = null;
                 }
+                state.error = null;
+            })
+            .addCase(deleteAdminApartment.rejected, (state, action) => {
+                state.error = action.error.message;
             });
     },
 });
 
 export const { setSelectedApartment, clearError, clearSelectedApartment } = adminApartmentSlice.actions;
+
+// Selectors
+export const selectAllApartments = (state) => state.adminApartments.apartments;
+export const selectApartmentStatus = (state) => state.adminApartments.status;
+export const selectApartmentError = (state) => state.adminApartments.error;
+export const selectSelectedApartment = (state) => state.adminApartments.selectedApartment;
 
 export default adminApartmentSlice.reducer;

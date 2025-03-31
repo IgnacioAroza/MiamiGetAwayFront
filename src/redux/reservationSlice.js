@@ -53,9 +53,23 @@ export const updateReservation = createAsyncThunk(
     'reservations/update',
     async ({ id, reservationData }, { rejectWithValue }) => {
         try {
+            console.log('updateReservation thunk - ID:', id);
+            console.log('updateReservation thunk - Data:', reservationData);
+
+            // Asegurarse de que parkingFee sea un número
+            if (reservationData.parkingFee !== undefined) {
+                console.log('parkingFee antes de enviar:', reservationData.parkingFee, typeof reservationData.parkingFee);
+                // Asegurar que sea un número
+                if (typeof reservationData.parkingFee === 'string') {
+                    reservationData.parkingFee = parseFloat(reservationData.parkingFee);
+                }
+            }
+
             const data = await reservationService.update(id, reservationData);
+            console.log('updateReservation thunk - Respuesta:', data);
             return data;
         } catch (error) {
+            console.error('updateReservation thunk - Error:', error);
             return rejectWithValue(error.response?.data?.message || 'Error updating reservation');
         }
     }
@@ -78,8 +92,8 @@ export const registerPayment = createAsyncThunk(
     'reservations/registerPayment',
     async ({ id, paymentData }, { rejectWithValue }) => {
         try {
-            const data = await reservationService.registerPayment(id, paymentData);
-            return { id, payment: data };
+            const response = await reservationService.registerPayment(id, paymentData);
+            return response.data;
         } catch (error) {
             return rejectWithValue(error.response?.data?.message || 'Error registering payment');
         }
@@ -137,6 +151,21 @@ export const sendReservationConfirmation = createAsyncThunk(
     }
 );
 
+export const updateReservationPaymentStatus = createAsyncThunk(
+    'reservations/updatePaymentStatus',
+    async ({ id, paymentData }, { rejectWithValue }) => {
+        try {
+            console.log("Actualizando estado de pago para reserva:", id);
+            console.log("Datos de pago:", paymentData);
+            const data = await reservationService.updatePaymentStatus(id, paymentData);
+            return { id, data };
+        } catch (error) {
+            console.error("Error en updateReservationPaymentStatus:", error);
+            return rejectWithValue(error);
+        }
+    }
+);
+
 const reservationSlice = createSlice({
     name: 'reservations',
     initialState,
@@ -152,6 +181,32 @@ const reservationSlice = createSlice({
         },
         clearReservationPayments: (state) => {
             state.reservationPayments = [];
+        },
+        // Actualiza el estado de pago de una reserva
+        updatePaymentStatus: (state, action) => {
+            const { id, paymentStatus, amountPaid, amountDue } = action.payload;
+            const reservation = state.reservations.find(res => res.id === id);
+            if (reservation) {
+                reservation.paymentStatus = paymentStatus;
+                reservation.amountPaid = amountPaid;
+                reservation.amountDue = amountDue;
+            }
+            if (state.selectedReservation?.id === id) {
+                state.selectedReservation.paymentStatus = paymentStatus;
+                state.selectedReservation.amountPaid = amountPaid;
+                state.selectedReservation.amountDue = amountDue;
+            }
+        },
+        // Actualiza el estado de una reserva
+        updateReservationStatus: (state, action) => {
+            const { id, status } = action.payload;
+            const reservation = state.reservations.find(res => res.id === id);
+            if (reservation) {
+                reservation.status = status;
+            }
+            if (state.selectedReservation?.id === id) {
+                state.selectedReservation.status = status;
+            }
         }
     },
     extraReducers: (builder) => {
@@ -172,8 +227,17 @@ const reservationSlice = createSlice({
                 state.loading = false;
             })
             // Fetch By Id
+            .addCase(fetchReservationById.pending, (state) => {
+                state.loading = true;
+                state.error = null;
+            })
             .addCase(fetchReservationById.fulfilled, (state, action) => {
                 state.selectedReservation = action.payload;
+                state.loading = false;
+            })
+            .addCase(fetchReservationById.rejected, (state, action) => {
+                state.loading = false;
+                state.error = action.payload || 'Error al cargar la reserva';
             })
             // Create
             .addCase(createReservation.fulfilled, (state, action) => {
@@ -189,6 +253,11 @@ const reservationSlice = createSlice({
                     state.selectedReservation = action.payload;
                 }
             })
+            .addCase(updateReservation.rejected, (state, action) => {
+                state.status = 'failed';
+                state.error = action.payload;
+                state.loading = false;
+            })
             // Delete
             .addCase(deleteReservation.fulfilled, (state, action) => {
                 state.reservations = state.reservations.filter(res => res.id !== action.payload);
@@ -197,17 +266,20 @@ const reservationSlice = createSlice({
                 }
             })
             // Register Payment
+            .addCase(registerPayment.pending, (state) => {
+                state.loading = true;
+                state.error = null;
+            })
             .addCase(registerPayment.fulfilled, (state, action) => {
-                const { id, payment } = action.payload;
-                const reservation = state.reservations.find(res => res.id === id);
-                if (reservation) {
-                    reservation.payments = reservation.payments || [];
-                    reservation.payments.push(payment);
+                state.loading = false;
+                // Actualizar la reserva seleccionada con los nuevos datos
+                if (state.selectedReservation && state.selectedReservation.id === action.payload.id) {
+                    state.selectedReservation = action.payload;
                 }
-                if (state.selectedReservation?.id === id) {
-                    state.selectedReservation.payments = state.selectedReservation.payments || [];
-                    state.selectedReservation.payments.push(payment);
-                }
+            })
+            .addCase(registerPayment.rejected, (state, action) => {
+                state.loading = false;
+                state.error = action.payload;
             })
             // Fetch Payments
             .addCase(fetchReservationPayments.fulfilled, (state, action) => {
@@ -226,6 +298,38 @@ const reservationSlice = createSlice({
                 if (state.selectedReservation?.id === action.payload.id) {
                     state.selectedReservation.confirmation = action.payload.confirmation;
                 }
+            })
+            // update payment status
+            .addCase(updateReservationPaymentStatus.pending, (state) => {
+                state.status = 'loading';
+                state.loading = true;
+            })
+            .addCase(updateReservationPaymentStatus.fulfilled, (state, action) => {
+                state.status = 'succeeded';
+                state.loading = false;
+
+                // Actualizar la reserva en el listado
+                const index = state.reservations.findIndex(res => res.id === action.payload.id);
+                if (index !== -1 && action.payload.data) {
+                    // Actualizar solo los campos de pago
+                    state.reservations[index] = {
+                        ...state.reservations[index],
+                        ...action.payload.data
+                    };
+                }
+
+                // Actualizar la reserva seleccionada si es la misma
+                if (state.selectedReservation?.id === action.payload.id && action.payload.data) {
+                    state.selectedReservation = {
+                        ...state.selectedReservation,
+                        ...action.payload.data
+                    };
+                }
+            })
+            .addCase(updateReservationPaymentStatus.rejected, (state, action) => {
+                state.status = 'failed';
+                state.error = action.payload;
+                state.loading = false;
             });
     }
 });
@@ -234,7 +338,9 @@ export const {
     setSelectedReservation,
     clearSelectedReservation,
     clearError,
-    clearReservationPayments
+    clearReservationPayments,
+    updatePaymentStatus,
+    updateReservationStatus
 } = reservationSlice.actions;
 
 export default reservationSlice.reducer;

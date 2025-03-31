@@ -21,6 +21,9 @@ import ReservationManagement from './components/admin/reservations/ReservationMa
 import PaymentsList from './components/admin/payments/PaymentsList';
 import AdminReviews from './components/admin/reviews/AdminReviews';
 import ReservationDetails from './pages/ReservationDetails';
+import ApartmentList from './components/admin/apartments/ApartmentList';
+import UserList from './components/admin/users/UserList';
+import ReservationsPage from './pages/ReservationsPage';
 
 const theme = createTheme({
   palette: {
@@ -46,10 +49,18 @@ function AppContent() {
   const isAdminRoute = location.pathname.startsWith('/admin');
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
+    <div style={{ 
+      display: 'flex', 
+      flexDirection: 'column', 
+      minHeight: '100vh',
+      backgroundColor: isAdminRoute ? '#121212' : 'inherit'
+    }}>
       <ScrollToTop />
-      <Header />
-      <main style={{ flexGrow: 1 }}>
+      {!isAdminRoute && <Header />}
+      <main style={{ 
+        flexGrow: 1,
+        backgroundColor: isAdminRoute ? '#121212' : 'inherit'
+      }}>
         <Routes>
           <Route path="/" element={<Home />} />
           <Route path="/services" element={<Services />} />
@@ -67,11 +78,17 @@ function AppContent() {
           }>
             <Route index element={<AdminDashboard />} />
             <Route path="dashboard" element={<AdminDashboard />} />
+            <Route path="users" element={<UserList />} />
             <Route path="payments" element={<PaymentsList />} />
-            <Route path="reservations" element={<ReservationManagement />} />
+            
+            {/* Rutas de reservas */}
+            <Route path="reservations" element={<ReservationsPage />} />
+            <Route path="reservations/new" element={<ReservationManagement />} />
+            <Route path="reservations/edit/:id" element={<ReservationManagement />} />
             <Route path="reservations/:id" element={<ReservationDetails />} />
+            
             <Route path="reviews" element={<AdminReviews />} />
-            <Route path="apartments" element={<AdminDashboard />} />
+            <Route path="apartments" element={<ApartmentList />} />
           </Route>
         </Routes>
       </main>

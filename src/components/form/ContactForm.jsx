@@ -85,8 +85,6 @@ export default function ContactForm() {
         publicKey
       );
 
-      console.log();
-
       setSnackbarMessage("Mensaje enviado. Nos pondremos en contacto contigo pronto.");
       setSnackbarSeverity("success");
       setOpenSnackbar(true);
