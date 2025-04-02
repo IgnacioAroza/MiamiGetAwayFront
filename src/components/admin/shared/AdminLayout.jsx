@@ -9,18 +9,6 @@ const AdminLayout = () => {
     const theme = useTheme();
     const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
 
-    // Elementos del menú principal
-    const mainListItems = (
-        <>
-            <ListItemLink to="/admin/dashboard" primary="Dashboard" icon={<DashboardIcon />} />
-            <ListItemLink to="/admin/reservations" primary="Reservas" icon={<BookIcon />} />
-            <ListItemLink to="/admin/apartments" primary="Apartamentos" icon={<ApartmentIcon />} />
-            <ListItemLink to="/admin/users" primary="Clientes" icon={<PeopleIcon />} />
-            <ListItemLink to="/admin/payments" primary="Pagos" icon={<PaymentIcon />} />
-            <ListItemLink to="/admin/reviews" primary="Reseñas" icon={<ReviewsIcon />} />
-        </>
-    );
-
     return (
         <Box sx={{ 
             display: 'flex',

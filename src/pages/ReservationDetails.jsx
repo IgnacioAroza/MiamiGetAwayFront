@@ -1,5 +1,5 @@
 import React, { useEffect } from 'react';
-import { useParams } from 'react-router-dom';
+import { useParams, useLocation } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 import {
     Box,
@@ -13,19 +13,56 @@ import {
     Alert
 } from '@mui/material';
 import { fetchReservationById } from '../redux/reservationSlice';
+import { fetchAdminApartmentById } from '../redux/adminApartmentSlice';
 import PaymentHistory from '../components/admin/payments/PaymentHistory';
-import PaymentSummary from '../components/admin/payments/PaymentSummary';
+import ReservationSummary from '../components/admin/payments/ReservationSummary';
 
 const ReservationDetails = () => {
     const { id } = useParams();
+    const location = useLocation();
     const dispatch = useDispatch();
     const { selectedReservation: reservation, loading, error } = useSelector(state => state.reservations);
+    
+    // Obtener todo el estado de adminApartments para inspección
+    const adminApartmentState = useSelector(state => state.adminApartments);
+    const { selectedApartment: apartment, loading: apartmentLoading, error: apartmentError } = adminApartmentState;
 
     useEffect(() => {
+        console.log("ReservationDetails - Ruta:", location.pathname);
+        console.log("ReservationDetails - ID de reserva:", id);
+        
         if (id) {
             dispatch(fetchReservationById(id));
         }
-    }, [dispatch, id]);
+    }, [dispatch, id, location]);
+
+    // Efecto separado para cargar el apartamento cuando tengamos los datos de la reserva
+    useEffect(() => {
+        if (reservation) {
+            // Buscar el ID del apartamento en diferentes formatos posibles
+            const apartmentId = reservation.apartment_id
+            
+            console.log("ReservationDetails - Reservation Object:", reservation);
+            console.log("ReservationDetails - Apartment ID detectado:", apartmentId);
+            
+            if (apartmentId) {
+                console.log("Cargando datos del apartamento ID:", apartmentId);
+                dispatch(fetchAdminApartmentById(apartmentId));
+            } else {
+                console.error("No se pudo detectar el ID del apartamento en la reserva:", reservation);
+            }
+        }
+    }, [dispatch, reservation]);
+
+    useEffect(() => {
+        console.log("Estado completo de apartamentos:", adminApartmentState);
+        console.log("ReservationDetails - Datos de reserva:", reservation);
+        console.log("ReservationDetails - Datos de apartamento:", apartment);
+        
+        if (apartmentError) {
+            console.error("Error al cargar los datos del apartamento:", apartmentError);
+        }
+    }, [reservation, apartment, adminApartmentState, apartmentError]);
 
     if (loading) {
         return (
@@ -49,7 +86,7 @@ const ReservationDetails = () => {
         return (
             <Container>
                 <Alert severity="info" sx={{ mt: 3 }}>
-                    No se encontró la reserva
+                    Reservation not found: {id}
                 </Alert>
             </Container>
         );
@@ -61,17 +98,63 @@ const ReservationDetails = () => {
             CONFIRMED: 'success',
             CANCELLED: 'error',
             COMPLETED: 'info',
-            // Agrega más estados según necesites
+            // Agregar todos los posibles estados
+            pending: 'warning',
+            confirmed: 'success',
+            cancelled: 'error',
+            completed: 'info',
         };
         return statusColors[status] || 'default';
     };
 
     const formatDate = (date) => {
+        if (!date) return 'N/A';
         return new Date(date).toLocaleDateString('es-ES', {
             year: 'numeric',
             month: 'long',
             day: 'numeric'
         });
+    };
+
+    // Verificar y normalizar los nombres de propiedades para evitar problemas
+    const normalizedReservation = {
+        id: reservation.id,
+        status: reservation.status,
+        clientName: reservation.clientName || reservation.client_name,
+        clientEmail: reservation.clientEmail || reservation.client_email,
+        clientPhone: reservation.clientPhone || reservation.client_phone,
+        clientCity: reservation.clientCity || reservation.client_city,
+        clientCountry: reservation.clientCountry || reservation.client_country,
+        checkIn: reservation.checkIn || reservation.checkInDate || reservation.check_in_date,
+        checkOut: reservation.checkOut || reservation.checkOutDate || reservation.check_out_date,
+        nights: reservation.nights,
+        apartmentId: reservation.apartmentId || reservation.apartment_id,
+        pricePerNight: reservation.pricePerNight || reservation.price_per_night,
+        payments: reservation.payments || [],
+        notes: reservation.notes || reservation.clientNotes || reservation.client_notes,
+    };
+
+    // Datos del apartamento desde el estado
+    const apartmentInfo = apartment ? {
+        id: apartment.id,
+        name: apartment.name || apartment.building_name || apartment.title || '',
+        address: apartment.address || apartment.location || '',
+        description: apartment.description || apartment.desc || apartment.about || '',
+        bathrooms: apartment.bathrooms || apartment.bathroom_count || 0,
+        bedrooms: apartment.rooms || apartment.bedrooms || apartment.bedroom_count || 0,
+        image: apartment.image || apartment.coverImage || apartment.cover_image || apartment.thumbnail || '',
+        capacity: apartment.capacity || apartment.max_guests || apartment.maxGuests || 0
+    } : null;
+
+    // Verificación adicional para el fallback
+    const apartmentData = apartmentInfo || {
+        id: normalizedReservation.apartmentId,
+        name: 'Información no disponible',
+        address: 'Información no disponible',
+        description: 'Información no disponible',
+        bathrooms: 'N/A',
+        bedrooms: 'N/A',
+        capacity: 'N/A'
     };
 
     return (
@@ -80,11 +163,11 @@ const ReservationDetails = () => {
                 {/* Encabezado */}
                 <Box display="flex" justifyContent="space-between" alignItems="center" mb={3}>
                     <Typography variant="h4">
-                        Reserva #{reservation.id}
+                        Reserva #{normalizedReservation.id}
                     </Typography>
                     <Chip
-                        label={reservation.status}
-                        color={getStatusColor(reservation.status)}
+                        label={normalizedReservation.status}
+                        color={getStatusColor(normalizedReservation.status)}
                         size="large"
                     />
                 </Box>
@@ -97,11 +180,13 @@ const ReservationDetails = () => {
                     <Grid item xs={12} md={6}>
                         <Paper variant="outlined" sx={{ p: 2 }}>
                             <Typography variant="h6" gutterBottom>
-                                Información del Cliente
+                                Client Information
                             </Typography>
-                            <Typography>Nombre: {reservation.clientName}</Typography>
-                            <Typography>Email: {reservation.clientEmail}</Typography>
-                            <Typography>Teléfono: {reservation.clientPhone}</Typography>
+                            <Typography sx={{ mb: 1 }}>Name: {normalizedReservation.clientName}</Typography>
+                            <Typography sx={{ mb: 1 }}>Email: {normalizedReservation.clientEmail}</Typography>
+                            <Typography sx={{ mb: 1 }}>Phone: {normalizedReservation.clientPhone}</Typography>
+                            <Typography sx={{ mb: 1 }}>City: {normalizedReservation.clientCity}</Typography>
+                            <Typography sx={{ mb: 1 }}>Country: {normalizedReservation.clientCountry}</Typography>
                         </Paper>
                     </Grid>
 
@@ -109,11 +194,11 @@ const ReservationDetails = () => {
                     <Grid item xs={12} md={6}>
                         <Paper variant="outlined" sx={{ p: 2 }}>
                             <Typography variant="h6" gutterBottom>
-                                Detalles de la Reserva
+                                Reservation Details
                             </Typography>
-                            <Typography>Check-in: {formatDate(reservation.checkIn)}</Typography>
-                            <Typography>Check-out: {formatDate(reservation.checkOut)}</Typography>
-                            <Typography>Noches: {reservation.nights}</Typography>
+                            <Typography>Check-in: {formatDate(normalizedReservation.checkIn)}</Typography>
+                            <Typography>Check-out: {formatDate(normalizedReservation.checkOut)}</Typography>
+                            <Typography>Nights: {normalizedReservation.nights}</Typography>
                         </Paper>
                     </Grid>
 
@@ -121,36 +206,49 @@ const ReservationDetails = () => {
                     <Grid item xs={12} md={6}>
                         <Paper variant="outlined" sx={{ p: 2 }}>
                             <Typography variant="h6" gutterBottom>
-                                Detalles del Apartamento
+                                Apartment Details
                             </Typography>
-                            <Typography>ID: {reservation.apartmentId}</Typography>
-                            <Typography>Precio por noche: ${reservation.pricePerNight}</Typography>
+                            <Typography>Price per night: ${normalizedReservation.pricePerNight}</Typography>
+                            
+                            {apartmentLoading ? (
+                                <Box sx={{ display: 'flex', justifyContent: 'center', mt: 2 }}>
+                                    <CircularProgress size={24} />
+                                </Box>
+                            ) : apartmentError ? (
+                                <Alert severity="error" sx={{ mt: 2, mb: 2 }}>
+                                    Error al cargar datos del apartamento: {apartmentError}
+                                </Alert>
+                            ) : (
+                                <Box sx={{ mt: 2 }}>
+                                    <Typography>Name: {apartmentData.name}</Typography>     
+                                    <Typography>Address: {apartmentData.address}</Typography>
+                                    <Typography>Description: {apartmentData.description}</Typography>
+                                    <Typography>Bathrooms: {apartmentData.bathrooms}</Typography>
+                                    <Typography>Bedrooms: {apartmentData.bedrooms}</Typography>
+                                    <Typography>Capacity: {apartmentData.capacity} guests</Typography>
+                                </Box>
+                            )}
                         </Paper>
                     </Grid>
 
-                    {/* Costos y Pagos */}
+                    {/* Resumen de Costos */}
                     <Grid item xs={12} md={6}>
-                        <PaymentSummary reservation={reservation} />
+                        <ReservationSummary reservation={reservation} />
                     </Grid>
 
                     {/* Historial de Pagos */}
                     <Grid item xs={12}>
-                        <Paper variant="outlined" sx={{ p: 2 }}>
-                            <Typography variant="h6" gutterBottom>
-                                Historial de Pagos
-                            </Typography>
-                            <PaymentHistory payments={reservation.payments || []} />
-                        </Paper>
+                        <PaymentHistory reservationId={id} />
                     </Grid>
 
                     {/* Notas adicionales */}
-                    {reservation.notes && (
+                    {normalizedReservation.notes && (
                         <Grid item xs={12}>
                             <Paper variant="outlined" sx={{ p: 2 }}>
                                 <Typography variant="h6" gutterBottom>
                                     Notas
                                 </Typography>
-                                <Typography>{reservation.notes}</Typography>
+                                <Typography>{normalizedReservation.notes}</Typography>
                             </Paper>
                         </Grid>
                     )}

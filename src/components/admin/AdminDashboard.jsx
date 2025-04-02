@@ -3,7 +3,6 @@ import { useDispatch, useSelector } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
 import { Box, Snackbar, Alert, Grid, Paper, Typography, Divider, Button, List, ListItem, ListItemText, ListItemIcon, useTheme } from '@mui/material';
 import { 
-  ShoppingBag as ShoppingBagIcon,
   CalendarToday as CalendarTodayIcon,
   AttachMoney as AttachMoneyIcon,
   Person as PersonIcon,
@@ -13,28 +12,8 @@ import {
 
 // Componentes
 import DashboardCards from './dashboard/DashboardCards';
-import ServiceButtons from './services/ServiceButtons';
-import ServiceTable from './services/ServiceTable';
-import FormDialog from './dialogs/FormDialog';
-import DeleteDialog from './dialogs/DeleteDialog';
-import AdminReviews from './reviews/AdminReviews';
-
-// Forms
-import CarForm from '../form/CarForm';
-import YachtForm from '../form/YachtForm';
-import PropertyForm from '../form/PropertyForm';
-import UserForm from '../form/UserForm';
 
 // Redux actions
-import { 
-  fetchServices, 
-  createService, 
-  updateService, 
-  deleteService,
-  setSelectedService,
-  setCurrentItem
-} from '../../redux/serviceSlice';
-
 import {
   fetchUsers,
   selectUserCount,
@@ -50,16 +29,11 @@ const AdminDashboard = () => {
   const navigate = useNavigate();
 
   // Estados locales
-  const [dialogOpen, setDialogOpen] = useState(false);
-  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
-  const [itemToDelete, setItemToDelete] = useState(null);
-  const [newImages, setNewImages] = useState([]);
   const [openSnackbar, setOpenSnackbar] = useState(false);
   const [apartments, setApartments] = useState([]);
   const [buildingNames, setBuildingNames] = useState({});
 
   // Selectores de Redux
-  const { items, status, error, selectedService, currentItem } = useSelector((state) => state.services);
   const userStatus = useSelector(state => state.users.status);
   const userError = useSelector(state => state.users.error);
   const reviewError = useSelector(state => state.reviews.error);
@@ -136,178 +110,80 @@ const AdminDashboard = () => {
 
   // Effects
   useEffect(() => {
-    if (selectedService === 'users' && userStatus === 'idle') {
+    if (userStatus === 'idle') {
       dispatch(fetchUsers());
-    } else if (selectedService && status[selectedService] === 'idle') {
-      dispatch(fetchServices(selectedService));
     }
-  }, [selectedService, dispatch, status, userStatus]);
+  }, [dispatch, userStatus]);
 
   useEffect(() => {
-    const hasError = (selectedService === 'users' && userError) || 
-                    (selectedService === 'reviews' && reviewError) ||
-                    (selectedService && error[selectedService]);
+    const hasError = userError || reviewError;
     if (hasError) {
       setOpenSnackbar(true);
     }
-  }, [error, userError, reviewError, selectedService]);
+  }, [userError, reviewError]);
 
   // Handlers
   const handleCardClick = (path) => navigate(path);
   
-  const handleServiceSelect = (serviceType) => {
-    dispatch(setSelectedService(serviceType));
-  };
-
-  const handleCreateNew = () => {
-    dispatch(setCurrentItem({
-      name: '',
-      description: '',
-      address: '',
-      capacity: '',
-      bathrooms: '',
-      rooms: '',
-      price: '',
-      unit_number: '',
-      images: []
-    }));
-    setNewImages([]);
-    setDialogOpen(true);
-  };
-
-  const handleEdit = (item) => {
-    dispatch(setCurrentItem(selectedService === 'users' ? {...item} : {...item, images: item.images || []}));
-    setNewImages([]);
-    setDialogOpen(true);
-  };
-
-  const handleDelete = (item) => {
-    setItemToDelete(item);
-    setDeleteDialogOpen(true);
-  };
-
-  const handleDeleteConfirm = async () => {
-    if (itemToDelete) {
-      try {
-        await dispatch(deleteService({ 
-          serviceType: selectedService, 
-          id: itemToDelete.id 
-        })).unwrap();
-        setDeleteDialogOpen(false);
-        setItemToDelete(null);
-      } catch (error) {
-        setOpenSnackbar(true);
-      }
-    }
-  };
-
-  const handleDialogSave = async (event) => {
-    event.preventDefault();
-    try {
-      const formData = new FormData();
-      Object.entries(currentItem).forEach(([key, value]) => {
-        if (key !== 'images') {
-          formData.append(key, value);
-        }
-      });
-
-      if (currentItem.images) {
-        currentItem.images.forEach(image => {
-          if (typeof image === 'string') {
-            formData.append('existingImages', image);
-          }
-        });
-      }
-
-      newImages.forEach(image => {
-        formData.append('images', image);
-      });
-
-      if (currentItem.id) {
-        await dispatch(updateService({ 
-          serviceType: selectedService, 
-          id: currentItem.id, 
-          data: formData 
-        })).unwrap();
-      } else {
-        await dispatch(createService({ 
-          serviceType: selectedService, 
-          data: formData 
-        })).unwrap();
-      }
-
-      setDialogOpen(false);
-      dispatch(setCurrentItem(null));
-      setNewImages([]);
-    } catch (error) {
-      setOpenSnackbar(true);
-    }
-  };
-
-  const renderForm = () => {
-    const forms = {
-      cars: <CarForm car={currentItem} setCar={(car) => dispatch(setCurrentItem(car))} />,
-      yachts: <YachtForm yacht={currentItem} setYacht={(yacht) => dispatch(setCurrentItem(yacht))} />,
-      apartments: <PropertyForm property={currentItem} setProperty={(property) => dispatch(setCurrentItem(property))} />,
-      villas: <PropertyForm property={currentItem} setProperty={(property) => dispatch(setCurrentItem(property))} />,
-      users: <UserForm user={currentItem} setUser={(user) => dispatch(setCurrentItem(user))} />
-    };
-    return forms[selectedService] || null;
-  };
-
-  // Obtener las últimas reservas para mostrar
+  // Obtener las últimas reservas
   const latestReservations = getLatestReservations();
 
   return (
-    <Box sx={{ p: 0 }}>
-      {/* Tarjetas de estadísticas principales */}
-      <Grid container spacing={3} sx={{ mb: 4 }}>
-        <Grid item xs={12} sm={6} md={3}>
-          <StatCard 
-            title="Reservas Totales" 
-            value={stats.totalReservations} 
-            icon={<CalendarTodayIcon />} 
-            color="#4fc3f7"
-          />
+    <Box sx={{ p: 3 }}>
+      <Grid container spacing={4}>
+        <Grid item xs={12} md={8}>
+          <Paper sx={{ p: 3, height: '100%' }}>
+            <Typography variant="h5" component="h2" gutterBottom>
+              ¡Welcome to your dashboard!
+            </Typography>
+            <Typography variant="body1" paragraph>
+              From here you can manage all aspects of your business.
+            </Typography>
+            
+            <Typography variant="h6" sx={{ mt: 4, mb: 2 }}>
+              General statistics
+            </Typography>
+            <Grid container spacing={3} sx={{ mb: 4 }}>
+              <Grid item xs={12} sm={6} md={4}>
+                <StatCard 
+                  title="Users"
+                  value={stats.totalUsers}
+                  icon={<PersonIcon />}
+                  color={theme.palette.primary.main}
+                />
+              </Grid>
+              <Grid item xs={12} sm={6} md={4}>
+                <StatCard 
+                  title="Reservations"
+                  value={stats.totalReservations}
+                  icon={<CalendarTodayIcon />}
+                  color={theme.palette.success.main}
+                />
+              </Grid>
+              <Grid item xs={12} sm={6} md={4}>
+                <StatCard 
+                  title="Incomes"
+                  value={formatCurrency(stats.totalRevenue)}
+                  icon={<AttachMoneyIcon />}
+                  color={theme.palette.warning.main}
+                />
+              </Grid>
+            </Grid>
+          </Paper>
         </Grid>
-        <Grid item xs={12} sm={6} md={3}>
-          <StatCard 
-            title="Ingresos" 
-            value={`$${stats.totalRevenue.toLocaleString()}`} 
-            icon={<AttachMoneyIcon />} 
-            color="#66bb6a"
-          />
-        </Grid>
-        <Grid item xs={12} sm={6} md={3}>
-          <StatCard 
-            title="Usuarios" 
-            value={stats.totalUsers} 
-            icon={<PersonIcon />} 
-            color="#ff7043"
-          />
-        </Grid>
-        <Grid item xs={12} sm={6} md={3}>
-          <StatCard 
-            title="Departamentos" 
-            value={stats.totalApartments} 
-            icon={<ApartmentIcon />} 
-            color="#ba68c8"
-          />
-        </Grid>
-      </Grid>
-
-      <Grid container spacing={3}>
-        {/* Reservas recientes */}
-        <Grid item xs={12} md={6}>
-          <Paper sx={{ p: 2, height: '100%' }}>
-            <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
-              <Typography variant="h6">Reservas Recientes</Typography>
+        
+        <Grid item xs={12} md={4}>
+          <Paper sx={{ p: 3, height: '100%' }}>
+            <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 1 }}>
+              <Typography variant="h6" component="h3">
+                Latest reservations
+              </Typography>
               <Button 
                 variant="outlined" 
                 size="small"
                 onClick={() => navigate('/admin/reservations')}
               >
-                Ver todas
+                See all
               </Button>
             </Box>
             <Divider sx={{ mb: 2 }} />
@@ -315,52 +191,7 @@ const AdminDashboard = () => {
             <List>
               {latestReservations.length === 0 ? (
                 <ListItem>
-                  <ListItemText primary="No hay reservas disponibles" />
-                </ListItem>
-              ) : (
-                latestReservations.map((reservation) => (
-                  <ListItem key={reservation.id} sx={{ 
-                    borderLeft: `4px solid ${reservation.status === 'confirmed' || reservation.status === 'ON_RENT' ? theme.palette.success.main : theme.palette.warning.main}`,
-                    mb: 1,
-                    backgroundColor: theme.palette.background.paper,
-                    borderRadius: '4px'
-                  }}>
-                    <ListItemText
-                      primary={reservation.client_name || 'Cliente'}
-                      secondary={`${formatDate(reservation.check_in_date)} - ${formatCurrency(reservation.total_amount)}`}
-                    />
-                    <Typography 
-                      variant="body2" 
-                      color={reservation.status === 'confirmed' || reservation.status === 'ON_RENT' ? 'success.main' : 'warning.main'}
-                    >
-                      {reservation.status}
-                    </Typography>
-                  </ListItem>
-                ))
-              )}
-            </List>
-          </Paper>
-        </Grid>
-
-        {/* Departamentos recientemente alquilados */}
-        <Grid item xs={12} md={6}>
-          <Paper sx={{ p: 2, height: '100%' }}>
-            <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
-              <Typography variant="h6">Alquileres Recientes</Typography>
-              <Button 
-                variant="outlined" 
-                size="small"
-                onClick={() => navigate('/admin/apartments')}
-              >
-                Ver todos
-              </Button>
-            </Box>
-            <Divider sx={{ mb: 2 }} />
-            
-            <List>
-              {latestReservations.length === 0 ? (
-                <ListItem>
-                  <ListItemText primary="No hay alquileres disponibles" />
+                  <ListItemText primary="No reservations available" />
                 </ListItem>
               ) : (
                 latestReservations.map((reservation) => (
@@ -388,38 +219,6 @@ const AdminDashboard = () => {
         stats={stats}
         onCardClick={handleCardClick}
       />
-      
-      <ServiceButtons 
-        onServiceSelect={handleServiceSelect}
-      />
-
-      {selectedService === 'reviews' ? (
-        <AdminReviews />
-      ) : (
-        <ServiceTable 
-          selectedService={selectedService}
-          services={items[selectedService] || []}
-          status={status[selectedService]}
-          error={error[selectedService]}
-          onEdit={handleEdit}
-          onDelete={handleDelete}
-        />
-      )}
-
-      <FormDialog
-        open={dialogOpen}
-        onClose={() => setDialogOpen(false)}
-        onSave={handleDialogSave}
-        title={currentItem?.id ? 'Editar' : 'Crear Nuevo'}
-      >
-        {renderForm()}
-      </FormDialog>
-
-      <DeleteDialog
-        open={deleteDialogOpen}
-        onClose={() => setDeleteDialogOpen(false)}
-        onConfirm={handleDeleteConfirm}
-      />
 
       <Snackbar 
         open={openSnackbar} 
@@ -431,9 +230,7 @@ const AdminDashboard = () => {
           severity="error" 
           sx={{ width: '100%' }}
         >
-          {(selectedService === 'users' && userError) || 
-           (selectedService === 'reviews' && reviewError) ||
-           (selectedService && error[selectedService])}
+          {userError || reviewError}
         </Alert>
       </Snackbar>
     </Box>

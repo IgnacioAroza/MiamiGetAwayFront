@@ -47,7 +47,7 @@ const ServiceTable = ({
     const headers = {
       cars: ['Brand', 'Model', 'Description', 'Price', 'Images', 'Actions'],
       yachts: ['Name', 'Description', 'Capacity', 'Price', 'Images', 'Actions'],
-      apartments: ['Name', 'Description', 'Address', 'Capacity', 'Bathrooms', 'Bedrooms', 'Price', 'Images', 'Actions'],
+      apartments: ['Name', 'Description', 'Unit Number', 'Address', 'Capacity', 'Bathrooms', 'Bedrooms', 'Price', 'Images', 'Actions'],
       villas: ['Name', 'Description', 'Address', 'Capacity', 'Bathrooms', 'Bedrooms', 'Price', 'Images', 'Actions']
     };
 
@@ -84,6 +84,7 @@ const ServiceTable = ({
         <>
           <TableCell>{service.name}</TableCell>
           <TableCell>{service.description}</TableCell>
+          <TableCell>{service.unitNumber}</TableCell>
           <TableCell>{service.address}</TableCell>
           <TableCell>{service.capacity}</TableCell>
           <TableCell>{service.bathrooms}</TableCell>

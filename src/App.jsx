@@ -24,6 +24,7 @@ import ReservationDetails from './pages/ReservationDetails';
 import ApartmentList from './components/admin/apartments/ApartmentList';
 import UserList from './components/admin/users/UserList';
 import ReservationsPage from './pages/ReservationsPage';
+import ServicesPage from './components/admin/services/ServicesPage';
 
 const theme = createTheme({
   palette: {
@@ -78,6 +79,7 @@ function AppContent() {
           }>
             <Route index element={<AdminDashboard />} />
             <Route path="dashboard" element={<AdminDashboard />} />
+            <Route path="services" element={<ServicesPage />} />
             <Route path="users" element={<UserList />} />
             <Route path="payments" element={<PaymentsList />} />
             
@@ -86,10 +88,13 @@ function AppContent() {
             <Route path="reservations/new" element={<ReservationManagement />} />
             <Route path="reservations/edit/:id" element={<ReservationManagement />} />
             <Route path="reservations/:id" element={<ReservationDetails />} />
+            <Route path="reservations/view/:id" element={<ReservationDetails />} />
             
             <Route path="reviews" element={<AdminReviews />} />
             <Route path="apartments" element={<ApartmentList />} />
           </Route>
+          <Route path="/reservations" element={<ReservationsPage />} />
+          <Route path="/reservations/:id" element={<ReservationDetails />} />
         </Routes>
       </main>
       {!isAdminRoute && <Footer />}

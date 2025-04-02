@@ -15,7 +15,8 @@ import {
   ApartmentIcon, 
   PaymentIcon, 
   PeopleIcon, 
-  LogoutIcon 
+  LogoutIcon,
+  DesignServicesIcon
 } from './icons';
 
 const DashboardHeader = () => {
@@ -74,6 +75,18 @@ const DashboardHeader = () => {
               }}
             >
               Home
+            </Button>
+            
+            <Button 
+              color="inherit" 
+              startIcon={<DesignServicesIcon />}
+              onClick={() => navigate('/admin/services')}
+              sx={{ 
+                mr: 1,
+                borderBottom: location.pathname.includes('/admin/services') ? '2px solid white' : 'none',
+              }}
+            >
+              Servicios
             </Button>
             
             <Button 

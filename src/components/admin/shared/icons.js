@@ -7,6 +7,7 @@ import ReviewsIcon from '@mui/icons-material/Reviews';
 import SettingsIcon from '@mui/icons-material/Settings';
 import LogoutIcon from '@mui/icons-material/Logout';
 import HomeIcon from '@mui/icons-material/Home';
+import DesignServicesIcon from '@mui/icons-material/DesignServices';
 
 export {
     DashboardIcon,
@@ -17,5 +18,6 @@ export {
     ReviewsIcon,
     SettingsIcon,
     LogoutIcon,
-    HomeIcon
+    HomeIcon,
+    DesignServicesIcon
 }; 
