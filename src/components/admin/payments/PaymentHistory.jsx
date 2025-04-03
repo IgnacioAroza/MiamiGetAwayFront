@@ -34,9 +34,7 @@ const PaymentHistory = ({ payments = [], reservationId }) => {
             setError(null);
             
             try {
-                console.log(`Obteniendo pagos para la reserva ID: ${reservationId}`);
                 const response = await api.get(`/reservations/${reservationId}/payments`);
-                console.log('Pagos obtenidos:', response.data);
                 
                 if (response.data && Array.isArray(response.data)) {
                     setLoadedPayments(response.data);
@@ -44,10 +42,8 @@ const PaymentHistory = ({ payments = [], reservationId }) => {
                     setLoadedPayments(response.data.payments);
                 } else {
                     setLoadedPayments([]);
-                    console.warn('La respuesta no contiene un array de pagos:', response.data);
                 }
             } catch (err) {
-                console.error('Error al obtener pagos:', err);
                 setError(err.response?.data?.message || 'Error al cargar los pagos');
                 setLoadedPayments([]);
             } finally {
@@ -87,7 +83,6 @@ const PaymentHistory = ({ payments = [], reservationId }) => {
         try {
             return format(new Date(dateString), 'dd/MM/yyyy', { locale: es });
         } catch (error) {
-            console.error('Error formatting date:', error);
             return 'Fecha inválida';
         }
     };

@@ -247,6 +247,69 @@ const reservationService = {
         }
     },
 
+    // Nueva función para descarga directa del PDF
+    downloadPdf: async (id) => {
+        try {
+            // Obtener el token de autenticación del almacenamiento local
+            const token = localStorage.getItem('adminToken');
+
+            if (!token) {
+                throw new Error('No hay token de autenticación disponible. Por favor inicie sesión nuevamente.');
+            }
+
+            // Primero obtener todos los datos de la reserva
+            const reservationResponse = await api.get(`/reservations/${id}`);
+            const reservationData = reservationResponse.data;
+
+            // Construir la URL con query parameters para incluir datos importantes
+            const queryParams = new URLSearchParams();
+            queryParams.append('format', 'pdf');
+            queryParams.append('include_details', 'true');
+
+            // Incluir información adicional que podría ser útil
+            if (reservationData.client_name || reservationData.clientName) {
+                queryParams.append('client_name', reservationData.client_name || reservationData.clientName);
+            }
+
+            if (reservationData.check_in_date || reservationData.checkInDate) {
+                const checkInDate = reservationData.check_in_date || reservationData.checkInDate;
+                queryParams.append('check_in_date', new Date(checkInDate).toISOString());
+            }
+
+            const url = `/reservations/${id}/pdf/download?${queryParams.toString()}`;
+
+            // Realizar la solicitud para obtener el PDF
+            const response = await api.get(url, {
+                responseType: 'blob',
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Accept': 'application/pdf'
+                }
+            });
+
+            // Crear un blob URL para el archivo PDF recibido
+            const blob = new Blob([response.data], { type: 'application/pdf' });
+            const blobUrl = window.URL.createObjectURL(blob);
+
+            // Crear un enlace temporal y hacer clic en él para descargar
+            const link = document.createElement('a');
+            link.href = blobUrl;
+            link.download = `reservation-${id}.pdf`;
+            document.body.appendChild(link);
+            link.click();
+
+            // Limpiar después de la descarga
+            setTimeout(() => {
+                document.body.removeChild(link);
+                window.URL.revokeObjectURL(blobUrl);
+            }, 100);
+
+            return blobUrl;
+        } catch (error) {
+            throw error.response?.data?.message || error.message || 'Error downloading PDF';
+        }
+    },
+
     sendConfirmation: async (id) => {
         try {
             const response = await api.post(`/reservations/${id}/send-confirmation`);
@@ -256,18 +319,32 @@ const reservationService = {
         }
     },
 
-    sendPdfByEmail: async (id, email, pdfBlob) => {
+    sendPdfByEmail: async (id, email) => {
         try {
-            const formData = new FormData();
-            formData.append('email', email);
-            formData.append('pdf', pdfBlob, `reservation_${id}.pdf`);
+            // Obtener el token de autenticación
+            const token = localStorage.getItem('adminToken');
 
-            await api.post(`/reservations/${id}/send-pdf`, formData, {
-                headers: {
-                    'Content-Type': 'multipart/form-data'
-                }
+            if (!token) {
+                throw new Error('No hay token de autenticación disponible. Por favor inicie sesión nuevamente.');
+            }
+
+            // Usar directamente el endpoint que genera y envía el PDF
+            const response = await api.post(`/reservations/${id}/pdf`, {
+                email: email
             });
+
+            // Retornar un objeto con información sobre el resultado
+            return {
+                success: true,
+                message: 'PDF enviado exitosamente por correo electrónico',
+                email: email,
+                id: id
+            };
         } catch (error) {
+            console.error("Error al enviar PDF por email:", error);
+            if (error.response) {
+                console.error("Detalles del error:", error.response.data);
+            }
             throw error.response?.data?.message || 'Error sending PDF by email';
         }
     },
@@ -486,6 +563,99 @@ const reservationService = {
 
             throw error.response?.data?.message || error.message || 'Error updating fees';
         }
+    },
+
+    // Función para diagnosticar problemas con la generación de PDF
+    diagnosePdfGeneration: async (id) => {
+        // 1. Verificar que tenemos un ID válido
+        if (!id) {
+            throw new Error('Se requiere el ID de la reserva');
+        }
+
+        // 2. Obtener datos completos de la reserva para verificar
+        const response = await api.get(`/reservations/${id}`);
+        const reservationData = response.data;
+
+        // 3. Verificar campos críticos para el PDF - considerando ambos formatos: camelCase y snake_case
+        const fieldsToCheck = [
+            { camelCase: 'id', snakeCase: 'id' },
+            { camelCase: 'clientName', snakeCase: 'client_name' },
+            { camelCase: 'clientEmail', snakeCase: 'client_email' },
+            { camelCase: 'clientPhone', snakeCase: 'client_phone' },
+            { camelCase: 'checkInDate', snakeCase: 'check_in_date' },
+            { camelCase: 'checkOutDate', snakeCase: 'check_out_date' },
+            { camelCase: 'nights', snakeCase: 'nights' },
+            { camelCase: 'pricePerNight', snakeCase: 'price_per_night' },
+            { camelCase: 'totalAmount', snakeCase: 'total_amount' },
+            { camelCase: 'amountPaid', snakeCase: 'amount_paid' },
+            { camelCase: 'amountDue', snakeCase: 'amount_due' }
+        ];
+
+        const missingFields = [];
+
+        fieldsToCheck.forEach(field => {
+            // Verificar si el campo existe en cualquiera de los dos formatos
+            const camelCaseValue = reservationData[field.camelCase];
+            const snakeCaseValue = reservationData[field.snakeCase];
+
+            // Un campo está "presente" si existe en cualquier formato y no es nulo/vacío
+            const isPresent =
+                (camelCaseValue !== undefined && camelCaseValue !== null && camelCaseValue !== '') ||
+                (snakeCaseValue !== undefined && snakeCaseValue !== null && snakeCaseValue !== '');
+
+            if (!isPresent) {
+                missingFields.push(field.camelCase);
+            }
+        });
+
+        // 4. Crear un objeto de datos normalizado para usar en la generación del PDF
+        const normalizedData = {
+            id: reservationData.id,
+            clientName: reservationData.clientName || reservationData.client_name,
+            clientEmail: reservationData.clientEmail || reservationData.client_email,
+            clientPhone: reservationData.clientPhone || reservationData.client_phone,
+            clientAddress: reservationData.clientAddress || reservationData.client_address,
+            clientCity: reservationData.clientCity || reservationData.client_city,
+            clientCountry: reservationData.clientCountry || reservationData.client_country,
+            clientNotes: reservationData.clientNotes || reservationData.client_notes,
+            checkInDate: reservationData.checkInDate || reservationData.check_in_date,
+            checkOutDate: reservationData.checkOutDate || reservationData.check_out_date,
+            nights: reservationData.nights,
+            pricePerNight: reservationData.pricePerNight || reservationData.price_per_night,
+            cleaningFee: reservationData.cleaningFee || reservationData.cleaning_fee,
+            parkingFee: reservationData.parkingFee || reservationData.parking_fee,
+            otherExpenses: reservationData.otherExpenses || reservationData.other_expenses,
+            taxes: reservationData.taxes,
+            totalAmount: reservationData.totalAmount || reservationData.total_amount,
+            amountPaid: reservationData.amountPaid || reservationData.amount_paid,
+            amountDue: reservationData.amountDue || reservationData.amount_due,
+            status: reservationData.status,
+            paymentStatus: reservationData.paymentStatus || reservationData.payment_status
+        };
+
+        // 5. Verificar datos del apartamento
+        const apartmentId = reservationData.apartmentId || reservationData.apartment_id;
+        let apartmentData = null;
+
+        if (apartmentId) {
+            try {
+                const aptResponse = await api.get(`/apartments/${apartmentId}`);
+                apartmentData = aptResponse.data;
+            } catch (aptError) {
+                // Si hay error, dejamos apartmentData como null
+            }
+        }
+
+        // 6. Devolver resultados del diagnóstico
+        return {
+            success: missingFields.length === 0,
+            reservationData: normalizedData,
+            apartmentData,
+            missingFields,
+            message: missingFields.length === 0
+                ? 'Todos los datos necesarios están presentes'
+                : `Faltan campos necesarios: ${missingFields.join(', ')}`
+        };
     },
 }
 

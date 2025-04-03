@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import {
     Box,
     Paper,
@@ -12,7 +12,14 @@ import {
     TableCell,
     TableContainer,
     TableHead,
-    TableRow
+    TableRow,
+    Dialog,
+    DialogTitle,
+    DialogContent,
+    DialogActions,
+    TextField,
+    Snackbar,
+    Alert
 } from '@mui/material';
 import {
     Person as PersonIcon,
@@ -23,8 +30,18 @@ import {
     Payment as PaymentIcon,
     Receipt as ReceiptIcon
 } from '@mui/icons-material';
+import { useReservation } from '../../../hooks/useReservation';
 
 const ReservationDetails = ({ reservation }) => {
+    const { handleGeneratePdf, handleSendConfirmation } = useReservation();
+    const [openEmailDialog, setOpenEmailDialog] = useState(false);
+    const [email, setEmail] = useState('');
+    const [snackbar, setSnackbar] = useState({
+        open: false,
+        message: '',
+        severity: 'success'
+    });
+
     // Función para formatear fechas
     const formatDate = (date) => {
         return new Date(date).toLocaleDateString('es-ES', {
@@ -56,6 +73,68 @@ const ReservationDetails = ({ reservation }) => {
         return statusColors[status] || 'default';
     };
 
+    // Funciones para manejar la generación y envío de PDF
+    const handleGeneratePdfClick = async () => {
+        try {
+            await handleGeneratePdf(reservation.id);
+            setSnackbar({
+                open: true,
+                message: 'PDF generado con éxito',
+                severity: 'success'
+            });
+        } catch (error) {
+            setSnackbar({
+                open: true,
+                message: 'Error al generar el PDF: ' + error.message,
+                severity: 'error'
+            });
+        }
+    };
+
+    const handleSendEmailClick = () => {
+        setEmail(reservation?.clientEmail || '');
+        setOpenEmailDialog(true);
+    };
+
+    const handleSendEmail = async () => {
+        try {
+            await handleGeneratePdf(reservation.id, email);
+            setOpenEmailDialog(false);
+            setSnackbar({
+                open: true,
+                message: 'Email enviado con éxito',
+                severity: 'success'
+            });
+        } catch (error) {
+            setSnackbar({
+                open: true,
+                message: 'Error al enviar el email: ' + error.message,
+                severity: 'error'
+            });
+        }
+    };
+
+    const handleSendConfirmationEmail = async () => {
+        try {
+            await handleSendConfirmation(reservation.id);
+            setSnackbar({
+                open: true,
+                message: 'Confirmación enviada con éxito',
+                severity: 'success'
+            });
+        } catch (error) {
+            setSnackbar({
+                open: true,
+                message: 'Error al enviar la confirmación: ' + error.message,
+                severity: 'error'
+            });
+        }
+    };
+
+    const handleCloseSnackbar = () => {
+        setSnackbar({ ...snackbar, open: false });
+    };
+
     return (
         <Box>
             {/* Encabezado */}
@@ -80,12 +159,14 @@ const ReservationDetails = ({ reservation }) => {
                             variant="contained"
                             startIcon={<ReceiptIcon />}
                             sx={{ mr: 1 }}
+                            onClick={handleGeneratePdfClick}
                         >
                             Generar PDF
                         </Button>
                         <Button
                             variant="outlined"
                             startIcon={<EmailIcon />}
+                            onClick={handleSendEmailClick}
                         >
                             Enviar Email
                         </Button>
@@ -213,6 +294,43 @@ const ReservationDetails = ({ reservation }) => {
                     </Paper>
                 </Grid>
             </Grid>
+
+            {/* Diálogo para enviar email */}
+            <Dialog open={openEmailDialog} onClose={() => setOpenEmailDialog(false)}>
+                <DialogTitle>Enviar Reserva por Email</DialogTitle>
+                <DialogContent>
+                    <TextField
+                        autoFocus
+                        margin="dense"
+                        id="email"
+                        label="Correo Electrónico"
+                        type="email"
+                        fullWidth
+                        variant="outlined"
+                        value={email}
+                        onChange={(e) => setEmail(e.target.value)}
+                    />
+                </DialogContent>
+                <DialogActions>
+                    <Button onClick={() => setOpenEmailDialog(false)}>Cancelar</Button>
+                    <Button onClick={handleSendEmail} variant="contained">Enviar PDF</Button>
+                    <Button onClick={handleSendConfirmationEmail} color="secondary" variant="contained">
+                        Enviar Confirmación
+                    </Button>
+                </DialogActions>
+            </Dialog>
+
+            {/* Snackbar para notificaciones */}
+            <Snackbar 
+                open={snackbar.open} 
+                autoHideDuration={6000} 
+                onClose={handleCloseSnackbar}
+                anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
+            >
+                <Alert onClose={handleCloseSnackbar} severity={snackbar.severity}>
+                    {snackbar.message}
+                </Alert>
+            </Snackbar>
         </Box>
     );
 };

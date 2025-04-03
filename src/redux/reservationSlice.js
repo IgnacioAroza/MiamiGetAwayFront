@@ -117,22 +117,26 @@ export const generateReservationPdf = createAsyncThunk(
     'reservations/generatePdf',
     async ({ id, email }, { rejectWithValue }) => {
         try {
-            // Generar el PDF
-            const pdfBlob = await reservationService.generatePdf(id);
-
-            // Crear URL del blob para descarga
-            const pdfUrl = URL.createObjectURL(pdfBlob);
-
-            // Si se proporciona email, enviar el PDF
+            // Si se proporciona email, enviar el PDF por email
             if (email) {
-                await reservationService.sendPdfByEmail(id, email, pdfBlob);
+                await reservationService.sendPdfByEmail(id, email);
+                return {
+                    id,
+                    email,
+                    sentByEmail: true
+                };
             }
+            // Si no hay email, descargar el PDF directamente
+            else {
+                // Iniciar la descarga directa del PDF
+                const downloadUrl = await reservationService.downloadPdf(id);
 
-            return {
-                id,
-                pdfUrl,
-                email
-            };
+                return {
+                    id,
+                    downloadUrl,
+                    sentByEmail: false
+                };
+            }
         } catch (error) {
             return rejectWithValue(error.response?.data?.message || 'Error generating PDF');
         }
@@ -287,17 +291,35 @@ const reservationSlice = createSlice({
                 state.reservationPayments = payments;
             })
             // Generate PDF
+            .addCase(generateReservationPdf.pending, (state) => {
+                state.loading = true;
+                state.error = null;
+            })
             .addCase(generateReservationPdf.fulfilled, (state, action) => {
+                state.loading = false;
                 const { id, pdfUrl, email } = action.payload;
                 if (state.selectedReservation?.id === id) {
                     state.selectedReservation.pdfUrl = pdfUrl;
                 }
             })
+            .addCase(generateReservationPdf.rejected, (state, action) => {
+                state.loading = false;
+                state.error = action.payload || 'Error al generar el PDF';
+            })
             // Send Confirmation
+            .addCase(sendReservationConfirmation.pending, (state) => {
+                state.loading = true;
+                state.error = null;
+            })
             .addCase(sendReservationConfirmation.fulfilled, (state, action) => {
+                state.loading = false;
                 if (state.selectedReservation?.id === action.payload.id) {
                     state.selectedReservation.confirmation = action.payload.confirmation;
                 }
+            })
+            .addCase(sendReservationConfirmation.rejected, (state, action) => {
+                state.loading = false;
+                state.error = action.payload || 'Error al enviar la confirmación';
             })
             // update payment status
             .addCase(updateReservationPaymentStatus.pending, (state) => {
