@@ -7,32 +7,24 @@ import {
     Chip,
     Divider,
     Button,
-    Table,
-    TableBody,
-    TableCell,
-    TableContainer,
-    TableHead,
-    TableRow,
     Dialog,
     DialogTitle,
     DialogContent,
     DialogActions,
     TextField,
     Snackbar,
-    Alert
+    Alert,
+    CircularProgress
 } from '@mui/material';
 import {
     Person as PersonIcon,
     Email as EmailIcon,
-    Phone as PhoneIcon,
-    Home as HomeIcon,
-    Event as EventIcon,
-    Payment as PaymentIcon,
     Receipt as ReceiptIcon
 } from '@mui/icons-material';
 import { useReservation } from '../../../hooks/useReservation';
+import ReservationSummary from '../payments/ReservationSummary';
 
-const ReservationDetails = ({ reservation }) => {
+const ReservationDetails = ({ reservation, apartmentLoading, apartmentError, apartmentData }) => {
     const { handleGeneratePdf, handleSendConfirmation } = useReservation();
     const [openEmailDialog, setOpenEmailDialog] = useState(false);
     const [email, setEmail] = useState('');
@@ -42,38 +34,29 @@ const ReservationDetails = ({ reservation }) => {
         severity: 'success'
     });
 
-    // Función para formatear fechas
     const formatDate = (date) => {
+        if (!date) return 'N/A';
         return new Date(date).toLocaleDateString('es-ES', {
             year: 'numeric',
             month: 'long',
-            day: 'numeric',
-            hour: '2-digit',
-            minute: '2-digit'
+            day: 'numeric'
         });
     };
 
-    // Función para formatear montos
-    const formatCurrency = (amount) => {
-        return new Intl.NumberFormat('es-US', {
-            style: 'currency',
-            currency: 'USD'
-        }).format(amount);
-    };
-
-    // Función para obtener el color del estado
     const getStatusColor = (status) => {
         const statusColors = {
+            PENDING: 'warning',
+            CONFIRMED: 'success',
+            CANCELLED: 'error',
+            COMPLETED: 'info',
             pending: 'warning',
             confirmed: 'success',
-            checked_in: 'info',
-            checked_out: 'default',
-            cancelled: 'error'
+            cancelled: 'error',
+            completed: 'info',
         };
         return statusColors[status] || 'default';
     };
 
-    // Funciones para manejar la generación y envío de PDF
     const handleGeneratePdfClick = async () => {
         try {
             await handleGeneratePdf(reservation.id);
@@ -116,7 +99,10 @@ const ReservationDetails = ({ reservation }) => {
 
     const handleSendConfirmationEmail = async () => {
         try {
-            await handleSendConfirmation(reservation.id);
+            await handleSendConfirmation({
+                id: reservation.id,
+                notificationType: 'confirmation'
+            });
             setSnackbar({
                 open: true,
                 message: 'Confirmación enviada con éxito',
@@ -136,163 +122,107 @@ const ReservationDetails = ({ reservation }) => {
     };
 
     return (
-        <Box>
+        <Paper elevation={3} sx={{ p: 3, mb: 3 }}>
             {/* Encabezado */}
-            <Paper sx={{ p: 3, mb: 3 }}>
-                <Grid container spacing={2} alignItems="center">
-                    <Grid item xs={12} md={8}>
-                        <Typography variant="h5" gutterBottom>
-                            Reserva #{reservation?.id}
-                        </Typography>
-                        <Chip
-                            label={reservation?.status?.toUpperCase()}
-                            color={getStatusColor(reservation?.status)}
-                            sx={{ mr: 1 }}
-                        />
-                        <Chip
-                            label={reservation?.paymentStatus?.toUpperCase()}
-                            color={reservation?.paymentStatus === 'complete' ? 'success' : 'warning'}
-                        />
-                    </Grid>
-                    <Grid item xs={12} md={4} sx={{ textAlign: 'right' }}>
-                        <Button
-                            variant="contained"
-                            startIcon={<ReceiptIcon />}
-                            sx={{ mr: 1 }}
-                            onClick={handleGeneratePdfClick}
-                        >
-                            Generar PDF
-                        </Button>
-                        <Button
-                            variant="outlined"
-                            startIcon={<EmailIcon />}
-                            onClick={handleSendEmailClick}
-                        >
-                            Enviar Email
-                        </Button>
-                    </Grid>
-                </Grid>
-            </Paper>
+            <Box display="flex" justifyContent="space-between" alignItems="center" flexWrap="wrap" mb={3}>
+                <Typography variant="h4">
+                    Reservation #{reservation?.id}
+                </Typography>
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mt: { xs: 2, md: 0 } }}>
+                    <Chip
+                        label={reservation?.status}
+                        color={getStatusColor(reservation?.status)}
+                        size="large"
+                    />
+                    <Button 
+                        variant="contained" 
+                        startIcon={<ReceiptIcon />}
+                        onClick={handleGeneratePdfClick}
+                    >
+                        Generate PDF
+                    </Button>
+                    <Button 
+                        variant="outlined" 
+                        startIcon={<EmailIcon />}
+                        onClick={handleSendEmailClick}
+                    >
+                        Send Email
+                    </Button>
+                </Box>
+            </Box>
 
+            <Divider sx={{ mb: 3 }} />
+
+            {/* Información principal */}
             <Grid container spacing={3}>
-                {/* Información del Cliente */}
+                {/* Detalles del Cliente */}
                 <Grid item xs={12} md={6}>
-                    <Paper sx={{ p: 3 }}>
+                    <Paper variant="outlined" sx={{ p: 2 }}>
                         <Typography variant="h6" gutterBottom>
-                            <PersonIcon sx={{ mr: 1, verticalAlign: 'middle' }} />
-                            Información del Cliente
+                            Client Information
                         </Typography>
-                        <Divider sx={{ my: 2 }} />
-                        <Box sx={{ ml: 4 }}>
-                            <Typography gutterBottom>
-                                <PersonIcon sx={{ mr: 1, verticalAlign: 'middle' }} />
-                                {reservation?.clientName}
-                            </Typography>
-                            <Typography gutterBottom>
-                                <EmailIcon sx={{ mr: 1, verticalAlign: 'middle' }} />
-                                {reservation?.clientEmail}
-                            </Typography>
-                            <Typography gutterBottom>
-                                <PhoneIcon sx={{ mr: 1, verticalAlign: 'middle' }} />
-                                {reservation?.clientPhone}
-                            </Typography>
-                        </Box>
+                        <Typography sx={{ mb: 1 }}>Name: {reservation?.clientName}</Typography>
+                        <Typography sx={{ mb: 1 }}>Email: {reservation?.clientEmail}</Typography>
+                        <Typography sx={{ mb: 1 }}>Phone: {reservation?.clientPhone}</Typography>
+                        <Typography sx={{ mb: 1 }}>City: {reservation?.clientCity}</Typography>
+                        <Typography sx={{ mb: 1 }}>Country: {reservation?.clientCountry}</Typography>
                     </Paper>
                 </Grid>
 
-                {/* Información del Apartamento */}
+                {/* Detalles de la Reserva */}
                 <Grid item xs={12} md={6}>
-                    <Paper sx={{ p: 3 }}>
+                    <Paper variant="outlined" sx={{ p: 2 }}>
                         <Typography variant="h6" gutterBottom>
-                            <HomeIcon sx={{ mr: 1, verticalAlign: 'middle' }} />
-                            Detalles del Apartamento
+                            Reservation Details
                         </Typography>
-                        <Divider sx={{ my: 2 }} />
-                        <Box sx={{ ml: 4 }}>
-                            <Typography gutterBottom>
-                                Edificio: {reservation?.buildingName}
-                            </Typography>
-                            <Typography gutterBottom>
-                                Unidad: {reservation?.unitNumber}
-                            </Typography>
-                            <Typography gutterBottom>
-                                Capacidad: {reservation?.capacity} personas
-                            </Typography>
-                        </Box>
+                        <Typography>Check-in: {formatDate(reservation?.checkIn)}</Typography>
+                        <Typography>Check-out: {formatDate(reservation?.checkOut)}</Typography>
+                        <Typography>Nights: {reservation?.nights}</Typography>
                     </Paper>
                 </Grid>
 
-                {/* Fechas y Duración */}
-                <Grid item xs={12}>
-                    <Paper sx={{ p: 3 }}>
+                {/* Detalles del Apartamento */}
+                <Grid item xs={12} md={6}>
+                    <Paper variant="outlined" sx={{ p: 2 }}>
                         <Typography variant="h6" gutterBottom>
-                            <EventIcon sx={{ mr: 1, verticalAlign: 'middle' }} />
-                            Fechas de la Reserva
+                            Apartment Details
                         </Typography>
-                        <Divider sx={{ my: 2 }} />
-                        <Grid container spacing={2}>
-                            <Grid item xs={12} md={6}>
-                                <Typography gutterBottom>
-                                    Check-in: {formatDate(reservation?.checkInDate)}
-                                </Typography>
-                            </Grid>
-                            <Grid item xs={12} md={6}>
-                                <Typography gutterBottom>
-                                    Check-out: {formatDate(reservation?.checkOutDate)}
-                                </Typography>
-                            </Grid>
-                            <Grid item xs={12}>
-                                <Typography>
-                                    Duración: {reservation?.nights} noches
-                                </Typography>
-                            </Grid>
-                        </Grid>
+                        <Typography>Price per night: ${reservation?.pricePerNight}</Typography>
+                        
+                        {apartmentLoading ? (
+                            <Box sx={{ display: 'flex', justifyContent: 'center', mt: 2 }}>
+                                <CircularProgress size={24} />
+                            </Box>
+                        ) : apartmentError ? (
+                            <Alert severity="error" sx={{ mt: 2, mb: 2 }}>
+                                Error al cargar datos del apartamento: {apartmentError}
+                            </Alert>
+                        ) : (
+                            <Box sx={{ mt: 2 }}>
+                                <Typography>Name: {apartmentData?.name}</Typography>     
+                                <Typography>Address: {apartmentData?.address}</Typography>
+                                <Typography>Description: {apartmentData?.description}</Typography>
+                            </Box>
+                        )}
                     </Paper>
                 </Grid>
 
-                {/* Historial de Pagos */}
-                <Grid item xs={12}>
-                    <Paper sx={{ p: 3 }}>
-                        <Typography variant="h6" gutterBottom>
-                            <PaymentIcon sx={{ mr: 1, verticalAlign: 'middle' }} />
-                            Historial de Pagos
-                        </Typography>
-                        <Divider sx={{ my: 2 }} />
-                        <TableContainer>
-                            <Table>
-                                <TableHead>
-                                    <TableRow>
-                                        <TableCell>Fecha</TableCell>
-                                        <TableCell>Método</TableCell>
-                                        <TableCell>Referencia</TableCell>
-                                        <TableCell align="right">Monto</TableCell>
-                                    </TableRow>
-                                </TableHead>
-                                <TableBody>
-                                    {reservation?.payments?.map((payment) => (
-                                        <TableRow key={payment.id}>
-                                            <TableCell>
-                                                {formatDate(payment.paymentDate)}
-                                            </TableCell>
-                                            <TableCell>{payment.paymentMethod}</TableCell>
-                                            <TableCell>{payment.paymentReference}</TableCell>
-                                            <TableCell align="right">
-                                                {formatCurrency(payment.amount)}
-                                            </TableCell>
-                                        </TableRow>
-                                    ))}
-                                    {(!reservation?.payments || reservation.payments.length === 0) && (
-                                        <TableRow>
-                                            <TableCell colSpan={4} align="center">
-                                                No hay pagos registrados
-                                            </TableCell>
-                                        </TableRow>
-                                    )}
-                                </TableBody>
-                            </Table>
-                        </TableContainer>
-                    </Paper>
+                {/* Resumen de Costos */}
+                <Grid item xs={12} md={6}>
+                    <ReservationSummary reservation={reservation} />
                 </Grid>
+
+                {/* Notas adicionales */}
+                {reservation?.notes && (
+                    <Grid item xs={12}>
+                        <Paper variant="outlined" sx={{ p: 2 }}>
+                            <Typography variant="h6" gutterBottom>
+                                Notas
+                            </Typography>
+                            <Typography>{reservation?.notes}</Typography>
+                        </Paper>
+                    </Grid>
+                )}
             </Grid>
 
             {/* Diálogo para enviar email */}
@@ -331,7 +261,7 @@ const ReservationDetails = ({ reservation }) => {
                     {snackbar.message}
                 </Alert>
             </Snackbar>
-        </Box>
+        </Paper>
     );
 };
 

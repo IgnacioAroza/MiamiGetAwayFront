@@ -26,9 +26,9 @@ import {
 import { fetchReservationById, generateReservationPdf, sendReservationConfirmation } from '../redux/reservationSlice';
 import { fetchAdminApartmentById } from '../redux/adminApartmentSlice';
 import PaymentHistory from '../components/admin/payments/PaymentHistory';
-import ReservationSummary from '../components/admin/payments/ReservationSummary';
+import ReservationDetails from '../components/admin/reservations/ReservationDetails';
 
-const ReservationDetails = () => {
+const ReservationDetailsPage = () => {
     const { id } = useParams();
     const location = useLocation();
     const dispatch = useDispatch();
@@ -147,6 +147,9 @@ const ReservationDetails = () => {
         
         // Información del apartamento
         apartmentId: reservation.apartmentId || reservation.apartment_id || 0,
+        buildingName: reservation.buildingName || '',
+        unitNumber: reservation.unitNumber || '',
+        capacity: reservation.capacity || 0,
         
         // Costos y pagos
         pricePerNight: reservation.pricePerNight || reservation.price_per_night || 0,
@@ -256,7 +259,11 @@ const ReservationDetails = () => {
 
     const handleSendConfirmationEmail = async () => {
         try {
-            await dispatch(sendReservationConfirmation(id)).unwrap();
+            await dispatch(sendReservationConfirmation({ 
+                id: normalizedReservation.id, 
+                notificationType: 'confirmation' 
+            })).unwrap();
+            
             setOpenEmailDialog(false);
             setSnackbar({
                 open: true,
@@ -278,117 +285,14 @@ const ReservationDetails = () => {
 
     return (
         <Container maxWidth="xl" sx={{ py: 4 }}>
-            <Paper elevation={3} sx={{ p: 3, mb: 3 }}>
-                {/* Encabezado */}
-                <Box display="flex" justifyContent="space-between" alignItems="center" flexWrap="wrap" mb={3}>
-                    <Typography variant="h4">
-                        Reserva #{normalizedReservation.id}
-                    </Typography>
-                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mt: { xs: 2, md: 0 } }}>
-                        <Chip
-                            label={normalizedReservation.status}
-                            color={getStatusColor(normalizedReservation.status)}
-                            size="large"
-                        />
-                        <Button 
-                            variant="contained" 
-                            startIcon={<ReceiptIcon />}
-                            onClick={handleGeneratePdfClick}
-                        >
-                            Generar PDF
-                        </Button>
-                        <Button 
-                            variant="outlined" 
-                            startIcon={<EmailIcon />}
-                            onClick={handleSendEmailClick}
-                        >
-                            Enviar Email
-                        </Button>
-                    </Box>
-                </Box>
-
-                <Divider sx={{ mb: 3 }} />
-
-                {/* Información principal */}
-                <Grid container spacing={3}>
-                    {/* Detalles del Cliente */}
-                    <Grid item xs={12} md={6}>
-                        <Paper variant="outlined" sx={{ p: 2 }}>
-                            <Typography variant="h6" gutterBottom>
-                                Client Information
-                            </Typography>
-                            <Typography sx={{ mb: 1 }}>Name: {normalizedReservation.clientName}</Typography>
-                            <Typography sx={{ mb: 1 }}>Email: {normalizedReservation.clientEmail}</Typography>
-                            <Typography sx={{ mb: 1 }}>Phone: {normalizedReservation.clientPhone}</Typography>
-                            <Typography sx={{ mb: 1 }}>City: {normalizedReservation.clientCity}</Typography>
-                            <Typography sx={{ mb: 1 }}>Country: {normalizedReservation.clientCountry}</Typography>
-                        </Paper>
-                    </Grid>
-
-                    {/* Detalles de la Reserva */}
-                    <Grid item xs={12} md={6}>
-                        <Paper variant="outlined" sx={{ p: 2 }}>
-                            <Typography variant="h6" gutterBottom>
-                                Reservation Details
-                            </Typography>
-                            <Typography>Check-in: {formatDate(normalizedReservation.checkIn)}</Typography>
-                            <Typography>Check-out: {formatDate(normalizedReservation.checkOut)}</Typography>
-                            <Typography>Nights: {normalizedReservation.nights}</Typography>
-                        </Paper>
-                    </Grid>
-
-                    {/* Detalles del Apartamento */}
-                    <Grid item xs={12} md={6}>
-                        <Paper variant="outlined" sx={{ p: 2 }}>
-                            <Typography variant="h6" gutterBottom>
-                                Apartment Details
-                            </Typography>
-                            <Typography>Price per night: ${normalizedReservation.pricePerNight}</Typography>
-                            
-                            {apartmentLoading ? (
-                                <Box sx={{ display: 'flex', justifyContent: 'center', mt: 2 }}>
-                                    <CircularProgress size={24} />
-                                </Box>
-                            ) : apartmentError ? (
-                                <Alert severity="error" sx={{ mt: 2, mb: 2 }}>
-                                    Error al cargar datos del apartamento: {apartmentError}
-                                </Alert>
-                            ) : (
-                                <Box sx={{ mt: 2 }}>
-                                    <Typography>Name: {apartmentData.name}</Typography>     
-                                    <Typography>Address: {apartmentData.address}</Typography>
-                                    <Typography>Description: {apartmentData.description}</Typography>
-                                    <Typography>Bathrooms: {apartmentData.bathrooms}</Typography>
-                                    <Typography>Bedrooms: {apartmentData.bedrooms}</Typography>
-                                    <Typography>Capacity: {apartmentData.capacity} guests</Typography>
-                                </Box>
-                            )}
-                        </Paper>
-                    </Grid>
-
-                    {/* Resumen de Costos */}
-                    <Grid item xs={12} md={6}>
-                        <ReservationSummary reservation={reservation} />
-                    </Grid>
-
-                    {/* Historial de Pagos */}
-                    <Grid item xs={12}>
-                        <PaymentHistory reservationId={id} />
-                    </Grid>
-
-                    {/* Notas adicionales */}
-                    {normalizedReservation.notes && (
-                        <Grid item xs={12}>
-                            <Paper variant="outlined" sx={{ p: 2 }}>
-                                <Typography variant="h6" gutterBottom>
-                                    Notas
-                                </Typography>
-                                <Typography>{normalizedReservation.notes}</Typography>
-                            </Paper>
-                        </Grid>
-                    )}
-                </Grid>
-            </Paper>
+            <ReservationDetails 
+                reservation={normalizedReservation}
+                apartmentLoading={apartmentLoading}
+                apartmentError={apartmentError}
+                apartmentData={apartmentData}
+            />
+            
+            <PaymentHistory reservationId={id} />
 
             {/* Diálogo para enviar email */}
             <Dialog open={openEmailDialog} onClose={() => setOpenEmailDialog(false)}>
@@ -430,4 +334,4 @@ const ReservationDetails = () => {
     );
 };
 
-export default ReservationDetails;
+export default ReservationDetailsPage;

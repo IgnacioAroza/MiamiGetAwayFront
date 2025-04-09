@@ -20,7 +20,7 @@ import AdminDashboard from './components/admin/AdminDashboard';
 import ReservationManagement from './components/admin/reservations/ReservationManagement';
 import PaymentsList from './components/admin/payments/PaymentsList';
 import AdminReviews from './components/admin/reviews/AdminReviews';
-import ReservationDetails from './pages/ReservationDetails';
+import ReservationDetailsPage from './pages/ReservationDetailsPage';
 import ApartmentList from './components/admin/apartments/ApartmentList';
 import UserList from './components/admin/users/UserList';
 import ReservationsPage from './pages/ReservationsPage';
@@ -87,14 +87,14 @@ function AppContent() {
             <Route path="reservations" element={<ReservationsPage />} />
             <Route path="reservations/new" element={<ReservationManagement />} />
             <Route path="reservations/edit/:id" element={<ReservationManagement />} />
-            <Route path="reservations/:id" element={<ReservationDetails />} />
-            <Route path="reservations/view/:id" element={<ReservationDetails />} />
+            <Route path="reservations/:id" element={<ReservationDetailsPage />} />
+            <Route path="reservations/view/:id" element={<ReservationDetailsPage />} />
             
             <Route path="reviews" element={<AdminReviews />} />
             <Route path="apartments" element={<ApartmentList />} />
           </Route>
           <Route path="/reservations" element={<ReservationsPage />} />
-          <Route path="/reservations/:id" element={<ReservationDetails />} />
+          <Route path="/reservations/:id" element={<ReservationDetailsPage />} />
         </Routes>
       </main>
       {!isAdminRoute && <Footer />}

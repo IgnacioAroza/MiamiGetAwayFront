@@ -294,7 +294,7 @@ const reservationService = {
             // Crear un enlace temporal y hacer clic en él para descargar
             const link = document.createElement('a');
             link.href = blobUrl;
-            link.download = `reservation-${id}.pdf`;
+            link.download = `reservation-${id}-${reservationData.clientLastname}-${reservationData.clientName}.pdf`;
             document.body.appendChild(link);
             link.click();
 
@@ -310,9 +310,12 @@ const reservationService = {
         }
     },
 
-    sendConfirmation: async (id) => {
+    sendConfirmation: async (id, notificationType = 'confirmation') => {
         try {
-            const response = await api.post(`/reservations/${id}/send-confirmation`);
+            console.log('Enviando confirmación para reserva:', id);
+            const response = await api.post(`/reservations/${id}/send-notification`, {
+                type: notificationType
+            });
             return response.data;
         } catch (error) {
             throw error.response?.data?.message || 'Error sending confirmation';

@@ -1,6 +1,5 @@
 import { useDispatch, useSelector } from 'react-redux';
 import {
-    fetchReservations,
     createReservation,
     updateReservation,
     registerPayment,
@@ -33,8 +32,8 @@ export const useReservation = () => {
         return dispatch(generateReservationPdf({ id: reservationId, email }));
     };
 
-    const handleSendConfirmation = (reservationId) => {
-        return dispatch(sendReservationConfirmation(reservationId));
+    const handleSendConfirmation = ({ id, notificationType = 'confirmation' }) => {
+        return dispatch(sendReservationConfirmation({ id, notificationType }));
     };
 
     return {

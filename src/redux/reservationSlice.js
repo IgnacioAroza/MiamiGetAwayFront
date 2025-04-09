@@ -145,9 +145,9 @@ export const generateReservationPdf = createAsyncThunk(
 
 export const sendReservationConfirmation = createAsyncThunk(
     'reservations/sendConfirmation',
-    async (id, { rejectWithValue }) => {
+    async ({ id, notificationType = 'confirmation' }, { rejectWithValue }) => {
         try {
-            const data = await reservationService.sendConfirmation(id);
+            const data = await reservationService.sendConfirmation(id, notificationType);
             return { id, confirmation: data };
         } catch (error) {
             return rejectWithValue(error.response?.data?.message || 'Error sending confirmation');
