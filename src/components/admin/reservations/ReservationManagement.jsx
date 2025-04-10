@@ -40,8 +40,6 @@ const ReservationManagement = () => {
     // Función para actualización directa de tarifas
     const updateDirectly = async (formData) => {
         try {
-            console.log("Datos para actualización directa:", formData);
-            
             // Determinar qué campos se han modificado comparando con los datos originales
             const originalData = selectedReservation || {};
             const changedFields = {};
@@ -53,7 +51,6 @@ const ReservationManagement = () => {
                 const oldNum = typeof oldVal === 'string' ? parseFloat(oldVal) : (typeof oldVal === 'number' ? oldVal : 0);
                 
                 // Considerar una pequeña tolerancia para evitar problemas de redondeo
-                console.log(`Comparando: ${newNum} vs ${oldNum} = ${Math.abs(newNum - oldNum) > 0.001}`);
                 return Math.abs(newNum - oldNum) > 0.001;
             };
             
@@ -72,9 +69,7 @@ const ReservationManagement = () => {
                 hasNumericChanged(formData.otherExpenses, originalData.other_expenses)) {
                 changedFields.otherExpenses = formData.otherExpenses;
             }
-            
-            console.log("Campos modificados:", changedFields);
-            
+
             // Si no hay cambios, no hacer nada
             if (Object.keys(changedFields).length === 0) {
                 setNotification({
@@ -87,7 +82,6 @@ const ReservationManagement = () => {
             
             // Usar el método general para actualizar todas las tarifas de una vez
             const response = await reservationService.updateFees(id, changedFields);
-            console.log("Respuesta de actualización:", response);
             
             // Mostrar notificación de éxito con los detalles de lo actualizado
             let successMessage = 'Tarifas actualizadas:';
@@ -129,9 +123,7 @@ const ReservationManagement = () => {
     };
     
     const handleSubmit = async (formData) => {
-        try {
-            console.log("Datos enviados desde ReservationManagement:", formData);
-            
+        try {            
             // Si estamos creando una nueva reserva
             if (!id) {
                 await dispatch(createReservation(formData)).unwrap();
@@ -174,11 +166,8 @@ const ReservationManagement = () => {
                 formData.checkOutDate?.toString() === new Date(originalData.check_out_date)?.toString()
             );
             
-            console.log("¿Solo cambiaron tarifas?", onlyFeesChanged);
-            
             // Si solo se modificaron tarifas, usar el método específico
             if (onlyFeesChanged) {
-                console.log("Usando método de actualización específico para tarifas");
                 const success = await updateDirectly(formData);
                 if (success) {
                     return; // No continuar con la actualización completa
@@ -186,7 +175,6 @@ const ReservationManagement = () => {
             }
             
             // Si llegamos aquí, hacer una actualización completa
-            console.log("Realizando actualización completa de la reserva");
             await dispatch(updateReservation({ 
                 id, 
                 reservationData: formData 

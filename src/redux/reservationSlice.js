@@ -53,12 +53,8 @@ export const updateReservation = createAsyncThunk(
     'reservations/update',
     async ({ id, reservationData }, { rejectWithValue }) => {
         try {
-            console.log('updateReservation thunk - ID:', id);
-            console.log('updateReservation thunk - Data:', reservationData);
-
             // Asegurarse de que parkingFee sea un número
             if (reservationData.parkingFee !== undefined) {
-                console.log('parkingFee antes de enviar:', reservationData.parkingFee, typeof reservationData.parkingFee);
                 // Asegurar que sea un número
                 if (typeof reservationData.parkingFee === 'string') {
                     reservationData.parkingFee = parseFloat(reservationData.parkingFee);
@@ -66,10 +62,8 @@ export const updateReservation = createAsyncThunk(
             }
 
             const data = await reservationService.update(id, reservationData);
-            console.log('updateReservation thunk - Respuesta:', data);
             return data;
         } catch (error) {
-            console.error('updateReservation thunk - Error:', error);
             return rejectWithValue(error.response?.data?.message || 'Error updating reservation');
         }
     }
@@ -159,12 +153,9 @@ export const updateReservationPaymentStatus = createAsyncThunk(
     'reservations/updatePaymentStatus',
     async ({ id, paymentData }, { rejectWithValue }) => {
         try {
-            console.log("Actualizando estado de pago para reserva:", id);
-            console.log("Datos de pago:", paymentData);
             const data = await reservationService.updatePaymentStatus(id, paymentData);
             return { id, data };
         } catch (error) {
-            console.error("Error en updateReservationPaymentStatus:", error);
             return rejectWithValue(error);
         }
     }

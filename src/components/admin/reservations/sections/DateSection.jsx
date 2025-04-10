@@ -13,7 +13,7 @@ const DateSection = ({ checkInDate, checkOutDate, onDateChange }) => {
                     label="Check-in"
                     value={checkInDate}
                     onChange={onDateChange('checkInDate')}
-                    renderInput={(params) => <TextField {...params} fullWidth />}
+                    TextField={(params) => <TextField {...params} fullWidth />}
                     minDate={new Date()} // No permitir fechas en el pasado
                 />
             </Grid>
@@ -23,7 +23,7 @@ const DateSection = ({ checkInDate, checkOutDate, onDateChange }) => {
                     label="Check-out"
                     value={checkOutDate}
                     onChange={onDateChange('checkOutDate')}
-                    renderInput={(params) => <TextField {...params} fullWidth />}
+                    TextField={(params) => <TextField {...params} fullWidth />}
                     minDate={minCheckoutDate || new Date()} // Mínimo 1 día después del checkin o la fecha actual
                     disabled={!checkInDate} // Deshabilitar hasta seleccionar checkin
                 />

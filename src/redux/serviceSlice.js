@@ -37,10 +37,8 @@ export const fetchServices = createAsyncThunk(
     async (serviceType, { rejectWithValue }) => {
         try {
             const response = await api.get(`/${serviceType}`);
-            console.log(`API response for ${serviceType}:`, response.data);
             return { serviceType, data: response.data };
         } catch (error) {
-            console.error('API error:', error);
             return rejectWithValue({ serviceType, error: handleApiError(error) });
         }
     }
@@ -55,11 +53,9 @@ export const createService = createAsyncThunk(
                 for (let [key, value] of data.entries()) {
                     formValues[key] = value;
                 }
-                console.log('Creating apartment with data:', formValues);
             }
 
             const response = await api.post(`/${serviceType}`, data);
-            console.log(`Created ${serviceType}:`, response.data);
             return { serviceType, data: response.data };
         } catch (error) {
             return rejectWithValue({ serviceType, error: handleApiError(error) });
@@ -76,11 +72,9 @@ export const updateService = createAsyncThunk(
                 for (let [key, value] of data.entries()) {
                     formValues[key] = value;
                 }
-                console.log('Updating apartment with data:', formValues);
             }
 
             const response = await api.put(`/${serviceType}/${id}`, data);
-            console.log(`Updated ${serviceType}:`, response.data);
             return { serviceType, data: response.data };
         } catch (error) {
             return rejectWithValue({ serviceType, error: handleApiError(error) });

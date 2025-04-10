@@ -111,7 +111,7 @@ const ReservationFilters = ({ onApplyFilters, onClearFilters }) => {
                             label="Start date"
                             value={filters.startDate}
                             onChange={(newValue) => handleFilterChange('startDate', newValue)}
-                            renderInput={(params) => (
+                            TextField={(params) => (
                                 <TextField 
                                     {...params} 
                                     fullWidth 
@@ -134,7 +134,7 @@ const ReservationFilters = ({ onApplyFilters, onClearFilters }) => {
                             label="End date"
                             value={filters.endDate}
                             onChange={(newValue) => handleFilterChange('endDate', newValue)}
-                            renderInput={(params) => (
+                            TextField={(params) => (
                                 <TextField 
                                     {...params} 
                                     fullWidth 

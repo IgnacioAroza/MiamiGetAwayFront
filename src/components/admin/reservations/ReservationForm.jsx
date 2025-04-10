@@ -209,8 +209,6 @@ const ReservationForm = ({ initialData, onSubmit }) => {
     const handleChange = (event) => {
         const { name, value } = event.target;
         
-        console.log(`Campo modificado: ${name}, valor: ${value}`);
-        
         if (name === 'apartmentId') {
             const apartment = apartments.find(apt => apt.id === value);
             if (apartment) {
@@ -353,12 +351,9 @@ const ReservationForm = ({ initialData, onSubmit }) => {
                 clientNotes: formData.clientNotes
             };
             
-            console.log('Enviando datos de reserva:', dataToSubmit);
-            
             // Llamar a la función de envío proporcionada
             onSubmit(dataToSubmit);
         } catch (error) {
-            console.error('Error al enviar el formulario:', error);
             alert('Error al enviar el formulario');
         }
     };

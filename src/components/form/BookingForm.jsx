@@ -145,13 +145,13 @@ function BookingForm({ service }) {
                 label={t('bookingForm.startDate')}
                 value={startDate}
                 onChange={(newValue) => setStartDate(newValue)}
-                renderInput={(params) => <TextField {...params} />}
+                TextField={(params) => <TextField {...params} />}
               />
               <DatePicker
                 label={t('bookingForm.endDate')}
                 value={endDate}
                 onChange={(newValue) => setEndDate(newValue)}
-                renderInput={(params) => <TextField {...params} />}
+                TextField={(params) => <TextField {...params} />}
               />
             </Box>
           </LocalizationProvider>

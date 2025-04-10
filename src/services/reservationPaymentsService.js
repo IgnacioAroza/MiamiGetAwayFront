@@ -21,8 +21,6 @@ const reservationPaymentService = {
 
     createPayment: async (paymentData) => {
         try {
-            console.log("Datos para crear pago:", paymentData);
-
             // Extraer el ID de la reserva y el resto de los datos
             const { reservationId, ...restPaymentData } = paymentData;
 
@@ -42,19 +40,10 @@ const reservationPaymentService = {
                 paymentDate: undefined
             };
 
-            console.log("Datos formateados para enviar al backend:", dataToSend);
-
             // Llamar al endpoint de pagos de reservaciones
             const response = await api.post(`/reservations/${reservationId}/payments`, dataToSend);
-            console.log("Respuesta del servidor (pago):", response.data);
             return response.data;
         } catch (error) {
-            console.error("Error en createPayment:", error);
-            if (error.response) {
-                console.error("Detalles del error:", error.response.data);
-                console.error("Status:", error.response.status);
-                console.error("Headers:", error.response.headers);
-            }
             throw error.response?.data?.message || 'Error creating payment';
         }
     },

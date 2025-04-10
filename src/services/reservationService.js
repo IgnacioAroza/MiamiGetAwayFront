@@ -26,9 +26,6 @@ const reservationService = {
 
     create: async (reservationData) => {
         try {
-            // Generar log para ver exactamente lo que estamos enviando
-            console.log("Datos originales de creación:", JSON.stringify(reservationData, null, 2));
-
             // Formateamos ciertos datos pero enviamos con los nombres exactos que espera el backend
             const formattedData = {
                 // Datos básicos - respetando camelCase del backend
@@ -81,8 +78,6 @@ const reservationService = {
                     .filter(([_, value]) => value !== undefined)
             );
 
-            console.log("Datos formateados para enviar al servidor:", JSON.stringify(dataToSend, null, 2));
-
             const response = await api.post('/reservations', dataToSend);
             return response.data;
         } catch (error) {
@@ -103,9 +98,6 @@ const reservationService = {
             if (!reservationData) {
                 throw new Error('No se proporcionaron datos para actualizar la reserva');
             }
-
-            // Generar log para ver exactamente lo que estamos enviando
-            console.log("Datos originales de actualización:", JSON.stringify(reservationData, null, 2));
 
             // Mantener camelCase como espera el backend
             const formattedData = {
@@ -150,12 +142,8 @@ const reservationService = {
                     .filter(([_, value]) => value !== undefined)
             );
 
-            console.log("Datos formateados para enviar al servidor:", JSON.stringify(dataToSend, null, 2));
-
             // Hacer la petición al servidor
             const response = await api.put(`/reservations/${id}`, dataToSend);
-            console.log("Respuesta del servidor:", response.status, response.statusText);
-            console.log("Datos de respuesta:", response.data);
 
             return response.data;
         } catch (error) {
@@ -201,13 +189,9 @@ const reservationService = {
                 } : undefined
             };
 
-            console.log("Enviando datos de pago:", formattedData);
-            console.log("URL de petición:", `/reservations/${id}/payments`);
-
             // Intentar hacer la petición POST
             try {
                 const response = await api.post(`/reservations/${id}/payments`, formattedData);
-                console.log("Respuesta del servidor:", response.data);
                 return response.data;
             } catch (apiError) {
                 console.error("Error en la petición API:", apiError);
@@ -312,7 +296,6 @@ const reservationService = {
 
     sendConfirmation: async (id, notificationType = 'confirmation') => {
         try {
-            console.log('Enviando confirmación para reserva:', id);
             const response = await api.post(`/reservations/${id}/send-notification`, {
                 type: notificationType
             });
@@ -344,10 +327,6 @@ const reservationService = {
                 id: id
             };
         } catch (error) {
-            console.error("Error al enviar PDF por email:", error);
-            if (error.response) {
-                console.error("Detalles del error:", error.response.data);
-            }
             throw error.response?.data?.message || 'Error sending PDF by email';
         }
     },
@@ -373,17 +352,9 @@ const reservationService = {
                 amountDue: Number(paymentData.amountDue)
             };
 
-            console.log("Actualizando estado de pago para reserva:", id);
-            console.log("Datos de actualización:", data);
-
             const response = await api.patch(`/reservations/${id}/payment-status`, data);
-            console.log("Respuesta del servidor:", response.data);
             return response.data;
         } catch (error) {
-            console.error("Error al actualizar estado de pago:", error);
-            if (error.response) {
-                console.error("Detalles del error:", error.response.data);
-            }
             throw error.response?.data?.message || 'Error updating payment status';
         }
     },
@@ -405,17 +376,10 @@ const reservationService = {
                 notes: `Payment registered from admin panel - Method: ${method}`
             };
 
-            console.log("Registrando pago simple:", data);
-
             // Usar un endpoint más simple si el problema persiste
             const response = await api.post(`/payments/register/${id}`, data);
-            console.log("Respuesta del servidor:", response.data);
             return response.data;
         } catch (error) {
-            console.error("Error al registrar pago simple:", error);
-            if (error.response) {
-                console.error("Detalles del error:", error.response.data);
-            }
             throw error.response?.data?.message || error.message || 'Error registering simple payment';
         }
     },
@@ -430,8 +394,6 @@ const reservationService = {
             // Convertir a número
             const numericFee = Math.max(0, parseFloat(parkingFee) || 0);
 
-            console.log(`Actualizando parking fee para reserva ${id} a $${numericFee}`);
-
             // Enviar como número al backend en camelCase
             const data = {
                 parkingFee: numericFee
@@ -439,13 +401,8 @@ const reservationService = {
 
             // Usar PATCH para actualización parcial
             const response = await api.patch(`/reservations/${id}`, data);
-            console.log("Respuesta:", response.status, response.statusText);
             return response.data;
         } catch (error) {
-            console.error("Error al actualizar parking fee:", error);
-            if (error.response) {
-                console.error("Detalles del error:", error.response.data);
-            }
 
             throw error.response?.data?.message || error.message || 'Error updating parking fee';
         }
@@ -461,15 +418,12 @@ const reservationService = {
             // Convertir a número
             const numericFee = Math.max(0, parseFloat(cleaningFee) || 0);
 
-            console.log(`Actualizando cleaning fee para reserva ${id} a $${numericFee}`);
-
             // Enviar como número al backend en camelCase
             const data = {
                 cleaningFee: numericFee
             };
 
             const response = await api.patch(`/reservations/${id}`, data);
-            console.log("Respuesta:", response.status, response.statusText);
             return response.data;
         } catch (error) {
             console.error("Error al actualizar cleaning fee:", error);
@@ -491,15 +445,12 @@ const reservationService = {
             // Convertir a número
             const numericValue = Math.max(0, parseFloat(otherExpenses) || 0);
 
-            console.log(`Actualizando other expenses para reserva ${id} a $${numericValue}`);
-
             // Enviar como número al backend en camelCase
             const data = {
                 otherExpenses: numericValue
             };
 
             const response = await api.patch(`/reservations/${id}`, data);
-            console.log("Respuesta:", response.status, response.statusText);
             return response.data;
         } catch (error) {
             console.error("Error al actualizar other expenses:", error);
@@ -544,8 +495,6 @@ const reservationService = {
                 dataToSend.pricePerNight = value;
             }
 
-            console.log(`Actualizando tarifas para reserva ${id}:`, dataToSend);
-
             // Si no hay nada que actualizar, salir
             if (Object.keys(dataToSend).length === 0) {
                 return { message: 'No hay tarifas para actualizar' };
@@ -553,8 +502,6 @@ const reservationService = {
 
             // Usar el endpoint PATCH para actualización parcial
             const response = await api.patch(`/reservations/${id}`, dataToSend);
-            console.log("Respuesta del servidor:", response.status, response.statusText);
-            console.log("Datos actualizados:", response.data);
 
             return response.data;
         } catch (error) {

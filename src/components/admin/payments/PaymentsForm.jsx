@@ -226,7 +226,7 @@ const PaymentForm = ({ open, onClose }) => {
                                     label="Payment Date"
                                     value={formData.paymentDate}
                                     onChange={handleDateChange}
-                                    renderInput={(params) => (
+                                    TextField={(params) => (
                                         <TextField
                                             {...params}
                                             fullWidth
