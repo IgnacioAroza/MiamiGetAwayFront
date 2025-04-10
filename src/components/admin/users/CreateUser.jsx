@@ -47,7 +47,6 @@ const CreateUser = ({ isDialog = false, onSuccess, onCancel }) => {
         
         try {
             const result = await dispatch(createUser(formData)).unwrap();
-            console.log(result);
             setSuccess(true);
             if (isDialog && onSuccess) {
                 onSuccess(result);

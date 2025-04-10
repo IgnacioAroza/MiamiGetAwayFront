@@ -4,9 +4,7 @@ import { Grid, TextField, Typography, Paper, Box, Divider } from '@mui/material'
 const PricingSection = ({ formData, onChange }) => {
     // Manejar cambios específicos para campos numéricos
     const handleNumericChange = (e) => {
-        const { name, value } = e.target;
-        console.log(`Campo numérico modificado: ${name}, valor original: ${value}`);
-        
+        const { name, value } = e.target;        
         // NO forzar conversión a número si el campo está vacío
         // Si está vacío, mantenerlo como cadena vacía para que el usuario pueda borrar el campo
         let processedValue;
@@ -23,8 +21,6 @@ const PricingSection = ({ formData, onChange }) => {
                 processedValue = num;
             }
         }
-        
-        console.log(`Valor procesado: ${processedValue}`);
         
         // Crear un evento sintético para mantener compatibilidad con el onChange original
         const syntheticEvent = {
