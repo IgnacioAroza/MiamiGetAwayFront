@@ -12,7 +12,7 @@ import {
 } from '@mui/material';
 import AddIcon from '@mui/icons-material/Add';
 import { useDispatch } from 'react-redux';
-import { createUser } from '../../../../redux/userSlice';
+import CreateUser from '../../users/CreateUser';
 
 const ClientSection = ({ 
     formData, 
@@ -24,29 +24,10 @@ const ClientSection = ({
 }) => {
     const dispatch = useDispatch();
     const [openNewClientDialog, setOpenNewClientDialog] = useState(false);
-    const [newClientData, setNewClientData] = useState({
-        firstName: '',
-        lastName: '',
-        email: '',
-        phone: '',
-        address: '',
-        city: '',
-        country: '',
-        notes: ''
-    });
 
     // Formatear nombre completo para el Autocomplete
     const getFullName = (client) => {
         return `${client.firstName} ${client.lastName} (${client.email})`;
-    };
-
-    // Manejar cambios en el nuevo cliente
-    const handleNewClientChange = (event) => {
-        const { name, value } = event.target;
-        setNewClientData(prev => ({
-            ...prev,
-            [name]: value
-        }));
     };
 
     // Abrir diálogo para nuevo cliente
@@ -59,56 +40,15 @@ const ClientSection = ({
         setOpenNewClientDialog(false);
     };
 
-    // Guardar nuevo cliente
-    const handleSaveNewClient = () => {
-        // Validar campos obligatorios
-        if (!newClientData.firstName || !newClientData.lastName || !newClientData.email) {
-            alert('Por favor complete los campos obligatorios: Nombre, Apellido y Email');
-            return;
-        }
-        
-        // Crear el objeto de datos del usuario para enviar al servidor
-        const userData = {
-            name: newClientData.firstName,
-            lastname: newClientData.lastName,
-            email: newClientData.email,
-            // Campos opcionales
-            phone: newClientData.phone || null,
-            address: newClientData.address || null,
-            city: newClientData.city || null,
-            country: newClientData.country || null,
-            notes: newClientData.notes || null
-        };
-
-        // Dispatch para crear el nuevo usuario/cliente
-        dispatch(createUser(userData))
-            .unwrap()
-            .then(newUser => {
-                // Actualizar en el componente padre
-                onNewClientCreated(newUser);
-                
-                setOpenNewClientDialog(false);
-                // Limpiar formulario
-                setNewClientData({
-                    firstName: '',
-                    lastName: '',
-                    email: '',
-                    phone: '',
-                    address: '',
-                    city: '',
-                    country: '',
-                    notes: ''
-                });
-            })
-            .catch(error => {
-                console.error('Error al crear cliente:', error);
-                alert(`Error al crear cliente: ${error.message || 'Error desconocido'}`);
-            });
-    };
-
     // Manejar selección en Autocomplete
     const handleClientSelectChange = (event, client) => {
         onClientSelect(client);
+    };
+
+    // Manejar la creación exitosa de un nuevo cliente
+    const handleClientCreated = (newUser) => {
+        onNewClientCreated(newUser);
+        setOpenNewClientDialog(false);
     };
 
     return (
@@ -124,7 +64,7 @@ const ClientSection = ({
                     renderInput={(params) => (
                         <TextField
                             {...params}
-                            label="Seleccionar Cliente Existente"
+                            label="Select Existing Client"
                             variant="outlined"
                             fullWidth
                         />
@@ -142,14 +82,14 @@ const ClientSection = ({
                     startIcon={<AddIcon />}
                     sx={{ height: '56px' }}
                 >
-                    Nuevo Cliente
+                    New Client
                 </Button>
             </Grid>
 
             <Grid item xs={12} md={6}>
                 <TextField
                     fullWidth
-                    label="Nombre del Cliente"
+                    label="Client Name"
                     name="clientName"
                     value={formData.clientName}
                     onChange={onChange}
@@ -160,7 +100,7 @@ const ClientSection = ({
             <Grid item xs={12} md={6}>
                 <TextField
                     fullWidth
-                    label="Email del Cliente"
+                    label="Client Email"
                     name="clientEmail"
                     type="email"
                     value={formData.clientEmail}
@@ -172,7 +112,7 @@ const ClientSection = ({
             <Grid item xs={12} md={6}>
                 <TextField
                     fullWidth
-                    label="Teléfono del Cliente"
+                    label="Client Phone"
                     name="clientPhone"
                     value={formData.clientPhone}
                     onChange={onChange}
@@ -183,121 +123,35 @@ const ClientSection = ({
             <Grid item xs={12} md={6}>
                 <TextField
                     fullWidth
-                    label="Dirección"
-                    name="clientAddress"
-                    value={formData.clientAddress}
+                    label="City"
+                    name="clientCity"
+                    value={formData.clientCity}
                     onChange={onChange}
                     disabled={selectedClient !== null}
                 />
             </Grid>
 
             {/* Diálogo para agregar nuevo cliente */}
-            <Dialog open={openNewClientDialog} onClose={handleCloseNewClientDialog} maxWidth="md" fullWidth>
-                <DialogTitle>Agregar Nuevo Cliente</DialogTitle>
+            <Dialog 
+                open={openNewClientDialog} 
+                onClose={handleCloseNewClientDialog} 
+                maxWidth="md" 
+                fullWidth
+                PaperProps={{
+                    sx: {
+                        bgcolor: '#1e1e1e',
+                        color: '#fff'
+                    }
+                }}
+            >
+                <DialogTitle>Add New Client</DialogTitle>
                 <DialogContent>
-                    <Grid container spacing={2} sx={{ mt: 1 }}>
-                        <Grid item xs={12} md={6}>
-                            <TextField
-                                fullWidth
-                                label="Nombre *"
-                                name="firstName"
-                                value={newClientData.firstName}
-                                onChange={handleNewClientChange}
-                                required
-                                error={!newClientData.firstName}
-                                helperText={!newClientData.firstName ? "El nombre es obligatorio" : ""}
-                            />
-                        </Grid>
-                        <Grid item xs={12} md={6}>
-                            <TextField
-                                fullWidth
-                                label="Apellido *"
-                                name="lastName"
-                                value={newClientData.lastName}
-                                onChange={handleNewClientChange}
-                                required
-                                error={!newClientData.lastName}
-                                helperText={!newClientData.lastName ? "El apellido es obligatorio" : ""}
-                            />
-                        </Grid>
-                        <Grid item xs={12} md={6}>
-                            <TextField
-                                fullWidth
-                                label="Email *"
-                                name="email"
-                                type="email"
-                                value={newClientData.email}
-                                onChange={handleNewClientChange}
-                                required
-                                error={!newClientData.email}
-                                helperText={!newClientData.email ? "El email es obligatorio" : ""}
-                            />
-                        </Grid>
-                        <Grid item xs={12} md={6}>
-                            <TextField
-                                fullWidth
-                                label="Teléfono"
-                                name="phone"
-                                value={newClientData.phone}
-                                onChange={handleNewClientChange}
-                            />
-                        </Grid>
-                        <Grid item xs={12} md={6}>
-                            <TextField
-                                fullWidth
-                                label="Dirección"
-                                name="address"
-                                value={newClientData.address}
-                                onChange={handleNewClientChange}
-                            />
-                        </Grid>
-                        <Grid item xs={12} md={6}>
-                            <TextField
-                                fullWidth
-                                label="Ciudad"
-                                name="city"
-                                value={newClientData.city}
-                                onChange={handleNewClientChange}
-                            />
-                        </Grid>
-                        <Grid item xs={12} md={6}>
-                            <TextField
-                                fullWidth
-                                label="País"
-                                name="country"
-                                value={newClientData.country}
-                                onChange={handleNewClientChange}
-                            />
-                        </Grid>
-                        <Grid item xs={12}>
-                            <TextField
-                                fullWidth
-                                label="Notas"
-                                name="notes"
-                                value={newClientData.notes}
-                                onChange={handleNewClientChange}
-                                multiline
-                                rows={3}
-                            />
-                        </Grid>
-                    </Grid>
-                    <Typography variant="caption" color="textSecondary" sx={{ display: 'block', mt: 2 }}>
-                        * Campos obligatorios
-                    </Typography>
+                    <CreateUser 
+                        isDialog={true}
+                        onSuccess={handleClientCreated}
+                        onCancel={handleCloseNewClientDialog}
+                    />
                 </DialogContent>
-                <DialogActions>
-                    <Button onClick={handleCloseNewClientDialog} color="secondary">
-                        Cancelar
-                    </Button>
-                    <Button 
-                        onClick={handleSaveNewClient} 
-                        color="primary" 
-                        variant="contained"
-                        disabled={!newClientData.firstName || !newClientData.lastName || !newClientData.email}
-                    >
-                        Guardar Cliente
-                    </Button>
-                </DialogActions>
             </Dialog>
         </>
     );

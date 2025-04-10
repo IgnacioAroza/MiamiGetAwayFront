@@ -13,6 +13,18 @@ export const fetchUsers = createAsyncThunk(
     }
 );
 
+export const fetchUserById = createAsyncThunk(
+    'users/fetchUserById',
+    async (id, { rejectWithValue }) => {
+        try {
+            const data = await userService.getUserById(id);
+            return data;
+        } catch (error) {
+            return rejectWithValue(error.response?.data || 'Error fetching user by id');
+        }
+    }
+);
+
 export const createUser = createAsyncThunk(
     'users/createUser',
     async (userData, { rejectWithValue }) => {
@@ -81,6 +93,14 @@ const userSlice = createSlice({
             })
             .addCase(fetchUsers.rejected, (state, action) => {
                 state.status = 'failed';
+                state.error = action.payload;
+            })
+            // Fetch User by Id
+            .addCase(fetchUserById.fulfilled, (state, action) => {
+                state.selectedUser = action.payload;
+                state.error = null;
+            })
+            .addCase(fetchUserById.rejected, (state, action) => {
                 state.error = action.payload;
             })
             // Create User

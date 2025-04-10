@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { 
     Box, 
     Typography, 
@@ -11,7 +12,8 @@ import {
     TableHead, 
     TableRow,
     IconButton,
-    Tooltip
+    Tooltip,
+    CircularProgress
 } from '@mui/material';
 import { useDispatch, useSelector } from 'react-redux';
 import AddIcon from '@mui/icons-material/Add';
@@ -20,18 +22,20 @@ import DeleteIcon from '@mui/icons-material/Delete';
 import { 
     fetchUsers,
     deleteUser,
-    setSelectedUser,
     selectAllUsers,
     selectUserStatus,
     selectUserError
 } from '../../../redux/userSlice';
+import DeleteDialog from '../dialogs/DeleteDialog';
 
 const UserList = () => {
+    const navigate = useNavigate();
     const dispatch = useDispatch();
     const users = useSelector(selectAllUsers);
     const status = useSelector(selectUserStatus);
     const error = useSelector(selectUserError);
-    const [dialogOpen, setDialogOpen] = useState(false);
+    const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+    const [userToDelete, setUserToDelete] = useState(null);
 
     useEffect(() => {
         if (status === 'idle') {
@@ -39,46 +43,64 @@ const UserList = () => {
         }
     }, [status, dispatch]);
 
-    const handleEdit = (user) => {
-        dispatch(setSelectedUser(user));
-        setDialogOpen(true);
+    const handleEdit = (userId) => {
+        navigate(`/admin/users/edit/${userId}`);
     };
 
-    const handleDelete = async (user) => {
-        if (window.confirm('¿Estás seguro de que deseas eliminar este usuario?')) {
+    const handleDeleteClick = (user) => {
+        setUserToDelete(user);
+        setDeleteDialogOpen(true);
+    };
+
+    const handleDeleteConfirm = async () => {
+        if (userToDelete) {
             try {
-                await dispatch(deleteUser(user.id)).unwrap();
+                await dispatch(deleteUser(userToDelete.id)).unwrap();
+                setDeleteDialogOpen(false);
+                setUserToDelete(null);
             } catch (error) {
                 console.error('Error al eliminar usuario:', error);
             }
         }
     };
 
+    const handleDeleteCancel = () => {
+        setDeleteDialogOpen(false);
+        setUserToDelete(null);
+    };
+
     const handleCreate = () => {
-        dispatch(setSelectedUser(null));
-        setDialogOpen(true);
+        navigate('/admin/users/create');
     };
 
     if (status === 'loading') {
-        return <Box sx={{ p: 3 }}>Cargando...</Box>;
+        return (
+            <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '50vh' }}>
+                <CircularProgress />
+            </Box>
+        );
     }
 
     if (status === 'failed') {
-        return <Box sx={{ p: 3, color: 'error.main' }}>Error: {error}</Box>;
+        return (
+            <Box sx={{ p: 3, color: 'error.main' }}>
+                Error: {error}
+            </Box>
+        );
     }
 
     return (
         <Box sx={{ p: 3 }}>
             <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
                 <Typography variant="h4">
-                    Usuarios
+                    Users
                 </Typography>
                 <Button
                     variant="contained"
                     startIcon={<AddIcon />}
                     onClick={handleCreate}
                 >
-                    Nuevo Usuario
+                    New User
                 </Button>
             </Box>
 
@@ -86,13 +108,13 @@ const UserList = () => {
                 <Table>
                     <TableHead>
                         <TableRow>
-                            <TableCell>Nombre</TableCell>
-                            <TableCell>Apellido</TableCell>
+                            <TableCell>Name</TableCell>
+                            <TableCell>Last Name</TableCell>
                             <TableCell>Email</TableCell>
-                            <TableCell>Teléfono</TableCell>
-                            <TableCell>Ciudad</TableCell>
-                            <TableCell>País</TableCell>
-                            <TableCell>Acciones</TableCell>
+                            <TableCell>Phone</TableCell>
+                            <TableCell>City</TableCell>
+                            <TableCell>Country</TableCell>
+                            <TableCell>Actions</TableCell>
                         </TableRow>
                     </TableHead>
                     <TableBody>
@@ -105,13 +127,13 @@ const UserList = () => {
                                 <TableCell>{user.city}</TableCell>
                                 <TableCell>{user.country}</TableCell>
                                 <TableCell>
-                                    <Tooltip title="Editar">
-                                        <IconButton onClick={() => handleEdit(user)} size="small">
+                                    <Tooltip title="Edit">
+                                        <IconButton onClick={() => handleEdit(user.id)} size="small">
                                             <EditIcon />
                                         </IconButton>
                                     </Tooltip>
-                                    <Tooltip title="Eliminar">
-                                        <IconButton onClick={() => handleDelete(user)} size="small" color="error">
+                                    <Tooltip title="Delete">
+                                        <IconButton onClick={() => handleDeleteClick(user)} size="small" color="error">
                                             <DeleteIcon />
                                         </IconButton>
                                     </Tooltip>
@@ -122,7 +144,11 @@ const UserList = () => {
                 </Table>
             </TableContainer>
 
-            {/* Aquí irá el diálogo de edición/creación */}
+            <DeleteDialog
+                open={deleteDialogOpen}
+                onClose={handleDeleteCancel}
+                onConfirm={handleDeleteConfirm}
+            />
         </Box>
     );
 };

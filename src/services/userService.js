@@ -11,22 +11,45 @@ const userService = {
         }
     },
 
+    getUserById: async (id) => {
+        try {
+            const response = await api.get(`/users/${id}`);
+            return response.data;
+        } catch (error) {
+            console.error('Error fetching user by id:', error);
+            throw error;
+        }
+    },
+
     createUser: async (userData) => {
         try {
+            console.log(userData);
             const response = await api.post('/users', userData);
+            console.log(response.data);
             return response.data;
         } catch (error) {
             console.error('Error creating user:', error)
-            if (error.response) {
-                console.error('Response data:', error.response.data);
-                console.error('Response status:', error.response.status);
-                console.error('Response headers:', error.response.headers);
-            } else if (error.request) {
-                console.error('No response received:', error.request);
-            } else {
-                console.error('Error setting up request:', error.message);
-            }
             throw error
+        }
+    },
+
+    updateUser: async (id, userData) => {
+        try {
+            const response = await api.put(`/users/${id}`, userData);
+            return response.data;
+        } catch (error) {
+            console.error('Error updating user:', error);
+            throw error;
+        }
+    },
+
+    deleteUser: async (id) => {
+        try {
+            const response = await api.delete(`/users/${id}`);
+            return response.data;
+        } catch (error) {
+            console.error('Error deleting user:', error);
+            throw error;
         }
     }
 }

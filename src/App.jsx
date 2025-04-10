@@ -25,6 +25,8 @@ import ApartmentList from './components/admin/apartments/ApartmentList';
 import UserList from './components/admin/users/UserList';
 import ReservationsPage from './pages/ReservationsPage';
 import ServicesPage from './components/admin/services/ServicesPage';
+import CreateUser from './components/admin/users/CreateUser';
+import EditUser from './components/admin/users/EditUser';
 
 const theme = createTheme({
   palette: {
@@ -81,6 +83,8 @@ function AppContent() {
             <Route path="dashboard" element={<AdminDashboard />} />
             <Route path="services" element={<ServicesPage />} />
             <Route path="users" element={<UserList />} />
+            <Route path="users/create" element={<CreateUser />} />
+            <Route path="users/edit/:id" element={<EditUser />} />
             <Route path="payments" element={<PaymentsList />} />
             
             {/* Rutas de reservas */}
