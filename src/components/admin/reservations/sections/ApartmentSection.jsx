@@ -25,7 +25,7 @@ const ApartmentSection = ({ formData, apartments, selectedApartment, onChange })
         <>
             <Grid item xs={12} md={6}>
                 <FormControl fullWidth>
-                    <InputLabel>Apartamento</InputLabel>
+                    <InputLabel>Apartment</InputLabel>
                     <Select
                         name="apartmentId"
                         value={formData.apartmentId}

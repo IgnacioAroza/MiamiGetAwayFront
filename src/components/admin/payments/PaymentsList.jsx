@@ -31,6 +31,8 @@ import {
 } from '../../../redux/reservationPaymentSlice';
 import PaymentForm from './PaymentsForm';
 import PaymentDetails from './PaymentDetails';
+import userService from '../../../services/userService';
+import reservationService from '../../../services/reservationService';
 
 // Componente para mostrar y gestionar la lista de pagos
 const PaymentsList = () => {
@@ -47,11 +49,104 @@ const PaymentsList = () => {
         severity: 'success'
     });
     const [selectedPaymentForDetails, setSelectedPaymentForDetails] = useState(null);
+    const [reservationsData, setReservationsData] = useState({});
+    const [clientsData, setClientsData] = useState({});
 
     // Cargar pagos al montar el componente
     useEffect(() => {
         dispatch(fetchAllPayments());
     }, [dispatch]);
+
+    // Cargar datos de reservas y clientes cuando cambian los pagos
+    useEffect(() => {
+        const fetchData = async () => {
+            const reservationIds = payments
+                .map(payment => payment.reservation_id || payment.reservationId)
+                .filter(id => id && !reservationsData[id]);
+
+            if (reservationIds.length === 0) return;
+
+            try {
+                const reservationPromises = reservationIds.map(async id => {
+                    try {
+                        const reservationData = await reservationService.getById(id);
+                        return { id, data: reservationData };
+                    } catch (error) {
+                        console.error(`Error fetching reservation ${id}:`, error);
+                        return { id, data: null };
+                    }
+                });
+
+                const reservationResults = await Promise.all(reservationPromises);
+                const newReservationsData = { ...reservationsData };
+                
+                const clientIds = new Set();
+                reservationResults.forEach(({ id, data }) => {
+                    if (data) {
+                        newReservationsData[id] = data;
+                        const clientId = data.client_id || data.clientId;
+                        if (clientId) {
+                            clientIds.add(clientId);
+                        }
+                    }
+                });
+
+                setReservationsData(newReservationsData);
+
+                const clientPromises = Array.from(clientIds).map(async id => {
+                    try {
+                        const userData = await userService.getUserById(id);
+                        if (!userData || !userData.id) {
+                            return { id, data: null };
+                        }
+                        return { id, data: userData };
+                    } catch (error) {
+                        console.error(`Error fetching user ${id}:`, error);
+                        return { id, data: null };
+                    }
+                });
+
+                const clientResults = await Promise.all(clientPromises);
+                const newClientsData = { ...clientsData };
+                
+                clientResults.forEach(({ id, data }) => {
+                    if (data) {
+                        const formattedClientData = {
+                            id: data.id,
+                            name: data.name || data.firstName || data.first_name || '',
+                            lastname: data.lastname || data.lastName || data.last_name || '',
+                            email: data.email || '',
+                            phone: data.phone || ''
+                        };
+                        newClientsData[id] = formattedClientData;
+                    }
+                });
+
+                setClientsData(newClientsData);
+            } catch (error) {
+                console.error('Error fetching data:', error);
+            }
+        };
+
+        fetchData();
+    }, [payments, reservationsData, clientsData]);
+
+    // Función para obtener el nombre del cliente
+    const getClientName = (payment) => {
+        const reservationId = payment.reservation_id || payment.reservationId;
+        if (!reservationId) return '-';
+        
+        const reservation = reservationsData[reservationId];
+        if (!reservation) return 'Loading...';
+
+        const clientId = reservation.client_id || reservation.clientId;
+        if (!clientId) return '-';
+
+        const client = clientsData[clientId];
+        if (!client) return 'Loading...';
+
+        return `${client.name || ''} ${client.lastname || ''}`.trim() || '-';
+    };
 
     // Manejadores de eventos
     const handleCreateNew = () => {
@@ -79,13 +174,13 @@ const PaymentsList = () => {
             await dispatch(deletePayment(paymentToDelete.id)).unwrap();
             setSnackbar({
                 open: true,
-                message: 'Pago eliminado exitosamente',
+                message: 'Payment deleted successfully',
                 severity: 'success'
             });
         } catch (error) {
             setSnackbar({
                 open: true,
-                message: error.message || 'Error al eliminar el pago',
+                message: error.message || 'Error deleting payment',
                 severity: 'error'
             });
         } finally {
@@ -96,11 +191,17 @@ const PaymentsList = () => {
 
     // Formatear fecha
     const formatDate = (dateString) => {
-        return new Date(dateString).toLocaleDateString('es-ES', {
-            year: 'numeric',
-            month: 'long',
-            day: 'numeric'
-        });
+        if (!dateString) return 'N/A';
+        try {
+            return new Date(dateString).toLocaleDateString('es-ES', {
+                year: 'numeric',
+                month: 'long',
+                day: 'numeric'
+            });
+        } catch (error) {
+            console.error('Error al formatear la fecha:', error);
+            return 'Fecha inválida';
+        }
     };
 
     // Formatear monto
@@ -109,6 +210,26 @@ const PaymentsList = () => {
             style: 'currency',
             currency: 'USD'
         }).format(amount);
+    };
+
+    // Normalizar el método de pago
+    const normalizePaymentMethod = (method) => {
+        if (!method) return 'Other';
+        
+        const methodMap = {
+            'cash': 'Cash',
+            'CASH': 'Cash',
+            'transfer': 'Bank Transfer',
+            'TRANSFER': 'Bank Transfer',
+            'BANK_TRANSFER': 'Bank Transfer',
+            'card': 'Card',
+            'CARD': 'Card',
+            'CREDIT_CARD': 'Card',
+            'paypal': 'PayPal',
+            'PAYPAL': 'PayPal'
+        };
+
+        return methodMap[method.toLowerCase()] || method;
     };
 
     if (loading) {
@@ -164,14 +285,12 @@ const PaymentsList = () => {
                         ) : (
                             payments.map((payment) => (
                                 <TableRow key={payment.id}>
-                                    <TableCell>{formatDate(payment.paymentDate)}</TableCell>
+                                    <TableCell>{formatDate(payment.payment_date)}</TableCell>
                                     <TableCell>{formatAmount(payment.amount)}</TableCell>
                                     <TableCell>
-                                        {payment.paymentMethod === 'cash' ? 'Cash' :
-                                         payment.paymentMethod === 'transfer' ? 'Transfer' : 
-                                         payment.paymentMethod === 'card' ? 'Card' : 'Other'}
+                                        {normalizePaymentMethod(payment.payment_method)}
                                     </TableCell>
-                                    <TableCell>{payment.paymentReference || '-'}</TableCell>
+                                    <TableCell>Client: {getClientName(payment)}</TableCell>
                                     <TableCell>{payment.notes || '-'}</TableCell>
                                     <TableCell align="center">
                                         <IconButton 
@@ -205,20 +324,20 @@ const PaymentsList = () => {
                 open={openDeleteDialog}
                 onClose={() => setOpenDeleteDialog(false)}
             >
-                <DialogTitle>Confirmar Eliminación</DialogTitle>
+                <DialogTitle>Confirm Delete</DialogTitle>
                 <DialogContent>
-                    ¿Está seguro que desea eliminar este pago? Esta acción no se puede deshacer.
+                    Are you sure you want to delete this payment? This action cannot be undone.
                 </DialogContent>
                 <DialogActions>
                     <Button onClick={() => setOpenDeleteDialog(false)}>
-                        Cancelar
+                        Cancel
                     </Button>
                     <Button 
                         onClick={handleDeleteConfirm} 
                         color="error" 
                         variant="contained"
                     >
-                        Eliminar
+                        Delete
                     </Button>
                 </DialogActions>
             </Dialog>

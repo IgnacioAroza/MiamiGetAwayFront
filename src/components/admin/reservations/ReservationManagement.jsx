@@ -1,11 +1,10 @@
 import React, { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { useParams, useNavigate } from 'react-router-dom';
-import { Box, Container, Grid, Paper, Typography, Button, Tabs, Tab, Alert, Snackbar } from '@mui/material';
+import { Box, Container, Grid, Paper, Typography, Button, Alert, Snackbar } from '@mui/material';
 import { ArrowBack as ArrowBackIcon } from '@mui/icons-material';
-import { fetchReservationById, updateReservation, createReservation } from '../../../redux/reservationSlice';
+import { fetchReservationById, updateReservation, createReservation, registerPayment } from '../../../redux/reservationSlice';
 import ReservationForm from './ReservationForm';
-import PaymentSummary from '../payments/PaymentSummary';
 import reservationService from '../../../services/reservationService';
 
 const ReservationManagement = () => {
@@ -13,7 +12,6 @@ const ReservationManagement = () => {
     const navigate = useNavigate();
     const { id } = useParams();
     const { selectedReservation, loading, error } = useSelector(state => state.reservations);
-    const [activeTab, setActiveTab] = useState(0);
     const [notification, setNotification] = useState({ open: false, message: '', type: 'info' });
     
     useEffect(() => {
@@ -22,20 +20,6 @@ const ReservationManagement = () => {
             dispatch(fetchReservationById(id));
         }
     }, [dispatch, id]);
-    
-    // Agregar este log para ver si los datos están llegando
-    useEffect(() => {
-        if (selectedReservation) {
-            console.log("Datos de reserva cargados:", selectedReservation);
-        }
-    }, [selectedReservation]);
-    
-    const handlePaymentRegistered = async () => {
-        if (id) {
-            // Recargar la reserva para obtener los datos actualizados
-            await dispatch(fetchReservationById(id)).unwrap();
-        }
-    };
     
     // Función para actualización directa de tarifas
     const updateDirectly = async (formData) => {
@@ -124,9 +108,138 @@ const ReservationManagement = () => {
     
     const handleSubmit = async (formData) => {
         try {            
+            let reservationId;
+            
             // Si estamos creando una nueva reserva
             if (!id) {
-                await dispatch(createReservation(formData)).unwrap();
+                const result = await dispatch(createReservation(formData)).unwrap();
+                reservationId = result.id;
+                
+                // Si hay un monto pagado, registrar el pago
+                if (formData.amountPaid && parseFloat(formData.amountPaid) > 0) {
+                    try {
+                        // Calcular el amountDue con validación y manejo de decimales
+                        const totalAmount = Math.max(0, parseFloat(formData.totalAmount) || 0);
+                        const amountPaid = Math.max(0, parseFloat(formData.amountPaid) || 0);
+                        const amountDue = Math.max(0, parseFloat((totalAmount - amountPaid).toFixed(2)));
+                        
+                        // Log de los montos calculados
+                        console.log('=== DATOS DE PAGO INICIAL ===');
+                        console.log('Total Amount:', totalAmount);
+                        console.log('Amount Paid:', amountPaid);
+                        console.log('Amount Due:', amountDue);
+                        console.log('Payment Status:', amountDue <= 0 ? 'PAID' : (amountPaid > 0 ? 'PARTIAL' : 'PENDING'));
+                        
+                        // Preparar datos para el pago
+                        const paymentData = {
+                            amount: parseFloat(formData.amountPaid),
+                            payment_method: 'cash', // Método por defecto
+                            notes: 'Pago inicial registrado durante la creación de la reserva',
+                            reservation_update: {
+                                amount_paid: parseFloat(amountPaid.toFixed(2)),
+                                amount_due: parseFloat(amountDue.toFixed(2)),
+                                payment_status: amountDue <= 0 ? 'PAID' : (amountPaid > 0 ? 'PARTIAL' : 'PENDING')
+                            }
+                        };
+                        
+                        // Log de los datos que se enviarán al servidor
+                        console.log('=== DATOS A ENVIAR AL SERVIDOR ===');
+                        console.log('Payment Data:', JSON.stringify(paymentData, null, 2));
+                        
+                        // Registrar el pago
+                        try {
+                            const response = await dispatch(registerPayment({ 
+                                id: reservationId, 
+                                paymentData 
+                            })).unwrap();
+                            
+                            // Verificar los datos de la respuesta
+                            console.log('=== RESPUESTA DEL SERVIDOR ===');
+                            console.log('Response Data:', JSON.stringify(response, null, 2));
+                            
+                            // Verificar si los montos son correctos
+                            const responseAmountPaid = response.amount_paid || response.amountPaid;
+                            const responseAmountDue = response.amount_due || response.amountDue;
+                            
+                            if (Math.abs(responseAmountPaid - amountPaid) < 0.01 && 
+                                Math.abs(responseAmountDue - amountDue) < 0.01) {
+                                // Los montos coinciden, el pago se registró correctamente
+                                setNotification({
+                                    open: true,
+                                    message: 'Reserva creada y pago registrado exitosamente',
+                                    type: 'success'
+                                });
+                            } else {
+                                // Los montos no coinciden, mostrar advertencia
+                                console.warn('Los montos en la respuesta no coinciden con los enviados');
+                                console.warn('Enviado - Amount Paid:', amountPaid, 'Amount Due:', amountDue);
+                                console.warn('Recibido - Amount Paid:', responseAmountPaid, 'Amount Due:', responseAmountDue);
+                                
+                                setNotification({
+                                    open: true,
+                                    message: 'Reserva creada, pero los montos registrados no coinciden con los esperados',
+                                    type: 'warning'
+                                });
+                            }
+                        } catch (paymentError) {
+                            console.error('Error al registrar el pago:', paymentError);
+                            
+                            // Verificar si el error es 500 y si el pago podría haberse registrado de todos modos
+                            if (paymentError.status === 500) {
+                                // Intentar verificar si el pago se registró a pesar del error
+                                try {
+                                    // Esperar un momento para dar tiempo al servidor a procesar
+                                    await new Promise(resolve => setTimeout(resolve, 1000));
+                                    
+                                    // Obtener la reserva actualizada para verificar si el pago se registró
+                                    const updatedReservation = await reservationService.getReservationById(reservationId);
+                                    
+                                    // Verificar si el monto pagado coincide con lo que intentamos registrar
+                                    const currentAmountPaid = parseFloat(updatedReservation.amount_paid) || 0;
+                                    const expectedAmountPaid = parseFloat(formData.amountPaid);
+                                    
+                                    if (Math.abs(currentAmountPaid - expectedAmountPaid) < 0.01) {
+                                        // El pago parece haberse registrado correctamente a pesar del error
+                                        setNotification({
+                                            open: true,
+                                            message: 'Reserva creada y pago registrado exitosamente (verificado)',
+                                            type: 'success'
+                                        });
+                                    } else {
+                                        // El pago no se registró correctamente
+                                        setNotification({
+                                            open: true,
+                                            message: `Reserva creada, pero el pago no se registró correctamente. Error: ${paymentError.message || 'Error desconocido'}`,
+                                            type: 'warning'
+                                        });
+                                    }
+                                } catch (verificationError) {
+                                    // No pudimos verificar si el pago se registró
+                                    setNotification({
+                                        open: true,
+                                        message: `Reserva creada, pero hubo un error al registrar el pago: ${paymentError.message || 'Error desconocido'}. No se pudo verificar si el pago se registró.`,
+                                        type: 'warning'
+                                    });
+                                }
+                            } else {
+                                // Para otros tipos de errores, mostrar el mensaje normal
+                                setNotification({
+                                    open: true,
+                                    message: `Reserva creada, pero hubo un error al registrar el pago: ${paymentError.message || 'Error desconocido'}`,
+                                    type: 'warning'
+                                });
+                            }
+                        }
+                    } catch (error) {
+                        console.error('Error general al procesar el pago:', error);
+                        setNotification({
+                            open: true,
+                            message: `Reserva creada, pero hubo un error al procesar el pago: ${error.message || 'Error desconocido'}`,
+                            type: 'warning'
+                        });
+                    }
+                }
+                
                 navigate('/admin/reservations');
                 return;
             }
@@ -175,10 +288,120 @@ const ReservationManagement = () => {
             }
             
             // Si llegamos aquí, hacer una actualización completa
-            await dispatch(updateReservation({ 
+            const result = await dispatch(updateReservation({ 
                 id, 
                 reservationData: formData 
             })).unwrap();
+            
+            // Verificar si el monto pagado ha aumentado
+            const originalAmountPaid = parseFloat(originalData.amount_paid) || 0;
+            const newAmountPaid = parseFloat(formData.amountPaid) || 0;
+            
+            if (newAmountPaid > originalAmountPaid) {
+                const paymentDifference = newAmountPaid - originalAmountPaid;
+                
+                if (paymentDifference > 0) {
+                    try {
+                        // Calcular el nuevo amountDue con validación y manejo de decimales
+                        const totalAmount = Math.max(0, parseFloat(formData.totalAmount) || 0);
+                        const amountDue = Math.max(0, parseFloat((totalAmount - newAmountPaid).toFixed(2)));
+                        
+                        // Log de los montos calculados
+                        console.log('=== DATOS DE PAGO ADICIONAL ===');
+                        console.log('Total Amount:', totalAmount);
+                        console.log('Original Amount Paid:', originalAmountPaid);
+                        console.log('New Amount Paid:', newAmountPaid);
+                        console.log('Payment Difference:', paymentDifference);
+                        console.log('Amount Due:', amountDue);
+                        console.log('Payment Status:', amountDue <= 0 ? 'PAID' : (newAmountPaid > 0 ? 'PARTIAL' : 'PENDING'));
+                        
+                        // Preparar datos para el pago
+                        const paymentData = {
+                            amount: paymentDifference,
+                            payment_method: 'cash', // Método por defecto
+                            notes: 'Pago adicional registrado durante la actualización de la reserva',
+                            reservation_update: {
+                                amount_paid: parseFloat(newAmountPaid.toFixed(2)),
+                                amount_due: parseFloat(amountDue.toFixed(2)),
+                                payment_status: amountDue <= 0 ? 'PAID' : (newAmountPaid > 0 ? 'PARTIAL' : 'PENDING')
+                            }
+                        };
+                        
+                        // Log de los datos que se enviarán al servidor
+                        console.log('=== DATOS A ENVIAR AL SERVIDOR ===');
+                        console.log('Payment Data:', JSON.stringify(paymentData, null, 2));
+                        
+                        // Registrar el pago
+                        try {
+                            await dispatch(registerPayment({ 
+                                id, 
+                                paymentData 
+                            })).unwrap();
+                            
+                            // Mostrar notificación de éxito
+                            setNotification({
+                                open: true,
+                                message: 'Reserva actualizada y pago registrado exitosamente',
+                                type: 'success'
+                            });
+                        } catch (paymentError) {
+                            console.error('Error al registrar el pago:', paymentError);
+                            
+                            // Verificar si el error es 500 y si el pago podría haberse registrado de todos modos
+                            if (paymentError.status === 500) {
+                                // Intentar verificar si el pago se registró a pesar del error
+                                try {
+                                    // Esperar un momento para dar tiempo al servidor a procesar
+                                    await new Promise(resolve => setTimeout(resolve, 1000));
+                                    
+                                    // Obtener la reserva actualizada para verificar si el pago se registró
+                                    const updatedReservation = await reservationService.getReservationById(id);
+                                    
+                                    // Verificar si el monto pagado coincide con lo que intentamos registrar
+                                    const currentAmountPaid = parseFloat(updatedReservation.amount_paid) || 0;
+                                    
+                                    if (Math.abs(currentAmountPaid - newAmountPaid) < 0.01) {
+                                        // El pago parece haberse registrado correctamente a pesar del error
+                                        setNotification({
+                                            open: true,
+                                            message: 'Reserva actualizada y pago registrado exitosamente (verificado)',
+                                            type: 'success'
+                                        });
+                                    } else {
+                                        // El pago no se registró correctamente
+                                        setNotification({
+                                            open: true,
+                                            message: `Reserva actualizada, pero el pago no se registró correctamente. Error: ${paymentError.message || 'Error desconocido'}`,
+                                            type: 'warning'
+                                        });
+                                    }
+                                } catch (verificationError) {
+                                    // No pudimos verificar si el pago se registró
+                                    setNotification({
+                                        open: true,
+                                        message: `Reserva actualizada, pero hubo un error al registrar el pago: ${paymentError.message || 'Error desconocido'}. No se pudo verificar si el pago se registró.`,
+                                        type: 'warning'
+                                    });
+                                }
+                            } else {
+                                // Para otros tipos de errores, mostrar el mensaje normal
+                                setNotification({
+                                    open: true,
+                                    message: `Reserva actualizada, pero hubo un error al registrar el pago: ${paymentError.message || 'Error desconocido'}`,
+                                    type: 'warning'
+                                });
+                            }
+                        }
+                    } catch (error) {
+                        console.error('Error general al procesar el pago:', error);
+                        setNotification({
+                            open: true,
+                            message: `Reserva actualizada, pero hubo un error al procesar el pago: ${error.message || 'Error desconocido'}`,
+                            type: 'warning'
+                        });
+                    }
+                }
+            }
             
             navigate('/admin/reservations');
         } catch (error) {
@@ -195,10 +418,6 @@ const ReservationManagement = () => {
     
     const handleBack = () => {
         navigate('/admin/reservations');
-    };
-    
-    const handleTabChange = (e, newValue) => {
-        setActiveTab(newValue);
     };
     
     const handleCloseNotification = () => {
@@ -229,41 +448,10 @@ const ReservationManagement = () => {
                 ) : (
                     <Grid container spacing={3}>
                         <Grid item xs={12} md={8}>
-                            <Paper elevation={3}>
-                                <Tabs value={activeTab} onChange={handleTabChange}>
-                                    <Tab label="Detalles" />
-                                    <Tab label="Pagos" />
-                                </Tabs>
-
-                                {activeTab === 1 && (
-                                    <Alert severity="info" sx={{ mt: 2, mx: 2 }}>
-                                        En esta pestaña solo puede registrar pagos y actualizar el estado de pago.
-                                        Para modificar otros datos como tarifas o fechas, vaya a la pestaña &quot;Detalles&quot;.
-                                    </Alert>
-                                )}
-
-                                <Box sx={{ mt: 2 }}>
-                                    {activeTab === 0 ? (
-                                        <ReservationForm
-                                            initialData={selectedReservation}
-                                            onSubmit={handleSubmit}
-                                        />
-                                    ) : (
-                                        <PaymentSummary 
-                                            reservation={selectedReservation}
-                                            onPaymentRegistered={handlePaymentRegistered}
-                                        />
-                                    )}
-                                </Box>
-                            </Paper>
-                        </Grid>
-                        <Grid item xs={12} md={4}>
                             <Paper elevation={3} sx={{ p: 3 }}>
-                                <Typography variant="h6" gutterBottom>
-                                    Payment summary
-                                </Typography>
-                                <PaymentSummary 
-                                    reservation={id ? selectedReservation : null}
+                                <ReservationForm
+                                    initialData={selectedReservation}
+                                    onSubmit={handleSubmit}
                                 />
                             </Paper>
                         </Grid>

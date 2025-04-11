@@ -4,7 +4,8 @@ import { Grid, TextField, Typography, Paper, Box, Divider } from '@mui/material'
 const PricingSection = ({ formData, onChange }) => {
     // Manejar cambios específicos para campos numéricos
     const handleNumericChange = (e) => {
-        const { name, value } = e.target;        
+        const { name, value } = e.target;
+        
         // NO forzar conversión a número si el campo está vacío
         // Si está vacío, mantenerlo como cadena vacía para que el usuario pueda borrar el campo
         let processedValue;
@@ -72,11 +73,11 @@ const PricingSection = ({ formData, onChange }) => {
             <Grid item xs={12} md={3}>
                 <TextField
                     fullWidth
-                    label="Noches"
+                    label="Nights"
                     name="nights"
                     type="number"
                     value={formData.nights}
-                    disabled={formData.checkInDate && formData.checkOutDate}
+                    disabled={Boolean(formData.checkInDate) && Boolean(formData.checkOutDate)}
                     onChange={onChange}
                 />
             </Grid>

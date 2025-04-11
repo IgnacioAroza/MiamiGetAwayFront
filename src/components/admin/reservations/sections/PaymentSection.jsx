@@ -7,7 +7,7 @@ const PaymentSection = ({ formData, onChange }) => {
             <Grid item xs={12} md={4}>
                 <TextField
                     fullWidth
-                    label="Monto Total"
+                    label="Total Amount"
                     name="totalAmount"
                     type="number"
                     value={formData.totalAmount}
@@ -21,7 +21,7 @@ const PaymentSection = ({ formData, onChange }) => {
             <Grid item xs={12} md={4}>
                 <TextField
                     fullWidth
-                    label="Monto Pagado"
+                    label="Amount Paid"
                     name="amountPaid"
                     type="number"
                     value={formData.amountPaid}
@@ -35,7 +35,7 @@ const PaymentSection = ({ formData, onChange }) => {
             <Grid item xs={12} md={4}>
                 <TextField
                     fullWidth
-                    label="Saldo Pendiente"
+                    label="Amount Due"
                     name="amountDue"
                     type="number"
                     value={formData.amountDue}

@@ -4,11 +4,6 @@ import { useDispatch, useSelector } from 'react-redux';
 import {
     Box,
     Container,
-    Grid,
-    Paper,
-    Typography,
-    Divider,
-    Chip,
     CircularProgress,
     Alert,
     Button,
@@ -19,10 +14,6 @@ import {
     TextField,
     Snackbar
 } from '@mui/material';
-import {
-    Receipt as ReceiptIcon,
-    Email as EmailIcon
-} from '@mui/icons-material';
 import { fetchReservationById, generateReservationPdf, sendReservationConfirmation } from '../redux/reservationSlice';
 import { fetchAdminApartmentById } from '../redux/adminApartmentSlice';
 import PaymentHistory from '../components/admin/payments/PaymentHistory';
@@ -57,7 +48,7 @@ const ReservationDetailsPage = () => {
     useEffect(() => {
         if (reservation) {
             // Buscar el ID del apartamento en diferentes formatos posibles
-            const apartmentId = reservation.apartment_id
+            const apartmentId = reservation.apartmentId || reservation.apartment_id;
             
             if (apartmentId) {
                 dispatch(fetchAdminApartmentById(apartmentId));
@@ -191,45 +182,6 @@ const ReservationDetailsPage = () => {
         bathrooms: 'N/A',
         bedrooms: 'N/A',
         capacity: 'N/A'
-    };
-
-    // Funciones para manejar la generación y envío de PDF
-    const handleGeneratePdfClick = async () => {
-        try {
-            // Primero ejecutamos un diagnóstico para verificar los datos
-            const reservationService = await import('../services/reservationService').then(module => module.default);
-            
-            const diagnosis = await reservationService.diagnosePdfGeneration(id);
-            
-            if (!diagnosis.success) {
-                // Mostrar advertencia pero continuar con la generación del PDF
-                setSnackbar({
-                    open: true,
-                    message: `Advertencia: ${diagnosis.message}. Se intentará generar el PDF de todos modos.`,
-                    severity: 'warning'
-                });
-            }
-            
-            // Llamar al thunk que inicia la descarga directa del PDF
-            await dispatch(generateReservationPdf({ id })).unwrap();
-            
-            setSnackbar({
-                open: true,
-                message: 'Descarga de PDF iniciada',
-                severity: 'success'
-            });
-        } catch (error) {
-            setSnackbar({
-                open: true,
-                message: 'Error al generar el PDF: ' + (error.message || 'Error desconocido'),
-                severity: 'error'
-            });
-        }
-    };
-
-    const handleSendEmailClick = () => {
-        setEmail(normalizedReservation.clientEmail || '');
-        setOpenEmailDialog(true);
     };
 
     const handleSendEmail = async () => {

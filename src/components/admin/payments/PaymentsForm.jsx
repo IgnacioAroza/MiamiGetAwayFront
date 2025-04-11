@@ -55,7 +55,7 @@ const PaymentForm = ({ open, onClose }) => {
                 paymentMethod: selectedPayment.paymentMethod,
                 paymentReference: selectedPayment.paymentReference || '',
                 notes: selectedPayment.notes || '',
-                reservationId: selectedPayment.reservationId.toString()
+                reservationId: selectedPayment.reservationId
             });
         }
     }, [selectedPayment]);

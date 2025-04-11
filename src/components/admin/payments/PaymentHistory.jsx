@@ -89,10 +89,10 @@ const PaymentHistory = ({ payments = [], reservationId }) => {
 
     // Normalizar los nombres de propiedades para diferentes formatos
     const normalizedPayments = loadedPayments.map(payment => ({
-        id: payment.id || Math.random().toString(36),
-        date: payment.date || payment.paymentDate || payment.payment_date || payment.created_at || new Date().toISOString(),
-        method: payment.method || payment.paymentMethod || payment.payment_method || 'N/A',
-        reference: payment.reference || payment.paymentReference || payment.payment_reference || '-',
+        id: payment.id,
+        date: payment.payment_date,
+        method: payment.payment_method || 'N/A',
+        reference: payment.notes || '-',
         amount: payment.amount || 0
     }));
 
@@ -119,10 +119,10 @@ const PaymentHistory = ({ payments = [], reservationId }) => {
                     <Table size="small">
                         <TableHead>
                             <TableRow>
-                                <TableCell>Fecha</TableCell>
-                                <TableCell>Método</TableCell>
-                                <TableCell>Referencia</TableCell>
-                                <TableCell align="right">Monto</TableCell>
+                                <TableCell>Date</TableCell>
+                                <TableCell>Method</TableCell>
+                                <TableCell>Reference</TableCell>
+                                <TableCell align="right">Amount</TableCell>
                             </TableRow>
                         </TableHead>
                         <TableBody>

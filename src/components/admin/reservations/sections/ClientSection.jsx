@@ -61,7 +61,7 @@ const ClientSection = ({
                     getOptionLabel={getFullName}
                     value={selectedClient}
                     onChange={handleClientSelectChange}
-                    TextField={(params) => (
+                    renderInput={(params) => (
                         <TextField
                             {...params}
                             label="Select Existing Client"
