@@ -193,14 +193,16 @@ const PaymentsList = () => {
     const formatDate = (dateString) => {
         if (!dateString) return 'N/A';
         try {
-            return new Date(dateString).toLocaleDateString('es-ES', {
+            const date = new Date(dateString);
+            if (isNaN(date.getTime())) return 'N/A';
+            return date.toLocaleDateString('es-ES', {
                 year: 'numeric',
                 month: 'long',
                 day: 'numeric'
             });
         } catch (error) {
             console.error('Error al formatear la fecha:', error);
-            return 'Fecha inválida';
+            return 'N/A';
         }
     };
 
@@ -229,7 +231,7 @@ const PaymentsList = () => {
             'PAYPAL': 'PayPal'
         };
 
-        return methodMap[method.toLowerCase()] || method;
+        return methodMap[method] || method;
     };
 
     if (loading) {

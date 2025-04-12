@@ -20,12 +20,13 @@ import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns';
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 import { es } from 'date-fns/locale';
-import { createPayment, updatePayment } from '../../../redux/reservationPaymentSlice';
+import { createPayment, updatePayment, fetchAllPayments } from '../../../redux/reservationPaymentSlice';
 
 const PAYMENT_METHODS = [
-    { value: 'cash', label: 'Efectivo' },
-    { value: 'transfer', label: 'Transferencia' },
-    { value: 'card', label: 'Tarjeta' }
+    { value: 'cash', label: 'Cash' },
+    { value: 'transfer', label: 'Bank Transfer' },
+    { value: 'card', label: 'Card' },
+    { value: 'paypal', label: 'Paypal' }
 ];
 
 const PaymentForm = ({ open, onClose }) => {
@@ -36,11 +37,12 @@ const PaymentForm = ({ open, onClose }) => {
     // Estado del formulario
     const [formData, setFormData] = useState({
         amount: '',
-        paymentDate: new Date(),
-        paymentMethod: 'cash',
-        paymentReference: '',
+        payment_date: new Date(),
+        payment_method: 'CASH',
+        payment_reference: '',
         notes: '',
-        reservationId: ''
+        reservation_id: '',
+        client_id: ''
     });
 
     // Estado de errores
@@ -49,13 +51,27 @@ const PaymentForm = ({ open, onClose }) => {
     // Cargar datos si es edición
     useEffect(() => {
         if (selectedPayment) {
-            setFormData({
-                amount: selectedPayment.amount.toString(),
-                paymentDate: new Date(selectedPayment.paymentDate),
-                paymentMethod: selectedPayment.paymentMethod,
-                paymentReference: selectedPayment.paymentReference || '',
+            // Normalizar los datos del pago seleccionado
+            const normalizedPayment = {
+                amount: selectedPayment.amount?.toString() || '',
+                payment_date: selectedPayment.payment_date ? new Date(selectedPayment.payment_date) : null,
+                payment_method: selectedPayment.payment_method || 'CASH',
+                payment_reference: selectedPayment.payment_reference || '',
                 notes: selectedPayment.notes || '',
-                reservationId: selectedPayment.reservationId
+                reservation_id: selectedPayment.reservation_id?.toString() || '',
+                client_id: selectedPayment.client_id?.toString() || ''
+            };
+            setFormData(normalizedPayment);
+        } else {
+            // Resetear el formulario si no hay pago seleccionado
+            setFormData({
+                amount: '',
+                payment_date: new Date(),
+                payment_method: 'CASH',
+                payment_reference: '',
+                notes: '',
+                reservation_id: '',
+                client_id: ''
             });
         }
     }, [selectedPayment]);
@@ -68,20 +84,20 @@ const PaymentForm = ({ open, onClose }) => {
             newErrors.amount = 'Enter a valid amount';
         }
 
-        if (!formData.paymentDate) {
-            newErrors.paymentDate = 'Select a date';
+        if (!formData.payment_date) {
+            newErrors.payment_date = 'Select a date';
         }
 
-        if (!formData.paymentMethod) {
-            newErrors.paymentMethod = 'Select a payment method';
+        if (!formData.payment_method) {
+            newErrors.payment_method = 'Select a payment method';
         }
 
-        if (!formData.reservationId) {
-            newErrors.reservationId = 'Enter the reservation ID';
+        if (!formData.reservation_id) {
+            newErrors.reservation_id = 'Enter the reservation ID';
         }
 
-        if (formData.paymentMethod === 'transfer' && !formData.paymentReference) {
-            newErrors.paymentReference = 'Enter the transfer reference';
+        if (formData.payment_method === 'transfer' && !formData.payment_reference) {
+            newErrors.payment_reference = 'Enter the transfer reference';
         }
 
         setErrors(newErrors);
@@ -107,12 +123,12 @@ const PaymentForm = ({ open, onClose }) => {
     const handleDateChange = (date) => {
         setFormData(prev => ({
             ...prev,
-            paymentDate: date
+            payment_date: date
         }));
-        if (errors.paymentDate) {
+        if (errors.payment_date) {
             setErrors(prev => ({
                 ...prev,
-                paymentDate: undefined
+                payment_date: undefined
             }));
         }
     };
@@ -125,28 +141,35 @@ const PaymentForm = ({ open, onClose }) => {
         }
 
         const paymentData = {
-            ...formData,
             amount: parseFloat(formData.amount),
-            reservationId: parseInt(formData.reservationId)
+            payment_date: formData.payment_date ? formData.payment_date.toISOString().split('T')[0] : null,
+            payment_method: formData.payment_method,
+            payment_reference: formData.payment_reference || null,
+            notes: formData.notes || null,
+            reservation_id: parseInt(formData.reservation_id),
+            client_id: selectedPayment?.client_id || null
         };
 
         try {
             if (selectedPayment) {
-                await dispatch(updatePayment({ 
+                const result = await dispatch(updatePayment({ 
                     id: selectedPayment.id, 
                     paymentData 
                 })).unwrap();
+                // Recargar la lista de pagos después de la actualización
+                await dispatch(fetchAllPayments()).unwrap();
             } else {
                 await dispatch(createPayment(paymentData)).unwrap();
             }
             onClose();
             setFormData({
                 amount: '',
-                paymentDate: new Date(),
-                paymentMethod: 'cash',
-                paymentReference: '',
+                payment_date: new Date(),
+                payment_method: 'CASH',
+                payment_reference: '',
                 notes: '',
-                reservationId: ''
+                reservation_id: '',
+                client_id: ''
             });
         } catch (error) {
             setErrors(prev => ({
@@ -159,11 +182,12 @@ const PaymentForm = ({ open, onClose }) => {
     const handleClose = () => {
         setFormData({
             amount: '',
-            paymentDate: new Date(),
-            paymentMethod: 'cash',
-            paymentReference: '',
+            payment_date: new Date(),
+            payment_method: 'CASH',
+            payment_reference: '',
             notes: '',
-            reservationId: ''
+            reservation_id: '',
+            client_id: ''
         });
         setErrors({});
         onClose();
@@ -192,14 +216,14 @@ const PaymentForm = ({ open, onClose }) => {
                         
                         <Grid item xs={12}>
                             <TextField
-                                name="reservationId"
+                                name="reservation_id"
                                 label="Reservation ID"
                                 fullWidth
-                                value={formData.reservationId}
+                                value={formData.reservation_id}
                                 onChange={handleChange}
-                                error={!!errors.reservationId}
-                                helperText={errors.reservationId}
-                                disabled={loading}
+                                error={!!errors.reservation_id}
+                                helperText={errors.reservation_id}
+                                disabled
                             />
                         </Grid>
 
@@ -224,14 +248,14 @@ const PaymentForm = ({ open, onClose }) => {
                             <LocalizationProvider dateAdapter={AdapterDateFns} adapterLocale={es}>
                                 <DatePicker
                                     label="Payment Date"
-                                    value={formData.paymentDate}
+                                    value={formData.payment_date}
                                     onChange={handleDateChange}
                                     TextField={(params) => (
                                         <TextField
                                             {...params}
                                             fullWidth
-                                            error={!!errors.paymentDate}
-                                            helperText={errors.paymentDate}
+                                            error={!!errors.payment_date}
+                                            helperText={errors.payment_date}
                                         />
                                     )}
                                     disabled={loading}
@@ -242,12 +266,12 @@ const PaymentForm = ({ open, onClose }) => {
                         <Grid item xs={12}>
                             <FormControl 
                                 fullWidth 
-                                error={!!errors.paymentMethod}
+                                error={!!errors.payment_method}
                             >
                                 <InputLabel>Payment Method</InputLabel>
                                 <Select
-                                    name="paymentMethod"
-                                    value={formData.paymentMethod}
+                                    name="payment_method"
+                                    value={formData.payment_method}
                                     onChange={handleChange}
                                     disabled={loading}
                                 >
@@ -260,24 +284,24 @@ const PaymentForm = ({ open, onClose }) => {
                                         </MenuItem>
                                     ))}
                                 </Select>
-                                {errors.paymentMethod && (
+                                {errors.payment_method && (
                                     <FormHelperText>
-                                        {errors.paymentMethod}
+                                        {errors.payment_method}
                                     </FormHelperText>
                                 )}
                             </FormControl>
                         </Grid>
 
-                        {formData.paymentMethod === 'transfer' && (
+                        {formData.payment_method === 'transfer' && (
                             <Grid item xs={12}>
                                 <TextField
-                                    name="paymentReference"
+                                    name="payment_reference"
                                     label="Payment Reference"
                                     fullWidth
-                                    value={formData.paymentReference}
+                                    value={formData.payment_reference}
                                     onChange={handleChange}
-                                    error={!!errors.paymentReference}
-                                    helperText={errors.paymentReference}
+                                    error={!!errors.payment_reference}
+                                    helperText={errors.payment_reference}
                                     disabled={loading}
                                 />
                             </Grid>
