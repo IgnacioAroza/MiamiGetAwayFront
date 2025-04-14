@@ -43,16 +43,40 @@ const ReservationList = ({ filter = {} }) => {
     const [order, setOrder] = useState('desc');
     const [activeFilters, setActiveFilters] = useState({});
     
+    // Función para ordenar las reservas localmente
+    const sortReservations = (reservations, orderBy, order) => {
+        return [...reservations].sort((a, b) => {
+            let aValue = a[orderBy];
+            let bValue = b[orderBy];
+
+            // Si es una fecha, convertir a timestamp
+            if (orderBy === 'created_at' || orderBy === 'check_in_date' || orderBy === 'check_out_date') {
+                aValue = new Date(aValue).getTime();
+                bValue = new Date(bValue).getTime();
+            }
+
+            // Si es un número, convertir a número
+            if (orderBy === 'total_amount' || orderBy === 'id') {
+                aValue = Number(aValue);
+                bValue = Number(bValue);
+            }
+
+            if (order === 'asc') {
+                return aValue > bValue ? 1 : -1;
+            } else {
+                return aValue < bValue ? 1 : -1;
+            }
+        });
+    };
+    
     // Cargar reservas al montar el componente o cuando cambian los filtros
     useEffect(() => {
         const combinedFilters = { 
             ...filter, 
-            ...activeFilters,
-            orderBy,
-            order
+            ...activeFilters
         };
         dispatch(fetchReservations(combinedFilters));
-    }, [dispatch, filter, activeFilters, orderBy, order]);
+    }, [dispatch, filter, activeFilters]);
     
     // Cargar todos los apartamentos al montar el componente
     useEffect(() => {
@@ -77,11 +101,15 @@ const ReservationList = ({ filter = {} }) => {
         loadApartments();
     }, []);
     
+    // Obtener las reservas ordenadas
+    const sortedReservations = sortReservations(reservations, orderBy, order);
+    
     // Función para cambiar la ordenación
     const handleRequestSort = (property) => {
         const isAsc = orderBy === property && order === 'asc';
         setOrder(isAsc ? 'desc' : 'asc');
         setOrderBy(property);
+        setPage(0); // Resetear la página cuando cambia la ordenación
     };
     
     // Función para aplicar filtros
@@ -294,12 +322,12 @@ const ReservationList = ({ filter = {} }) => {
                             <TableRow>
                                 <TableCell colSpan={10} align="center">Loading...</TableCell>
                             </TableRow>
-                        ) : !reservations || reservations.length === 0 ? (
+                        ) : !sortedReservations || sortedReservations.length === 0 ? (
                             <TableRow>
                                 <TableCell colSpan={10} align="center">No reservations found</TableCell>
                             </TableRow>
                         ) : (
-                            reservations
+                            sortedReservations
                                 .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
                                 .map((reservation) => (
                                     <TableRow key={reservation.id} hover>
@@ -373,7 +401,7 @@ const ReservationList = ({ filter = {} }) => {
                 <TablePagination
                     rowsPerPageOptions={[5, 10, 25]}
                     component="div"
-                    count={reservations ? reservations.length : 0}
+                    count={sortedReservations ? sortedReservations.length : 0}
                     rowsPerPage={rowsPerPage}
                     page={page}
                     onPageChange={handleChangePage}
