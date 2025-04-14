@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import {
     Grid,
     Typography,
@@ -9,9 +9,6 @@ import {
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns';
 import { es } from 'date-fns/locale';
-import { useDispatch, useSelector } from 'react-redux';
-import { fetchAdminApartments, selectAllApartments } from '../../../redux/adminApartmentSlice';
-import { fetchUsers, selectAllUsers, selectUserStatus } from '../../../redux/userSlice';
 
 // Componentes
 import ApartmentSection from './sections/ApartmentSection';
@@ -20,279 +17,22 @@ import ClientSection from './sections/ClientSection';
 import PricingSection from './sections/PricingSection';
 import PaymentSection from './sections/PaymentSection';
 import StatusSection from './sections/StatusSection';
+import NotesSection from './sections/NotesSection';
+import { useReservationForm } from '../../../hooks/useReservationForm';
 
 const ReservationForm = ({ initialData, onSubmit }) => {
-    const dispatch = useDispatch();
-    const apartments = useSelector(selectAllApartments);
-    const apartmentsStatus = useSelector(state => state.adminApartments.status);
-    const clients = useSelector(selectAllUsers);
-    const clientsStatus = useSelector(selectUserStatus);
-    
-    const [formData, setFormData] = useState({
-        // Datos del apartamento
-        apartmentId: '',
-        name: '',
-        unitNumber: '',
-        
-        // Datos del cliente
-        clientId: '',
-        clientName: '',
-        clientEmail: '',
-        clientPhone: '',
-        clientAddress: '',
-        clientCity: '',
-        clientCountry: '',
-        clientNotes: '',
-        
-        // Fechas
-        checkInDate: null,
-        checkOutDate: null,
-        
-        // Precios y pagos
-        price: 0,
-        nights: 0,
-        cleaningFee: 0,
-        parkingFee: 0,
-        otherExpenses: 0,
-        taxes: 0,
-        totalAmount: 0,
-        amountPaid: 0,
-        amountDue: 0,
-        
-        // Estado
-        status: 'pending',
-        paymentStatus: 'pending',
-    });
-
-    const [selectedApartment, setSelectedApartment] = useState(null);
-    const [selectedClient, setSelectedClient] = useState(null);
-
-    // Cargar datos iniciales
-    useEffect(() => {
-        if (apartmentsStatus === 'idle') {
-            dispatch(fetchAdminApartments());
-        }
-        
-        if (clientsStatus === 'idle') {
-            dispatch(fetchUsers());
-        }
-    }, [dispatch, apartmentsStatus, clientsStatus]);
-
-    // Cargar datos iniciales si los hay
-    useEffect(() => {
-        if (initialData) {            
-            // Adaptar datos del servidor al formato del formulario
-            const formattedData = {
-                // IDs y relaciones
-                apartmentId: initialData.apartmentId?.toString() || '',
-                name: initialData.apartmentName || '',
-                unitNumber: initialData.unitNumber || '',
-                
-                // Datos del cliente
-                clientId: initialData.clientId?.toString() || '',
-                clientName: initialData.clientName ? `${initialData.clientName} ${initialData.clientLastname || ''}` : '',
-                clientEmail: initialData.clientEmail || '',
-                clientPhone: initialData.clientPhone || '',
-                clientAddress: initialData.clientAddress || '',
-                clientCity: initialData.clientCity || '',
-                clientCountry: initialData.clientCountry || '',
-                clientNotes: initialData.clientNotes || '',
-                
-                // Fechas
-                checkInDate: initialData.checkInDate ? new Date(initialData.checkInDate) : null,
-                checkOutDate: initialData.checkOutDate ? new Date(initialData.checkOutDate) : null,
-                
-                // Precios y pagos
-                price: parseFloat(initialData.pricePerNight) || 0,
-                nights: initialData.nights || 0,
-                cleaningFee: parseFloat(initialData.cleaningFee) || 0,
-                parkingFee: parseFloat(initialData.parkingFee) || 0,
-                otherExpenses: parseFloat(initialData.otherExpenses) || 0,
-                taxes: parseFloat(initialData.taxes) || 0,
-                totalAmount: parseFloat(initialData.totalAmount) || 0,
-                amountPaid: parseFloat(initialData.amountPaid) || 0,
-                amountDue: parseFloat(initialData.amountDue) || 0,
-                
-                // Estado
-                status: initialData.status || 'pending',
-                paymentStatus: initialData.paymentStatus || 'pending',
-            };
-            
-            setFormData(formattedData);
-            
-            if (initialData.apartmentId) {
-                const apartment = apartments.find(apt => apt.id === parseInt(initialData.apartmentId));
-                if (apartment) {
-                    setSelectedApartment(apartment);
-                }
-            }
-            
-            if (initialData.clientId) {
-                const client = clients.find(c => c.id === parseInt(initialData.clientId));
-                if (client) {
-                    setSelectedClient(client);
-                }
-            }
-        }
-    }, [initialData, apartments, clients]);
-
-    // Calcular noches cuando cambian las fechas
-    useEffect(() => {
-        if (formData.checkInDate && formData.checkOutDate) {
-            // Asegurar que los objetos son Date
-            const checkIn = new Date(formData.checkInDate);
-            const checkOut = new Date(formData.checkOutDate);
-            
-            // Calcular la diferencia en milisegundos
-            const differenceMs = checkOut - checkIn;
-            
-            // Convertir a días (86400000 = 24 * 60 * 60 * 1000)
-            const nights = Math.max(1, Math.round(differenceMs / 86400000));
-            
-            setFormData(prev => ({
-                ...prev,
-                nights
-            }));
-        }
-    }, [formData.checkInDate, formData.checkOutDate]);
-
-    // Calcular precios
-    useEffect(() => {
-        if (formData.nights > 0 && formData.price > 0) {
-            // Convertir strings a numbers para evitar problemas de cálculo
-            const price = Number(formData.price);
-            const nights = Number(formData.nights);
-            const cleaningFee = Number(formData.cleaningFee) || 0;
-            const parkingFee = Number(formData.parkingFee) || 0;
-            const otherExpenses = Number(formData.otherExpenses) || 0;
-            const amountPaid = Number(formData.amountPaid) || 0;
-            
-            // Calcular subtotal (alojamiento + extras)
-            const accommodationTotal = price * nights;
-            const subtotal = accommodationTotal + cleaningFee + parkingFee + otherExpenses;
-            
-            // Calcular impuestos
-            const taxRate = 0.07;
-            const taxes = subtotal * taxRate;
-            
-            // Calcular total y saldo pendiente
-            const total = subtotal + taxes;
-            const due = total - amountPaid;
-            
-            // Determinar estado de pago basado en el saldo pendiente
-            let paymentStatus = 'pending';
-            if (due <= 0) {
-                paymentStatus = 'complete';
-            } else if (amountPaid > 0) {
-                paymentStatus = 'partial';
-            }
-            
-            // Actualizar SOLO los campos calculados, no tocar los inputs como parkingFee
-            setFormData(prev => ({
-                ...prev,
-                taxes: parseFloat(taxes.toFixed(2)),
-                totalAmount: parseFloat(total.toFixed(2)),
-                amountDue: parseFloat(due.toFixed(2)),
-                paymentStatus
-            }));
-        }
-    }, [
-        formData.price, 
-        formData.nights, 
-        formData.cleaningFee, 
-        formData.parkingFee, 
-        formData.otherExpenses,
-        formData.amountPaid
-    ]);
-
-    // Manejar cambios en el formulario
-    const handleChange = (event) => {
-        const { name, value } = event.target;
-        
-        if (name === 'apartmentId') {
-            const apartment = apartments.find(apt => apt.id === value);
-            if (apartment) {
-                setSelectedApartment(apartment);
-                setFormData(prev => ({
-                    ...prev,
-                    apartmentId: value,
-                    name: apartment.name || '',
-                    unitNumber: apartment.unitNumber || '',
-                    price: apartment.price || 0,
-                    cleaningFee: apartment.cleaningFee || 0
-                }));
-            } else {
-                setSelectedApartment(null);
-                setFormData(prev => ({
-                    ...prev,
-                    apartmentId: value,
-                    name: '',
-                    unitNumber: '',
-                    price: 0,
-                    cleaningFee: 0
-                }));
-            }
-        } else {
-            // Procesar todos los campos de manera uniforme
-            setFormData(prev => ({
-                ...prev,
-                [name]: value
-            }));
-        }
-    };
-
-    // Manejar cambio de fechas
-    const handleDateChange = (name) => (date) => {
-        setFormData(prev => ({
-            ...prev,
-            [name]: date
-        }));
-    };
-
-    // Manejar selección de cliente
-    const handleClientSelect = (client) => {
-        setSelectedClient(client);
-        if (client) {
-            setFormData(prev => ({
-                ...prev,
-                clientId: client.id,
-                clientName: `${client.firstName} ${client.lastName}`,
-                clientEmail: client.email,
-                clientPhone: client.phone,
-                clientAddress: client.address || '',
-                clientCity: client.city || '',
-                clientCountry: client.country || '',
-                clientNotes: client.notes || ''
-            }));
-        } else {
-            setFormData(prev => ({
-                ...prev,
-                clientId: '',
-                clientName: '',
-                clientEmail: '',
-                clientPhone: '',
-                clientAddress: '',
-                clientCity: '',
-                clientCountry: '',
-                clientNotes: ''
-            }));
-        }
-    };
-
-    // Actualizar datos del cliente desde un cliente recién creado
-    const handleNewClientCreated = (newClient) => {
-        handleClientSelect({
-            id: newClient.id,
-            firstName: newClient.name,
-            lastName: newClient.lastname,
-            email: newClient.email,
-            phone: newClient.phone || '',
-            address: newClient.address || '',
-            city: newClient.city || '',
-            country: newClient.country || '',
-            notes: newClient.notes || ''
-        });
-    };
+    const {
+        formData,
+        selectedApartment,
+        selectedClient,
+        apartments,
+        clients,
+        handleChange,
+        handleDateChange,
+        handleClientSelect,
+        handleNewClientCreated,
+        resetForm
+    } = useReservationForm(initialData);
 
     const handleSubmit = (event) => {
         event.preventDefault();
@@ -316,32 +56,24 @@ const ReservationForm = ({ initialData, onSubmit }) => {
         try {
             // Preparar datos para enviar
             const dataToSubmit = {
-                // ID y relaciones
                 apartmentId: Number(formData.apartmentId),
                 clientId: formData.clientId ? Number(formData.clientId) : undefined,
-                
-                // Fechas
                 checkInDate: formData.checkInDate ? new Date(formData.checkInDate).toISOString() : null,
                 checkOutDate: formData.checkOutDate ? new Date(formData.checkOutDate).toISOString() : null,
                 createdAt: new Date().toISOString(),
-                
-                // Cantidades numéricas - asegurar que sean números, no strings
                 nights: Number(formData.nights),
                 price: Number(formData.price),
                 pricePerNight: Number(formData.price),
                 cleaningFee: Number(formData.cleaningFee) || 0,
-                parkingFee: Number(formData.parkingFee) || 0, // Usar Number explícitamente
+                parkingFee: Number(formData.parkingFee) || 0,
                 otherExpenses: Number(formData.otherExpenses) || 0,
                 taxes: Number(formData.taxes),
                 totalAmount: Number(formData.totalAmount),
                 amountPaid: Number(formData.amountPaid) || 0,
                 amountDue: Number(formData.amountDue),
-                
-                // Estados
                 status: formData.status,
                 paymentStatus: formData.paymentStatus,
-                
-                // Datos adicionales del cliente
+                notes: formData.notes,
                 clientName: formData.clientName,
                 clientEmail: formData.clientEmail,
                 clientPhone: formData.clientPhone,
@@ -351,42 +83,10 @@ const ReservationForm = ({ initialData, onSubmit }) => {
                 clientNotes: formData.clientNotes
             };
             
-            // Llamar a la función de envío proporcionada
             onSubmit(dataToSubmit);
         } catch (error) {
             alert('Error al enviar el formulario');
         }
-    };
-
-    const resetForm = () => {
-        setFormData({
-            apartmentId: '',
-            name: '',
-            unitNumber: '',
-            clientId: '',
-            clientName: '',
-            clientEmail: '',
-            clientPhone: '',
-            clientAddress: '',
-            clientCity: '',
-            clientCountry: '',
-            clientNotes: '',
-            checkInDate: null,
-            checkOutDate: null,
-            price: 0,
-            nights: 0,
-            cleaningFee: 0,
-            parkingFee: 0,
-            otherExpenses: 0,
-            taxes: 0,
-            totalAmount: 0,
-            amountPaid: 0,
-            amountDue: 0,
-            status: 'pending',
-            paymentStatus: 'pending',
-        });
-        setSelectedApartment(null);
-        setSelectedClient(null);
     };
 
     return (
@@ -452,7 +152,20 @@ const ReservationForm = ({ initialData, onSubmit }) => {
                         onChange={handleChange} 
                     />
 
-                    {/* Sección de Pago - Solo mostrar si es creación (initialData NO existe) */}
+                    {/* Sección de Notas */}
+                    <Grid item xs={12}>
+                        <Typography variant="h6" gutterBottom sx={{ mt: 2 }}>
+                            Reservation Notes
+                        </Typography>
+                        <Divider sx={{ mb: 2 }} />
+                    </Grid>
+
+                    <NotesSection
+                        formData={formData}
+                        onChange={handleChange}
+                    />
+
+                    {/* Sección de Pago - Solo mostrar si es creación */}
                     {!initialData && (
                         <>
                             <Grid item xs={12}>

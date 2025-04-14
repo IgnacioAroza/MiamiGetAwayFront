@@ -1,24 +1,34 @@
 import React from 'react';
 import {
     Grid,
-    TextField,
-    MenuItem,
     FormControl,
     InputLabel,
     Select,
+    MenuItem,
     Card,
     CardMedia,
     Typography,
     Box
 } from '@mui/material';
+import { useApartmentImages } from '../../../../hooks/useApartmentImages';
 
 const ApartmentSection = ({ formData, apartments, selectedApartment, onChange }) => {
-    // Obtener la URL de la primera imagen o imagen por defecto
-    const getApartmentImage = () => {
-        if (selectedApartment && selectedApartment.images && selectedApartment.images.length > 0) {
-            return selectedApartment.images[0];
+    const { getApartmentDetails } = useApartmentImages(selectedApartment);
+    const apartmentDetails = getApartmentDetails();
+
+    // Manejar cambio de apartamento
+    const handleApartmentChange = (event) => {
+        const { value } = event.target;
+        const apartment = apartments.find(apt => apt.id === parseInt(value));
+        
+        if (apartment) {
+            onChange({
+                target: {
+                    name: 'apartmentId',
+                    value: value
+                }
+            });
         }
-        return 'https://via.placeholder.com/150?text=No+Image';
     };
 
     return (
@@ -29,13 +39,13 @@ const ApartmentSection = ({ formData, apartments, selectedApartment, onChange })
                     <Select
                         name="apartmentId"
                         value={formData.apartmentId}
-                        onChange={onChange}
+                        onChange={handleApartmentChange}
                         label="Apartment"
                     >
                         <MenuItem value="">Select...</MenuItem>
                         {apartments.map((apartment) => (
                             <MenuItem key={apartment.id} value={apartment.id}>
-                                {apartment.name} - {apartment.unitNumber}
+                                {apartment.name} - {apartment.unitNumber || 'N/A'}
                             </MenuItem>
                         ))}
                     </Select>
@@ -43,27 +53,27 @@ const ApartmentSection = ({ formData, apartments, selectedApartment, onChange })
             </Grid>
 
             {/* Mostrar información del apartamento seleccionado */}
-            {selectedApartment && (
+            {apartmentDetails && (
                 <Grid item xs={12} md={6}>
                     <Card sx={{ display: 'flex', height: '100%' }}>
                         <CardMedia
                             component="img"
                             sx={{ width: 120, height: 120, objectFit: 'cover' }}
-                            image={getApartmentImage()}
-                            alt={selectedApartment.building_name}
+                            image={apartmentDetails.image}
+                            alt={apartmentDetails.alt}
                         />
                         <Box sx={{ display: 'flex', flexDirection: 'column', pl: 2, pt: 1 }}>
                             <Typography variant="h6">
-                                {selectedApartment.name}
+                                {apartmentDetails.name}
                             </Typography>
                             <Typography variant="body2" color="text.secondary">
-                                Unit: {selectedApartment.unitNumber}
+                                Unit: {apartmentDetails.unitNumber}
                             </Typography>
                             <Typography variant="body2" color="text.secondary">
-                                Capacity: {selectedApartment.capacity} people
+                                Capacity: {apartmentDetails.capacity} people
                             </Typography>
                             <Typography variant="body2" color="primary">
-                                ${selectedApartment.price} per night
+                                ${apartmentDetails.price} per night
                             </Typography>
                         </Box>
                     </Card>

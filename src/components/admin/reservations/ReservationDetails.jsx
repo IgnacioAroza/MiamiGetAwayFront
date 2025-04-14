@@ -62,13 +62,13 @@ const ReservationDetails = ({ reservation, apartmentLoading, apartmentError, apa
             await handleGeneratePdf(reservation.id);
             setSnackbar({
                 open: true,
-                message: 'PDF generado con éxito',
+                message: 'PDF generated successfully',
                 severity: 'success'
             });
         } catch (error) {
             setSnackbar({
                 open: true,
-                message: 'Error al generar el PDF: ' + error.message,
+                message: 'Error generating the PDF: ' + error.message,
                 severity: 'error'
             });
         }
@@ -85,13 +85,13 @@ const ReservationDetails = ({ reservation, apartmentLoading, apartmentError, apa
             setOpenEmailDialog(false);
             setSnackbar({
                 open: true,
-                message: 'Email enviado con éxito',
+                message: 'Email sent successfully',
                 severity: 'success'
             });
         } catch (error) {
             setSnackbar({
                 open: true,
-                message: 'Error al enviar el email: ' + error.message,
+                message: 'Error sending the email: ' + error.message,
                 severity: 'error'
             });
         }
@@ -105,13 +105,13 @@ const ReservationDetails = ({ reservation, apartmentLoading, apartmentError, apa
             });
             setSnackbar({
                 open: true,
-                message: 'Confirmación enviada con éxito',
+                message: 'Confirmation sent successfully',
                 severity: 'success'
             });
         } catch (error) {
             setSnackbar({
                 open: true,
-                message: 'Error al enviar la confirmación: ' + error.message,
+                message: 'Error sending the confirmation: ' + error.message,
                 severity: 'error'
             });
         }
@@ -178,6 +178,7 @@ const ReservationDetails = ({ reservation, apartmentLoading, apartmentError, apa
                         <Typography>Check-in: {formatDate(reservation?.checkIn)}</Typography>
                         <Typography>Check-out: {formatDate(reservation?.checkOut)}</Typography>
                         <Typography>Nights: {reservation?.nights}</Typography>
+                        <Typography>Notes: {reservation?.notes}</Typography>
                     </Paper>
                 </Grid>
 
@@ -217,7 +218,7 @@ const ReservationDetails = ({ reservation, apartmentLoading, apartmentError, apa
                     <Grid item xs={12}>
                         <Paper variant="outlined" sx={{ p: 2 }}>
                             <Typography variant="h6" gutterBottom>
-                                Notas
+                                Reservation Notes
                             </Typography>
                             <Typography>{reservation?.notes}</Typography>
                         </Paper>
@@ -227,13 +228,13 @@ const ReservationDetails = ({ reservation, apartmentLoading, apartmentError, apa
 
             {/* Diálogo para enviar email */}
             <Dialog open={openEmailDialog} onClose={() => setOpenEmailDialog(false)}>
-                <DialogTitle>Enviar Reserva por Email</DialogTitle>
+                <DialogTitle>Send Reservation by Email</DialogTitle>
                 <DialogContent>
                     <TextField
                         autoFocus
                         margin="dense"
                         id="email"
-                        label="Correo Electrónico"
+                        label="Email"
                         type="email"
                         fullWidth
                         variant="outlined"
@@ -242,10 +243,10 @@ const ReservationDetails = ({ reservation, apartmentLoading, apartmentError, apa
                     />
                 </DialogContent>
                 <DialogActions>
-                    <Button onClick={() => setOpenEmailDialog(false)}>Cancelar</Button>
-                    <Button onClick={handleSendEmail} variant="contained">Enviar PDF</Button>
+                    <Button onClick={() => setOpenEmailDialog(false)}>Cancel</Button>
+                    <Button onClick={handleSendEmail} variant="contained">Send PDF</Button>
                     <Button onClick={handleSendConfirmationEmail} color="secondary" variant="contained">
-                        Enviar Confirmación
+                        Send Confirmation
                     </Button>
                 </DialogActions>
             </Dialog>

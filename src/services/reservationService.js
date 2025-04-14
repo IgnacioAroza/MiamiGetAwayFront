@@ -6,7 +6,7 @@ const reservationService = {
             const response = await api.get('/reservations', { params: filters });
             return response.data;
         } catch (error) {
-            console.error('Error al obtener reservas:', error);
+            console.error('Error in getAll:', error);
             throw error.response?.data?.message || 'Error fetching reservations';
         }
     },
@@ -16,9 +16,9 @@ const reservationService = {
             const response = await api.get(`/reservations/${id}`);
             return response.data;
         } catch (error) {
-            console.error("Error en getById:", error);
+            console.error("Error in getById:", error);
             if (error.response) {
-                console.error("Detalles del error:", error.response.data);
+                console.error("Error in getById:", error.response.data);
             }
             throw error.response?.data?.message || 'Error fetching reservation by id';
         }
@@ -47,6 +47,9 @@ const reservationService = {
                 totalAmount: reservationData.totalAmount !== undefined ? Number(reservationData.totalAmount) : undefined,
                 amountPaid: reservationData.amountPaid !== undefined ? Number(reservationData.amountPaid) : undefined,
                 amountDue: reservationData.amountDue !== undefined ? Number(reservationData.amountDue) : undefined,
+
+                // Notas
+                notes: reservationData.notes,
 
                 // Estados
                 status: reservationData.status,
@@ -121,6 +124,9 @@ const reservationService = {
                 amountPaid: reservationData.amountPaid !== undefined ? Number(reservationData.amountPaid) : undefined,
                 amountDue: reservationData.amountDue !== undefined ? Number(reservationData.amountDue) : undefined,
 
+                // Notas
+                notes: reservationData.notes,
+
                 // Estados
                 status: reservationData.status,
                 paymentStatus: reservationData.paymentStatus,
@@ -147,10 +153,10 @@ const reservationService = {
 
             return response.data;
         } catch (error) {
-            console.error("Error en update:", error);
+            console.error("Error in update:", error);
             if (error.response) {
                 console.error("Status:", error.response.status);
-                console.error("Detalles del error:", error.response.data);
+                console.error("Error in update:", error.response.data);
             }
             throw error.response?.data?.message || error.message || 'Error updating reservation';
         }
