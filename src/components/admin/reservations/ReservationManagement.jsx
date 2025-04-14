@@ -5,6 +5,7 @@ import { Box, Container, Grid, Paper, Typography, Button, Alert, Snackbar } from
 import { ArrowBack as ArrowBackIcon } from '@mui/icons-material';
 import { fetchReservationById, updateReservation, createReservation, registerPayment } from '../../../redux/reservationSlice';
 import ReservationForm from './ReservationForm';
+import PaymentSummary from '../payments/PaymentSummary';
 import reservationService from '../../../services/reservationService';
 
 const ReservationManagement = () => {
@@ -406,8 +407,19 @@ const ReservationManagement = () => {
                                 <ReservationForm
                                     initialData={selectedReservation}
                                     onSubmit={handleSubmit}
+                                    onUpdateFees={updateDirectly}
                                 />
                             </Paper>
+                        </Grid>
+                        <Grid item xs={12} md={4}>
+                            {selectedReservation && (
+                                <Paper elevation={3} sx={{ p: 3 }}>
+                                    <PaymentSummary
+                                        reservation={selectedReservation}
+                                        onPaymentRegistered={() => dispatch(fetchReservationById(id))}
+                                    />
+                                </Paper>
+                            )}
                         </Grid>
                     </Grid>
                 )}

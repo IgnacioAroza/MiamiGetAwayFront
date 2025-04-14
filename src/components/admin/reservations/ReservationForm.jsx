@@ -84,51 +84,51 @@ const ReservationForm = ({ initialData, onSubmit }) => {
             // Adaptar datos del servidor al formato del formulario
             const formattedData = {
                 // IDs y relaciones
-                apartmentId: initialData.apartment_id?.toString() || '',
-                name: initialData.apartment_name || '',
-                unitNumber: initialData.unit_number || '',
+                apartmentId: initialData.apartmentId?.toString() || '',
+                name: initialData.apartmentName || '',
+                unitNumber: initialData.unitNumber || '',
                 
                 // Datos del cliente
-                clientId: initialData.client_id?.toString() || '',
-                clientName: initialData.client_name ? `${initialData.client_name} ${initialData.client_lastname || ''}` : '',
-                clientEmail: initialData.client_email || '',
-                clientPhone: initialData.client_phone || '',
-                clientAddress: initialData.client_address || '',
-                clientCity: initialData.client_city || '',
-                clientCountry: initialData.client_country || '',
-                clientNotes: initialData.client_notes || '',
+                clientId: initialData.clientId?.toString() || '',
+                clientName: initialData.clientName ? `${initialData.clientName} ${initialData.clientLastname || ''}` : '',
+                clientEmail: initialData.clientEmail || '',
+                clientPhone: initialData.clientPhone || '',
+                clientAddress: initialData.clientAddress || '',
+                clientCity: initialData.clientCity || '',
+                clientCountry: initialData.clientCountry || '',
+                clientNotes: initialData.clientNotes || '',
                 
                 // Fechas
-                checkInDate: initialData.check_in_date ? new Date(initialData.check_in_date) : null,
-                checkOutDate: initialData.check_out_date ? new Date(initialData.check_out_date) : null,
+                checkInDate: initialData.checkInDate ? new Date(initialData.checkInDate) : null,
+                checkOutDate: initialData.checkOutDate ? new Date(initialData.checkOutDate) : null,
                 
                 // Precios y pagos
-                price: parseFloat(initialData.price_per_night) || 0,
+                price: parseFloat(initialData.pricePerNight) || 0,
                 nights: initialData.nights || 0,
-                cleaningFee: parseFloat(initialData.cleaning_fee) || 0,
-                parkingFee: parseFloat(initialData.parking_fee) || 0,
-                otherExpenses: parseFloat(initialData.other_expenses) || 0,
+                cleaningFee: parseFloat(initialData.cleaningFee) || 0,
+                parkingFee: parseFloat(initialData.parkingFee) || 0,
+                otherExpenses: parseFloat(initialData.otherExpenses) || 0,
                 taxes: parseFloat(initialData.taxes) || 0,
-                totalAmount: parseFloat(initialData.total_amount) || 0,
-                amountPaid: parseFloat(initialData.amount_paid) || 0,
-                amountDue: parseFloat(initialData.amount_due) || 0,
+                totalAmount: parseFloat(initialData.totalAmount) || 0,
+                amountPaid: parseFloat(initialData.amountPaid) || 0,
+                amountDue: parseFloat(initialData.amountDue) || 0,
                 
                 // Estado
                 status: initialData.status || 'pending',
-                paymentStatus: initialData.payment_status || 'pending',
+                paymentStatus: initialData.paymentStatus || 'pending',
             };
             
             setFormData(formattedData);
             
-            if (initialData.apartment_id) {
-                const apartment = apartments.find(apt => apt.id === parseInt(initialData.apartment_id));
+            if (initialData.apartmentId) {
+                const apartment = apartments.find(apt => apt.id === parseInt(initialData.apartmentId));
                 if (apartment) {
                     setSelectedApartment(apartment);
                 }
             }
             
-            if (initialData.client_id) {
-                const client = clients.find(c => c.id === parseInt(initialData.client_id));
+            if (initialData.clientId) {
+                const client = clients.find(c => c.id === parseInt(initialData.clientId));
                 if (client) {
                     setSelectedClient(client);
                 }
