@@ -32,6 +32,8 @@ const PaymentSummary = ({ reservation, onPaymentRegistered }) => {
         { value: 'card', label: 'Credit Card' },
         { value: 'transfer', label: 'Bank Transfer' },
         { value: 'paypal', label: 'PayPal' },
+        { value: 'zelle', label: 'Zelle' },
+        { value: 'stripe', label: 'Stripe' },
         { value: 'other', label: 'Other' }
     ];
 
@@ -59,11 +61,11 @@ const PaymentSummary = ({ reservation, onPaymentRegistered }) => {
 
             // Verificar que los montos sean válidos
             if (isNaN(newAmountPaid) || newAmountPaid < 0) {
-                throw new Error('El nuevo monto pagado no es válido');
+                throw new Error('The new paid amount is not valid');
             }
             
             if (isNaN(newAmountDue) || newAmountDue < 0) {
-                throw new Error('El nuevo monto pendiente no es válido');
+                throw new Error('The new pending amount is not valid');
             }
 
             // Determinar el nuevo estado de pago según la documentación
@@ -121,7 +123,7 @@ const PaymentSummary = ({ reservation, onPaymentRegistered }) => {
                     navigate('/admin/reservations');
                 }, 1500);
             } catch (error) {
-                let errorMessage = 'Error al actualizar el pago';
+                let errorMessage = 'Error updating the payment';
                 if (error.response?.data?.error) {
                     errorMessage = error.response.data.error;
                 }

@@ -42,7 +42,7 @@ const ReservationSummary = ({ reservation }) => {
             <Box display="flex" alignItems="center" mb={3}>
                 <ReceiptIcon sx={{ mr: 1 }} />
                 <Typography variant="h6">
-                    Resumen de Pagos
+                    Payment Summary
                 </Typography>
             </Box>
 
@@ -52,7 +52,7 @@ const ReservationSummary = ({ reservation }) => {
                 <Grid item xs={12}>
                     <Box display="flex" justifyContent="space-between" mb={1}>
                         <Typography>
-                            {nights} {nights === 1 ? 'Noche' : 'Noches'} x {formatCurrency(pricePerNight)}
+                            {nights} {nights === 1 ? 'Night' : 'Nights'} x {formatCurrency(pricePerNight)}
                         </Typography>
                         <Typography>
                             {formatCurrency(subtotal)}
@@ -65,7 +65,7 @@ const ReservationSummary = ({ reservation }) => {
                     <Grid item xs={12}>
                         <Box display="flex" justifyContent="space-between" mb={1}>
                             <Typography>
-                                Cargo por Limpieza
+                                Cleaning Fee
                             </Typography>
                             <Typography>
                                 {formatCurrency(cleaningFee)}
@@ -79,7 +79,7 @@ const ReservationSummary = ({ reservation }) => {
                     <Grid item xs={12}>
                         <Box display="flex" justifyContent="space-between" mb={1}>
                             <Typography>
-                                Cargo por Estacionamiento
+                                Parking Fee
                             </Typography>
                             <Typography>
                                 {formatCurrency(parkingFee)}
@@ -93,7 +93,7 @@ const ReservationSummary = ({ reservation }) => {
                     <Grid item xs={12}>
                         <Box display="flex" justifyContent="space-between" mb={1}>
                             <Typography>
-                                Otros Gastos
+                                Other Expenses
                             </Typography>
                             <Typography>
                                 {formatCurrency(otherExpenses)}
@@ -118,7 +118,7 @@ const ReservationSummary = ({ reservation }) => {
                 <Grid item xs={12}>
                     <Box display="flex" justifyContent="space-between" mb={1}>
                         <Typography>
-                            Impuestos (7%)
+                            Taxes (7%)
                         </Typography>
                         <Typography>
                             {formatCurrency(taxes)}
@@ -146,7 +146,7 @@ const ReservationSummary = ({ reservation }) => {
                 <Grid item xs={12}>
                     <Box display="flex" justifyContent="space-between" mb={1}>
                         <Typography>
-                            Monto Pagado
+                            Paid Amount
                         </Typography>
                         <Typography color="success.main">
                             {formatCurrency(amountPaid)}
@@ -159,7 +159,7 @@ const ReservationSummary = ({ reservation }) => {
                     <Paper sx={{ p: 2, bgcolor: 'background.default' }}>
                         <Box display="flex" justifyContent="space-between" mb={1}>
                             <Typography fontWeight="bold">
-                                Saldo Pendiente
+                                Pending Balance
                             </Typography>
                             <Typography fontWeight="bold" color={amountDue > 0 ? "error.main" : "success.main"}>
                                 {formatCurrency(amountDue)}

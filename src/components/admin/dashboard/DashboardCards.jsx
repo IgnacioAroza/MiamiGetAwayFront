@@ -11,35 +11,35 @@ import {
 const DashboardCards = ({ stats, onCardClick }) => {
   const dashboardItems = [
     {
-      title: 'Usuarios',
+      title: 'Users',
       count: stats.totalUsers,
       icon: <PeopleIcon sx={{ fontSize: 40 }} />,
       color: '#1976d2',
       path: '/admin/users'
     },
     {
-      title: 'Apartamentos',
+      title: 'Apartments',
       count: stats.totalApartments,
       icon: <ApartmentIcon sx={{ fontSize: 40 }} />,
       color: '#2e7d32',
       path: '/admin/apartments'
     },
     {
-      title: 'Reservaciones',
+      title: 'Reservations',
       count: stats.totalReservations,
       icon: <BookOnlineIcon sx={{ fontSize: 40 }} />,
       color: '#ed6c02',
       path: '/admin/reservations'
     },
     {
-      title: 'Pagos',
+      title: 'Payments',
       count: stats.totalPayments,
       icon: <PaymentIcon sx={{ fontSize: 40 }} />,
       color: '#9c27b0',
       path: '/admin/payments'
     },
     {
-      title: 'Reseñas',
+      title: 'Reviews',
       count: stats.totalReviews,
       icon: <ReviewsIcon sx={{ fontSize: 40 }} />,
       color: '#d32f2f',

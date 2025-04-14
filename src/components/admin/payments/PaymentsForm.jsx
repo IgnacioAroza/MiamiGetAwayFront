@@ -26,7 +26,10 @@ const PAYMENT_METHODS = [
     { value: 'cash', label: 'Cash' },
     { value: 'transfer', label: 'Bank Transfer' },
     { value: 'card', label: 'Card' },
-    { value: 'paypal', label: 'Paypal' }
+    { value: 'paypal', label: 'Paypal' },
+    { value: 'zelle', label: 'Zelle' },
+    { value: 'stripe', label: 'Stripe' },
+    { value: 'other', label: 'Other' }
 ];
 
 const PaymentForm = ({ open, onClose }) => {

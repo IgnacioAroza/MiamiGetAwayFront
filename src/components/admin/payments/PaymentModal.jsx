@@ -73,6 +73,9 @@ const PaymentModal = ({ open, onClose, reservationId, totalAmount }) => {
                                 <MenuItem value="CREDIT_CARD">Credit Card</MenuItem>
                                 <MenuItem value="BANK_TRANSFER">Bank Transfer</MenuItem>
                                 <MenuItem value="PAYPAL">PayPal</MenuItem>
+                                <MenuItem value="ZELLE">Zelle</MenuItem>
+                                <MenuItem value="STRIPE">Stripe</MenuItem>
+                                <MenuItem value="OTHER">Other</MenuItem>
                             </Select>
                         </FormControl>
                     </Grid>

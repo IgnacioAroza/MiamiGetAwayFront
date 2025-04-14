@@ -210,7 +210,7 @@ const ReservationList = ({ filter = {} }) => {
     return (
         <Box sx={{ p: 3 }}>
             <Typography variant="h5" gutterBottom component="div" sx={{ mb: 3 }}>
-                Historial de Reservas
+                Reservation History
             </Typography>
             
             {/* Componente de filtros */}
@@ -226,7 +226,7 @@ const ReservationList = ({ filter = {} }) => {
                         color="primary"
                         onClick={handleAddReservation}
                     >
-                        Nueva Reserva
+                        New Reservation
                     </Button>
                 </Grid>
             </Grid>
@@ -246,8 +246,8 @@ const ReservationList = ({ filter = {} }) => {
                                     ID
                                 </TableSortLabel>
                             </TableCell>
-                            <TableCell>Cliente</TableCell>
-                            <TableCell>Apartamento</TableCell>
+                            <TableCell>Client</TableCell>
+                            <TableCell>Apartment</TableCell>
                             <TableCell>
                                 <TableSortLabel
                                     active={orderBy === 'check_in_date'}
@@ -275,28 +275,28 @@ const ReservationList = ({ filter = {} }) => {
                                     Total
                                 </TableSortLabel>
                             </TableCell>
-                            <TableCell>Estado</TableCell>
-                            <TableCell>Pago</TableCell>
+                            <TableCell>Status</TableCell>
+                            <TableCell>Payment</TableCell>
                             <TableCell>
                                 <TableSortLabel
                                     active={orderBy === 'created_at'}
                                     direction={orderBy === 'created_at' ? order : 'asc'}
                                     onClick={() => handleRequestSort('created_at')}
                                 >
-                                    Fecha Creación
+                                    Creation Date
                                 </TableSortLabel>
                             </TableCell>
-                            <TableCell align="right">Acciones</TableCell>
+                            <TableCell align="right">Actions</TableCell>
                         </TableRow>
                     </TableHead>
                     <TableBody>
                         {loading ? (
                             <TableRow>
-                                <TableCell colSpan={10} align="center">Cargando...</TableCell>
+                                <TableCell colSpan={10} align="center">Loading...</TableCell>
                             </TableRow>
                         ) : !reservations || reservations.length === 0 ? (
                             <TableRow>
-                                <TableCell colSpan={10} align="center">No se encontraron reservas</TableCell>
+                                <TableCell colSpan={10} align="center">No reservations found</TableCell>
                             </TableRow>
                         ) : (
                             reservations
@@ -337,7 +337,7 @@ const ReservationList = ({ filter = {} }) => {
                                         </TableCell>
                                         <TableCell>{formatDate(reservation.created_at || reservation.createdAt)}</TableCell>
                                         <TableCell align="right">
-                                            <Tooltip title="Ver detalles">
+                                            <Tooltip title="View details">
                                                 <IconButton 
                                                     size="small" 
                                                     onClick={() => handleViewClick(reservation)}
@@ -346,7 +346,7 @@ const ReservationList = ({ filter = {} }) => {
                                                     <VisibilityIcon />
                                                 </IconButton>
                                             </Tooltip>
-                                            <Tooltip title="Editar">
+                                            <Tooltip title="Edit">
                                                 <IconButton 
                                                     size="small" 
                                                     onClick={() => handleEditClick(reservation)}
@@ -355,7 +355,7 @@ const ReservationList = ({ filter = {} }) => {
                                                     <EditIcon />
                                                 </IconButton>
                                             </Tooltip>
-                                            <Tooltip title="Eliminar">
+                                            <Tooltip title="Delete">
                                                 <IconButton 
                                                     size="small" 
                                                     onClick={() => handleDeleteClick(reservation.id)}
@@ -378,7 +378,7 @@ const ReservationList = ({ filter = {} }) => {
                     page={page}
                     onPageChange={handleChangePage}
                     onRowsPerPageChange={handleChangeRowsPerPage}
-                    labelRowsPerPage="Filas por página:"
+                    labelRowsPerPage="Rows per page:"
                 />
             </TableContainer>
         </Box>

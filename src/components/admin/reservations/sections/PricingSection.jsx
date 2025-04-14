@@ -63,7 +63,6 @@ const PricingSection = ({ formData, onChange }) => {
                     type="number"
                     value={formData.price}
                     onChange={handleNumericChange}
-                    disabled={formData.apartmentId !== ''}
                     InputProps={{
                         startAdornment: '$'
                     }}
@@ -131,7 +130,7 @@ const PricingSection = ({ formData, onChange }) => {
                     name="taxes"
                     type="number"
                     value={formData.taxes}
-                    disabled
+                    onChange={handleNumericChange}
                     InputProps={{
                         startAdornment: '$'
                     }}
@@ -180,7 +179,7 @@ const PricingSection = ({ formData, onChange }) => {
                         </Box>
                         
                         <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
-                            <Typography variant="body2" color="text.primary">Taxes (7%)</Typography>
+                            <Typography variant="body2" color="text.primary">Taxes</Typography>
                             <Typography variant="body2" color="text.primary">${summary.taxes.toFixed(2)}</Typography>
                         </Box>
                         

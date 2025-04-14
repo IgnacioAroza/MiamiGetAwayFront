@@ -223,12 +223,17 @@ const PaymentsList = () => {
             'CASH': 'Cash',
             'transfer': 'Bank Transfer',
             'TRANSFER': 'Bank Transfer',
-            'BANK_TRANSFER': 'Bank Transfer',
             'card': 'Card',
             'CARD': 'Card',
             'CREDIT_CARD': 'Card',
             'paypal': 'PayPal',
-            'PAYPAL': 'PayPal'
+            'PAYPAL': 'PayPal',
+            'zelle': 'Zelle',
+            'ZELLE': 'Zelle',
+            'stripe': 'Stripe',
+            'STRIPE': 'Stripe',
+            'other': 'Other',
+            'OTHER': 'Other'
         };
 
         return methodMap[method] || method;

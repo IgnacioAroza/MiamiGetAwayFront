@@ -6,15 +6,15 @@ const StatusSection = ({ formData, onChange }) => {
         <>
             <Grid item xs={12} md={6}>
                 <FormControl fullWidth>
-                    <InputLabel>Estado</InputLabel>
+                    <InputLabel>Status</InputLabel>
                     <Select
                         name="status"
                         value={formData.status}
                         onChange={onChange}
-                        label="Estado"
+                        label="Status"
                     >
-                        <MenuItem value="pending">Pendiente</MenuItem>
-                        <MenuItem value="confirmed">Confirmada</MenuItem>
+                        <MenuItem value="pending">Pending</MenuItem>
+                        <MenuItem value="confirmed">Confirmed</MenuItem>
                         <MenuItem value="checked_in">Check-in</MenuItem>
                         <MenuItem value="checked_out">Check-out</MenuItem>
                     </Select>
@@ -23,17 +23,17 @@ const StatusSection = ({ formData, onChange }) => {
 
             <Grid item xs={12} md={6}>
                 <FormControl fullWidth>
-                    <InputLabel>Estado de Pago</InputLabel>
+                    <InputLabel>Payment Status</InputLabel>
                     <Select
                         name="paymentStatus"
                         value={formData.paymentStatus}
                         onChange={onChange}
-                        label="Estado de Pago"
+                        label="Payment Status"
                         disabled
                     >
-                        <MenuItem value="pending">Pendiente</MenuItem>
-                        <MenuItem value="partial">Parcial</MenuItem>
-                        <MenuItem value="complete">Completo</MenuItem>
+                        <MenuItem value="pending">Pending</MenuItem>
+                        <MenuItem value="partial">Partial</MenuItem>
+                        <MenuItem value="complete">Complete</MenuItem>
                     </Select>
                 </FormControl>
             </Grid>

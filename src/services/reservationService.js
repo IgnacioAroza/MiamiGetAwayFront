@@ -65,11 +65,11 @@ const reservationService = {
 
             // Validar que los campos requeridos estén presentes
             if (formattedData.pricePerNight === undefined) {
-                throw new Error('El precio por noche es obligatorio');
+                throw new Error('The price per night is required');
             }
 
             if (formattedData.cleaningFee === undefined) {
-                throw new Error('La tarifa de limpieza es obligatoria');
+                throw new Error('The cleaning fee is required');
             }
 
             // Filtrar propiedades undefined para no enviar datos innecesarios
@@ -92,11 +92,11 @@ const reservationService = {
     update: async (id, reservationData) => {
         try {
             if (!id) {
-                throw new Error('Se requiere el ID de la reserva');
+                throw new Error('The reservation ID is required');
             }
 
             if (!reservationData) {
-                throw new Error('No se proporcionaron datos para actualizar la reserva');
+                throw new Error('No data provided to update the reservation');
             }
 
             // Mantener camelCase como espera el backend
@@ -169,7 +169,7 @@ const reservationService = {
         try {
             // Verificar que tenemos los datos necesarios
             if (!paymentData || !paymentData.amount) {
-                throw new Error('Se requiere al menos el monto del pago');
+                throw new Error('The payment amount is required');
             }
 
             // Verificar si hay datos para actualizar la reserva
@@ -194,17 +194,17 @@ const reservationService = {
                 const response = await api.post(`/reservations/${id}/payments`, formattedData);
                 return response.data;
             } catch (apiError) {
-                console.error("Error en la petición API:", apiError);
+                console.error("Error in the API request:", apiError);
                 if (apiError.response) {
-                    console.error("Código de respuesta:", apiError.response.status);
-                    console.error("Datos de respuesta:", apiError.response.data);
+                    console.error("Response code:", apiError.response.status);
+                    console.error("Response data:", apiError.response.data);
                 }
                 throw apiError;
             }
         } catch (error) {
-            console.error("Error al registrar pago:", error);
+            console.error("Error registering payment:", error);
             if (error.response) {
-                console.error("Detalles del error:", error.response.data);
+                console.error("Error details:", error.response.data);
                 console.error("Status:", error.response.status);
             }
             throw error.response?.data?.message || error.message || 'Error registering payment';
@@ -238,7 +238,7 @@ const reservationService = {
             const token = localStorage.getItem('adminToken');
 
             if (!token) {
-                throw new Error('No hay token de autenticación disponible. Por favor inicie sesión nuevamente.');
+                throw new Error('No authentication token available. Please log in again.');
             }
 
             // Primero obtener todos los datos de la reserva
@@ -311,7 +311,7 @@ const reservationService = {
             const token = localStorage.getItem('adminToken');
 
             if (!token) {
-                throw new Error('No hay token de autenticación disponible. Por favor inicie sesión nuevamente.');
+                throw new Error('No authentication token available. Please log in again.');
             }
 
             // Usar directamente el endpoint que genera y envía el PDF
@@ -322,7 +322,7 @@ const reservationService = {
             // Retornar un objeto con información sobre el resultado
             return {
                 success: true,
-                message: 'PDF enviado exitosamente por correo electrónico',
+                message: 'PDF sent successfully by email',
                 email: email,
                 id: id
             };
@@ -343,7 +343,7 @@ const reservationService = {
     updatePaymentStatus: async (id, paymentData) => {
         try {
             if (!id) {
-                throw new Error('Se requiere el ID de la reserva');
+                throw new Error('The reservation ID is required');
             }
 
             const data = {
@@ -362,12 +362,12 @@ const reservationService = {
     simpleRegisterPayment: async (id, amount, method = 'cash') => {
         try {
             if (!id) {
-                throw new Error('Se requiere el ID de la reserva');
+                throw new Error('The reservation ID is required');
             }
 
             const numericAmount = parseFloat(amount);
             if (isNaN(numericAmount) || numericAmount <= 0) {
-                throw new Error('El monto del pago debe ser positivo');
+                throw new Error('The payment amount must be positive');
             }
 
             const data = {
@@ -388,7 +388,7 @@ const reservationService = {
     updateParkingFee: async (id, parkingFee) => {
         try {
             if (!id) {
-                throw new Error('Se requiere el ID de la reserva');
+                throw new Error('The reservation ID is required');
             }
 
             // Convertir a número
@@ -412,7 +412,7 @@ const reservationService = {
     updateCleaningFee: async (id, cleaningFee) => {
         try {
             if (!id) {
-                throw new Error('Se requiere el ID de la reserva');
+                throw new Error('The reservation ID is required');
             }
 
             // Convertir a número
@@ -439,7 +439,7 @@ const reservationService = {
     updateOtherExpenses: async (id, otherExpenses) => {
         try {
             if (!id) {
-                throw new Error('Se requiere el ID de la reserva');
+                throw new Error('The reservation ID is required');
             }
 
             // Convertir a número
@@ -466,7 +466,7 @@ const reservationService = {
     updateFees: async (id, feeData) => {
         try {
             if (!id) {
-                throw new Error('Se requiere el ID de la reserva');
+                throw new Error('The reservation ID is required');
             }
 
             // Crear objeto solo con los campos de tarifas en formato camelCase para el backend
@@ -519,7 +519,7 @@ const reservationService = {
     diagnosePdfGeneration: async (id) => {
         // 1. Verificar que tenemos un ID válido
         if (!id) {
-            throw new Error('Se requiere el ID de la reserva');
+            throw new Error('The reservation ID is required');
         }
 
         // 2. Obtener datos completos de la reserva para verificar
@@ -603,8 +603,8 @@ const reservationService = {
             apartmentData,
             missingFields,
             message: missingFields.length === 0
-                ? 'Todos los datos necesarios están presentes'
-                : `Faltan campos necesarios: ${missingFields.join(', ')}`
+                ? 'All necessary data is present'
+                : `Missing required fields: ${missingFields.join(', ')}`
         };
     },
 }

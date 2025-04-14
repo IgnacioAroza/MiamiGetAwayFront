@@ -12,7 +12,7 @@ const ReservationsPage = () => {
         <Container maxWidth="xl">
             <Box py={3}>
                 <Typography variant="h4" component="h1" gutterBottom>
-                    Gestión de Reservas
+                    Reservation Management
                 </Typography>
                 
                 <Paper>
