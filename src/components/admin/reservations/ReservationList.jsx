@@ -147,9 +147,13 @@ const ReservationList = ({ filter = {} }) => {
             confirmed: 'success',
             cancelled: 'error',
             completed: 'info',
-            'ON_RENT': 'success',
-            'BOOKED': 'primary',
+            checked_in: 'warning',
+            checked_out: 'info',
+            'ON_RENT': 'warning',
+            'BOOKED': 'success',
             'PENDING': 'warning',
+            'CHECKED_IN': 'warning',
+            'CHECKED_OUT': 'info',
         };
         return statusColors[status] || 'default';
     };

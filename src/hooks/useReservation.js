@@ -33,7 +33,16 @@ export const useReservation = () => {
     };
 
     const handleSendConfirmation = ({ id, notificationType = 'confirmation' }) => {
-        return dispatch(sendReservationConfirmation({ id, notificationType }));
+        return dispatch(sendReservationConfirmation({
+            id,
+            notificationType,
+            onSuccess: () => {
+                console.log(`Notification ${notificationType} sent successfully`);
+            },
+            onError: (error) => {
+                console.error(`Error sending the notification ${notificationType}:`, error);
+            }
+        }));
     };
 
     return {

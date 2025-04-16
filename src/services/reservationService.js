@@ -302,12 +302,38 @@ const reservationService = {
 
     sendConfirmation: async (id, notificationType = 'confirmation') => {
         try {
+            // Validar el tipo de notificación
+            const validTypes = ['confirmation', 'status_update', 'payment'];
+            if (!validTypes.includes(notificationType)) {
+                throw new Error('Invalid notification type');
+            }
+
             const response = await api.post(`/reservations/${id}/send-notification`, {
                 type: notificationType
             });
             return response.data;
         } catch (error) {
-            throw error.response?.data?.message || 'Error sending confirmation';
+            if (error.response) {
+                const status = error.response.status;
+                const message = error.response.data?.error || error.response.data?.message;
+
+                switch (status) {
+                    case 404:
+                        throw new Error('The reservation does not have an associated email address');
+                    case 400:
+                        if (message.includes('email')) {
+                            throw new Error('Invalid email format');
+                        } else if (message.includes('notification type')) {
+                            throw new Error('Invalid notification type');
+                        }
+                        throw new Error(message || 'Error in the request');
+                    case 500:
+                        throw new Error('Server error sending the notification');
+                    default:
+                        throw new Error(message || 'Error sending the confirmation');
+                }
+            }
+            throw error;
         }
     },
 

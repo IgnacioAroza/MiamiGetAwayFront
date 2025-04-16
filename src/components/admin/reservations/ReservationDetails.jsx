@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
     Box,
     Paper,
@@ -14,12 +14,17 @@ import {
     TextField,
     Snackbar,
     Alert,
-    CircularProgress
+    CircularProgress,
+    Menu,
+    MenuItem,
+    ListItemIcon,
+    ListItemText
 } from '@mui/material';
 import {
-    Person as PersonIcon,
     Email as EmailIcon,
-    Receipt as ReceiptIcon
+    Receipt as ReceiptIcon,
+    Update as UpdateIcon,
+    Payment as PaymentIcon
 } from '@mui/icons-material';
 import { useReservation } from '../../../hooks/useReservation';
 import ReservationSummary from '../payments/ReservationSummary';
@@ -33,6 +38,21 @@ const ReservationDetails = ({ reservation, apartmentLoading, apartmentError, apa
         message: '',
         severity: 'success'
     });
+    const [anchorEl, setAnchorEl] = useState(null);
+    const [loading, setLoading] = useState(false);
+    const [redirectTimer, setRedirectTimer] = useState(null);
+    const [successTimer, setSuccessTimer] = useState(null);
+
+    useEffect(() => {
+        return () => {
+            if (redirectTimer) {
+                clearTimeout(redirectTimer);
+            }
+            if (successTimer) {
+                clearTimeout(successTimer);
+            }
+        };
+    }, [redirectTimer, successTimer]);
 
     const formatDate = (date) => {
         if (!date) return 'N/A';
@@ -49,76 +69,94 @@ const ReservationDetails = ({ reservation, apartmentLoading, apartmentError, apa
             CONFIRMED: 'success',
             CANCELLED: 'error',
             COMPLETED: 'info',
+            CHECKED_IN: 'warning',
+            CHECKED_OUT: 'info',
             pending: 'warning',
             confirmed: 'success',
             cancelled: 'error',
             completed: 'info',
+            checked_in: 'warning',
+            checked_out: 'info',
         };
         return statusColors[status] || 'default';
     };
 
-    const handleGeneratePdfClick = async () => {
-        try {
-            await handleGeneratePdf(reservation.id);
-            setSnackbar({
-                open: true,
-                message: 'PDF generated successfully',
-                severity: 'success'
-            });
-        } catch (error) {
-            setSnackbar({
-                open: true,
-                message: 'Error generating the PDF: ' + error.message,
-                severity: 'error'
-            });
-        }
+    const handleSuccess = (message) => {
+        setSnackbar({
+            open: true,
+            message: message,
+            severity: 'success'
+        });
+        setTimeout(() => {
+            setSnackbar(prev => ({ ...prev }));
+        }, 100);
     };
 
-    const handleSendEmailClick = () => {
-        setEmail(reservation?.clientEmail || '');
-        setOpenEmailDialog(true);
+    const handleError = (error) => {
+        setSnackbar({
+            open: true,
+            message: error.message || 'Error in the operation',
+            severity: 'error'
+        });
+        setTimeout(() => {
+            setSnackbar(prev => ({ ...prev }));
+        }, 100);
+    };
+
+    const handleGeneratePdfClick = async () => {
+        try {
+            setLoading(true);
+            await handleGeneratePdf(reservation.id);
+            handleSuccess('PDF generated successfully');
+        } catch (error) {
+            handleError(error);
+        } finally {
+            setLoading(false);
+        }
     };
 
     const handleSendEmail = async () => {
         try {
+            setLoading(true);
             await handleGeneratePdf(reservation.id, email);
             setOpenEmailDialog(false);
-            setSnackbar({
-                open: true,
-                message: 'Email sent successfully',
-                severity: 'success'
-            });
+            handleSuccess('Email sent successfully');
         } catch (error) {
-            setSnackbar({
-                open: true,
-                message: 'Error sending the email: ' + error.message,
-                severity: 'error'
-            });
+            handleError(error);
+        } finally {
+            setLoading(false);
         }
     };
 
-    const handleSendConfirmationEmail = async () => {
+    const handleMenuClick = (event) => {
+        setAnchorEl(event.currentTarget);
+    };
+
+    const handleMenuClose = () => {
+        setAnchorEl(null);
+    };
+
+    const handleSendNotification = async (type) => {
         try {
+            setLoading(true);
             await handleSendConfirmation({
                 id: reservation.id,
-                notificationType: 'confirmation'
+                notificationType: type
             });
-            setSnackbar({
-                open: true,
-                message: 'Confirmation sent successfully',
-                severity: 'success'
-            });
+            handleSuccess(`Notification ${type} sent successfully`);
         } catch (error) {
-            setSnackbar({
-                open: true,
-                message: 'Error sending the confirmation: ' + error.message,
-                severity: 'error'
-            });
+            handleError(error);
+        } finally {
+            setLoading(false);
+            handleMenuClose();
         }
     };
 
-    const handleCloseSnackbar = () => {
-        setSnackbar({ ...snackbar, open: false });
+    const handleCloseSnackbar = (event, reason) => {
+        if (reason === 'clickaway') {
+            return;
+        }
+        setSnackbar(prev => ({ ...prev, open: false }));
     };
 
     return (
@@ -138,18 +176,54 @@ const ReservationDetails = ({ reservation, apartmentLoading, apartmentError, apa
                         variant="contained" 
                         startIcon={<ReceiptIcon />}
                         onClick={handleGeneratePdfClick}
+                        disabled={loading}
                     >
-                        Generate PDF
+                        {loading ? <CircularProgress size={24} /> : 'Generate PDF'}
                     </Button>
-                    <Button 
-                        variant="outlined" 
+                    <Button
+                        variant="contained"
+                        color="primary"
                         startIcon={<EmailIcon />}
-                        onClick={handleSendEmailClick}
+                        onClick={handleMenuClick}
+                        disabled={loading}
                     >
-                        Send Email
+                        Send Emails
                     </Button>
                 </Box>
             </Box>
+
+            <Menu
+                anchorEl={anchorEl}
+                open={Boolean(anchorEl)}
+                onClose={handleMenuClose}
+                anchorOrigin={{
+                    vertical: 'bottom',
+                    horizontal: 'right',
+                }}
+                transformOrigin={{
+                    vertical: 'top',
+                    horizontal: 'right',
+                }}
+            >
+                <MenuItem onClick={() => handleSendNotification('confirmation')}>
+                    <ListItemIcon>
+                        <EmailIcon fontSize="small" />
+                    </ListItemIcon>
+                    <ListItemText>Send Confirmation</ListItemText>
+                </MenuItem>
+                <MenuItem onClick={() => handleSendNotification('status_update')}>
+                    <ListItemIcon>
+                        <UpdateIcon fontSize="small" />
+                    </ListItemIcon>
+                    <ListItemText>Send Status Update</ListItemText>
+                </MenuItem>
+                <MenuItem onClick={() => handleSendNotification('payment')}>
+                    <ListItemIcon>
+                        <PaymentIcon fontSize="small" />
+                    </ListItemIcon>
+                    <ListItemText>Send Payment Notification</ListItemText>
+                </MenuItem>
+            </Menu>
 
             <Divider sx={{ mb: 3 }} />
 
@@ -196,7 +270,7 @@ const ReservationDetails = ({ reservation, apartmentLoading, apartmentError, apa
                             </Box>
                         ) : apartmentError ? (
                             <Alert severity="error" sx={{ mt: 2, mb: 2 }}>
-                                Error al cargar datos del apartamento: {apartmentError}
+                                Error loading apartment data: {apartmentError}
                             </Alert>
                         ) : (
                             <Box sx={{ mt: 2 }}>
@@ -212,18 +286,6 @@ const ReservationDetails = ({ reservation, apartmentLoading, apartmentError, apa
                 <Grid item xs={12} md={6}>
                     <ReservationSummary reservation={reservation} />
                 </Grid>
-
-                {/* Notas adicionales */}
-                {reservation?.notes && (
-                    <Grid item xs={12}>
-                        <Paper variant="outlined" sx={{ p: 2 }}>
-                            <Typography variant="h6" gutterBottom>
-                                Reservation Notes
-                            </Typography>
-                            <Typography>{reservation?.notes}</Typography>
-                        </Paper>
-                    </Grid>
-                )}
             </Grid>
 
             {/* Diálogo para enviar email */}
@@ -245,9 +307,6 @@ const ReservationDetails = ({ reservation, apartmentLoading, apartmentError, apa
                 <DialogActions>
                     <Button onClick={() => setOpenEmailDialog(false)}>Cancel</Button>
                     <Button onClick={handleSendEmail} variant="contained">Send PDF</Button>
-                    <Button onClick={handleSendConfirmationEmail} color="secondary" variant="contained">
-                        Send Confirmation
-                    </Button>
                 </DialogActions>
             </Dialog>
 
@@ -256,9 +315,24 @@ const ReservationDetails = ({ reservation, apartmentLoading, apartmentError, apa
                 open={snackbar.open} 
                 autoHideDuration={6000} 
                 onClose={handleCloseSnackbar}
-                anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
+                anchorOrigin={{ vertical: 'top', horizontal: 'center' }}
+                sx={{
+                    '& .MuiSnackbar-root': {
+                        top: '24px !important'
+                    }
+                }}
             >
-                <Alert onClose={handleCloseSnackbar} severity={snackbar.severity}>
+                <Alert 
+                    onClose={handleCloseSnackbar} 
+                    severity={snackbar.severity}
+                    sx={{ 
+                        width: '100%',
+                        boxShadow: 3,
+                        '& .MuiAlert-message': {
+                            fontSize: '1rem'
+                        }
+                    }}
+                >
                     {snackbar.message}
                 </Alert>
             </Snackbar>

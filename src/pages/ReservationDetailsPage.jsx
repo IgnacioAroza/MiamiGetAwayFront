@@ -53,14 +53,14 @@ const ReservationDetailsPage = () => {
             if (apartmentId) {
                 dispatch(fetchAdminApartmentById(apartmentId));
             } else {
-                console.error("No se pudo detectar el ID del apartamento en la reserva:", reservation);
+                console.error("The apartment ID could not be detected in the reservation.:", reservation);
             }
         }
     }, [dispatch, reservation]);
 
     useEffect(() => {        
         if (apartmentError) {
-            console.error("Error al cargar los datos del apartamento:", apartmentError);
+            console.error("Error loading apartment data:", apartmentError);
         }
     }, [reservation, apartment, adminApartmentState, apartmentError]);
 
@@ -91,30 +91,6 @@ const ReservationDetailsPage = () => {
             </Container>
         );
     }
-
-    const getStatusColor = (status) => {
-        const statusColors = {
-            PENDING: 'warning',
-            CONFIRMED: 'success',
-            CANCELLED: 'error',
-            COMPLETED: 'info',
-            // Agregar todos los posibles estados
-            pending: 'warning',
-            confirmed: 'success',
-            cancelled: 'error',
-            completed: 'info',
-        };
-        return statusColors[status] || 'default';
-    };
-
-    const formatDate = (date) => {
-        if (!date) return 'N/A';
-        return new Date(date).toLocaleDateString('es-ES', {
-            year: 'numeric',
-            month: 'long',
-            day: 'numeric'
-        });
-    };
 
     // Verificar y normalizar los nombres de propiedades para evitar problemas
     const normalizedReservation = {
@@ -151,6 +127,9 @@ const ReservationDetailsPage = () => {
         totalAmount: reservation.totalAmount || reservation.total_amount || 0,
         amountPaid: reservation.amountPaid || reservation.amount_paid || 0,
         amountDue: reservation.amountDue || reservation.amount_due || 0,
+
+        // Notas
+        notes: reservation.notes || '',
         
         // Estados
         status: reservation.status || '',
@@ -176,9 +155,9 @@ const ReservationDetailsPage = () => {
     // Verificación adicional para el fallback
     const apartmentData = apartmentInfo || {
         id: normalizedReservation.apartmentId,
-        name: 'Información no disponible',
-        address: 'Información no disponible',
-        description: 'Información no disponible',
+        name: 'Information not available',
+        address: 'Information not available',
+        description: 'Information not available',
         bathrooms: 'N/A',
         bedrooms: 'N/A',
         capacity: 'N/A'
@@ -188,7 +167,7 @@ const ReservationDetailsPage = () => {
         try {
             // Validar email
             if (!email || !email.includes('@')) {
-                throw new Error('Por favor ingrese un email válido');
+                throw new Error('Please enter a valid email');
             }
             
             // Enviar el PDF por email
@@ -197,13 +176,13 @@ const ReservationDetailsPage = () => {
             setOpenEmailDialog(false);
             setSnackbar({
                 open: true,
-                message: 'Email enviado con éxito',
+                message: 'Email sent successfully',
                 severity: 'success'
             });
         } catch (error) {
             setSnackbar({
                 open: true,
-                message: 'Error al enviar el email: ' + (error.message || 'Error desconocido'),
+                message: 'Error sending email: ' + (error.message || 'Unknown error'),
                 severity: 'error'
             });
         }
@@ -219,13 +198,13 @@ const ReservationDetailsPage = () => {
             setOpenEmailDialog(false);
             setSnackbar({
                 open: true,
-                message: 'Confirmación enviada con éxito',
+                message: 'Confirmation sent successfully',
                 severity: 'success'
             });
         } catch (error) {
             setSnackbar({
                 open: true,
-                message: 'Error al enviar la confirmación: ' + (error.message || 'Error desconocido'),
+                message: 'Error sending confirmation: ' + (error.message || 'Unknown error'),
                 severity: 'error'
             });
         }
@@ -248,13 +227,13 @@ const ReservationDetailsPage = () => {
 
             {/* Diálogo para enviar email */}
             <Dialog open={openEmailDialog} onClose={() => setOpenEmailDialog(false)}>
-                <DialogTitle>Enviar Reserva por Email</DialogTitle>
+                <DialogTitle>Send Reservation by Email</DialogTitle>
                 <DialogContent>
                     <TextField
                         autoFocus
                         margin="dense"
                         id="email"
-                        label="Correo Electrónico"
+                        label="Email"
                         type="email"
                         fullWidth
                         variant="outlined"
@@ -263,10 +242,10 @@ const ReservationDetailsPage = () => {
                     />
                 </DialogContent>
                 <DialogActions>
-                    <Button onClick={() => setOpenEmailDialog(false)}>Cancelar</Button>
-                    <Button onClick={handleSendEmail} variant="contained">Enviar PDF</Button>
+                    <Button onClick={() => setOpenEmailDialog(false)}>Cancel</Button>
+                    <Button onClick={handleSendEmail} variant="contained">Send PDF</Button>
                     <Button onClick={handleSendConfirmationEmail} color="secondary" variant="contained">
-                        Enviar Confirmación
+                        Send Confirmation
                     </Button>
                 </DialogActions>
             </Dialog>

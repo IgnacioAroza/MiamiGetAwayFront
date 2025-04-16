@@ -139,12 +139,14 @@ export const generateReservationPdf = createAsyncThunk(
 
 export const sendReservationConfirmation = createAsyncThunk(
     'reservations/sendConfirmation',
-    async ({ id, notificationType = 'confirmation' }, { rejectWithValue }) => {
+    async ({ id, notificationType = 'confirmation', onSuccess, onError }, { rejectWithValue }) => {
         try {
             const data = await reservationService.sendConfirmation(id, notificationType);
-            return { id, confirmation: data };
+            if (onSuccess) onSuccess();
+            return { id, notificationType, confirmation: data };
         } catch (error) {
-            return rejectWithValue(error.response?.data?.message || 'Error sending confirmation');
+            if (onError) onError(error);
+            return rejectWithValue(error.message || 'Error sending the notification');
         }
     }
 );
@@ -304,13 +306,19 @@ const reservationSlice = createSlice({
             })
             .addCase(sendReservationConfirmation.fulfilled, (state, action) => {
                 state.loading = false;
-                if (state.selectedReservation?.id === action.payload.id) {
-                    state.selectedReservation.confirmation = action.payload.confirmation;
+                const { id, notificationType, confirmation } = action.payload;
+                if (state.selectedReservation?.id === id) {
+                    state.selectedReservation.notifications = state.selectedReservation.notifications || [];
+                    state.selectedReservation.notifications.push({
+                        type: notificationType,
+                        sentAt: new Date().toISOString(),
+                        ...confirmation
+                    });
                 }
             })
             .addCase(sendReservationConfirmation.rejected, (state, action) => {
                 state.loading = false;
-                state.error = action.payload || 'Error al enviar la confirmación';
+                state.error = action.payload || 'Error sending the notification';
             })
             // update payment status
             .addCase(updateReservationPaymentStatus.pending, (state) => {

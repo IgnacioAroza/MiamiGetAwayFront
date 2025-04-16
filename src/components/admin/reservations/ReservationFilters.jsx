@@ -31,10 +31,6 @@ const ReservationFilters = ({ onApplyFilters, onClearFilters }) => {
         { value: 'confirmed', label: 'Confirmed' },
         { value: 'checked_in', label: 'Check-in' },
         { value: 'checked_out', label: 'Check-out' },
-        { value: 'cancelled', label: 'Cancelled' },
-        { value: 'completed', label: 'Completed' },
-        { value: 'ON_RENT', label: 'On Rent' },
-        { value: 'BOOKED', label: 'Booked' }
     ];
 
     const handleFilterChange = (field, value) => {

@@ -18,10 +18,12 @@ import ReceiptIcon from '@mui/icons-material/Receipt';
 import PaymentIcon from '@mui/icons-material/Payment';
 import { useDispatch } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
+import { useReservation } from '../../../hooks/useReservation';
 
 const PaymentSummary = ({ reservation, onPaymentRegistered }) => {
     const dispatch = useDispatch();
     const navigate = useNavigate();
+    const { handleSendConfirmation } = useReservation();
     const [paymentAmount, setPaymentAmount] = useState('');
     const [paymentMethod, setPaymentMethod] = useState('cash');
     const [error, setError] = useState('');
@@ -102,7 +104,17 @@ const PaymentSummary = ({ reservation, onPaymentRegistered }) => {
                     
                     await api.post('/reservation-payments', paymentRecord);
                 } catch (paymentError) {
-                    // No interrumpir el flujo principal si falla el registro del pago
+                    console.error('Error al registrar el pago en el historial:', paymentError);
+                }
+
+                // Enviar notificación de pago por correo
+                try {
+                    await handleSendConfirmation({
+                        id: reservation.id,
+                        notificationType: 'payment'
+                    });
+                } catch (emailError) {
+                    console.error('Error sending the payment notification:', emailError);
                 }
                 
                 // Mostrar mensaje de éxito
