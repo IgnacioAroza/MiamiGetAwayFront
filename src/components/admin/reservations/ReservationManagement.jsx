@@ -70,7 +70,16 @@ const ReservationManagement = () => {
     const handleFormSubmit = async (formData) => {
         try {
             console.log('Enviando datos del formulario:', formData);
-            const response = await reservationService.update(id, formData);
+            let response;
+            
+            if (id) {
+                // Si hay ID, actualizar reserva existente
+                response = await reservationService.update(id, formData);
+            } else {
+                // Si no hay ID, crear nueva reserva
+                response = await reservationService.create(formData);
+            }
+
             setNotification({
                 open: true,
                 message: id ? 'Reservation updated successfully' : 'Reservation created successfully',

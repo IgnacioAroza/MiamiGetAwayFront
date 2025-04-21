@@ -5,6 +5,7 @@ import reviewReducer from './reviewSlice';
 import adminApartmentReducer from './adminApartmentSlice';
 import reservationReducer from './reservationSlice';
 import reservationPaymentReducer from './reservationPaymentSlice';
+import summaryReducer from './summarySlice';
 
 export const store = configureStore({
     reducer: {
@@ -14,6 +15,7 @@ export const store = configureStore({
         adminApartments: adminApartmentReducer,
         reservations: reservationReducer,
         reservationPayments: reservationPaymentReducer,
+        summary: summaryReducer,
     },
 });
 
