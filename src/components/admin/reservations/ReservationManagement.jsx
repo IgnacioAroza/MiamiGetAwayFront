@@ -69,7 +69,6 @@ const ReservationManagement = () => {
     
     const handleFormSubmit = async (formData) => {
         try {
-            console.log('Enviando datos del formulario:', formData);
             let response;
             
             if (id) {
