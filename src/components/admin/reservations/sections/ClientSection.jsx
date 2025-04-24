@@ -1,43 +1,26 @@
-import React, { useState } from 'react';
+import React from 'react';
 import {
     Grid,
     TextField,
     Button,
-    Dialog,
-    DialogTitle,
-    DialogContent,
-    DialogActions,
-    Typography,
-    Autocomplete
+    Autocomplete,
+    IconButton,
 } from '@mui/material';
 import AddIcon from '@mui/icons-material/Add';
-import { useDispatch } from 'react-redux';
-import CreateUser from '../../users/CreateUser';
+import EditIcon from '@mui/icons-material/Edit';
 
 const ClientSection = ({ 
     formData, 
     clients, 
     selectedClient, 
-    onClientSelect, 
-    onNewClientCreated,
-    onChange 
+    onClientSelect,
+    onChange,
+    onOpenNewClient,
+    onOpenEditClient
 }) => {
-    const dispatch = useDispatch();
-    const [openNewClientDialog, setOpenNewClientDialog] = useState(false);
-
     // Formatear nombre completo para el Autocomplete
     const getFullName = (client) => {
         return `${client.firstName} ${client.lastName} (${client.email})`;
-    };
-
-    // Abrir diálogo para nuevo cliente
-    const handleOpenNewClientDialog = () => {
-        setOpenNewClientDialog(true);
-    };
-
-    // Cerrar diálogo de nuevo cliente
-    const handleCloseNewClientDialog = () => {
-        setOpenNewClientDialog(false);
     };
 
     // Manejar selección en Autocomplete
@@ -45,15 +28,9 @@ const ClientSection = ({
         onClientSelect(client);
     };
 
-    // Manejar la creación exitosa de un nuevo cliente
-    const handleClientCreated = (newUser) => {
-        onNewClientCreated(newUser);
-        setOpenNewClientDialog(false);
-    };
-
     return (
         <>
-            {/* Selector de cliente existente */}
+            {/* Selector de cliente existente y botón de nuevo cliente */}
             <Grid item xs={12} md={9}>
                 <Autocomplete
                     id="client-select"
@@ -67,18 +44,27 @@ const ClientSection = ({
                             label="Select Existing Client"
                             variant="outlined"
                             fullWidth
+                            InputProps={{
+                                ...params.InputProps,
+                                endAdornment: selectedClient && (
+                                    <IconButton
+                                        onClick={onOpenEditClient}
+                                        size="small"
+                                    >
+                                        <EditIcon />
+                                    </IconButton>
+                                )
+                            }}
                         />
                     )}
                 />
             </Grid>
-
-            {/* Botón para agregar nuevo cliente */}
             <Grid item xs={12} md={3}>
                 <Button
                     fullWidth
                     variant="outlined"
                     color="primary"
-                    onClick={handleOpenNewClientDialog}
+                    onClick={onOpenNewClient}
                     startIcon={<AddIcon />}
                     sx={{ height: '56px' }}
                 >
@@ -86,6 +72,7 @@ const ClientSection = ({
                 </Button>
             </Grid>
 
+            {/* Campos de información del cliente */}
             <Grid item xs={12} md={6}>
                 <TextField
                     fullWidth
@@ -130,29 +117,6 @@ const ClientSection = ({
                     disabled={selectedClient !== null}
                 />
             </Grid>
-
-            {/* Diálogo para agregar nuevo cliente */}
-            <Dialog 
-                open={openNewClientDialog} 
-                onClose={handleCloseNewClientDialog} 
-                maxWidth="md" 
-                fullWidth
-                PaperProps={{
-                    sx: {
-                        bgcolor: '#1e1e1e',
-                        color: '#fff'
-                    }
-                }}
-            >
-                <DialogTitle>Add New Client</DialogTitle>
-                <DialogContent>
-                    <CreateUser 
-                        isDialog={true}
-                        onSuccess={handleClientCreated}
-                        onCancel={handleCloseNewClientDialog}
-                    />
-                </DialogContent>
-            </Dialog>
         </>
     );
 };

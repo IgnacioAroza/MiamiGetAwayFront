@@ -15,7 +15,7 @@ import {
   CircularProgress
 } from '@mui/material';
 
-const EditUser = () => {
+const EditUser = ({ isDialog = false, onSuccess, onCancel, initialData }) => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const { id } = useParams();
@@ -35,21 +35,35 @@ const EditUser = () => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const loadUser = async () => {
-      try {
-        await dispatch(fetchUserById(id)).unwrap();
-        setLoading(false);
-      } catch (err) {
-        setError('Error al cargar los datos del usuario');
-        setLoading(false);
-      }
-    };
+    if (isDialog && initialData) {
+      setFormData({
+        name: initialData.firstName || initialData.name || '',
+        lastname: initialData.lastName || initialData.lastname || '',
+        email: initialData.email || '',
+        phone: initialData.phone || '',
+        address: initialData.address || '',
+        city: initialData.city || '',
+        country: initialData.country || '',
+        notes: initialData.notes || ''
+      });
+      setLoading(false);
+    } else if (!isDialog) {
+      const loadUser = async () => {
+        try {
+          await dispatch(fetchUserById(id)).unwrap();
+          setLoading(false);
+        } catch (err) {
+          setError('Error al cargar los datos del usuario');
+          setLoading(false);
+        }
+      };
 
-    loadUser();
-  }, [dispatch, id]);
+      loadUser();
+    }
+  }, [dispatch, id, isDialog, initialData]);
 
   useEffect(() => {
-    if (selectedUser) {
+    if (!isDialog && selectedUser) {
       setFormData({
         name: selectedUser.name || '',
         lastname: selectedUser.lastname || '',
@@ -61,7 +75,7 @@ const EditUser = () => {
         notes: selectedUser.notes || ''
       });
     }
-  }, [selectedUser]);
+  }, [selectedUser, isDialog]);
 
   const handleChange = (e) => {
     setFormData({
@@ -73,11 +87,35 @@ const EditUser = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      await dispatch(updateUser({ id, data: formData })).unwrap();
+      const userData = {
+        name: formData.name,
+        lastname: formData.lastname,
+        email: formData.email,
+        phone: formData.phone,
+        address: formData.address,
+        city: formData.city,
+        country: formData.country,
+        notes: formData.notes
+      };
+      
+      const updatedUser = await dispatch(updateUser({ 
+        id: isDialog ? initialData.id : id, 
+        data: userData 
+      })).unwrap();
+      
       setSuccess(true);
-      setTimeout(() => {
-        navigate('/admin/users');
-      }, 2000);
+      
+      if (isDialog && onSuccess) {
+        onSuccess({
+          ...updatedUser,
+          firstName: updatedUser.name,
+          lastName: updatedUser.lastname
+        });
+      } else {
+        setTimeout(() => {
+          navigate('/admin/users');
+        }, 2000);
+      }
     } catch (err) {
       setError(err.message || 'Error al actualizar el usuario');
     }
@@ -91,120 +129,127 @@ const EditUser = () => {
     );
   }
 
+  const renderForm = () => (
+    <Box component="form" onSubmit={handleSubmit} sx={{ mt: 3 }}>
+      <Grid container spacing={3}>
+        <Grid item xs={12} sm={6}>
+          <TextField
+            fullWidth
+            label="First Name"
+            name="name"
+            value={formData.name}
+            onChange={handleChange}
+            required
+          />
+        </Grid>
+        
+        <Grid item xs={12} sm={6}>
+          <TextField
+            fullWidth
+            label="Last Name"
+            name="lastname"
+            value={formData.lastname}
+            onChange={handleChange}
+            required
+          />
+        </Grid>
+        
+        <Grid item xs={12} sm={6}>
+          <TextField
+            fullWidth
+            label="Email"
+            name="email"
+            type="email"
+            value={formData.email}
+            onChange={handleChange}
+            required
+          />
+        </Grid>
+        
+        <Grid item xs={12} sm={6}>
+          <TextField
+            fullWidth
+            label="Phone"
+            name="phone"
+            value={formData.phone}
+            onChange={handleChange}
+          />
+        </Grid>
+        
+        <Grid item xs={12} sm={6}>
+          <TextField
+            fullWidth
+            label="Address"
+            name="address"
+            value={formData.address}
+            onChange={handleChange}
+          />
+        </Grid>
+        
+        <Grid item xs={12} sm={6}>
+          <TextField
+            fullWidth
+            label="City"
+            name="city"
+            value={formData.city}
+            onChange={handleChange}
+          />
+        </Grid>
+        
+        <Grid item xs={12} sm={6}>
+          <TextField
+            fullWidth
+            label="Country"
+            name="country"
+            value={formData.country}
+            onChange={handleChange}
+          />
+        </Grid>
+        
+        <Grid item xs={12}>
+          <TextField
+            fullWidth
+            label="Notes"
+            name="notes"
+            multiline
+            rows={4}
+            value={formData.notes}
+            onChange={handleChange}
+          />
+        </Grid>
+        
+        <Grid item xs={12}>
+          <Box sx={{ display: 'flex', gap: 2, justifyContent: 'flex-end' }}>
+            <Button
+              variant="outlined"
+              onClick={isDialog ? onCancel : () => navigate('/admin/users')}
+            >
+              Cancel
+            </Button>
+            <Button
+              type="submit"
+              variant="contained"
+              color="primary"
+            >
+              Update User
+            </Button>
+          </Box>
+        </Grid>
+      </Grid>
+    </Box>
+  );
+
+  if (isDialog) {
+    return renderForm();
+  }
+
   return (
     <Container maxWidth="md">
       <Paper elevation={3} sx={{ p: 4, mt: 4 }}>
         <Typography variant="h4" component="h1" gutterBottom>
           Edit User
         </Typography>
-        
-        <Box component="form" onSubmit={handleSubmit} sx={{ mt: 3 }}>
-          <Grid container spacing={3}>
-            <Grid item xs={12} sm={6}>
-              <TextField
-                fullWidth
-                label="First Name"
-                name="name"
-                value={formData.name}
-                onChange={handleChange}
-                required
-              />
-            </Grid>
-            
-            <Grid item xs={12} sm={6}>
-              <TextField
-                fullWidth
-                label="Last Name"
-                name="lastname"
-                value={formData.lastname}
-                onChange={handleChange}
-                required
-              />
-            </Grid>
-            
-            <Grid item xs={12} sm={6}>
-              <TextField
-                fullWidth
-                label="Email"
-                name="email"
-                type="email"
-                value={formData.email}
-                onChange={handleChange}
-                required
-              />
-            </Grid>
-            
-            <Grid item xs={12} sm={6}>
-              <TextField
-                fullWidth
-                label="Phone"
-                name="phone"
-                value={formData.phone}
-                onChange={handleChange}
-              />
-            </Grid>
-            
-            <Grid item xs={12} sm={6}>
-              <TextField
-                fullWidth
-                label="Address"
-                name="address"
-                value={formData.address}
-                onChange={handleChange}
-              />
-            </Grid>
-            
-            <Grid item xs={12} sm={6}>
-              <TextField
-                fullWidth
-                label="City"
-                name="city"
-                value={formData.city}
-                onChange={handleChange}
-              />
-            </Grid>
-            
-            <Grid item xs={12} sm={6}>
-              <TextField
-                fullWidth
-                label="Country"
-                name="country"
-                value={formData.country}
-                onChange={handleChange}
-              />
-            </Grid>
-            
-            <Grid item xs={12}>
-              <TextField
-                fullWidth
-                label="Notes"
-                name="notes"
-                multiline
-                rows={4}
-                value={formData.notes}
-                onChange={handleChange}
-              />
-            </Grid>
-            
-            <Grid item xs={12}>
-              <Box sx={{ display: 'flex', gap: 2, justifyContent: 'flex-end' }}>
-                <Button
-                  variant="outlined"
-                  onClick={() => navigate('/admin/users')}
-                >
-                  Cancel
-                </Button>
-                <Button
-                  type="submit"
-                  variant="contained"
-                  color="primary"
-                >
-                  Update User
-                </Button>
-              </Box>
-            </Grid>
-          </Grid>
-        </Box>
+        {renderForm()}
         
         <Snackbar 
           open={!!error} 

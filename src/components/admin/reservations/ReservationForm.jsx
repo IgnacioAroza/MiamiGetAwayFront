@@ -1,10 +1,13 @@
-import React from 'react';
+import React, { useState } from 'react';
 import {
     Grid,
     Typography,
     Divider,
     Box,
     Button,
+    Dialog,
+    DialogTitle,
+    DialogContent,
 } from '@mui/material';
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns';
@@ -18,6 +21,8 @@ import PricingSection from './sections/PricingSection';
 import PaymentSection from './sections/PaymentSection';
 import StatusSection from './sections/StatusSection';
 import NotesSection from './sections/NotesSection';
+import CreateUser from '../users/CreateUser';
+import EditUser from '../users/EditUser';
 import { useReservationForm } from '../../../hooks/useReservationForm';
 
 const ReservationForm = ({ initialData, onSubmit }) => {
@@ -33,6 +38,15 @@ const ReservationForm = ({ initialData, onSubmit }) => {
         handleNewClientCreated,
         resetForm
     } = useReservationForm(initialData);
+
+    const [openNewClientDialog, setOpenNewClientDialog] = useState(false);
+    const [openEditClientDialog, setOpenEditClientDialog] = useState(false);
+
+    // Manejadores de diálogos
+    const handleOpenNewClientDialog = () => setOpenNewClientDialog(true);
+    const handleCloseNewClientDialog = () => setOpenNewClientDialog(false);
+    const handleOpenEditClientDialog = () => setOpenEditClientDialog(true);
+    const handleCloseEditClientDialog = () => setOpenEditClientDialog(false);
 
     const handleSubmit = (event) => {
         event.preventDefault();
@@ -137,6 +151,8 @@ const ReservationForm = ({ initialData, onSubmit }) => {
                         onClientSelect={handleClientSelect}
                         onNewClientCreated={handleNewClientCreated}
                         onChange={handleChange}
+                        onOpenNewClient={handleOpenNewClientDialog}
+                        onOpenEditClient={handleOpenEditClientDialog}
                     />
 
                     {/* Sección de Precios y Extras */}
@@ -212,6 +228,55 @@ const ReservationForm = ({ initialData, onSubmit }) => {
                     </Grid>
                 </Grid>
             </Box>
+
+            {/* Diálogos */}
+            <Dialog 
+                open={openNewClientDialog} 
+                onClose={handleCloseNewClientDialog} 
+                maxWidth="md" 
+                fullWidth
+                PaperProps={{
+                    sx: {
+                        bgcolor: '#1e1e1e',
+                        color: '#fff'
+                    }
+                }}
+            >
+                <DialogTitle>Add New Client</DialogTitle>
+                <DialogContent>
+                    <CreateUser 
+                        isDialog={true}
+                        onSuccess={handleNewClientCreated}
+                        onCancel={handleCloseNewClientDialog}
+                    />
+                </DialogContent>
+            </Dialog>
+
+            <Dialog 
+                open={openEditClientDialog} 
+                onClose={handleCloseEditClientDialog} 
+                maxWidth="md" 
+                fullWidth
+                PaperProps={{
+                    sx: {
+                        bgcolor: '#1e1e1e',
+                        color: '#fff'
+                    }
+                }}
+            >
+                <DialogTitle>Edit Client</DialogTitle>
+                <DialogContent>
+                    <EditUser 
+                        isDialog={true}
+                        onSuccess={(updatedUser) => {
+                            handleClientSelect(updatedUser);
+                            handleCloseEditClientDialog();
+                        }}
+                        onCancel={handleCloseEditClientDialog}
+                        initialData={selectedClient}
+                    />
+                </DialogContent>
+            </Dialog>
         </LocalizationProvider>
     );
 };
