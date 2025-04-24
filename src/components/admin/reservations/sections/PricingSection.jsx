@@ -1,51 +1,82 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { Grid, TextField, Typography, Paper, Box, Divider } from '@mui/material';
 
 const PricingSection = ({ formData, onChange }) => {
+    // Estado para controlar si los taxes han sido modificados manualmente
+    const [taxesModifiedManually, setTaxesModifiedManually] = useState(false);
+
     // Manejar cambios específicos para campos numéricos
     const handleNumericChange = (e) => {
         const { name, value } = e.target;
         
+        // Si el campo modificado es taxes, marcar como modificado manualmente
+        if (name === 'taxes') {
+            setTaxesModifiedManually(true);
+        }
+        
         // NO forzar conversión a número si el campo está vacío
-        // Si está vacío, mantenerlo como cadena vacía para que el usuario pueda borrar el campo
         let processedValue;
         
         if (value === '') {
             processedValue = '';
         } else {
-            // Evitar conversiones innecesarias si ya es un número
             const num = parseFloat(value);
             if (isNaN(num)) {
                 processedValue = 0;
             } else {
-                // Preservar el valor original si es un número válido
-                processedValue = num;
+                // Asegurar que los valores numéricos no sean negativos
+                processedValue = Math.max(0, num);
             }
         }
         
-        // Crear un evento sintético para mantener compatibilidad con el onChange original
-        const syntheticEvent = {
+        onChange({
             target: {
                 name: name,
                 value: processedValue
             }
-        };
-        
-        onChange(syntheticEvent);
+        });
     };
+
+    // Calcular y actualizar taxes automáticamente cuando cambian los valores que afectan al subtotal
+    useEffect(() => {
+        if (!taxesModifiedManually && formData.nights > 0 && formData.price > 0) {
+            const accommodationTotal = formData.nights * formData.price;
+            const cleaningFee = Number(formData.cleaningFee) || 0;
+            const parkingFee = Number(formData.parkingFee) || 0;
+            const otherExpenses = Number(formData.otherExpenses) || 0;
+            const subtotal = accommodationTotal + cleaningFee + parkingFee + otherExpenses;
+            const taxRate = 0.07; // 7%
+            const calculatedTaxes = Math.max(0, subtotal * taxRate); // Asegurar que los taxes calculados no sean negativos
+
+            // Actualizar taxes solo si no han sido modificados manualmente
+            onChange({
+                target: {
+                    name: 'taxes',
+                    value: parseFloat(calculatedTaxes.toFixed(2))
+                }
+            });
+        }
+    }, [formData.nights, formData.price, formData.cleaningFee, formData.parkingFee, formData.otherExpenses, taxesModifiedManually, onChange]);
 
     // Calcular resumen para mostrar
     const calculateSummary = () => {
         if (formData.nights > 0 && formData.price > 0) {
             const accommodationTotal = formData.nights * formData.price;
+            const cleaningFee = Number(formData.cleaningFee) || 0;
+            const parkingFee = Number(formData.parkingFee) || 0;
+            const otherExpenses = Number(formData.otherExpenses) || 0;
+            const subtotal = accommodationTotal + cleaningFee + parkingFee + otherExpenses;
+            const taxes = Math.max(0, Number(formData.taxes) || 0); // Asegurar que los taxes no sean negativos
+            const total = subtotal + taxes;
+
             return {
                 accommodation: accommodationTotal,
-                cleaning: Number(formData.cleaningFee) || 0,
-                parking: Number(formData.parkingFee) || 0,
-                other: Number(formData.otherExpenses) || 0,
-                subtotal: accommodationTotal + Number(formData.cleaningFee) + Number(formData.parkingFee) + Number(formData.otherExpenses),
-                taxes: formData.taxes,
-                total: formData.totalAmount
+                cleaning: cleaningFee,
+                parking: parkingFee,
+                other: otherExpenses,
+                subtotal: subtotal,
+                taxes: taxes,
+                total: total
             };
         }
         return null;
@@ -64,7 +95,8 @@ const PricingSection = ({ formData, onChange }) => {
                     value={formData.price}
                     onChange={handleNumericChange}
                     InputProps={{
-                        startAdornment: '$'
+                        startAdornment: '$',
+                        inputProps: { min: 0 } // Agregar restricción de valor mínimo
                     }}
                 />
             </Grid>
@@ -78,6 +110,9 @@ const PricingSection = ({ formData, onChange }) => {
                     value={formData.nights}
                     disabled={Boolean(formData.checkInDate) && Boolean(formData.checkOutDate)}
                     onChange={onChange}
+                    InputProps={{
+                        inputProps: { min: 1 } // Agregar restricción de valor mínimo
+                    }}
                 />
             </Grid>
 
@@ -90,7 +125,8 @@ const PricingSection = ({ formData, onChange }) => {
                     value={formData.cleaningFee}
                     onChange={handleNumericChange}
                     InputProps={{
-                        startAdornment: '$'
+                        startAdornment: '$',
+                        inputProps: { min: 0 } // Agregar restricción de valor mínimo
                     }}
                 />
             </Grid>
@@ -104,7 +140,8 @@ const PricingSection = ({ formData, onChange }) => {
                     value={formData.parkingFee}
                     onChange={handleNumericChange}
                     InputProps={{
-                        startAdornment: '$'
+                        startAdornment: '$',
+                        inputProps: { min: 0 } // Agregar restricción de valor mínimo
                     }}
                 />
             </Grid>
@@ -118,7 +155,8 @@ const PricingSection = ({ formData, onChange }) => {
                     value={formData.otherExpenses}
                     onChange={handleNumericChange}
                     InputProps={{
-                        startAdornment: '$'
+                        startAdornment: '$',
+                        inputProps: { min: 0 } // Agregar restricción de valor mínimo
                     }}
                 />
             </Grid>
@@ -131,8 +169,10 @@ const PricingSection = ({ formData, onChange }) => {
                     type="number"
                     value={formData.taxes}
                     onChange={handleNumericChange}
+                    helperText={!taxesModifiedManually ? "Calculated automatically (7%)" : "Modified manually"}
                     InputProps={{
-                        startAdornment: '$'
+                        startAdornment: '$',
+                        inputProps: { min: 0 } // Agregar restricción de valor mínimo
                     }}
                 />
             </Grid>

@@ -33,7 +33,15 @@ export const useReservationPricing = (formData, setFormData) => {
             const accommodationTotal = price * nights;
             const subtotal = accommodationTotal + cleaningFee + parkingFee + otherExpenses;
             const taxRate = 0.07;
-            const taxes = subtotal * taxRate;
+
+            // Solo calcular taxes si el campo está vacío o undefined
+            let taxes;
+            if (formData.taxes === '' || formData.taxes === undefined) {
+                taxes = subtotal * taxRate;
+            } else {
+                taxes = Number(formData.taxes);
+            }
+
             const total = subtotal + taxes;
             const due = total - amountPaid;
 
@@ -46,7 +54,7 @@ export const useReservationPricing = (formData, setFormData) => {
 
             setFormData(prev => ({
                 ...prev,
-                taxes: parseFloat(taxes.toFixed(2)),
+                taxes: formData.taxes === '' ? '' : parseFloat(taxes.toFixed(2)),
                 totalAmount: parseFloat(total.toFixed(2)),
                 amountDue: parseFloat(due.toFixed(2)),
                 paymentStatus
@@ -59,6 +67,7 @@ export const useReservationPricing = (formData, setFormData) => {
         formData.parkingFee,
         formData.otherExpenses,
         formData.amountPaid,
+        formData.taxes,
         setFormData
     ]);
 
