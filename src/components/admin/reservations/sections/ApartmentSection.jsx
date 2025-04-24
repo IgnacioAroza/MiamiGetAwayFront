@@ -45,7 +45,7 @@ const ApartmentSection = ({ formData, apartments, selectedApartment, onChange })
                         <MenuItem value="">Select...</MenuItem>
                         {apartments.map((apartment) => (
                             <MenuItem key={apartment.id} value={apartment.id}>
-                                {apartment.name} - {apartment.unitNumber || 'N/A'}
+                                {apartment.name} - Rooms: {apartment.rooms || 'N/A'}
                             </MenuItem>
                         ))}
                     </Select>
