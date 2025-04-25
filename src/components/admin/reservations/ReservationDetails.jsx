@@ -235,7 +235,7 @@ const ReservationDetails = ({ reservation, apartmentLoading, apartmentError, apa
                         <Typography variant="h6" gutterBottom>
                             Client Information
                         </Typography>
-                        <Typography sx={{ mb: 1 }}>Name: {reservation?.clientName}</Typography>
+                        <Typography sx={{ mb: 1 }}>Name: {reservation?.clientName}, {reservation?.clientLastname}</Typography>
                         <Typography sx={{ mb: 1 }}>Email: {reservation?.clientEmail}</Typography>
                         <Typography sx={{ mb: 1 }}>Phone: {reservation?.clientPhone}</Typography>
                         <Typography sx={{ mb: 1 }}>City: {reservation?.clientCity}</Typography>
