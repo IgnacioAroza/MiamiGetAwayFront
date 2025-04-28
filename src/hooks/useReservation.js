@@ -33,16 +33,16 @@ export const useReservation = () => {
     };
 
     const handleSendConfirmation = ({ id, notificationType = 'confirmation' }) => {
-        return dispatch(sendReservationConfirmation({
-            id,
-            notificationType,
-            onSuccess: () => {
-                console.log(`Notification ${notificationType} sent successfully`);
-            },
-            onError: (error) => {
-                console.error(`Error sending the notification ${notificationType}:`, error);
-            }
-        }));
+        return dispatch(sendReservationConfirmation({ id, notificationType }))
+            .unwrap()
+            .catch(error => {
+                // Asegurarse de que el error sea un string
+                const errorMessage = typeof error === 'string' ? error :
+                    error?.error ||
+                    error?.message ||
+                    'Failed to send notification';
+                throw new Error(errorMessage);
+            });
     };
 
     return {
