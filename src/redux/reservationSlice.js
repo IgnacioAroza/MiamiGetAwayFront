@@ -139,15 +139,9 @@ export const generateReservationPdf = createAsyncThunk(
 
 export const sendReservationConfirmation = createAsyncThunk(
     'reservations/sendConfirmation',
-    async ({ id, notificationType = 'confirmation', onSuccess, onError }, { rejectWithValue }) => {
-        try {
-            const data = await reservationService.sendConfirmation(id, notificationType);
-            if (onSuccess) onSuccess();
-            return { id, notificationType, confirmation: data };
-        } catch (error) {
-            if (onError) onError(error);
-            return rejectWithValue(error.message || 'Error sending the notification');
-        }
+    async ({ id, notificationType = 'confirmation' }) => {
+        const data = await reservationService.sendConfirmation(id, notificationType);
+        return { id, notificationType, confirmation: data };
     }
 );
 
@@ -318,7 +312,7 @@ const reservationSlice = createSlice({
             })
             .addCase(sendReservationConfirmation.rejected, (state, action) => {
                 state.loading = false;
-                state.error = action.payload || 'Error sending the notification';
+                // No establecer el error en el estado global
             })
             // update payment status
             .addCase(updateReservationPaymentStatus.pending, (state) => {
