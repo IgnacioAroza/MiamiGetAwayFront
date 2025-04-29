@@ -168,7 +168,7 @@ const ReservationDetails = ({ reservation, apartmentLoading, apartmentError, apa
         if (!lastSentTime) return false;
         
         const now = Date.now();
-        const cooldownPeriod = 10 * 60 * 1000; // 10 minutes in milliseconds
+        const cooldownPeriod = 1 * 60 * 1000; // 1 minuto en milisegundos
         return (now - lastSentTime) < cooldownPeriod;
     };
 
@@ -178,9 +178,9 @@ const ReservationDetails = ({ reservation, apartmentLoading, apartmentError, apa
         if (!lastSentTime) return 0;
         
         const now = Date.now();
-        const cooldownPeriod = 10 * 60 * 1000; // 10 minutes in milliseconds
+        const cooldownPeriod = 1 * 60 * 1000; // 1 minuto en milisegundos
         const remaining = cooldownPeriod - (now - lastSentTime);
-        return Math.max(0, Math.ceil(remaining / 60000)); // Convert to minutes and round up
+        return Math.max(0, Math.ceil(remaining / 60000)); // Convertir a minutos y redondear hacia arriba
     };
 
     const handleSendNotification = async (type) => {
