@@ -88,17 +88,35 @@ const ReservationForm = ({ initialData, onSubmit }) => {
                 status: formData.status,
                 paymentStatus: formData.paymentStatus,
                 notes: formData.notes,
-                clientName: formData.clientName,
-                clientEmail: formData.clientEmail,
-                clientPhone: formData.clientPhone,
-                clientAddress: formData.clientAddress,
-                clientCity: formData.clientCity,
-                clientCountry: formData.clientCountry,
-                clientNotes: formData.clientNotes
+                // Solo incluir datos del cliente si no hay clientId (cliente nuevo)
+                ...(formData.clientId ? {} : {
+                    clientName: formData.clientName,
+                    clientEmail: formData.clientEmail,
+                    clientPhone: formData.clientPhone,
+                    clientAddress: formData.clientAddress,
+                    clientCity: formData.clientCity,
+                    clientCountry: formData.clientCountry,
+                    clientNotes: formData.clientNotes
+                })
             };
+
+            // Log de los datos que se enviarán
+            console.log('=== Datos a enviar en ReservationForm ===');
+            console.log('ClientId:', dataToSubmit.clientId);
+            console.log('Datos del cliente:', formData.clientId ? 'Solo se envía clientId' : {
+                clientName: dataToSubmit.clientName,
+                clientEmail: dataToSubmit.clientEmail,
+                clientPhone: dataToSubmit.clientPhone,
+                clientAddress: dataToSubmit.clientAddress,
+                clientCity: dataToSubmit.clientCity,
+                clientCountry: dataToSubmit.clientCountry,
+                clientNotes: dataToSubmit.clientNotes
+            });
+            console.log('=======================================');
             
             onSubmit(dataToSubmit);
         } catch (error) {
+            console.error('Error en handleSubmit:', error);
             alert('Error al enviar el formulario');
         }
     };

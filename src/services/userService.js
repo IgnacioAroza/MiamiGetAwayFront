@@ -33,10 +33,18 @@ const userService = {
 
     updateUser: async (id, userData) => {
         try {
+            // Asegurarse de que tenemos un ID válido
+            if (!id) {
+                throw new Error('User ID is required for update');
+            }
+
             const response = await api.put(`/users/${id}`, userData);
             return response.data;
         } catch (error) {
             console.error('Error updating user:', error);
+            if (error.response) {
+                console.error('Server response:', error.response.data);
+            }
             throw error;
         }
     },

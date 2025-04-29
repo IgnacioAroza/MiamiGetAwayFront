@@ -213,7 +213,7 @@ export const useReservationForm = (initialData) => {
         if (client) {
             setFormData(prev => ({
                 ...prev,
-                clientId: client.id,
+                clientId: client.id.toString(),
                 clientName: `${client.firstName} ${client.lastName}`,
                 clientEmail: client.email,
                 clientPhone: client.phone,
@@ -238,17 +238,16 @@ export const useReservationForm = (initialData) => {
     };
 
     const handleNewClientCreated = (newClient) => {
-        handleClientSelect({
-            id: newClient.id,
-            firstName: newClient.name,
-            lastName: newClient.lastname,
-            email: newClient.email,
-            phone: newClient.phone || '',
-            address: newClient.address || '',
-            city: newClient.city || '',
-            country: newClient.country || '',
-            notes: newClient.notes || ''
-        });
+        setFormData(prev => ({
+            ...prev,
+            clientName: newClient.name,
+            clientEmail: newClient.email,
+            clientPhone: newClient.phone || '',
+            clientAddress: newClient.address || '',
+            clientCity: newClient.city || '',
+            clientCountry: newClient.country || '',
+            clientNotes: newClient.notes || ''
+        }));
     };
 
     const resetForm = () => {

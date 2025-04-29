@@ -108,6 +108,7 @@ const EditUser = ({ isDialog = false, onSuccess, onCancel, initialData }) => {
       if (isDialog && onSuccess) {
         onSuccess({
           ...updatedUser,
+          id: updatedUser.id,
           firstName: updatedUser.name,
           lastName: updatedUser.lastname
         });
