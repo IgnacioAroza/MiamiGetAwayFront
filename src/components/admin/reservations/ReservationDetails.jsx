@@ -191,26 +191,25 @@ const ReservationDetails = ({ reservation, apartmentLoading, apartmentError, apa
             return;
         }
 
+        // Deshabilitar inmediatamente para prevenir doble envío
+        const now = Date.now();
+        setEmailsSent(prev => ({
+            ...prev,
+            [type]: now
+        }));
+        
+        // Guardar en localStorage inmediatamente
+        localStorage.setItem('sentEmails', JSON.stringify({
+            ...JSON.parse(localStorage.getItem('sentEmails') || '{}'),
+            [`${reservation.id}-${type}`]: now
+        }));
+
         setLoading(true);
         try {
             await handleSendConfirmation({
                 id: reservation.id,
                 notificationType: type
             });
-
-            // Update sent emails state with current timestamp
-            const now = Date.now();
-            const newEmailsSent = {
-                ...emailsSent,
-                [type]: now
-            };
-            setEmailsSent(newEmailsSent);
-            
-            // Save to localStorage with timestamp
-            localStorage.setItem('sentEmails', JSON.stringify({
-                ...JSON.parse(localStorage.getItem('sentEmails') || '{}'),
-                [`${reservation.id}-${type}`]: now
-            }));
 
             // Show success message
             const messageMap = {
@@ -220,12 +219,47 @@ const ReservationDetails = ({ reservation, apartmentLoading, apartmentError, apa
             };
 
             handleSuccess(messageMap[type] || `${type} email sent successfully`);
+
+            // Cerrar el menú después de un envío exitoso
+            handleMenuClose();
         } catch (error) {
+            // Si hay un error, revertir el estado
+            setEmailsSent(prev => ({
+                ...prev,
+                [type]: 0
+            }));
+            
+            // Revertir localStorage
+            const storedEmails = JSON.parse(localStorage.getItem('sentEmails') || '{}');
+            delete storedEmails[`${reservation.id}-${type}`];
+            localStorage.setItem('sentEmails', JSON.stringify(storedEmails));
+
             handleError(error);
         } finally {
             setLoading(false);
         }
     };
+
+    // Efecto para mantener sincronizado el estado con localStorage
+    useEffect(() => {
+        const checkEmailStatus = () => {
+            const storedEmails = JSON.parse(localStorage.getItem('sentEmails') || '{}');
+            const newEmailsSent = {
+                confirmation: storedEmails[`${reservation?.id}-confirmation`] || 0,
+                status_update: storedEmails[`${reservation?.id}-status_update`] || 0,
+                payment: storedEmails[`${reservation?.id}-payment`] || 0
+            };
+            setEmailsSent(newEmailsSent);
+        };
+
+        // Verificar el estado al montar el componente
+        checkEmailStatus();
+
+        // Configurar un intervalo para verificar periódicamente
+        const interval = setInterval(checkEmailStatus, 30000); // Verificar cada 30 segundos
+
+        return () => clearInterval(interval);
+    }, [reservation?.id]);
 
     return (
         <Paper elevation={3} sx={{ p: 3, mb: 3 }}>
