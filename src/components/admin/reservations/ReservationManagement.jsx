@@ -21,16 +21,11 @@ const ReservationManagement = () => {
         const loadReservationData = async () => {
             if (id) {
                 try {
-                    console.log('Fetching reservation data for ID:', id); // Log para identificar el ID de la reserva
                     const reservation = await reservationService.getById(id);
-                    console.log('Reservation data fetched:', reservation); // Log para ver los datos obtenidos del servidor
 
                     if (reservation) {
                         const checkInDate = parseISO(reservation.checkInDate);
                         const checkOutDate = parseISO(reservation.checkOutDate);
-
-                        console.log('Check-in date (server):', reservation.checkInDate);
-                        console.log('Check-out date (server):', reservation.checkOutDate);
 
                         setInitialData({
                             checkInDate: reservation.checkInDate || '',
@@ -63,7 +58,6 @@ const ReservationManagement = () => {
                         });
                     }
                 } catch (error) {
-                    console.error('Error al cargar los datos de la reserva:', error);
                     setNotification({
                         open: true,
                         message: 'Error loading reservation data',
