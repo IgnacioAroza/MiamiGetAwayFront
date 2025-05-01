@@ -7,6 +7,7 @@ import { fetchReservationById } from '../../../redux/reservationSlice';
 import ReservationForm from './ReservationForm';
 import PaymentSummary from '../payments/PaymentSummary';
 import reservationService from '../../../services/reservationService';
+import { format, parseISO } from 'date-fns';
 
 const ReservationManagement = () => {
     const dispatch = useDispatch();
@@ -20,12 +21,20 @@ const ReservationManagement = () => {
         const loadReservationData = async () => {
             if (id) {
                 try {
+                    console.log('Fetching reservation data for ID:', id); // Log para identificar el ID de la reserva
                     const reservation = await reservationService.getById(id);
-                    
+                    console.log('Reservation data fetched:', reservation); // Log para ver los datos obtenidos del servidor
+
                     if (reservation) {
+                        const checkInDateLocal = parseISO(reservation.checkInDate);
+                        const checkOutDateLocal = parseISO(reservation.checkOutDate);
+
+                        console.log('Check-in date (local):', format(checkInDateLocal, 'yyyy-MM-dd HH:mm:ss'));
+                        console.log('Check-out date (local):', format(checkOutDateLocal, 'yyyy-MM-dd HH:mm:ss'));
+
                         setInitialData({
-                            checkInDate: reservation.checkInDate || '',
-                            checkOutDate: reservation.checkOutDate || '',
+                            checkInDate: checkInDateLocal || '',
+                            checkOutDate: checkOutDateLocal || '',
                             nights: reservation.nights || 1,
                             price: reservation.pricePerNight || 0,
                             pricePerNight: reservation.pricePerNight || 0,
