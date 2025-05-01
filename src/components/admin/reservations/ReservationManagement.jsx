@@ -26,15 +26,15 @@ const ReservationManagement = () => {
                     console.log('Reservation data fetched:', reservation); // Log para ver los datos obtenidos del servidor
 
                     if (reservation) {
-                        const checkInDateLocal = parseISO(reservation.checkInDate);
-                        const checkOutDateLocal = parseISO(reservation.checkOutDate);
+                        const checkInDate = parseISO(reservation.checkInDate);
+                        const checkOutDate = parseISO(reservation.checkOutDate);
 
-                        console.log('Check-in date (local):', format(checkInDateLocal, 'yyyy-MM-dd HH:mm:ss'));
-                        console.log('Check-out date (local):', format(checkOutDateLocal, 'yyyy-MM-dd HH:mm:ss'));
+                        console.log('Check-in date (server):', reservation.checkInDate);
+                        console.log('Check-out date (server):', reservation.checkOutDate);
 
                         setInitialData({
-                            checkInDate: checkInDateLocal || '',
-                            checkOutDate: checkOutDateLocal || '',
+                            checkInDate: reservation.checkInDate || '',
+                            checkOutDate: reservation.checkOutDate || '',
                             nights: reservation.nights || 1,
                             price: reservation.pricePerNight || 0,
                             pricePerNight: reservation.pricePerNight || 0,
