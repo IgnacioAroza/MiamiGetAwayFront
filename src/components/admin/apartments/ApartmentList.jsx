@@ -175,4 +175,4 @@ const ApartmentList = () => {
     );
 };
 
-export default ApartmentList; 
+export default ApartmentList;

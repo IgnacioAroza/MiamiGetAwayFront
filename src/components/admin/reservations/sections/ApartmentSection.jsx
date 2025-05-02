@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import {
     Grid,
     FormControl,
@@ -14,12 +14,15 @@ import { useApartmentImages } from '../../../../hooks/useApartmentImages';
 
 const ApartmentSection = ({ formData, apartments, selectedApartment, onChange }) => {
     const { getApartmentDetails } = useApartmentImages(selectedApartment);
-    const apartmentDetails = getApartmentDetails();
+
+    // Memorizar los detalles del apartamento para evitar cálculos innecesarios
+    const apartmentDetails = useMemo(() => getApartmentDetails(), [getApartmentDetails]);
 
     // Manejar cambio de apartamento
     const handleApartmentChange = (event) => {
         const { value } = event.target;
         const apartment = apartments.find(apt => apt.id === parseInt(value));
+        console.log('depto seleccionado:',apartment);
 
         if (apartment) {
             onChange({

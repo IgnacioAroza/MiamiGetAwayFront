@@ -110,12 +110,14 @@ export const useReservationForm = (initialData) => {
             const differenceMs = checkOut - checkIn;
             const nights = Math.max(1, Math.round(differenceMs / 86400000));
 
-            setFormData(prev => ({
-                ...prev,
-                nights
-            }));
+            if (formData.nights !== nights) { // Evitar actualizaciones innecesarias
+                setFormData(prev => ({
+                    ...prev,
+                    nights
+                }));
+            }
         }
-    }, [formData.checkInDate, formData.checkOutDate]);
+    }, [formData.checkInDate, formData.checkOutDate, formData.nights]);
 
     // Calcular precios
     useEffect(() => {
@@ -171,7 +173,7 @@ export const useReservationForm = (initialData) => {
         const { name, value } = event.target;
 
         if (name === 'apartmentId') {
-            const apartment = apartments.find(apt => apt.id === value);
+            const apartment = apartments.find(apt => apt.id === parseInt(value, 10));
             if (apartment) {
                 setSelectedApartment(apartment);
                 setFormData(prev => ({
@@ -294,4 +296,4 @@ export const useReservationForm = (initialData) => {
         handleNewClientCreated,
         resetForm
     };
-}; 
+};
