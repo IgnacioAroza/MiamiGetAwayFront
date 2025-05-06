@@ -56,10 +56,16 @@ const ReservationDetails = ({ reservation, apartmentLoading, apartmentError, apa
 
     const formatDate = (date) => {
         if (!date) return 'N/A';
-        return new Date(date).toLocaleDateString('es-ES', {
+        // Usar directamente la fecha en UTC sin convertir a ninguna zona horaria local
+        const dateObj = new Date(date);
+        return dateObj.toLocaleString('en-EN', {
+            timeZone: 'UTC',
             year: 'numeric',
             month: 'long',
-            day: 'numeric'
+            day: 'numeric',
+            hour: '2-digit',
+            minute: '2-digit',
+            hour12: false
         });
     };
 

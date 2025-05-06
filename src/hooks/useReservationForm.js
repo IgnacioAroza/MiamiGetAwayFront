@@ -67,8 +67,8 @@ export const useReservationForm = (initialData) => {
                 clientCity: initialData.clientCity || '',
                 clientCountry: initialData.clientCountry || '',
                 clientNotes: initialData.clientNotes || '',
-                checkInDate: initialData.checkInDate ? new Date(initialData.checkInDate) : null,
-                checkOutDate: initialData.checkOutDate ? new Date(initialData.checkOutDate) : null,
+                checkInDate: initialData.checkInDate ? adjustDateToUTC(new Date(initialData.checkInDate)) : null,
+                checkOutDate: initialData.checkOutDate ? adjustDateToUTC(new Date(initialData.checkOutDate)) : null,
                 price: parseFloat(initialData.pricePerNight) || 0,
                 pricePerNight: parseFloat(initialData.pricePerNight) || 0,
                 nights: initialData.nights || 0,
@@ -283,6 +283,31 @@ export const useReservationForm = (initialData) => {
         setSelectedClient(null);
     };
 
+    // Función auxiliar para ajustar una fecha a UTC sin conversión de zona horaria
+    const adjustDateToUTC = (date) => {
+        if (!date) return null;
+
+        // Obtener los componentes UTC de la fecha
+        const year = date.getUTCFullYear();
+        const month = date.getUTCMonth();
+        const day = date.getUTCDate();
+        const hours = date.getUTCHours();
+        const minutes = date.getUTCMinutes();
+        const seconds = date.getUTCSeconds();
+
+        // Crear una nueva fecha usando los mismos componentes pero estableciéndolos
+        // como valores locales, no UTC
+        const correctedDate = new Date();
+        correctedDate.setFullYear(year);
+        correctedDate.setMonth(month);
+        correctedDate.setDate(day);
+        correctedDate.setHours(hours);
+        correctedDate.setMinutes(minutes);
+        correctedDate.setSeconds(seconds);
+
+        return correctedDate;
+    };
+
     return {
         formData,
         selectedApartment,
@@ -295,4 +320,4 @@ export const useReservationForm = (initialData) => {
         handleNewClientCreated,
         resetForm
     };
-}; 
+};

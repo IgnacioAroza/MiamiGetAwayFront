@@ -72,8 +72,9 @@ const ReservationForm = ({ initialData, onSubmit }) => {
             const dataToSubmit = {
                 apartmentId: Number(formData.apartmentId),
                 clientId: formData.clientId ? Number(formData.clientId) : undefined,
-                checkInDate: formData.checkInDate ? new Date(formData.checkInDate).toISOString() : null,
-                checkOutDate: formData.checkOutDate ? new Date(formData.checkOutDate).toISOString() : null,
+                // Mantener las fechas en UTC sin convertir implícitamente a zona horaria local
+                checkInDate: formData.checkInDate ? formData.checkInDate.toISOString() : null,
+                checkOutDate: formData.checkOutDate ? formData.checkOutDate.toISOString() : null,
                 createdAt: new Date().toISOString(),
                 nights: Number(formData.nights),
                 price: Number(formData.price),
