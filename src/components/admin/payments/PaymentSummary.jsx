@@ -108,6 +108,7 @@ const PaymentSummary = ({ reservation, onPaymentRegistered }) => {
                 }
 
                 // Enviar notificación de pago por correo
+                /* Comentado para hacer el envío de correos manual
                 try {
                     await handleSendConfirmation({
                         id: reservation.id,
@@ -116,6 +117,7 @@ const PaymentSummary = ({ reservation, onPaymentRegistered }) => {
                 } catch (emailError) {
                     console.error('Error sending the payment notification:', emailError);
                 }
+                */
                 
                 // Mostrar mensaje de éxito
                 setSuccess(true);

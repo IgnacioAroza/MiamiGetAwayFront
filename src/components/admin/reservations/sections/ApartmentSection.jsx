@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import {
     Grid,
     FormControl,
@@ -14,13 +14,16 @@ import { useApartmentImages } from '../../../../hooks/useApartmentImages';
 
 const ApartmentSection = ({ formData, apartments, selectedApartment, onChange }) => {
     const { getApartmentDetails } = useApartmentImages(selectedApartment);
-    const apartmentDetails = getApartmentDetails();
+
+    // Memorizar los detalles del apartamento para evitar cálculos innecesarios
+    const apartmentDetails = useMemo(() => getApartmentDetails(), [getApartmentDetails]);
 
     // Manejar cambio de apartamento
     const handleApartmentChange = (event) => {
         const { value } = event.target;
         const apartment = apartments.find(apt => apt.id === parseInt(value));
-        
+        console.log('depto seleccionado:',apartment);
+
         if (apartment) {
             onChange({
                 target: {
@@ -28,8 +31,19 @@ const ApartmentSection = ({ formData, apartments, selectedApartment, onChange })
                     value: value
                 }
             });
+        } else {
+            onChange({
+                target: {
+                    name: 'apartmentId',
+                    value: '' // Restablecer a valor predeterminado si no coincide
+                }
+            });
         }
     };
+
+    // Validar el valor inicial de apartmentId
+    const isValidApartmentId = apartments.some(apt => apt.id === parseInt(formData.apartmentId));
+    const apartmentIdValue = isValidApartmentId ? formData.apartmentId : '';
 
     return (
         <>
@@ -38,14 +52,14 @@ const ApartmentSection = ({ formData, apartments, selectedApartment, onChange })
                     <InputLabel>Apartment</InputLabel>
                     <Select
                         name="apartmentId"
-                        value={formData.apartmentId}
+                        value={apartmentIdValue}
                         onChange={handleApartmentChange}
                         label="Apartment"
                     >
                         <MenuItem value="">Select...</MenuItem>
                         {apartments.map((apartment) => (
-                            <MenuItem key={apartment.id} value={apartment.id}>
-                                {apartment.name} - Rooms: {apartment.rooms || 'N/A'}
+                            <MenuItem key={apartment.id} value={apartment.id.toString()}>
+                                {apartment.name} - Rooms: {apartment.rooms === 0 ? 0 : apartment.rooms || 'N/A'}
                             </MenuItem>
                         ))}
                     </Select>
@@ -83,4 +97,4 @@ const ApartmentSection = ({ formData, apartments, selectedApartment, onChange })
     );
 };
 
-export default ApartmentSection; 
+export default ApartmentSection;

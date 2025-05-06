@@ -26,6 +26,16 @@ const reservationService = {
 
     create: async (reservationData) => {
         try {
+            console.log('=== Creando nueva reserva ===');
+            console.log('Datos recibidos:', {
+                clientId: reservationData.clientId,
+                clientData: reservationData.clientId ? 'Solo clientId' : {
+                    clientName: reservationData.clientName,
+                    clientEmail: reservationData.clientEmail,
+                    clientPhone: reservationData.clientPhone
+                }
+            });
+
             // Formateamos ciertos datos pero enviamos con los nombres exactos que espera el backend
             const formattedData = {
                 // Datos básicos - respetando camelCase del backend
@@ -66,6 +76,15 @@ const reservationService = {
                 clientNotes: reservationData.clientNotes
             };
 
+            console.log('Datos formateados para enviar:', {
+                clientId: formattedData.clientId,
+                clientData: formattedData.clientId ? 'Solo clientId' : {
+                    clientName: formattedData.clientName,
+                    clientEmail: formattedData.clientEmail,
+                    clientPhone: formattedData.clientPhone
+                }
+            });
+
             // Validar que los campos requeridos estén presentes
             if (formattedData.pricePerNight === undefined) {
                 throw new Error('The price per night is required');
@@ -82,6 +101,8 @@ const reservationService = {
             );
 
             const response = await api.post('/reservations', dataToSend);
+            console.log('Respuesta del servidor:', response.data);
+            console.log('============================');
             return response.data;
         } catch (error) {
             console.error('Error creating reservation:', error);
@@ -94,6 +115,17 @@ const reservationService = {
 
     update: async (id, reservationData) => {
         try {
+            console.log('=== Actualizando reserva ===');
+            console.log('ID de reserva:', id);
+            console.log('Datos recibidos:', {
+                clientId: reservationData.clientId,
+                clientData: reservationData.clientId ? 'Solo clientId' : {
+                    clientName: reservationData.clientName,
+                    clientEmail: reservationData.clientEmail,
+                    clientPhone: reservationData.clientPhone
+                }
+            });
+
             if (!id) {
                 throw new Error('The reservation ID is required');
             }
@@ -131,16 +163,28 @@ const reservationService = {
                 status: reservationData.status,
                 paymentStatus: reservationData.paymentStatus,
 
-                // Datos de cliente
-                clientName: reservationData.clientName,
-                clientLastname: reservationData.clientLastname,
-                clientEmail: reservationData.clientEmail,
-                clientPhone: reservationData.clientPhone,
-                clientAddress: reservationData.clientAddress,
-                clientCity: reservationData.clientCity,
-                clientCountry: reservationData.clientCountry,
-                clientNotes: reservationData.clientNotes
+                // NO incluir datos del cliente si hay un clientId
+                ...(reservationData.clientId ? {} : {
+                    // Datos de cliente - solo incluir si no hay clientId
+                    clientName: reservationData.clientName,
+                    clientLastname: reservationData.clientLastname,
+                    clientEmail: reservationData.clientEmail,
+                    clientPhone: reservationData.clientPhone,
+                    clientAddress: reservationData.clientAddress,
+                    clientCity: reservationData.clientCity,
+                    clientCountry: reservationData.clientCountry,
+                    clientNotes: reservationData.clientNotes
+                })
             };
+
+            console.log('Datos formateados para enviar:', {
+                clientId: formattedData.clientId,
+                clientData: formattedData.clientId ? 'Solo clientId' : {
+                    clientName: formattedData.clientName,
+                    clientEmail: formattedData.clientEmail,
+                    clientPhone: formattedData.clientPhone
+                }
+            });
 
             // Filtrar propiedades undefined para no enviar datos innecesarios
             const dataToSend = Object.fromEntries(
@@ -150,7 +194,8 @@ const reservationService = {
 
             // Hacer la petición al servidor
             const response = await api.put(`/reservations/${id}`, dataToSend);
-
+            console.log('Respuesta del servidor:', response.data);
+            console.log('============================');
             return response.data;
         } catch (error) {
             console.error("Error in update:", error);

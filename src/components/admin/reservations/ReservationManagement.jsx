@@ -7,6 +7,7 @@ import { fetchReservationById } from '../../../redux/reservationSlice';
 import ReservationForm from './ReservationForm';
 import PaymentSummary from '../payments/PaymentSummary';
 import reservationService from '../../../services/reservationService';
+import { format, parseISO } from 'date-fns';
 
 const ReservationManagement = () => {
     const dispatch = useDispatch();
@@ -21,8 +22,11 @@ const ReservationManagement = () => {
             if (id) {
                 try {
                     const reservation = await reservationService.getById(id);
-                    
+
                     if (reservation) {
+                        const checkInDate = parseISO(reservation.checkInDate);
+                        const checkOutDate = parseISO(reservation.checkOutDate);
+
                         setInitialData({
                             checkInDate: reservation.checkInDate || '',
                             checkOutDate: reservation.checkOutDate || '',
@@ -54,7 +58,6 @@ const ReservationManagement = () => {
                         });
                     }
                 } catch (error) {
-                    console.error('Error al cargar los datos de la reserva:', error);
                     setNotification({
                         open: true,
                         message: 'Error loading reservation data',

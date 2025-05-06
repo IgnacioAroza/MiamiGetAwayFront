@@ -110,12 +110,14 @@ export const useReservationForm = (initialData) => {
             const differenceMs = checkOut - checkIn;
             const nights = Math.max(1, Math.round(differenceMs / 86400000));
 
-            setFormData(prev => ({
-                ...prev,
-                nights
-            }));
+            if (formData.nights !== nights) { // Evitar actualizaciones innecesarias
+                setFormData(prev => ({
+                    ...prev,
+                    nights
+                }));
+            }
         }
-    }, [formData.checkInDate, formData.checkOutDate]);
+    }, [formData.checkInDate, formData.checkOutDate, formData.nights]);
 
     // Calcular precios
     useEffect(() => {
@@ -171,7 +173,7 @@ export const useReservationForm = (initialData) => {
         const { name, value } = event.target;
 
         if (name === 'apartmentId') {
-            const apartment = apartments.find(apt => apt.id === value);
+            const apartment = apartments.find(apt => apt.id === parseInt(value, 10));
             if (apartment) {
                 setSelectedApartment(apartment);
                 setFormData(prev => ({
@@ -213,7 +215,7 @@ export const useReservationForm = (initialData) => {
         if (client) {
             setFormData(prev => ({
                 ...prev,
-                clientId: client.id,
+                clientId: client.id.toString(),
                 clientName: `${client.firstName} ${client.lastName}`,
                 clientEmail: client.email,
                 clientPhone: client.phone,
@@ -238,17 +240,16 @@ export const useReservationForm = (initialData) => {
     };
 
     const handleNewClientCreated = (newClient) => {
-        handleClientSelect({
-            id: newClient.id,
-            firstName: newClient.name,
-            lastName: newClient.lastname,
-            email: newClient.email,
-            phone: newClient.phone || '',
-            address: newClient.address || '',
-            city: newClient.city || '',
-            country: newClient.country || '',
-            notes: newClient.notes || ''
-        });
+        setFormData(prev => ({
+            ...prev,
+            clientName: newClient.name,
+            clientEmail: newClient.email,
+            clientPhone: newClient.phone || '',
+            clientAddress: newClient.address || '',
+            clientCity: newClient.city || '',
+            clientCountry: newClient.country || '',
+            clientNotes: newClient.notes || ''
+        }));
     };
 
     const resetForm = () => {
@@ -320,4 +321,4 @@ export const useReservationForm = (initialData) => {
         handleNewClientCreated,
         resetForm
     };
-};
+}; 

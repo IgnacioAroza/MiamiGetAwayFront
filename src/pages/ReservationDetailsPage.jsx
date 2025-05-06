@@ -202,11 +202,9 @@ const ReservationDetailsPage = () => {
                 severity: 'success'
             });
         } catch (error) {
-            setSnackbar({
-                open: true,
-                message: 'Error sending confirmation: ' + (error.message || 'Unknown error'),
-                severity: 'error'
-            });
+            // No mostrar Snackbar para errores de envío de notificaciones
+            // Los errores serán manejados por el componente hijo
+            console.log('Error handled by child component:', error);
         }
     };
 
@@ -221,12 +219,19 @@ const ReservationDetailsPage = () => {
                 apartmentLoading={apartmentLoading}
                 apartmentError={apartmentError}
                 apartmentData={apartmentData}
+                onError={(response) => {
+                    setSnackbar({
+                        open: true,
+                        message: response.message || 'Error sending confirmation',
+                        severity: response.severity || 'error'
+                    });
+                }}
             />
             
             <PaymentHistory reservationId={id} />
 
             {/* Diálogo para enviar email */}
-            <Dialog open={openEmailDialog} onClose={() => setOpenEmailDialog(false)}>
+            {/* <Dialog open={openEmailDialog} onClose={() => setOpenEmailDialog(false)}>
                 <DialogTitle>Send Reservation by Email</DialogTitle>
                 <DialogContent>
                     <TextField
@@ -248,16 +253,20 @@ const ReservationDetailsPage = () => {
                         Send Confirmation
                     </Button>
                 </DialogActions>
-            </Dialog>
+            </Dialog> */}
 
-            {/* Snackbar para notificaciones */}
+            {/* Snackbar para todos los mensajes */}
             <Snackbar 
                 open={snackbar.open} 
                 autoHideDuration={6000} 
                 onClose={handleCloseSnackbar}
                 anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
             >
-                <Alert onClose={handleCloseSnackbar} severity={snackbar.severity}>
+                <Alert 
+                    onClose={handleCloseSnackbar} 
+                    severity={snackbar.severity}
+                    sx={{ width: '100%' }}
+                >
                     {snackbar.message}
                 </Alert>
             </Snackbar>

@@ -20,7 +20,8 @@ const ClientSection = ({
 }) => {
     // Formatear nombre completo para el Autocomplete
     const getFullName = (client) => {
-        return `${client.firstName} ${client.lastName} (${client.email})`;
+        const name = `${client.firstName || client.name} ${client.lastName || client.lastname}`;
+        return client.email ? `${name} (${client.email})` : name;
     };
 
     // Manejar selección en Autocomplete
@@ -38,6 +39,12 @@ const ClientSection = ({
                     getOptionLabel={getFullName}
                     value={selectedClient}
                     onChange={handleClientSelectChange}
+                    isOptionEqualToValue={(option, value) => option?.id === value?.id}
+                    renderOption={(props, option) => (
+                        <li {...props} key={option.id}>
+                            {getFullName(option)}
+                        </li>
+                    )}
                     renderInput={(params) => (
                         <TextField
                             {...params}

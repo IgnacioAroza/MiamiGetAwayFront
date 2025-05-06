@@ -29,7 +29,7 @@ import {
 import { useReservation } from '../../../hooks/useReservation';
 import ReservationSummary from '../payments/ReservationSummary';
 
-const ReservationDetails = ({ reservation, apartmentLoading, apartmentError, apartmentData }) => {
+const ReservationDetails = ({ reservation, apartmentLoading, apartmentError, apartmentData, onError }) => {
     const { handleGeneratePdf, handleSendConfirmation } = useReservation();
     const [openEmailDialog, setOpenEmailDialog] = useState(false);
     const [email, setEmail] = useState('');
@@ -42,6 +42,21 @@ const ReservationDetails = ({ reservation, apartmentLoading, apartmentError, apa
     const [loading, setLoading] = useState(false);
     const [redirectTimer, setRedirectTimer] = useState(null);
     const [successTimer, setSuccessTimer] = useState(null);
+    const [emailsSent, setEmailsSent] = useState(() => {
+        // Load initial state from localStorage
+        const sentEmails = JSON.parse(localStorage.getItem('sentEmails') || '{}');
+        return {
+            confirmation: sentEmails[`${reservation?.id}-confirmation`] || 0,
+            status_update: sentEmails[`${reservation?.id}-status_update`] || 0,
+            payment: sentEmails[`${reservation?.id}-payment`] || 0
+        };
+    });
+    const [errorDialog, setErrorDialog] = useState({
+        open: false,
+        title: '',
+        message: '',
+        details: ''
+    });
 
     useEffect(() => {
         return () => {
@@ -87,26 +102,37 @@ const ReservationDetails = ({ reservation, apartmentLoading, apartmentError, apa
         return statusColors[status] || 'default';
     };
 
-    const handleSuccess = (message) => {
-        setSnackbar({
-            open: true,
-            message: message,
-            severity: 'success'
-        });
-        setTimeout(() => {
-            setSnackbar(prev => ({ ...prev }));
-        }, 100);
+    const handleError = (error) => {
+        let errorMessage = '';
+        if (typeof error === 'string') {
+            errorMessage = error;
+        } else if (error.response?.data?.error) {
+            errorMessage = error.response.data.error;
+        } else if (error.message) {
+            errorMessage = error.message;
+        } else {
+            errorMessage = 'An unexpected error has occurred';
+        }
+
+        // Close menu if open
+        if (anchorEl) {
+            handleMenuClose();
+        }
+
+        // Propagate error to parent component
+        if (onError) {
+            onError({ message: errorMessage });
+        }
     };
 
-    const handleError = (error) => {
-        setSnackbar({
-            open: true,
-            message: error.message || 'Error in the operation',
-            severity: 'error'
-        });
-        setTimeout(() => {
-            setSnackbar(prev => ({ ...prev }));
-        }, 100);
+    const handleSuccess = (message) => {
+        // Mostrar mensaje de éxito en el componente padre
+        if (onError) {
+            onError({ 
+                message,
+                severity: 'success'
+            });
+        }
     };
 
     const handleGeneratePdfClick = async () => {
@@ -142,28 +168,104 @@ const ReservationDetails = ({ reservation, apartmentLoading, apartmentError, apa
         setAnchorEl(null);
     };
 
+    // Function to check if email is still in cooldown
+    const isEmailInCooldown = (type) => {
+        const lastSentTime = emailsSent[type];
+        if (!lastSentTime) return false;
+        
+        const now = Date.now();
+        const cooldownPeriod = 1 * 60 * 1000; // 1 minuto en milisegundos
+        return (now - lastSentTime) < cooldownPeriod;
+    };
+
+    // Function to get remaining cooldown time in minutes
+    const getRemainingCooldown = (type) => {
+        const lastSentTime = emailsSent[type];
+        if (!lastSentTime) return 0;
+        
+        const now = Date.now();
+        const cooldownPeriod = 1 * 60 * 1000; // 1 minuto en milisegundos
+        const remaining = cooldownPeriod - (now - lastSentTime);
+        return Math.max(0, Math.ceil(remaining / 60000)); // Convertir a minutos y redondear hacia arriba
+    };
+
     const handleSendNotification = async (type) => {
+        // Verificar el cooldown antes de proceder
+        if (isEmailInCooldown(type)) {
+            const remainingMinutes = getRemainingCooldown(type);
+            handleError(`Please wait ${remainingMinutes} minutes before sending another ${type} notification`);
+            return;
+        }
+
+        // Deshabilitar inmediatamente para prevenir doble envío
+        const now = Date.now();
+        setEmailsSent(prev => ({
+            ...prev,
+            [type]: now
+        }));
+        
+        // Guardar en localStorage inmediatamente
+        localStorage.setItem('sentEmails', JSON.stringify({
+            ...JSON.parse(localStorage.getItem('sentEmails') || '{}'),
+            [`${reservation.id}-${type}`]: now
+        }));
+
+        setLoading(true);
         try {
-            setLoading(true);
             await handleSendConfirmation({
                 id: reservation.id,
                 notificationType: type
             });
-            handleSuccess(`Notification ${type} sent successfully`);
+
+            // Show success message
+            const messageMap = {
+                confirmation: 'Confirmation email sent successfully',
+                status_update: 'Status update email sent successfully',
+                payment: 'Payment notification sent successfully'
+            };
+
+            handleSuccess(messageMap[type] || `${type} email sent successfully`);
+
+            // Cerrar el menú después de un envío exitoso
+            handleMenuClose();
         } catch (error) {
+            // Si hay un error, revertir el estado
+            setEmailsSent(prev => ({
+                ...prev,
+                [type]: 0
+            }));
+            
+            // Revertir localStorage
+            const storedEmails = JSON.parse(localStorage.getItem('sentEmails') || '{}');
+            delete storedEmails[`${reservation.id}-${type}`];
+            localStorage.setItem('sentEmails', JSON.stringify(storedEmails));
+
             handleError(error);
         } finally {
             setLoading(false);
-            handleMenuClose();
         }
     };
 
-    const handleCloseSnackbar = (event, reason) => {
-        if (reason === 'clickaway') {
-            return;
-        }
-        setSnackbar(prev => ({ ...prev, open: false }));
-    };
+    // Efecto para mantener sincronizado el estado con localStorage
+    useEffect(() => {
+        const checkEmailStatus = () => {
+            const storedEmails = JSON.parse(localStorage.getItem('sentEmails') || '{}');
+            const newEmailsSent = {
+                confirmation: storedEmails[`${reservation?.id}-confirmation`] || 0,
+                status_update: storedEmails[`${reservation?.id}-status_update`] || 0,
+                payment: storedEmails[`${reservation?.id}-payment`] || 0
+            };
+            setEmailsSent(newEmailsSent);
+        };
+
+        // Verificar el estado al montar el componente
+        checkEmailStatus();
+
+        // Configurar un intervalo para verificar periódicamente
+        const interval = setInterval(checkEmailStatus, 30000); // Verificar cada 30 segundos
+
+        return () => clearInterval(interval);
+    }, [reservation?.id]);
 
     return (
         <Paper elevation={3} sx={{ p: 3, mb: 3 }}>
@@ -211,23 +313,44 @@ const ReservationDetails = ({ reservation, apartmentLoading, apartmentError, apa
                     horizontal: 'right',
                 }}
             >
-                <MenuItem onClick={() => handleSendNotification('confirmation')}>
+                <MenuItem 
+                    onClick={() => handleSendNotification('confirmation')}
+                    disabled={loading || isEmailInCooldown('confirmation')}
+                >
                     <ListItemIcon>
                         <EmailIcon fontSize="small" />
                     </ListItemIcon>
-                    <ListItemText>Send Confirmation</ListItemText>
+                    <ListItemText>
+                        {isEmailInCooldown('confirmation') 
+                            ? `Confirmation email available in ${getRemainingCooldown('confirmation')} minutes`
+                            : 'Send Confirmation'}
+                    </ListItemText>
                 </MenuItem>
-                <MenuItem onClick={() => handleSendNotification('status_update')}>
+                <MenuItem 
+                    onClick={() => handleSendNotification('status_update')}
+                    disabled={loading || isEmailInCooldown('status_update')}
+                >
                     <ListItemIcon>
                         <UpdateIcon fontSize="small" />
                     </ListItemIcon>
-                    <ListItemText>Send Status Update</ListItemText>
+                    <ListItemText>
+                        {isEmailInCooldown('status_update')
+                            ? `Status update available in ${getRemainingCooldown('status_update')} minutes`
+                            : 'Send Status Update'}
+                    </ListItemText>
                 </MenuItem>
-                <MenuItem onClick={() => handleSendNotification('payment')}>
+                <MenuItem 
+                    onClick={() => handleSendNotification('payment')}
+                    disabled={loading || isEmailInCooldown('payment')}
+                >
                     <ListItemIcon>
                         <PaymentIcon fontSize="small" />
                     </ListItemIcon>
-                    <ListItemText>Send Payment Notification</ListItemText>
+                    <ListItemText>
+                        {isEmailInCooldown('payment')
+                            ? `Payment notification available in ${getRemainingCooldown('payment')} minutes`
+                            : 'Send Payment Notification'}
+                    </ListItemText>
                 </MenuItem>
             </Menu>
 
@@ -316,28 +439,46 @@ const ReservationDetails = ({ reservation, apartmentLoading, apartmentError, apa
                 </DialogActions>
             </Dialog>
 
-            {/* Snackbar para notificaciones */}
+            {/* Error Dialog */}
+            <Dialog
+                open={errorDialog.open}
+                onClose={() => setErrorDialog(prev => ({ ...prev, open: false }))}
+                aria-labelledby="error-dialog-title"
+                aria-describedby="error-dialog-description"
+                maxWidth="sm"
+                fullWidth
+            >
+                <DialogTitle id="error-dialog-title" sx={{ color: 'error.main' }}>
+                    {errorDialog.title}
+                </DialogTitle>
+                <DialogContent>
+                    <Typography variant="body1" gutterBottom>
+                        {errorDialog.message}
+                    </Typography>
+                </DialogContent>
+                <DialogActions>
+                    <Button 
+                        onClick={() => setErrorDialog(prev => ({ ...prev, open: false }))}
+                        variant="contained" 
+                        color="primary"
+                        autoFocus
+                    >
+                        Accept
+                    </Button>
+                </DialogActions>
+            </Dialog>
+
+            {/* Snackbar para mensajes de éxito locales */}
             <Snackbar 
                 open={snackbar.open} 
                 autoHideDuration={6000} 
-                onClose={handleCloseSnackbar}
+                onClose={() => setSnackbar(prev => ({ ...prev, open: false }))}
                 anchorOrigin={{ vertical: 'top', horizontal: 'center' }}
-                sx={{
-                    '& .MuiSnackbar-root': {
-                        top: '24px !important'
-                    }
-                }}
             >
                 <Alert 
-                    onClose={handleCloseSnackbar} 
+                    onClose={() => setSnackbar(prev => ({ ...prev, open: false }))} 
                     severity={snackbar.severity}
-                    sx={{ 
-                        width: '100%',
-                        boxShadow: 3,
-                        '& .MuiAlert-message': {
-                            fontSize: '1rem'
-                        }
-                    }}
+                    sx={{ width: '100%' }}
                 >
                     {snackbar.message}
                 </Alert>

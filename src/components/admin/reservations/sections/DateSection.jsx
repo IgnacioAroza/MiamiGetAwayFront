@@ -28,7 +28,7 @@ const DateSection = ({ checkInDate, checkOutDate, onDateChange }) => {
             <Grid item xs={12} md={6}>
                 <DateTimePicker
                     label="Check-in"
-                    value={checkInDate}
+                    value={checkInDate ? new Date(checkInDate) : null} // Asegurar que se use la fecha exacta del servidor
                     onChange={handleDateChangeUTC('checkInDate')}
                     TextField={(params) => <TextField {...params} fullWidth />}
                     minDate={new Date()} // No permitir fechas en el pasado
@@ -39,7 +39,7 @@ const DateSection = ({ checkInDate, checkOutDate, onDateChange }) => {
                 <DateTimePicker
                     label="Check-out"
                     value={checkOutDate}
-                    onChange={handleDateChangeUTC('checkOutDate')}
+                    onChange={onDateChange('checkOutDate')}
                     TextField={(params) => <TextField {...params} fullWidth />}
                     minDate={minCheckoutDate || new Date()} // Mínimo 1 día después del checkin o la fecha actual
                     disabled={!checkInDate} // Deshabilitar hasta seleccionar checkin
