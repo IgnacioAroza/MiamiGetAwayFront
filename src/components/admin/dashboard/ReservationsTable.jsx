@@ -1,5 +1,4 @@
 import React from 'react';
-import { format } from 'date-fns';
 import {
     Table,
     TableBody,
@@ -11,6 +10,7 @@ import {
     Typography,
     Chip
 } from '@mui/material';
+import { formatDateForDisplay } from '../../../utils/dateUtils';
 
 const ReservationsTable = ({ reservations }) => {
     if (!reservations || reservations.length === 0) {
@@ -20,16 +20,6 @@ const ReservationsTable = ({ reservations }) => {
             </Typography>
         );
     }
-
-    const formatDate = (dateString) => {
-        try {
-            if (!dateString) return 'N/A';
-            return format(new Date(dateString), 'MMM dd, yyyy');
-        } catch (error) {
-            console.error('Error formatting date:', error);
-            return 'Invalid Date';
-        }
-    };
 
     const formatAmount = (amount) => {
         try {
@@ -81,10 +71,10 @@ const ReservationsTable = ({ reservations }) => {
                             </TableCell>
                             <TableCell>{reservation?.apartmentName || 'N/A'}</TableCell>
                             <TableCell>
-                                {formatDate(reservation?.checkInDate)}
+                                {formatDateForDisplay(reservation?.checkInDate)}
                             </TableCell>
                             <TableCell>
-                                {formatDate(reservation?.checkOutDate)}
+                                {formatDateForDisplay(reservation?.checkOutDate)}
                             </TableCell>
                             <TableCell align="right">
                                 {formatAmount(reservation?.totalAmount)}
@@ -104,4 +94,4 @@ const ReservationsTable = ({ reservations }) => {
     );
 };
 
-export default ReservationsTable; 
+export default ReservationsTable;

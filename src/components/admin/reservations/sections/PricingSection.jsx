@@ -1,18 +1,10 @@
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 import { Grid, TextField, Typography, Paper, Box, Divider } from '@mui/material';
 
 const PricingSection = ({ formData, onChange }) => {
-    // Estado para controlar si los taxes han sido modificados manualmente
-    const [taxesModifiedManually, setTaxesModifiedManually] = useState(false);
-
     // Manejar cambios específicos para campos numéricos
     const handleNumericChange = (e) => {
         const { name, value } = e.target;
-        
-        // Si el campo modificado es taxes, marcar como modificado manualmente
-        if (name === 'taxes') {
-            setTaxesModifiedManually(true);
-        }
         
         // NO forzar conversión a número si el campo está vacío
         let processedValue;
@@ -36,27 +28,6 @@ const PricingSection = ({ formData, onChange }) => {
             }
         });
     };
-
-    // Calcular y actualizar taxes automáticamente cuando cambian los valores que afectan al subtotal
-    useEffect(() => {
-        if (!taxesModifiedManually && formData.nights > 0 && formData.price > 0) {
-            const accommodationTotal = formData.nights * formData.price;
-            const cleaningFee = Number(formData.cleaningFee) || 0;
-            const parkingFee = Number(formData.parkingFee) || 0;
-            const otherExpenses = Number(formData.otherExpenses) || 0;
-            const subtotal = accommodationTotal + cleaningFee + parkingFee + otherExpenses;
-            const taxRate = 0.07; // 7%
-            const calculatedTaxes = Math.max(0, subtotal * taxRate); // Asegurar que los taxes calculados no sean negativos
-
-            // Actualizar taxes solo si no han sido modificados manualmente
-            onChange({
-                target: {
-                    name: 'taxes',
-                    value: parseFloat(calculatedTaxes.toFixed(2))
-                }
-            });
-        }
-    }, [formData.nights, formData.price, formData.cleaningFee, formData.parkingFee, formData.otherExpenses, taxesModifiedManually, onChange]);
 
     // Calcular resumen para mostrar
     const calculateSummary = () => {
@@ -169,7 +140,7 @@ const PricingSection = ({ formData, onChange }) => {
                     type="number"
                     value={formData.taxes}
                     onChange={handleNumericChange}
-                    helperText={!taxesModifiedManually ? "Calculated automatically (7%)" : "Modified manually"}
+                    helperText="Enter tax amount manually"
                     InputProps={{
                         startAdornment: '$',
                         inputProps: { min: 0 } // Agregar restricción de valor mínimo
@@ -236,4 +207,4 @@ const PricingSection = ({ formData, onChange }) => {
     );
 };
 
-export default PricingSection; 
+export default PricingSection;

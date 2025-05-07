@@ -15,6 +15,7 @@ import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns';
 import { es } from 'date-fns/locale';
 import { Clear as ClearIcon } from '@mui/icons-material';
+import { formatDateToString, parseStringToDate } from '../../../utils/dateUtils';
 
 const ReservationFilters = ({ onApplyFilters, onClearFilters }) => {
     const [filters, setFilters] = useState({
@@ -43,8 +44,8 @@ const ReservationFilters = ({ onApplyFilters, onClearFilters }) => {
     const handleApplyFilters = () => {
         const formattedFilters = {
             ...filters,
-            startDate: filters.startDate ? filters.startDate.toISOString() : null,
-            endDate: filters.endDate ? filters.endDate.toISOString() : null
+            startDate: filters.startDate ? formatDateToString(filters.startDate) : null,
+            endDate: filters.endDate ? formatDateToString(filters.endDate) : null
         };
         
         onApplyFilters(formattedFilters);
@@ -203,4 +204,4 @@ const ReservationFilters = ({ onApplyFilters, onClearFilters }) => {
     );
 };
 
-export default ReservationFilters; 
+export default ReservationFilters;

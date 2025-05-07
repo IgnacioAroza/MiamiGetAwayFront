@@ -11,7 +11,7 @@ import {
 } from '@mui/material';
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns';
-import { es } from 'date-fns/locale';
+import { enUS } from 'date-fns/locale';
 
 // Componentes
 import ApartmentSection from './sections/ApartmentSection';
@@ -72,10 +72,10 @@ const ReservationForm = ({ initialData, onSubmit }) => {
             const dataToSubmit = {
                 apartmentId: Number(formData.apartmentId),
                 clientId: formData.clientId ? Number(formData.clientId) : undefined,
-                // Mantener las fechas en UTC sin convertir implícitamente a zona horaria local
-                checkInDate: formData.checkInDate ? formData.checkInDate.toISOString() : null,
-                checkOutDate: formData.checkOutDate ? formData.checkOutDate.toISOString() : null,
-                createdAt: new Date().toISOString(),
+                // Las fechas ya están en formato MM-DD-YYYY HH:mm, no es necesario convertirlas
+                checkInDate: formData.checkInDate,
+                checkOutDate: formData.checkOutDate,
+                createdAt: new Date().toISOString(), // Esta fecha sí se mantiene en formato ISO para compatibilidad
                 nights: Number(formData.nights),
                 price: Number(formData.price),
                 pricePerNight: Number(formData.price),
@@ -100,20 +100,6 @@ const ReservationForm = ({ initialData, onSubmit }) => {
                     clientNotes: formData.clientNotes
                 })
             };
-
-            // Log de los datos que se enviarán
-            console.log('=== Datos a enviar en ReservationForm ===');
-            console.log('ClientId:', dataToSubmit.clientId);
-            console.log('Datos del cliente:', formData.clientId ? 'Solo se envía clientId' : {
-                clientName: dataToSubmit.clientName,
-                clientEmail: dataToSubmit.clientEmail,
-                clientPhone: dataToSubmit.clientPhone,
-                clientAddress: dataToSubmit.clientAddress,
-                clientCity: dataToSubmit.clientCity,
-                clientCountry: dataToSubmit.clientCountry,
-                clientNotes: dataToSubmit.clientNotes
-            });
-            console.log('=======================================');
             
             onSubmit(dataToSubmit);
         } catch (error) {
@@ -123,7 +109,7 @@ const ReservationForm = ({ initialData, onSubmit }) => {
     };
 
     return (
-        <LocalizationProvider dateAdapter={AdapterDateFns} adapterLocale={es}>
+        <LocalizationProvider dateAdapter={AdapterDateFns} adapterLocale={enUS}>
             <Box component="form" onSubmit={handleSubmit} p={3}>
                 <Grid container spacing={3}>
                     {/* Sección de Apartamento */}

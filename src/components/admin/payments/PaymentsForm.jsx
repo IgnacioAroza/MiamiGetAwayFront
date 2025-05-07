@@ -19,7 +19,7 @@ import {
 import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns';
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import { DatePicker } from '@mui/x-date-pickers/DatePicker';
-import { es } from 'date-fns/locale';
+import { enUS } from 'date-fns/locale';
 import { createPayment, updatePayment, fetchAllPayments } from '../../../redux/reservationPaymentSlice';
 
 const PAYMENT_METHODS = [
@@ -248,11 +248,12 @@ const PaymentForm = ({ open, onClose }) => {
                         </Grid>
 
                         <Grid item xs={12}>
-                            <LocalizationProvider dateAdapter={AdapterDateFns} adapterLocale={es}>
+                            <LocalizationProvider dateAdapter={AdapterDateFns} adapterLocale={enUS}>
                                 <DatePicker
                                     label="Payment Date"
                                     value={formData.payment_date}
                                     onChange={handleDateChange}
+                                    ampm={false} // Usar formato de 24 horas
                                     TextField={(params) => (
                                         <TextField
                                             {...params}

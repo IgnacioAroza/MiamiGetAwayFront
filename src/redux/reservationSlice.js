@@ -305,7 +305,7 @@ const reservationSlice = createSlice({
                     state.selectedReservation.notifications = state.selectedReservation.notifications || [];
                     state.selectedReservation.notifications.push({
                         type: notificationType,
-                        sentAt: new Date().toISOString(),
+                        sentAt: new Date(), // Ahora el backend esperará este formato MM-DD-YYYY HH:mm
                         ...confirmation
                     });
                 }

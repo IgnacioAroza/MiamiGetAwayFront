@@ -114,17 +114,19 @@ const ReservationSummary = ({ reservation }) => {
                     </Box>
                 </Grid>
 
-                {/* Impuestos */}
-                <Grid item xs={12}>
-                    <Box display="flex" justifyContent="space-between" mb={1}>
-                        <Typography>
-                            Taxes (7%)
-                        </Typography>
-                        <Typography>
-                            {formatCurrency(taxes)}
-                        </Typography>
-                    </Box>
-                </Grid>
+                {/* Impuestos - solo mostrar si son mayores que cero */}
+                {taxes > 0 && (
+                    <Grid item xs={12}>
+                        <Box display="flex" justifyContent="space-between" mb={1}>
+                            <Typography>
+                                Taxes
+                            </Typography>
+                            <Typography>
+                                {formatCurrency(taxes)}
+                            </Typography>
+                        </Box>
+                    </Grid>
+                )}
 
                 <Grid item xs={12}>
                     <Divider sx={{ my: 2 }} />
@@ -172,4 +174,4 @@ const ReservationSummary = ({ reservation }) => {
     );
 };
 
-export default ReservationSummary; 
+export default ReservationSummary;

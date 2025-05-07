@@ -29,6 +29,7 @@ import {
 import { fetchReservations, deleteReservation, setSelectedReservation } from '../../../redux/reservationSlice';
 import adminApartmentService from '../../../services/adminApartmentService';
 import ReservationFilters from './ReservationFilters';
+import { formatDateForDisplay, parseStringToDate } from '../../../utils/dateUtils';
 
 const ReservationList = ({ filter = {} }) => {
     const dispatch = useDispatch();
@@ -127,11 +128,8 @@ const ReservationList = ({ filter = {} }) => {
     // Formatear fecha
     const formatDate = (dateString) => {
         if (!dateString) return 'N/A';
-        return new Date(dateString).toLocaleDateString('es-ES', {
-            year: 'numeric',
-            month: 'short',
-            day: 'numeric'
-        });
+        // Usar nuestra función de utilidad para mostrar fechas
+        return formatDateForDisplay(dateString, false); // false para no incluir la hora
     };
     
     // Formatear moneda

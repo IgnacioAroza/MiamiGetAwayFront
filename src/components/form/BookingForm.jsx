@@ -15,6 +15,8 @@ import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns';
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import { useTranslation } from 'react-i18next';
+import { formatDateToString, formatDateForDisplay } from '../../utils/dateUtils';
+import { enUS } from 'date-fns/locale';
 
 import userService from '../../services/userService';
 
@@ -36,6 +38,27 @@ function BookingForm({ service }) {
       ...prevState,
       [name]: value
     }));
+  };
+
+  // Manejadores de cambio de fecha para usar el nuevo formato
+  const handleStartDateChange = (date) => {
+    if (date) {
+      // Al seleccionar una fecha, convertirla a formato MM-DD-YYYY HH:mm
+      const formattedDate = formatDateToString(date);
+      setStartDate(formattedDate);
+    } else {
+      setStartDate(null);
+    }
+  };
+
+  const handleEndDateChange = (date) => {
+    if (date) {
+      // Al seleccionar una fecha, convertirla a formato MM-DD-YYYY HH:mm
+      const formattedDate = formatDateToString(date);
+      setEndDate(formattedDate);
+    } else {
+      setEndDate(null);
+    }
   };
 
   const resetForm = () => {
@@ -63,7 +86,11 @@ function BookingForm({ service }) {
     }
     try {
       await userService.createUser(userData);
-      const message =`Hola, me gustaría reservar ${service.name || `${service.brand} ${service.model}`} desde el ${startDate.toLocaleDateString('es-ES', { day: '2-digit', month: '2-digit', year: 'numeric' })} hasta el ${endDate.toLocaleDateString('es-ES', { day: '2-digit', month: '2-digit', year: 'numeric' })}. Mi nombre es ${userData.name} ${userData.lastName}.`;
+      // Formatear las fechas para mostrarlas en un formato más amigable para el mensaje
+      const startDateFormatted = formatDateForDisplay(startDate, false); // sin hora
+      const endDateFormatted = formatDateForDisplay(endDate, false); // sin hora
+      
+      const message =`Hola, me gustaría reservar ${service.name || `${service.brand} ${service.model}`} desde el ${startDateFormatted} hasta el ${endDateFormatted}. Mi nombre es ${userData.name} ${userData.lastName}.`;
       const encodedMessage = encodeURIComponent(message);
       const whatsappUrl = `https://wa.me/${phoneNumber}?text=${encodedMessage}`;
       const mobileWhatsappUrl = `whatsapp://send?phone=${phoneNumber}&text=${encodedMessage}`;
@@ -139,19 +166,23 @@ function BookingForm({ service }) {
       <Dialog open={openCalendar} onClose={() => setOpenCalendar(false)}>
         <DialogTitle>{t('bookingForm.selectReservationDates')}</DialogTitle>
         <DialogContent>
-          <LocalizationProvider dateAdapter={AdapterDateFns}>
+          <LocalizationProvider dateAdapter={AdapterDateFns} adapterLocale={enUS}>
             <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2, mt: 2 }}>
               <DatePicker
                 label={t('bookingForm.startDate')}
-                value={startDate}
-                onChange={(newValue) => setStartDate(newValue)}
+                // DatePicker espera un objeto Date, no un string
+                value={startDate ? new Date(startDate) : null}
+                onChange={handleStartDateChange}
                 TextField={(params) => <TextField {...params} />}
+                ampm={false} // Usar formato de 24 horas
               />
               <DatePicker
                 label={t('bookingForm.endDate')}
-                value={endDate}
-                onChange={(newValue) => setEndDate(newValue)}
+                // DatePicker espera un objeto Date, no un string
+                value={endDate ? new Date(endDate) : null}
+                onChange={handleEndDateChange}
                 TextField={(params) => <TextField {...params} />}
+                ampm={false} // Usar formato de 24 horas
               />
             </Box>
           </LocalizationProvider>

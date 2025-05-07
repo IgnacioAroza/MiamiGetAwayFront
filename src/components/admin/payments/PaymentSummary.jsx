@@ -26,6 +26,7 @@ const PaymentSummary = ({ reservation, onPaymentRegistered }) => {
     const { handleSendConfirmation } = useReservation();
     const [paymentAmount, setPaymentAmount] = useState('');
     const [paymentMethod, setPaymentMethod] = useState('cash');
+    const [paymentNotes, setPaymentNotes] = useState('');
     const [error, setError] = useState('');
     const [success, setSuccess] = useState(false);
 
@@ -99,7 +100,7 @@ const PaymentSummary = ({ reservation, onPaymentRegistered }) => {
                         amount: parseFloat(amount),
                         paymentMethod: paymentMethod,
                         paymentDate: new Date().toISOString(),
-                        notes: `Payment registered from admin panel - Method: ${paymentMethods.find(m => m.value === paymentMethod)?.label}`
+                        notes: paymentNotes || `Payment registered from admin panel - Method: ${paymentMethods.find(m => m.value === paymentMethod)?.label}`
                     };
                     
                     await api.post('/reservation-payments', paymentRecord);
@@ -254,16 +255,18 @@ const PaymentSummary = ({ reservation, onPaymentRegistered }) => {
                 </Grid>
 
                 {/* Impuestos */}
-                <Grid item xs={12}>
-                    <Box display="flex" justifyContent="space-between" mb={1}>
-                        <Typography>
-                            Taxes (7%)
-                        </Typography>
-                        <Typography>
-                            {formatCurrency(taxes)}
-                        </Typography>
-                    </Box>
-                </Grid>
+                {taxes > 0 && (
+                    <Grid item xs={12}>
+                        <Box display="flex" justifyContent="space-between" mb={1}>
+                            <Typography>
+                                Taxes
+                            </Typography>
+                            <Typography>
+                                {formatCurrency(taxes)}
+                            </Typography>
+                        </Box>
+                    </Grid>                    
+                )}
 
                 <Grid item xs={12}>
                     <Divider sx={{ my: 2 }} />
@@ -344,6 +347,18 @@ const PaymentSummary = ({ reservation, onPaymentRegistered }) => {
                                         ))}
                                     </Select>
                                 </FormControl>
+                            </Grid>
+                            <Grid item xs={12}>
+                                <TextField
+                                    fullWidth
+                                    label="Payment Notes"
+                                    multiline
+                                    rows={2}
+                                    value={paymentNotes}
+                                    onChange={(e) => setPaymentNotes(e.target.value)}
+                                    placeholder="Add notes about this payment (optional)"
+                                    sx={{ mt: 1 }}
+                                />
                             </Grid>
                         </Grid>
                         <Button

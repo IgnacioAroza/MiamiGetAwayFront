@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { fetchAdminApartments, selectAllApartments } from '../redux/adminApartmentSlice';
 import { fetchUsers, selectAllUsers, selectUserStatus } from '../redux/userSlice';
+import { formatDateToString, parseStringToDate, calculateNights } from '../utils/dateUtils';
 
 export const useReservationForm = (initialData) => {
     const dispatch = useDispatch();
@@ -67,8 +68,9 @@ export const useReservationForm = (initialData) => {
                 clientCity: initialData.clientCity || '',
                 clientCountry: initialData.clientCountry || '',
                 clientNotes: initialData.clientNotes || '',
-                checkInDate: initialData.checkInDate ? adjustDateToUTC(new Date(initialData.checkInDate)) : null,
-                checkOutDate: initialData.checkOutDate ? adjustDateToUTC(new Date(initialData.checkOutDate)) : null,
+                // Para fechas, ver si ya vienen en formato MM-DD-YYYY HH:mm o necesitan convertirse
+                checkInDate: initialData.checkInDate || null,
+                checkOutDate: initialData.checkOutDate || null,
                 price: parseFloat(initialData.pricePerNight) || 0,
                 pricePerNight: parseFloat(initialData.pricePerNight) || 0,
                 nights: initialData.nights || 0,
@@ -105,10 +107,8 @@ export const useReservationForm = (initialData) => {
     // Calcular noches cuando cambian las fechas
     useEffect(() => {
         if (formData.checkInDate && formData.checkOutDate) {
-            const checkIn = new Date(formData.checkInDate);
-            const checkOut = new Date(formData.checkOutDate);
-            const differenceMs = checkOut - checkIn;
-            const nights = Math.max(1, Math.round(differenceMs / 86400000));
+            // Usar la función de utilidad para calcular noches entre fechas
+            const nights = calculateNights(formData.checkInDate, formData.checkOutDate);
 
             if (formData.nights !== nights) { // Evitar actualizaciones innecesarias
                 setFormData(prev => ({
@@ -204,10 +204,19 @@ export const useReservationForm = (initialData) => {
     };
 
     const handleDateChange = (name) => (date) => {
-        setFormData(prev => ({
-            ...prev,
-            [name]: date
-        }));
+        if (date) {
+            // Convertir la fecha seleccionada al formato MM-DD-YYYY HH:mm
+            const formattedDate = formatDateToString(date);
+            setFormData(prev => ({
+                ...prev,
+                [name]: formattedDate
+            }));
+        } else {
+            setFormData(prev => ({
+                ...prev,
+                [name]: null
+            }));
+        }
     };
 
     const handleClientSelect = (client) => {
@@ -284,31 +293,6 @@ export const useReservationForm = (initialData) => {
         setSelectedClient(null);
     };
 
-    // Función auxiliar para ajustar una fecha a UTC sin conversión de zona horaria
-    const adjustDateToUTC = (date) => {
-        if (!date) return null;
-
-        // Obtener los componentes UTC de la fecha
-        const year = date.getUTCFullYear();
-        const month = date.getUTCMonth();
-        const day = date.getUTCDate();
-        const hours = date.getUTCHours();
-        const minutes = date.getUTCMinutes();
-        const seconds = date.getUTCSeconds();
-
-        // Crear una nueva fecha usando los mismos componentes pero estableciéndolos
-        // como valores locales, no UTC
-        const correctedDate = new Date();
-        correctedDate.setFullYear(year);
-        correctedDate.setMonth(month);
-        correctedDate.setDate(day);
-        correctedDate.setHours(hours);
-        correctedDate.setMinutes(minutes);
-        correctedDate.setSeconds(seconds);
-
-        return correctedDate;
-    };
-
     return {
         formData,
         selectedApartment,
@@ -321,4 +305,4 @@ export const useReservationForm = (initialData) => {
         handleNewClientCreated,
         resetForm
     };
-}; 
+};

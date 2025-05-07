@@ -1,4 +1,5 @@
 import api from '../utils/api'
+import { formatDateToString, parseStringToDate } from '../utils/dateUtils'
 
 const reservationService = {
     getAll: async (filters = {}) => {
@@ -42,9 +43,9 @@ const reservationService = {
                 apartmentId: reservationData.apartmentId !== undefined ? Number(reservationData.apartmentId) : undefined,
                 clientId: reservationData.clientId !== undefined ? Number(reservationData.clientId) : undefined,
 
-                // Fechas
-                checkInDate: reservationData.checkInDate ? new Date(reservationData.checkInDate).toISOString() : undefined,
-                checkOutDate: reservationData.checkOutDate ? new Date(reservationData.checkOutDate).toISOString() : undefined,
+                // Fechas - ahora en formato MM-DD-YYYY HH:mm
+                checkInDate: reservationData.checkInDate ? formatDateToString(reservationData.checkInDate) : undefined,
+                checkOutDate: reservationData.checkOutDate ? formatDateToString(reservationData.checkOutDate) : undefined,
 
                 // Datos numéricos IMPORTANTES - mantener como números y en camelCase
                 nights: reservationData.nights !== undefined ? Number(reservationData.nights) : undefined,
@@ -115,17 +116,6 @@ const reservationService = {
 
     update: async (id, reservationData) => {
         try {
-            console.log('=== Actualizando reserva ===');
-            console.log('ID de reserva:', id);
-            console.log('Datos recibidos:', {
-                clientId: reservationData.clientId,
-                clientData: reservationData.clientId ? 'Solo clientId' : {
-                    clientName: reservationData.clientName,
-                    clientEmail: reservationData.clientEmail,
-                    clientPhone: reservationData.clientPhone
-                }
-            });
-
             if (!id) {
                 throw new Error('The reservation ID is required');
             }
@@ -140,9 +130,9 @@ const reservationService = {
                 apartmentId: reservationData.apartmentId !== undefined ? Number(reservationData.apartmentId) : undefined,
                 clientId: reservationData.clientId !== undefined ? Number(reservationData.clientId) : undefined,
 
-                // Fechas
-                checkInDate: reservationData.checkInDate ? new Date(reservationData.checkInDate).toISOString() : undefined,
-                checkOutDate: reservationData.checkOutDate ? new Date(reservationData.checkOutDate).toISOString() : undefined,
+                // Fechas - ahora en formato MM-DD-YYYY HH:mm
+                checkInDate: reservationData.checkInDate ? formatDateToString(reservationData.checkInDate) : undefined,
+                checkOutDate: reservationData.checkOutDate ? formatDateToString(reservationData.checkOutDate) : undefined,
 
                 // Datos numéricos - mantener como números
                 nights: reservationData.nights !== undefined ? Number(reservationData.nights) : undefined,
@@ -177,15 +167,6 @@ const reservationService = {
                 })
             };
 
-            console.log('Datos formateados para enviar:', {
-                clientId: formattedData.clientId,
-                clientData: formattedData.clientId ? 'Solo clientId' : {
-                    clientName: formattedData.clientName,
-                    clientEmail: formattedData.clientEmail,
-                    clientPhone: formattedData.clientPhone
-                }
-            });
-
             // Filtrar propiedades undefined para no enviar datos innecesarios
             const dataToSend = Object.fromEntries(
                 Object.entries(formattedData)
@@ -194,8 +175,6 @@ const reservationService = {
 
             // Hacer la petición al servidor
             const response = await api.put(`/reservations/${id}`, dataToSend);
-            console.log('Respuesta del servidor:', response.data);
-            console.log('============================');
             return response.data;
         } catch (error) {
             console.error("Error in update:", error);
@@ -308,7 +287,8 @@ const reservationService = {
 
             if (reservationData.check_in_date || reservationData.checkInDate) {
                 const checkInDate = reservationData.check_in_date || reservationData.checkInDate;
-                queryParams.append('check_in_date', new Date(checkInDate).toISOString());
+                // Usar el nuevo formato de fecha MM-DD-YYYY HH:mm en lugar de ISO
+                queryParams.append('check_in_date', checkInDate);
             }
 
             const url = `/reservations/${id}/pdf/download?${queryParams.toString()}`;

@@ -28,6 +28,7 @@ import {
 } from '@mui/icons-material';
 import { useReservation } from '../../../hooks/useReservation';
 import ReservationSummary from '../payments/ReservationSummary';
+import { formatDateForDisplay } from '../../../utils/dateUtils';
 
 const ReservationDetails = ({ reservation, apartmentLoading, apartmentError, apartmentData, onError }) => {
     const { handleGeneratePdf, handleSendConfirmation } = useReservation();
@@ -68,21 +69,6 @@ const ReservationDetails = ({ reservation, apartmentLoading, apartmentError, apa
             }
         };
     }, [redirectTimer, successTimer]);
-
-    const formatDate = (date) => {
-        if (!date) return 'N/A';
-        // Usar directamente la fecha en UTC sin convertir a ninguna zona horaria local
-        const dateObj = new Date(date);
-        return dateObj.toLocaleString('en-EN', {
-            timeZone: 'UTC',
-            year: 'numeric',
-            month: 'long',
-            day: 'numeric',
-            hour: '2-digit',
-            minute: '2-digit',
-            hour12: false
-        });
-    };
 
     const getStatusColor = (status) => {
         const statusColors = {
@@ -266,6 +252,12 @@ const ReservationDetails = ({ reservation, apartmentLoading, apartmentError, apa
 
         return () => clearInterval(interval);
     }, [reservation?.id]);
+
+    const formatDate = (date) => {
+        if (!date) return 'N/A';
+        // Usar nuestra función de utilidad para mostrar la fecha
+        return formatDateForDisplay(date, true);
+    };
 
     return (
         <Paper elevation={3} sx={{ p: 3, mb: 3 }}>
