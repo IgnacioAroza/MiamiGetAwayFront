@@ -57,12 +57,12 @@ const PaymentForm = ({ open, onClose }) => {
             // Normalizar los datos del pago seleccionado
             const normalizedPayment = {
                 amount: selectedPayment.amount?.toString() || '',
-                payment_date: selectedPayment.payment_date ? new Date(selectedPayment.payment_date) : null,
-                payment_method: selectedPayment.payment_method || 'CASH',
-                payment_reference: selectedPayment.payment_reference || '',
+                payment_date: selectedPayment.paymentDate ? new Date(selectedPayment.paymentDate) : null,
+                payment_method: selectedPayment.paymentMethod || 'CASH',
+                payment_reference: selectedPayment.paymentReference || '',
                 notes: selectedPayment.notes || '',
-                reservation_id: selectedPayment.reservation_id?.toString() || '',
-                client_id: selectedPayment.client_id?.toString() || ''
+                reservation_id: selectedPayment.reservationId?.toString() || '',
+                client_id: selectedPayment.clientId?.toString() || ''
             };
             setFormData(normalizedPayment);
         } else {

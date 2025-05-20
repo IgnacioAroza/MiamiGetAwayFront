@@ -292,10 +292,10 @@ const PaymentsList = () => {
                         ) : (
                             payments.map((payment) => (
                                 <TableRow key={payment.id}>
-                                    <TableCell>{formatDate(payment.payment_date)}</TableCell>
+                                    <TableCell>{formatDate(payment.paymentDate)}</TableCell>
                                     <TableCell>{formatAmount(payment.amount)}</TableCell>
                                     <TableCell>
-                                        {normalizePaymentMethod(payment.payment_method)}
+                                        {normalizePaymentMethod(payment.paymentMethod)}
                                     </TableCell>
                                     <TableCell>Client: {getClientName(payment)}</TableCell>
                                     <TableCell>{payment.notes || '-'}</TableCell>

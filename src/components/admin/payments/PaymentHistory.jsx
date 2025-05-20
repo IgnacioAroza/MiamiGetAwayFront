@@ -90,8 +90,8 @@ const PaymentHistory = ({ payments = [], reservationId }) => {
     // Normalizar los nombres de propiedades para diferentes formatos
     const normalizedPayments = loadedPayments.map(payment => ({
         id: payment.id,
-        date: payment.payment_date,
-        method: payment.payment_method || 'N/A',
+        date: payment.paymentDate,
+        method: payment.paymentMethod || 'N/A',
         reference: payment.notes || '-',
         amount: payment.amount || 0
     }));
@@ -99,7 +99,7 @@ const PaymentHistory = ({ payments = [], reservationId }) => {
     return (
         <Paper variant="outlined" sx={{ p: 2 }}>
             <Typography variant="h6" gutterBottom>
-                Historial de Pagos
+                Payment History
             </Typography>
             
             {loading ? (
@@ -112,7 +112,7 @@ const PaymentHistory = ({ payments = [], reservationId }) => {
                 </Alert>
             ) : normalizedPayments.length === 0 ? (
                 <Typography align="center" sx={{ py: 2 }}>
-                    No hay pagos registrados para esta reserva
+                    There are no payments recorded for this reservation.
                 </Typography>
             ) : (
                 <TableContainer>
