@@ -292,9 +292,9 @@ const ServicesPage = () => {
 
   const getServiceTitle = () => {
     const titles = {
-      apartments: 'Apartamentos',
-      cars: 'Carros',
-      yachts: 'Yates',
+      apartments: 'Apartments',
+      cars: 'Cars',
+      yachts: 'Yachts',
       villas: 'Villas'
     };
     return titles[selectedService] || 'Servicios';
@@ -304,14 +304,14 @@ const ServicesPage = () => {
     <Box sx={{ p: 3 }}>
       <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 4 }}>
         <Typography variant="h4" component="h1">
-          Servicios
+          Services
         </Typography>
         <Button
           variant="contained"
           startIcon={<AddIcon />}
           onClick={handleCreateNew}
         >
-          Nuevo {getServiceTitle().slice(0, -1)}
+          New {getServiceTitle().slice(0, -1)}
         </Button>
       </Box>
       

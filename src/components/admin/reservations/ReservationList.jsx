@@ -19,22 +19,35 @@ import {
     Divider,
     Tooltip,
     CircularProgress,
-    TableSortLabel
+    TableSortLabel,
+    Card,
+    CardContent,
+    CardActions,
+    Stack,
+    useTheme
 } from '@mui/material';
 import {
     Edit as EditIcon,
     Delete as DeleteIcon,
     Visibility as VisibilityIcon,
+    CalendarToday as CalendarIcon,
+    Person as PersonIcon,
+    Apartment as ApartmentIcon,
+    AttachMoney as MoneyIcon,
+    Add as AddIcon
 } from '@mui/icons-material';
 import { fetchReservations, deleteReservation, setSelectedReservation } from '../../../redux/reservationSlice';
 import adminApartmentService from '../../../services/adminApartmentService';
 import ReservationFilters from './ReservationFilters';
 import { formatDateForDisplay, parseStringToDate } from '../../../utils/dateUtils';
+import useDeviceDetection from '../../../hooks/useDeviceDetection';
 
 const ReservationList = ({ filter = {} }) => {
     const dispatch = useDispatch();
     const navigate = useNavigate();
+    const theme = useTheme();
     const { reservations, loading, status, error } = useSelector((state) => state.reservations);
+    const { isMobile, isTablet } = useDeviceDetection();
     
     const [page, setPage] = useState(0);
     const [rowsPerPage, setRowsPerPage] = useState(10);
@@ -191,7 +204,7 @@ const ReservationList = ({ filter = {} }) => {
     
     // Manejar clic en eliminar
     const handleDeleteClick = (id) => {
-        if (window.confirm('¿Estás seguro de que deseas eliminar esta reserva?')) {
+        if (window.confirm('Are you sure you want to delete this reservation?')) {
             dispatch(deleteReservation(id));
         }
     };
@@ -221,6 +234,176 @@ const ReservationList = ({ filter = {} }) => {
         return 'N/A';
     };
     
+    // Renderizar las tarjetas para la vista móvil
+    const renderMobileCards = () => {
+        if (loading) {
+            return (
+                <Box sx={{ display: 'flex', justifyContent: 'center', p: 3 }}>
+                    <CircularProgress />
+                </Box>
+            );
+        }
+
+        if (!sortedReservations || sortedReservations.length === 0) {
+            return (
+                <Typography align="center" sx={{ mt: 2 }}>
+                    No reservations found
+                </Typography>
+            );
+        }
+
+        return (
+            <Grid container spacing={2}>
+                {sortedReservations
+                    .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
+                    .map((reservation) => (
+                        <Grid item xs={12} key={reservation.id}>
+                            <Card elevation={2} sx={{ bgcolor: theme.palette.mode === 'dark' ? '#1e1e1e' : '#f5f5f5' }}>
+                                <CardContent>
+                                    <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 1 }}>
+                                        <Typography variant="h6">
+                                            Reservation #{reservation.id}
+                                        </Typography>
+                                        <Stack direction="row" spacing={1}>
+                                            <Chip
+                                                label={reservation.status}
+                                                size="small"
+                                                color={getStatusColor(reservation.status)}
+                                            />
+                                            <Chip
+                                                label={reservation.payment_status || reservation.paymentStatus}
+                                                size="small"
+                                                color={getPaymentStatusColor(reservation.payment_status || reservation.paymentStatus)}
+                                            />
+                                        </Stack>
+                                    </Box>
+
+                                    <Divider sx={{ mb: 2 }} />
+
+                                    <Grid container spacing={2}>
+                                        <Grid item xs={12}>
+                                            <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
+                                                <PersonIcon sx={{ mr: 1, color: 'primary.main' }} />
+                                                <Box>
+                                                    <Typography variant="subtitle1">
+                                                        {reservation.client_name || 'N/A'} {reservation.client_lastname || ''}
+                                                    </Typography>
+                                                    <Typography variant="body2" color="text.secondary">
+                                                        {reservation.client_email}
+                                                    </Typography>
+                                                </Box>
+                                            </Box>
+                                        </Grid>
+
+                                        <Grid item xs={12}>
+                                            <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
+                                                <ApartmentIcon sx={{ mr: 1, color: 'primary.main' }} />
+                                                <Box>
+                                                    <Typography variant="subtitle1">
+                                                        {getBuildingName(reservation)}
+                                                    </Typography>
+                                                    {reservation.unit_number && (
+                                                        <Typography variant="body2" color="text.secondary">
+                                                            Unit: {reservation.unit_number}
+                                                        </Typography>
+                                                    )}
+                                                </Box>
+                                            </Box>
+                                        </Grid>
+
+                                        <Grid item xs={6}>
+                                            <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                                                <CalendarIcon sx={{ mr: 1, color: 'primary.main' }} />
+                                                <Box>
+                                                    <Typography variant="caption" color="text.secondary">
+                                                        Check-in
+                                                    </Typography>
+                                                    <Typography variant="body2">
+                                                        {formatDate(reservation.check_in_date || reservation.checkInDate)}
+                                                    </Typography>
+                                                </Box>
+                                            </Box>
+                                        </Grid>
+
+                                        <Grid item xs={6}>
+                                            <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                                                <CalendarIcon sx={{ mr: 1, color: 'primary.main' }} />
+                                                <Box>
+                                                    <Typography variant="caption" color="text.secondary">
+                                                        Check-out
+                                                    </Typography>
+                                                    <Typography variant="body2">
+                                                        {formatDate(reservation.check_out_date || reservation.checkOutDate)}
+                                                    </Typography>
+                                                </Box>
+                                            </Box>
+                                        </Grid>
+
+                                        <Grid item xs={12}>
+                                            <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                                                <MoneyIcon sx={{ mr: 1, color: 'primary.main' }} />
+                                                <Box>
+                                                    <Typography variant="subtitle1" color="primary.main">
+                                                        {formatCurrency(reservation.total_amount || reservation.totalAmount)}
+                                                    </Typography>
+                                                </Box>
+                                            </Box>
+                                        </Grid>
+                                    </Grid>
+                                </CardContent>
+
+                                <Divider />
+
+                                <CardActions sx={{ justifyContent: 'space-between', p: 2 }}>
+                                    <Typography variant="caption" color="text.secondary">
+                                        Created: {formatDate(reservation.created_at || reservation.createdAt)}
+                                    </Typography>
+                                    <Box>
+                                        <IconButton 
+                                            size="small" 
+                                            onClick={() => handleViewClick(reservation)}
+                                            color="info"
+                                            sx={{ mr: 1 }}
+                                        >
+                                            <VisibilityIcon />
+                                        </IconButton>
+                                        <IconButton 
+                                            size="small" 
+                                            onClick={() => handleEditClick(reservation)}
+                                            color="primary"
+                                            sx={{ mr: 1 }}
+                                        >
+                                            <EditIcon />
+                                        </IconButton>
+                                        <IconButton 
+                                            size="small" 
+                                            onClick={() => handleDeleteClick(reservation.id)}
+                                            color="error"
+                                        >
+                                            <DeleteIcon />
+                                        </IconButton>
+                                    </Box>
+                                </CardActions>
+                            </Card>
+                        </Grid>
+                    ))}
+                
+                <Grid item xs={12}>
+                    <TablePagination
+                        component="div"
+                        count={sortedReservations.length}
+                        page={page}
+                        onPageChange={handleChangePage}
+                        rowsPerPage={rowsPerPage}
+                        onRowsPerPageChange={handleChangeRowsPerPage}
+                        rowsPerPageOptions={[5, 10, 25]}
+                        labelRowsPerPage={isMobile ? "Per page:" : "Rows per page:"}
+                    />
+                </Grid>
+            </Grid>
+        );
+    };
+    
     if (status === 'loading') {
         return (
             <Box sx={{ display: 'flex', justifyContent: 'center', mt: 3 }}>
@@ -238,7 +421,7 @@ const ReservationList = ({ filter = {} }) => {
     }
     
     return (
-        <Box sx={{ p: 3 }}>
+        <Box sx={{ p: isMobile ? 1 : 3 }}>
             <Typography variant="h5" gutterBottom component="div" sx={{ mb: 3 }}>
                 Reservation History
             </Typography>
@@ -255,6 +438,8 @@ const ReservationList = ({ filter = {} }) => {
                         variant="contained"
                         color="primary"
                         onClick={handleAddReservation}
+                        startIcon={<AddIcon />}
+                        size={isMobile ? "small" : "medium"}
                     >
                         New Reservation
                     </Button>
@@ -263,154 +448,160 @@ const ReservationList = ({ filter = {} }) => {
             
             <Divider sx={{ mb: 3 }} />
             
-            <TableContainer component={Paper} elevation={3}>
-                <Table sx={{ minWidth: 650 }} aria-label="tabla de reservas">
-                    <TableHead>
-                        <TableRow>
-                            <TableCell>
-                                <TableSortLabel
-                                    active={orderBy === 'id'}
-                                    direction={orderBy === 'id' ? order : 'asc'}
-                                    onClick={() => handleRequestSort('id')}
-                                >
-                                    ID
-                                </TableSortLabel>
-                            </TableCell>
-                            <TableCell>Client</TableCell>
-                            <TableCell>Apartment</TableCell>
-                            <TableCell>
-                                <TableSortLabel
-                                    active={orderBy === 'check_in_date'}
-                                    direction={orderBy === 'check_in_date' ? order : 'asc'}
-                                    onClick={() => handleRequestSort('check_in_date')}
-                                >
-                                    Check-in
-                                </TableSortLabel>
-                            </TableCell>
-                            <TableCell>
-                                <TableSortLabel
-                                    active={orderBy === 'check_out_date'}
-                                    direction={orderBy === 'check_out_date' ? order : 'asc'}
-                                    onClick={() => handleRequestSort('check_out_date')}
-                                >
-                                    Check-out
-                                </TableSortLabel>
-                            </TableCell>
-                            <TableCell>
-                                <TableSortLabel
-                                    active={orderBy === 'total_amount'}
-                                    direction={orderBy === 'total_amount' ? order : 'asc'}
-                                    onClick={() => handleRequestSort('total_amount')}
-                                >
-                                    Total
-                                </TableSortLabel>
-                            </TableCell>
-                            <TableCell>Status</TableCell>
-                            <TableCell>Payment</TableCell>
-                            <TableCell>
-                                <TableSortLabel
-                                    active={orderBy === 'created_at'}
-                                    direction={orderBy === 'created_at' ? order : 'asc'}
-                                    onClick={() => handleRequestSort('created_at')}
-                                >
-                                    Creation Date
-                                </TableSortLabel>
-                            </TableCell>
-                            <TableCell align="right">Actions</TableCell>
-                        </TableRow>
-                    </TableHead>
-                    <TableBody>
-                        {loading ? (
+            {isMobile || isTablet ? (
+                // Vista móvil y tablet
+                renderMobileCards()
+            ) : (
+                // Vista de escritorio
+                <TableContainer component={Paper} elevation={3}>
+                    <Table sx={{ minWidth: 650 }} aria-label="reservations table">
+                        <TableHead>
                             <TableRow>
-                                <TableCell colSpan={10} align="center">Loading...</TableCell>
+                                <TableCell>
+                                    <TableSortLabel
+                                        active={orderBy === 'id'}
+                                        direction={orderBy === 'id' ? order : 'asc'}
+                                        onClick={() => handleRequestSort('id')}
+                                    >
+                                        ID
+                                    </TableSortLabel>
+                                </TableCell>
+                                <TableCell>Client</TableCell>
+                                <TableCell>Apartment</TableCell>
+                                <TableCell>
+                                    <TableSortLabel
+                                        active={orderBy === 'check_in_date'}
+                                        direction={orderBy === 'check_in_date' ? order : 'asc'}
+                                        onClick={() => handleRequestSort('check_in_date')}
+                                    >
+                                        Check-in
+                                    </TableSortLabel>
+                                </TableCell>
+                                <TableCell>
+                                    <TableSortLabel
+                                        active={orderBy === 'check_out_date'}
+                                        direction={orderBy === 'check_out_date' ? order : 'asc'}
+                                        onClick={() => handleRequestSort('check_out_date')}
+                                    >
+                                        Check-out
+                                    </TableSortLabel>
+                                </TableCell>
+                                <TableCell>
+                                    <TableSortLabel
+                                        active={orderBy === 'total_amount'}
+                                        direction={orderBy === 'total_amount' ? order : 'asc'}
+                                        onClick={() => handleRequestSort('total_amount')}
+                                    >
+                                        Total
+                                    </TableSortLabel>
+                                </TableCell>
+                                <TableCell>Status</TableCell>
+                                <TableCell>Payment</TableCell>
+                                <TableCell>
+                                    <TableSortLabel
+                                        active={orderBy === 'created_at'}
+                                        direction={orderBy === 'created_at' ? order : 'asc'}
+                                        onClick={() => handleRequestSort('created_at')}
+                                    >
+                                        Creation Date
+                                    </TableSortLabel>
+                                </TableCell>
+                                <TableCell align="right">Actions</TableCell>
                             </TableRow>
-                        ) : !sortedReservations || sortedReservations.length === 0 ? (
-                            <TableRow>
-                                <TableCell colSpan={10} align="center">No reservations found</TableCell>
-                            </TableRow>
-                        ) : (
-                            sortedReservations
-                                .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
-                                .map((reservation) => (
-                                    <TableRow key={reservation.id} hover>
-                                        <TableCell>{reservation.id}</TableCell>
-                                        <TableCell>
-                                            {reservation.client_name || 'N/A'} {reservation.client_lastname || ''}
-                                            <Typography variant="body2" color="textSecondary">
-                                                {reservation.client_email}
-                                            </Typography>
-                                        </TableCell>
-                                        <TableCell>
-                                            {getBuildingName(reservation)}
-                                            {reservation.unit_number && (
+                        </TableHead>
+                        <TableBody>
+                            {loading ? (
+                                <TableRow>
+                                    <TableCell colSpan={10} align="center">Loading...</TableCell>
+                                </TableRow>
+                            ) : !sortedReservations || sortedReservations.length === 0 ? (
+                                <TableRow>
+                                    <TableCell colSpan={10} align="center">No reservations found</TableCell>
+                                </TableRow>
+                            ) : (
+                                sortedReservations
+                                    .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
+                                    .map((reservation) => (
+                                        <TableRow key={reservation.id} hover>
+                                            <TableCell>{reservation.id}</TableCell>
+                                            <TableCell>
+                                                {reservation.client_name || 'N/A'} {reservation.client_lastname || ''}
                                                 <Typography variant="body2" color="textSecondary">
-                                                    Unidad: {reservation.unit_number}
+                                                    {reservation.client_email}
                                                 </Typography>
-                                            )}
-                                        </TableCell>
-                                        <TableCell>{formatDate(reservation.check_in_date || reservation.checkInDate)}</TableCell>
-                                        <TableCell>{formatDate(reservation.check_out_date || reservation.checkOutDate)}</TableCell>
-                                        <TableCell>{formatCurrency(reservation.total_amount || reservation.totalAmount)}</TableCell>
-                                        <TableCell>
-                                            <Chip
-                                                label={reservation.status}
-                                                size="small"
-                                                color={getStatusColor(reservation.status)}
-                                            />
-                                        </TableCell>
-                                        <TableCell>
-                                            <Chip
-                                                label={reservation.payment_status || reservation.paymentStatus}
-                                                size="small"
-                                                color={getPaymentStatusColor(reservation.payment_status || reservation.paymentStatus)}
-                                            />
-                                        </TableCell>
-                                        <TableCell>{formatDate(reservation.created_at || reservation.createdAt)}</TableCell>
-                                        <TableCell align="right">
-                                            <Tooltip title="View details">
-                                                <IconButton 
-                                                    size="small" 
-                                                    onClick={() => handleViewClick(reservation)}
-                                                    color="info"
-                                                >
-                                                    <VisibilityIcon />
-                                                </IconButton>
-                                            </Tooltip>
-                                            <Tooltip title="Edit">
-                                                <IconButton 
-                                                    size="small" 
-                                                    onClick={() => handleEditClick(reservation)}
-                                                    color="primary"
-                                                >
-                                                    <EditIcon />
-                                                </IconButton>
-                                            </Tooltip>
-                                            <Tooltip title="Delete">
-                                                <IconButton 
-                                                    size="small" 
-                                                    onClick={() => handleDeleteClick(reservation.id)}
-                                                    color="error"
-                                                >
-                                                    <DeleteIcon />
-                                                </IconButton>
-                                            </Tooltip>
-                                        </TableCell>
-                                    </TableRow>
-                                ))
-                        )}
-                    </TableBody>
-                </Table>
-                <TablePagination
-                    rowsPerPageOptions={[5, 10, 25]}
-                    component="div"
-                    count={sortedReservations ? sortedReservations.length : 0}
-                    rowsPerPage={rowsPerPage}
-                    page={page}
-                    onPageChange={handleChangePage}
-                    onRowsPerPageChange={handleChangeRowsPerPage}
-                    labelRowsPerPage="Rows per page:"
-                />
-            </TableContainer>
+                                            </TableCell>
+                                            <TableCell>
+                                                {getBuildingName(reservation)}
+                                                {reservation.unit_number && (
+                                                    <Typography variant="body2" color="textSecondary">
+                                                        Unit: {reservation.unit_number}
+                                                    </Typography>
+                                                )}
+                                            </TableCell>
+                                            <TableCell>{formatDate(reservation.check_in_date || reservation.checkInDate)}</TableCell>
+                                            <TableCell>{formatDate(reservation.check_out_date || reservation.checkOutDate)}</TableCell>
+                                            <TableCell>{formatCurrency(reservation.total_amount || reservation.totalAmount)}</TableCell>
+                                            <TableCell>
+                                                <Chip
+                                                    label={reservation.status}
+                                                    size="small"
+                                                    color={getStatusColor(reservation.status)}
+                                                />
+                                            </TableCell>
+                                            <TableCell>
+                                                <Chip
+                                                    label={reservation.payment_status || reservation.paymentStatus}
+                                                    size="small"
+                                                    color={getPaymentStatusColor(reservation.payment_status || reservation.paymentStatus)}
+                                                />
+                                            </TableCell>
+                                            <TableCell>{formatDate(reservation.created_at || reservation.createdAt)}</TableCell>
+                                            <TableCell align="right">
+                                                <Tooltip title="View details">
+                                                    <IconButton 
+                                                        size="small" 
+                                                        onClick={() => handleViewClick(reservation)}
+                                                        color="info"
+                                                    >
+                                                        <VisibilityIcon />
+                                                    </IconButton>
+                                                </Tooltip>
+                                                <Tooltip title="Edit">
+                                                    <IconButton 
+                                                        size="small" 
+                                                        onClick={() => handleEditClick(reservation)}
+                                                        color="primary"
+                                                    >
+                                                        <EditIcon />
+                                                    </IconButton>
+                                                </Tooltip>
+                                                <Tooltip title="Delete">
+                                                    <IconButton 
+                                                        size="small" 
+                                                        onClick={() => handleDeleteClick(reservation.id)}
+                                                        color="error"
+                                                    >
+                                                        <DeleteIcon />
+                                                    </IconButton>
+                                                </Tooltip>
+                                            </TableCell>
+                                        </TableRow>
+                                    ))
+                            )}
+                        </TableBody>
+                    </Table>
+                    <TablePagination
+                        rowsPerPageOptions={[5, 10, 25]}
+                        component="div"
+                        count={sortedReservations ? sortedReservations.length : 0}
+                        rowsPerPage={rowsPerPage}
+                        page={page}
+                        onPageChange={handleChangePage}
+                        onRowsPerPageChange={handleChangeRowsPerPage}
+                        labelRowsPerPage="Rows per page:"
+                    />
+                </TableContainer>
+            )}
         </Box>
     );
 };

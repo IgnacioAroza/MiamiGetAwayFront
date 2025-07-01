@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { 
   AppBar, 
   Box, 
@@ -6,7 +6,15 @@ import {
   Typography, 
   Button, 
   Tooltip,
-  useTheme
+  useTheme,
+  Drawer,
+  IconButton,
+  List,
+  ListItem,
+  ListItemButton,
+  ListItemIcon,
+  ListItemText,
+  Divider
 } from '@mui/material';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { 
@@ -18,28 +26,82 @@ import {
   LogoutIcon,
   DesignServicesIcon
 } from './icons';
+import MenuIcon from '@mui/icons-material/Menu';
+import useDeviceDetection from '../../../hooks/useDeviceDetection';
 
 const DashboardHeader = () => {
   const theme = useTheme();
   const navigate = useNavigate();
   const location = useLocation();
+  const { isMobile } = useDeviceDetection();
+  const [drawerOpen, setDrawerOpen] = useState(false);
   
   const handleLogout = () => {
     localStorage.removeItem('adminToken');
     navigate('/admin/login');
   };
 
-  // Stats de ejemplo - en producción vendrían del estado de Redux
-  const stats = {
-    onRent: 4,
-    getting: 5,
-    booked: 0,
-    overbook: 4,
-    returning: 0,
-    overdue: 1,
-    pending: 0,
-    noShow: 0
+  const toggleDrawer = (open) => (event) => {
+    if (event.type === 'keydown' && (event.key === 'Tab' || event.key === 'Shift')) {
+      return;
+    }
+    setDrawerOpen(open);
   };
+
+  // Navegación compartida para escritorio y móvil
+  const navigationItems = [
+    { text: 'Home', icon: <HomeIcon />, path: '/admin' },
+    { text: 'Services', icon: <DesignServicesIcon />, path: '/admin/services' },
+    { text: 'Reservations', icon: <ReservationsIcon />, path: '/admin/reservations' },
+    { text: 'Apartments', icon: <ApartmentIcon />, path: '/admin/apartments' },
+    { text: 'Payments', icon: <PaymentIcon />, path: '/admin/payments' },
+    { text: 'Users', icon: <PeopleIcon />, path: '/admin/users' },
+  ];
+
+  // Contenido del drawer para móviles
+  const drawerContent = (
+    <Box
+      sx={{ width: 250 }}
+      role="presentation"
+      onClick={toggleDrawer(false)}
+      onKeyDown={toggleDrawer(false)}
+    >
+      <Box sx={{ p: 2 }}>
+        <Typography variant="h6" component="div" sx={{ fontWeight: 'bold' }}>
+          Control Panel
+        </Typography>
+      </Box>
+      <Divider />
+      <List>
+        {navigationItems.map((item) => (
+          <ListItem key={item.text} disablePadding>
+            <ListItemButton 
+              onClick={() => navigate(item.path)}
+              selected={
+                item.path === '/admin' ? location.pathname === '/admin' : location.pathname.includes(item.path)
+              }
+            >
+              <ListItemIcon>
+                {item.icon}
+              </ListItemIcon>
+              <ListItemText primary={item.text} />
+            </ListItemButton>
+          </ListItem>
+        ))}
+      </List>
+      <Divider />
+      <List>
+        <ListItem disablePadding>
+          <ListItemButton onClick={handleLogout}>
+            <ListItemIcon>
+              <LogoutIcon />
+            </ListItemIcon>
+            <ListItemText primary="Logout" />
+          </ListItemButton>
+        </ListItem>
+      </List>
+    </Box>
+  );
 
   return (
     <>
@@ -52,108 +114,88 @@ const DashboardHeader = () => {
         }}
       >
         <Toolbar>
-          <Typography 
-            variant="h6" 
-            component="div" 
-            sx={{ 
-              flexGrow: 0, 
-              mr: 3, 
-              fontWeight: 'bold' 
-            }}
-          >
-            Control Panel
-          </Typography>
-          
-          <Box sx={{ flexGrow: 1, display: 'flex' }}>
-            <Button 
-              color="inherit" 
-              startIcon={<HomeIcon />}
-              onClick={() => navigate('/admin')}
-              sx={{ 
-                mr: 1,
-                borderBottom: location.pathname === '/admin' ? '2px solid white' : 'none',
-              }}
-            >
-              Home
-            </Button>
-            
-            <Button 
-              color="inherit" 
-              startIcon={<DesignServicesIcon />}
-              onClick={() => navigate('/admin/services')}
-              sx={{ 
-                mr: 1,
-                borderBottom: location.pathname.includes('/admin/services') ? '2px solid white' : 'none',
-              }}
-            >
-              Servicios
-            </Button>
-            
-            <Button 
-              color="inherit" 
-              startIcon={<ReservationsIcon />}
-              onClick={() => navigate('/admin/reservations')}
-              sx={{ 
-                mr: 1,
-                borderBottom: location.pathname.includes('/admin/reservations') ? '2px solid white' : 'none',
-              }}
-            >
-              Reservas
-            </Button>
-            
-            <Button 
-              color="inherit" 
-              startIcon={<ApartmentIcon />}
-              onClick={() => navigate('/admin/apartments')}
-              sx={{ 
-                mr: 1,
-                borderBottom: location.pathname.includes('/admin/apartments') ? '2px solid white' : 'none',
-              }}
-            >
-              Apartamentos
-            </Button>
-            
-            <Button 
-              color="inherit" 
-              startIcon={<PaymentIcon />}
-              onClick={() => navigate('/admin/payments')}
-              sx={{ 
-                mr: 1,
-                borderBottom: location.pathname.includes('/admin/payments') ? '2px solid white' : 'none',
-              }}
-            >
-              Pagos
-            </Button>
-            
-            <Button 
-              color="inherit" 
-              startIcon={<PeopleIcon />}
-              onClick={() => navigate('/admin/users')}
-              sx={{ 
-                mr: 1,
-                borderBottom: location.pathname.includes('/admin/users') ? '2px solid white' : 'none',
-              }}
-            >
-              Usuarios
-            </Button>
-          </Box>
-          
-          <Box>
-            <Tooltip title="Cerrar sesión">
-              <Button 
-                color="inherit" 
-                startIcon={<LogoutIcon />}
-                onClick={handleLogout}
+          {isMobile ? (
+            // Versión móvil con menú hamburguesa
+            <>
+              <IconButton
+                size="large"
+                edge="start"
+                color="inherit"
+                aria-label="menu"
+                sx={{ mr: 2 }}
+                onClick={toggleDrawer(true)}
               >
-                Logout
-              </Button>
-            </Tooltip>
-          </Box>
+                <MenuIcon />
+              </IconButton>
+              <Typography 
+                variant="h6" 
+                component="div" 
+                sx={{ flexGrow: 1, fontWeight: 'bold' }}
+              >
+                Control Panel
+              </Typography>
+            </>
+          ) : (
+            // Versión de escritorio con botones
+            <>
+              <Typography 
+                variant="h6" 
+                component="div" 
+                sx={{ 
+                  flexGrow: 0, 
+                  mr: 3, 
+                  fontWeight: 'bold' 
+                }}
+              >
+                Control Panel
+              </Typography>
+              
+              <Box sx={{ flexGrow: 1, display: 'flex' }}>
+                {navigationItems.map((item) => (
+                  <Button 
+                    key={item.text}
+                    color="inherit" 
+                    startIcon={item.icon}
+                    onClick={() => navigate(item.path)}
+                    sx={{ 
+                      mr: 1,
+                      borderBottom: item.path === '/admin' 
+                        ? location.pathname === '/admin' ? '2px solid white' : 'none'
+                        : location.pathname.includes(item.path) ? '2px solid white' : 'none',
+                    }}
+                  >
+                    {item.text}
+                  </Button>
+                ))}
+              </Box>
+              
+              <Box>
+                <Tooltip title="Cerrar sesión">
+                  <Button 
+                    color="inherit" 
+                    startIcon={<LogoutIcon />}
+                    onClick={handleLogout}
+                  >
+                    Logout
+                  </Button>
+                </Tooltip>
+              </Box>
+            </>
+          )}
         </Toolbar>
       </AppBar>
+
+      {/* Drawer para navegación en móviles */}
+      <Drawer
+        anchor="left"
+        open={drawerOpen}
+        onClose={toggleDrawer(false)}
+      >
+        {drawerContent}
+      </Drawer>
     </>
   );
 };
 
 
-export default DashboardHeader; 
+export default DashboardHeader;

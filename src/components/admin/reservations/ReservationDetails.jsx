@@ -18,7 +18,9 @@ import {
     Menu,
     MenuItem,
     ListItemIcon,
-    ListItemText
+    ListItemText,
+    useTheme,
+    Stack
 } from '@mui/material';
 import {
     Email as EmailIcon,
@@ -29,9 +31,12 @@ import {
 import { useReservation } from '../../../hooks/useReservation';
 import ReservationSummary from '../payments/ReservationSummary';
 import { formatDateForDisplay } from '../../../utils/dateUtils';
+import useDeviceDetection from '../../../hooks/useDeviceDetection';
 
 const ReservationDetails = ({ reservation, apartmentLoading, apartmentError, apartmentData, onError }) => {
     const { handleGeneratePdf, handleSendConfirmation } = useReservation();
+    const theme = useTheme();
+    const { isMobile, isTablet } = useDeviceDetection();
     const [openEmailDialog, setOpenEmailDialog] = useState(false);
     const [email, setEmail] = useState('');
     const [snackbar, setSnackbar] = useState({
@@ -260,23 +265,36 @@ const ReservationDetails = ({ reservation, apartmentLoading, apartmentError, apa
     };
 
     return (
-        <Paper elevation={3} sx={{ p: 3, mb: 3 }}>
+        <Paper elevation={3} sx={{ p: { xs: 2, md: 3 }, mb: 3 }}>
             {/* Encabezado */}
-            <Box display="flex" justifyContent="space-between" alignItems="center" flexWrap="wrap" mb={3}>
-                <Typography variant="h4">
+            <Box 
+                display="flex" 
+                flexDirection={isMobile ? "column" : "row"}
+                justifyContent="space-between" 
+                alignItems={isMobile ? "flex-start" : "center"} 
+                mb={3}
+            >
+                <Typography variant={isMobile ? "h5" : "h4"} sx={{ mb: isMobile ? 2 : 0 }}>
                     Reservation #{reservation?.id}
                 </Typography>
-                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mt: { xs: 2, md: 0 } }}>
+                <Stack 
+                    direction={isMobile ? "column" : "row"} 
+                    spacing={1} 
+                    width={isMobile ? "100%" : "auto"}
+                >
                     <Chip
                         label={reservation?.status}
                         color={getStatusColor(reservation?.status)}
                         size="large"
+                        sx={{ alignSelf: isMobile ? "flex-start" : "center" }}
                     />
                     <Button 
                         variant="contained" 
                         startIcon={<ReceiptIcon />}
                         onClick={handleGeneratePdfClick}
                         disabled={loading}
+                        fullWidth={isMobile}
+                        size={isMobile ? "small" : "medium"}
                     >
                         {loading ? <CircularProgress size={24} /> : 'Generate PDF'}
                     </Button>
@@ -286,10 +304,12 @@ const ReservationDetails = ({ reservation, apartmentLoading, apartmentError, apa
                         startIcon={<EmailIcon />}
                         onClick={handleMenuClick}
                         disabled={loading}
+                        fullWidth={isMobile}
+                        size={isMobile ? "small" : "medium"}
                     >
                         Send Emails
                     </Button>
-                </Box>
+                </Stack>
             </Box>
 
             <Menu
@@ -298,16 +318,23 @@ const ReservationDetails = ({ reservation, apartmentLoading, apartmentError, apa
                 onClose={handleMenuClose}
                 anchorOrigin={{
                     vertical: 'bottom',
-                    horizontal: 'right',
+                    horizontal: isMobile ? 'center' : 'right',
                 }}
                 transformOrigin={{
                     vertical: 'top',
-                    horizontal: 'right',
+                    horizontal: isMobile ? 'center' : 'right',
+                }}
+                PaperProps={{
+                    style: {
+                        width: isMobile ? '90%' : 'auto',
+                        maxWidth: '300px'
+                    }
                 }}
             >
                 <MenuItem 
                     onClick={() => handleSendNotification('confirmation')}
                     disabled={loading || isEmailInCooldown('confirmation')}
+                    sx={{ py: isMobile ? 1.5 : 1 }}
                 >
                     <ListItemIcon>
                         <EmailIcon fontSize="small" />
@@ -321,6 +348,7 @@ const ReservationDetails = ({ reservation, apartmentLoading, apartmentError, apa
                 <MenuItem 
                     onClick={() => handleSendNotification('status_update')}
                     disabled={loading || isEmailInCooldown('status_update')}
+                    sx={{ py: isMobile ? 1.5 : 1 }}
                 >
                     <ListItemIcon>
                         <UpdateIcon fontSize="small" />
@@ -334,6 +362,7 @@ const ReservationDetails = ({ reservation, apartmentLoading, apartmentError, apa
                 <MenuItem 
                     onClick={() => handleSendNotification('payment')}
                     disabled={loading || isEmailInCooldown('payment')}
+                    sx={{ py: isMobile ? 1.5 : 1 }}
                 >
                     <ListItemIcon>
                         <PaymentIcon fontSize="small" />
@@ -349,41 +378,61 @@ const ReservationDetails = ({ reservation, apartmentLoading, apartmentError, apa
             <Divider sx={{ mb: 3 }} />
 
             {/* Información principal */}
-            <Grid container spacing={3}>
+            <Grid container spacing={isMobile ? 2 : 3}>
                 {/* Detalles del Cliente */}
                 <Grid item xs={12} md={6}>
-                    <Paper variant="outlined" sx={{ p: 2 }}>
+                    <Paper variant="outlined" sx={{ p: isMobile ? 1.5 : 2 }}>
                         <Typography variant="h6" gutterBottom>
                             Client Information
                         </Typography>
-                        <Typography sx={{ mb: 1 }}>Name: {reservation?.clientName}, {reservation?.clientLastname}</Typography>
-                        <Typography sx={{ mb: 1 }}>Email: {reservation?.clientEmail}</Typography>
-                        <Typography sx={{ mb: 1 }}>Phone: {reservation?.clientPhone}</Typography>
-                        <Typography sx={{ mb: 1 }}>City: {reservation?.clientCity}</Typography>
-                        <Typography sx={{ mb: 1 }}>Country: {reservation?.clientCountry}</Typography>
+                        <Typography sx={{ mb: 1, fontSize: isMobile ? '0.9rem' : 'inherit' }}>
+                            <strong>Name:</strong> {reservation?.clientName}, {reservation?.clientLastname}
+                        </Typography>
+                        <Typography sx={{ mb: 1, fontSize: isMobile ? '0.9rem' : 'inherit' }}>
+                            <strong>Email:</strong> {reservation?.clientEmail}
+                        </Typography>
+                        <Typography sx={{ mb: 1, fontSize: isMobile ? '0.9rem' : 'inherit' }}>
+                            <strong>Phone:</strong> {reservation?.clientPhone}
+                        </Typography>
+                        <Typography sx={{ mb: 1, fontSize: isMobile ? '0.9rem' : 'inherit' }}>
+                            <strong>City:</strong> {reservation?.clientCity}
+                        </Typography>
+                        <Typography sx={{ mb: 1, fontSize: isMobile ? '0.9rem' : 'inherit' }}>
+                            <strong>Country:</strong> {reservation?.clientCountry}
+                        </Typography>
                     </Paper>
                 </Grid>
 
                 {/* Detalles de la Reserva */}
                 <Grid item xs={12} md={6}>
-                    <Paper variant="outlined" sx={{ p: 2 }}>
+                    <Paper variant="outlined" sx={{ p: isMobile ? 1.5 : 2 }}>
                         <Typography variant="h6" gutterBottom>
                             Reservation Details
                         </Typography>
-                        <Typography>Check-in: {formatDate(reservation?.checkIn)}</Typography>
-                        <Typography>Check-out: {formatDate(reservation?.checkOut)}</Typography>
-                        <Typography>Nights: {reservation?.nights}</Typography>
-                        <Typography>Notes: {reservation?.notes}</Typography>
+                        <Typography sx={{ mb: 1, fontSize: isMobile ? '0.9rem' : 'inherit' }}>
+                            <strong>Check-in:</strong> {formatDate(reservation?.checkIn)}
+                        </Typography>
+                        <Typography sx={{ mb: 1, fontSize: isMobile ? '0.9rem' : 'inherit' }}>
+                            <strong>Check-out:</strong> {formatDate(reservation?.checkOut)}
+                        </Typography>
+                        <Typography sx={{ mb: 1, fontSize: isMobile ? '0.9rem' : 'inherit' }}>
+                            <strong>Nights:</strong> {reservation?.nights}
+                        </Typography>
+                        <Typography sx={{ mb: 1, fontSize: isMobile ? '0.9rem' : 'inherit', wordBreak: 'break-word' }}>
+                            <strong>Notes:</strong> {reservation?.notes || 'N/A'}
+                        </Typography>
                     </Paper>
                 </Grid>
 
                 {/* Detalles del Apartamento */}
                 <Grid item xs={12} md={6}>
-                    <Paper variant="outlined" sx={{ p: 2 }}>
+                    <Paper variant="outlined" sx={{ p: isMobile ? 1.5 : 2 }}>
                         <Typography variant="h6" gutterBottom>
                             Apartment Details
                         </Typography>
-                        <Typography>Price per night: ${reservation?.pricePerNight}</Typography>
+                        <Typography sx={{ mb: 1, fontSize: isMobile ? '0.9rem' : 'inherit' }}>
+                            <strong>Price per night:</strong> ${reservation?.pricePerNight}
+                        </Typography>
                         
                         {apartmentLoading ? (
                             <Box sx={{ display: 'flex', justifyContent: 'center', mt: 2 }}>
@@ -394,10 +443,16 @@ const ReservationDetails = ({ reservation, apartmentLoading, apartmentError, apa
                                 Error loading apartment data: {apartmentError}
                             </Alert>
                         ) : (
-                            <Box sx={{ mt: 2 }}>
-                                <Typography>Name: {apartmentData?.name}</Typography>     
-                                <Typography>Address: {apartmentData?.address}</Typography>
-                                <Typography>Description: {apartmentData?.description}</Typography>
+                            <Box sx={{ mt: 1 }}>
+                                <Typography sx={{ mb: 1, fontSize: isMobile ? '0.9rem' : 'inherit' }}>
+                                    <strong>Name:</strong> {apartmentData?.name}
+                                </Typography>     
+                                <Typography sx={{ mb: 1, fontSize: isMobile ? '0.9rem' : 'inherit' }}>
+                                    <strong>Address:</strong> {apartmentData?.address}
+                                </Typography>
+                                <Typography sx={{ mb: 0, fontSize: isMobile ? '0.9rem' : 'inherit', wordBreak: 'break-word' }}>
+                                    <strong>Description:</strong> {apartmentData?.description}
+                                </Typography>
                             </Box>
                         )}
                     </Paper>
@@ -410,7 +465,18 @@ const ReservationDetails = ({ reservation, apartmentLoading, apartmentError, apa
             </Grid>
 
             {/* Diálogo para enviar email */}
-            <Dialog open={openEmailDialog} onClose={() => setOpenEmailDialog(false)}>
+            <Dialog 
+                open={openEmailDialog} 
+                onClose={() => setOpenEmailDialog(false)}
+                fullWidth
+                maxWidth="xs"
+                PaperProps={{
+                    sx: {
+                        width: isMobile ? '95%' : '80%',
+                        m: isMobile ? 1 : 'auto'
+                    }
+                }}
+            >
                 <DialogTitle>Send Reservation by Email</DialogTitle>
                 <DialogContent>
                     <TextField
@@ -425,9 +491,20 @@ const ReservationDetails = ({ reservation, apartmentLoading, apartmentError, apa
                         onChange={(e) => setEmail(e.target.value)}
                     />
                 </DialogContent>
-                <DialogActions>
-                    <Button onClick={() => setOpenEmailDialog(false)}>Cancel</Button>
-                    <Button onClick={handleSendEmail} variant="contained">Send PDF</Button>
+                <DialogActions sx={{ px: 3, pb: 2 }}>
+                    <Button 
+                        onClick={() => setOpenEmailDialog(false)}
+                        size={isMobile ? "medium" : "large"}
+                    >
+                        Cancel
+                    </Button>
+                    <Button 
+                        onClick={handleSendEmail} 
+                        variant="contained" 
+                        size={isMobile ? "medium" : "large"}
+                    >
+                        Send PDF
+                    </Button>
                 </DialogActions>
             </Dialog>
 
@@ -439,6 +516,12 @@ const ReservationDetails = ({ reservation, apartmentLoading, apartmentError, apa
                 aria-describedby="error-dialog-description"
                 maxWidth="sm"
                 fullWidth
+                PaperProps={{
+                    sx: {
+                        width: isMobile ? '95%' : '80%',
+                        m: isMobile ? 1 : 'auto'
+                    }
+                }}
             >
                 <DialogTitle id="error-dialog-title" sx={{ color: 'error.main' }}>
                     {errorDialog.title}
@@ -448,12 +531,14 @@ const ReservationDetails = ({ reservation, apartmentLoading, apartmentError, apa
                         {errorDialog.message}
                     </Typography>
                 </DialogContent>
-                <DialogActions>
+                <DialogActions sx={{ px: 3, pb: 2 }}>
                     <Button 
                         onClick={() => setErrorDialog(prev => ({ ...prev, open: false }))}
                         variant="contained" 
                         color="primary"
                         autoFocus
+                        fullWidth={isMobile}
+                        size={isMobile ? "medium" : "large"}
                     >
                         Accept
                     </Button>
@@ -465,12 +550,19 @@ const ReservationDetails = ({ reservation, apartmentLoading, apartmentError, apa
                 open={snackbar.open} 
                 autoHideDuration={6000} 
                 onClose={() => setSnackbar(prev => ({ ...prev, open: false }))}
-                anchorOrigin={{ vertical: 'top', horizontal: 'center' }}
+                anchorOrigin={{ vertical: isMobile ? 'bottom' : 'top', horizontal: 'center' }}
+                sx={{
+                    width: isMobile ? '100%' : 'auto',
+                    '& .MuiPaper-root': {
+                        width: isMobile ? '90%' : 'auto'
+                    }
+                }}
             >
                 <Alert 
                     onClose={() => setSnackbar(prev => ({ ...prev, open: false }))} 
                     severity={snackbar.severity}
                     sx={{ width: '100%' }}
+                    variant="filled"
                 >
                     {snackbar.message}
                 </Alert>

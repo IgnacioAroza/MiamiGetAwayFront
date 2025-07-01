@@ -11,12 +11,26 @@ import {
     TableRow,
     Paper,
     IconButton,
-    CircularProgress
+    CircularProgress,
+    Card,
+    CardContent,
+    CardActions,
+    Grid,
+    Divider,
+    Chip,
+    useTheme,
+    Stack
 } from '@mui/material';
 import { useDispatch, useSelector } from 'react-redux';
 import AddIcon from '@mui/icons-material/Add';
 import EditIcon from '@mui/icons-material/Edit';
 import DeleteIcon from '@mui/icons-material/Delete';
+import HomeIcon from '@mui/icons-material/Home';
+import BedIcon from '@mui/icons-material/Bed';
+import BathtubIcon from '@mui/icons-material/Bathtub';
+import AttachMoneyIcon from '@mui/icons-material/AttachMoney';
+import LocationOnIcon from '@mui/icons-material/LocationOn';
+import PhotoLibraryIcon from '@mui/icons-material/PhotoLibrary';
 import { 
     fetchAdminApartments,
     deleteAdminApartment,
@@ -27,9 +41,12 @@ import {
 } from '../../../redux/adminApartmentSlice';
 import ApartmentForm from './ApartmentForm';
 import DeleteConfirmDialog from '../../common/DeleteConfirmDialog';
+import useDeviceDetection from '../../../hooks/useDeviceDetection';
 
 const ApartmentList = () => {
     const dispatch = useDispatch();
+    const theme = useTheme();
+    const { isMobile, isTablet } = useDeviceDetection();
     const apartments = useSelector(selectAllApartments);
     const status = useSelector(selectApartmentStatus);
     const error = useSelector(selectApartmentError);
@@ -68,6 +85,117 @@ const ApartmentList = () => {
         setDialogOpen(true);
     };
 
+    // Función para renderizar tarjetas en vista móvil
+    const renderMobileCards = () => {
+        if (apartments.length === 0) {
+            return (
+                <Box sx={{ p: 2, textAlign: 'center' }}>
+                    <Typography variant="body1">No apartments available</Typography>
+                </Box>
+            );
+        }
+
+        return (
+            <Grid container spacing={2}>
+                {apartments.map((apartment) => (
+                    <Grid item xs={12} key={apartment.id}>
+                        <Card elevation={2} sx={{ bgcolor: theme.palette.mode === 'dark' ? '#1e1e1e' : '#f5f5f5' }}>
+                            <CardContent>
+                                <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 1 }}>
+                                    <Typography variant="h6" component="div">
+                                        <HomeIcon sx={{ mr: 1, verticalAlign: 'top' }} />
+                                        {apartment.name}
+                                    </Typography>
+                                    {apartment.unitNumber && (
+                                        <Chip 
+                                            label={`Unit: ${apartment.unitNumber}`} 
+                                            size="small" 
+                                            color="primary"
+                                        />
+                                    )}
+                                </Box>
+
+                                <Divider sx={{ mb: 2 }} />
+
+                                <Grid container spacing={2}>
+                                    <Grid item xs={12}>
+                                        <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
+                                            <LocationOnIcon sx={{ mr: 1, color: 'primary.main' }} />
+                                            <Typography variant="body2">
+                                                {apartment.address || 'No address specified'}
+                                            </Typography>
+                                        </Box>
+                                    </Grid>
+
+                                    <Grid item xs={6}>
+                                        <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                                            <BedIcon sx={{ mr: 1, color: 'primary.main' }} />
+                                            <Typography variant="body2">
+                                                {apartment.rooms} rooms
+                                            </Typography>
+                                        </Box>
+                                    </Grid>
+
+                                    <Grid item xs={6}>
+                                        <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                                            <BathtubIcon sx={{ mr: 1, color: 'primary.main' }} />
+                                            <Typography variant="body2">
+                                                {apartment.bathrooms} bathrooms
+                                            </Typography>
+                                        </Box>
+                                    </Grid>
+
+                                    <Grid item xs={6}>
+                                        <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                                            <AttachMoneyIcon sx={{ mr: 1, color: 'primary.main' }} />
+                                            <Typography variant="body2">
+                                                ${apartment.price}/night
+                                            </Typography>
+                                        </Box>
+                                    </Grid>
+
+                                    <Grid item xs={6}>
+                                        <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                                            <PhotoLibraryIcon sx={{ mr: 1, color: 'primary.main' }} />
+                                            <Typography variant="body2">
+                                                {apartment.images?.length || 0} images
+                                            </Typography>
+                                        </Box>
+                                    </Grid>
+
+                                    <Grid item xs={12}>
+                                        <Typography variant="body2" color="text.secondary">
+                                            {apartment.description || 'No description available'}
+                                        </Typography>
+                                    </Grid>
+                                </Grid>
+                            </CardContent>
+
+                            <Divider />
+
+                            <CardActions sx={{ justifyContent: 'flex-end', p: 1 }}>
+                                <IconButton
+                                    size="small"
+                                    onClick={() => handleEdit(apartment)}
+                                    color="primary"
+                                >
+                                    <EditIcon />
+                                </IconButton>
+                                <IconButton
+                                    size="small"
+                                    onClick={() => handleDelete(apartment)}
+                                    color="error"
+                                >
+                                    <DeleteIcon />
+                                </IconButton>
+                            </CardActions>
+                        </Card>
+                    </Grid>
+                ))}
+            </Grid>
+        );
+    };
+
     if (status === 'loading') {
         return (
             <Box sx={{ display: 'flex', justifyContent: 'center', p: 3 }}>
@@ -99,62 +227,66 @@ const ApartmentList = () => {
                 </Button>
             </Box>
             
-            <TableContainer component={Paper}>
-                <Table>
-                    <TableHead>
-                        <TableRow>
-                            <TableCell>Name</TableCell>
-                            <TableCell>Unit Number</TableCell>
-                            <TableCell>Distribution</TableCell>
-                            <TableCell>Description</TableCell>
-                            <TableCell>Address</TableCell>
-                            <TableCell>Capacity</TableCell>
-                            <TableCell>Price per night</TableCell>
-                            <TableCell>Images</TableCell>
-                            <TableCell align="center">Actions</TableCell>
-                        </TableRow>
-                    </TableHead>
-                    <TableBody>
-                        {apartments.map((apartment) => (
-                            <TableRow key={apartment.id}>
-                                <TableCell>{apartment.name}</TableCell>
-                                <TableCell>{apartment.unitNumber}</TableCell>
-                                <TableCell>
-                                    {apartment.bathrooms} baths, {apartment.rooms} rooms
-                                </TableCell>
-                                <TableCell>{apartment.description}</TableCell>
-                                <TableCell>{apartment.address}</TableCell>
-                                <TableCell>{apartment.capacity}</TableCell>
-                                <TableCell>{apartment.price}</TableCell>
-                                <TableCell>{apartment.images?.length || 0} images</TableCell>
-                                <TableCell align="center">
-                                    <IconButton
-                                        size="small"
-                                        onClick={() => handleEdit(apartment)}
-                                        color="primary"
-                                    >
-                                        <EditIcon />
-                                    </IconButton>
-                                    <IconButton
-                                        size="small"
-                                        onClick={() => handleDelete(apartment)}
-                                        color="error"
-                                    >
-                                        <DeleteIcon />
-                                    </IconButton>
-                                </TableCell>
-                            </TableRow>
-                        ))}
-                        {apartments.length === 0 && (
+            {isMobile || isTablet ? (
+                renderMobileCards()
+            ) : (
+                <TableContainer component={Paper}>
+                    <Table>
+                        <TableHead>
                             <TableRow>
-                                <TableCell colSpan={8} align="center">
-                                    No apartments available
-                                </TableCell>
+                                <TableCell>Name</TableCell>
+                                <TableCell>Unit Number</TableCell>
+                                <TableCell>Distribution</TableCell>
+                                <TableCell>Description</TableCell>
+                                <TableCell>Address</TableCell>
+                                <TableCell>Capacity</TableCell>
+                                <TableCell>Price per night</TableCell>
+                                <TableCell>Images</TableCell>
+                                <TableCell align="center">Actions</TableCell>
                             </TableRow>
-                        )}
-                    </TableBody>
-                </Table>
-            </TableContainer>
+                        </TableHead>
+                        <TableBody>
+                            {apartments.map((apartment) => (
+                                <TableRow key={apartment.id}>
+                                    <TableCell>{apartment.name}</TableCell>
+                                    <TableCell>{apartment.unitNumber}</TableCell>
+                                    <TableCell>
+                                        {apartment.bathrooms} bathrooms, {apartment.rooms} rooms
+                                    </TableCell>
+                                    <TableCell>{apartment.description}</TableCell>
+                                    <TableCell>{apartment.address}</TableCell>
+                                    <TableCell>{apartment.capacity}</TableCell>
+                                    <TableCell>${apartment.price}</TableCell>
+                                    <TableCell>{apartment.images?.length || 0} images</TableCell>
+                                    <TableCell align="center">
+                                        <IconButton
+                                            size="small"
+                                            onClick={() => handleEdit(apartment)}
+                                            color="primary"
+                                        >
+                                            <EditIcon />
+                                        </IconButton>
+                                        <IconButton
+                                            size="small"
+                                            onClick={() => handleDelete(apartment)}
+                                            color="error"
+                                        >
+                                            <DeleteIcon />
+                                        </IconButton>
+                                    </TableCell>
+                                </TableRow>
+                            ))}
+                            {apartments.length === 0 && (
+                                <TableRow>
+                                    <TableCell colSpan={9} align="center">
+                                        No apartments available
+                                    </TableCell>
+                                </TableRow>
+                            )}
+                        </TableBody>
+                    </Table>
+                </TableContainer>
+            )}
 
             <ApartmentForm
                 open={dialogOpen}
