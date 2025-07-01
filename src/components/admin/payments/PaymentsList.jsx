@@ -18,11 +18,24 @@ import {
     DialogContent,
     DialogActions,
     Alert,
-    Snackbar
+    Snackbar,
+    Card,
+    CardContent,
+    CardActions,
+    Grid,
+    Divider,
+    Chip,
+    useTheme
 } from '@mui/material';
 import EditIcon from '@mui/icons-material/Edit';
 import DeleteIcon from '@mui/icons-material/Delete';
 import AddIcon from '@mui/icons-material/Add';
+import PaymentIcon from '@mui/icons-material/Payment';
+import DateRangeIcon from '@mui/icons-material/DateRange';
+import AttachMoneyIcon from '@mui/icons-material/AttachMoney';
+import PersonIcon from '@mui/icons-material/Person';
+import NoteIcon from '@mui/icons-material/Note';
+import useDeviceDetection from '../../../hooks/useDeviceDetection';
 import { 
     fetchAllPayments, 
     deletePayment,
@@ -37,6 +50,8 @@ import reservationService from '../../../services/reservationService';
 // Componente para mostrar y gestionar la lista de pagos
 const PaymentsList = () => {
     const dispatch = useDispatch();
+    const theme = useTheme();
+    const { isMobile, isTablet } = useDeviceDetection();
     const { payments, status, error, loading } = useSelector(state => state.reservationPayments);
     
     // Estados locales
@@ -239,6 +254,93 @@ const PaymentsList = () => {
         return methodMap[method] || method;
     };
 
+    // Función para renderizar tarjetas en vista móvil
+    const renderMobileCards = () => {
+        if (payments.length === 0) {
+            return (
+                <Box sx={{ p: 2, textAlign: 'center' }}>
+                    <Typography variant="body1">No payments registered</Typography>
+                </Box>
+            );
+        }
+
+        return (
+            <Grid container spacing={2}>
+                {payments.map((payment) => (
+                    <Grid item xs={12} key={payment.id}>
+                        <Card elevation={2} sx={{ bgcolor: theme.palette.mode === 'dark' ? '#1e1e1e' : '#f5f5f5' }}>
+                            <CardContent>
+                                <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 1 }}>
+                                    <Typography variant="h6" component="div" sx={{ display: 'flex', alignItems: 'center' }}>
+                                        <PaymentIcon sx={{ mr: 1 }} />
+                                        {formatAmount(payment.amount)}
+                                    </Typography>
+                                    <Chip
+                                        label={normalizePaymentMethod(payment.paymentMethod)}
+                                        size="small"
+                                        color="primary"
+                                    />
+                                </Box>
+
+                                <Divider sx={{ my: 1.5 }} />
+
+                                <Grid container spacing={2}>
+                                    <Grid item xs={12}>
+                                        <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
+                                            <DateRangeIcon sx={{ mr: 1, color: 'primary.main' }} />
+                                            <Typography variant="body2">
+                                                {formatDate(payment.paymentDate)}
+                                            </Typography>
+                                        </Box>
+                                    </Grid>
+
+                                    <Grid item xs={12}>
+                                        <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
+                                            <PersonIcon sx={{ mr: 1, color: 'primary.main' }} />
+                                            <Typography variant="body2">
+                                                Client: {getClientName(payment)}
+                                            </Typography>
+                                        </Box>
+                                    </Grid>
+
+                                    {payment.notes && (
+                                        <Grid item xs={12}>
+                                            <Box sx={{ display: 'flex', alignItems: 'flex-start', mb: 1 }}>
+                                                <NoteIcon sx={{ mr: 1, color: 'primary.main', mt: 0.3 }} />
+                                                <Typography variant="body2">
+                                                    {payment.notes}
+                                                </Typography>
+                                            </Box>
+                                        </Grid>
+                                    )}
+                                </Grid>
+                            </CardContent>
+
+                            <Divider />
+
+                            <CardActions sx={{ justifyContent: 'flex-end', p: 1 }}>
+                                <IconButton
+                                    size="small"
+                                    onClick={() => handleEdit(payment)}
+                                    color="primary"
+                                >
+                                    <EditIcon />
+                                </IconButton>
+                                <IconButton
+                                    size="small"
+                                    onClick={() => handleDeleteClick(payment)}
+                                    color="error"
+                                >
+                                    <DeleteIcon />
+                                </IconButton>
+                            </CardActions>
+                        </Card>
+                    </Grid>
+                ))}
+            </Grid>
+        );
+    };
+
     if (loading) {
         return (
             <Box display="flex" justifyContent="center" alignItems="center" minHeight="200px">
@@ -270,55 +372,60 @@ const PaymentsList = () => {
                 </Button>
             </Box>
 
-            <TableContainer component={Paper}>
-                <Table sx={{ minWidth: 650 }} aria-label="payments table">
-                    <TableHead>
-                        <TableRow>
-                            <TableCell>Date</TableCell>
-                            <TableCell>Amount</TableCell>
-                            <TableCell>Payment Method</TableCell>
-                            <TableCell>Reference</TableCell>
-                            <TableCell>Notes</TableCell>
-                            <TableCell align="center">Actions</TableCell>
-                        </TableRow>
-                    </TableHead>
-                    <TableBody>
-                        {payments.length === 0 ? (
+            {isMobile || isTablet ? (
+                // Mostrar tarjetas en vista móvil o tablet
+                renderMobileCards()
+            ) : (
+                <TableContainer component={Paper}>
+                    <Table sx={{ minWidth: 650 }} aria-label="payments table">
+                        <TableHead>
                             <TableRow>
-                                <TableCell colSpan={6} align="center">
-                                    No payments registered
-                                </TableCell>
+                                <TableCell>Date</TableCell>
+                                <TableCell>Amount</TableCell>
+                                <TableCell>Payment Method</TableCell>
+                                <TableCell>Reference</TableCell>
+                                <TableCell>Notes</TableCell>
+                                <TableCell align="center">Actions</TableCell>
                             </TableRow>
-                        ) : (
-                            payments.map((payment) => (
-                                <TableRow key={payment.id}>
-                                    <TableCell>{formatDate(payment.paymentDate)}</TableCell>
-                                    <TableCell>{formatAmount(payment.amount)}</TableCell>
-                                    <TableCell>
-                                        {normalizePaymentMethod(payment.paymentMethod)}
-                                    </TableCell>
-                                    <TableCell>Client: {getClientName(payment)}</TableCell>
-                                    <TableCell>{payment.notes || '-'}</TableCell>
-                                    <TableCell align="center">
-                                        <IconButton 
-                                            color="primary"
-                                            onClick={() => handleEdit(payment)}
-                                        >
-                                            <EditIcon />
-                                        </IconButton>
-                                        <IconButton 
-                                            color="error"
-                                            onClick={() => handleDeleteClick(payment)}
-                                        >
-                                            <DeleteIcon />
-                                        </IconButton>
+                        </TableHead>
+                        <TableBody>
+                            {payments.length === 0 ? (
+                                <TableRow>
+                                    <TableCell colSpan={6} align="center">
+                                        No payments registered
                                     </TableCell>
                                 </TableRow>
-                            ))
-                        )}
-                    </TableBody>
-                </Table>
-            </TableContainer>
+                            ) : (
+                                payments.map((payment) => (
+                                    <TableRow key={payment.id}>
+                                        <TableCell>{formatDate(payment.paymentDate)}</TableCell>
+                                        <TableCell>{formatAmount(payment.amount)}</TableCell>
+                                        <TableCell>
+                                            {normalizePaymentMethod(payment.paymentMethod)}
+                                        </TableCell>
+                                        <TableCell>Client: {getClientName(payment)}</TableCell>
+                                        <TableCell>{payment.notes || '-'}</TableCell>
+                                        <TableCell align="center">
+                                            <IconButton 
+                                                color="primary"
+                                                onClick={() => handleEdit(payment)}
+                                            >
+                                                <EditIcon />
+                                            </IconButton>
+                                            <IconButton 
+                                                color="error"
+                                                onClick={() => handleDeleteClick(payment)}
+                                            >
+                                                <DeleteIcon />
+                                            </IconButton>
+                                        </TableCell>
+                                    </TableRow>
+                                ))
+                            )}
+                        </TableBody>
+                    </Table>
+                </TableContainer>
+            )}
 
             {/* Modal de Formulario */}
             <PaymentForm 

@@ -8,16 +8,19 @@ import {
     Paper,
     Typography,
     IconButton,
-    Tooltip
+    Tooltip,
+    Stack
 } from '@mui/material';
 import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns';
 import { es } from 'date-fns/locale';
-import { Clear as ClearIcon } from '@mui/icons-material';
+import { Clear as ClearIcon, FilterAlt as FilterIcon } from '@mui/icons-material';
 import { formatDateToString, parseStringToDate } from '../../../utils/dateUtils';
+import useDeviceDetection from '../../../hooks/useDeviceDetection';
 
 const ReservationFilters = ({ onApplyFilters, onClearFilters }) => {
+    const { isMobile } = useDeviceDetection();
     const [filters, setFilters] = useState({
         startDate: null,
         endDate: null,
@@ -88,6 +91,7 @@ const ReservationFilters = ({ onApplyFilters, onClearFilters }) => {
                 mb: 1 
             }}>
                 <Typography variant="subtitle1" component="div" sx={{ color: '#fff' }}>
+                    {isMobile ? <FilterIcon fontSize="small" sx={{ mr: 0.5, verticalAlign: 'middle' }} /> : null}
                     Search filters
                 </Typography>
                 <Tooltip title="Clear filters">
@@ -108,14 +112,13 @@ const ReservationFilters = ({ onApplyFilters, onClearFilters }) => {
                             label="Start date"
                             value={filters.startDate}
                             onChange={(newValue) => handleFilterChange('startDate', newValue)}
-                            TextField={(params) => (
-                                <TextField 
-                                    {...params} 
-                                    fullWidth 
-                                    size="small"
-                                    sx={inputStyle}
-                                />
-                            )}
+                            slotProps={{
+                                textField: {
+                                    fullWidth: true,
+                                    size: "small",
+                                    sx: inputStyle
+                                }
+                            }}
                             sx={{
                                 width: '100%',
                                 '& .MuiInputBase-root': {
@@ -131,14 +134,13 @@ const ReservationFilters = ({ onApplyFilters, onClearFilters }) => {
                             label="End date"
                             value={filters.endDate}
                             onChange={(newValue) => handleFilterChange('endDate', newValue)}
-                            TextField={(params) => (
-                                <TextField 
-                                    {...params} 
-                                    fullWidth 
-                                    size="small"
-                                    sx={inputStyle}
-                                />
-                            )}
+                            slotProps={{
+                                textField: {
+                                    fullWidth: true,
+                                    size: "small",
+                                    sx: inputStyle
+                                }
+                            }}
                             sx={{
                                 width: '100%',
                                 '& .MuiInputBase-root': {
