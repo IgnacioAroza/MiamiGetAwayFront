@@ -10,13 +10,19 @@ import {
     Typography,
     Box,
     CircularProgress,
-    Alert
+    Alert,
+    Card,
+    CardContent,
+    Divider,
+    Stack
 } from '@mui/material';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
 import api from '../../../utils/api';
+import useDeviceDetection from '../../../hooks/useDeviceDetection';
 
 const PaymentHistory = ({ payments = [], reservationId }) => {
+    const { isMobile, isTablet } = useDeviceDetection();
     const [loadedPayments, setLoadedPayments] = useState([]);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState(null);
@@ -96,9 +102,58 @@ const PaymentHistory = ({ payments = [], reservationId }) => {
         amount: payment.amount || 0
     }));
 
+    // Renderizado de tarjetas para móviles
+    const renderMobileCards = () => {
+        return (
+            <Stack spacing={2}>
+                {normalizedPayments.map((payment) => (
+                    <Card key={payment.id} variant="outlined">
+                        <CardContent sx={{ p: 2, '&:last-child': { pb: 2 } }}>
+                            <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
+                                <Typography variant="subtitle2" color="text.secondary">
+                                    Date
+                                </Typography>
+                                <Typography variant="body2">
+                                    {formatDate(payment.date)}
+                                </Typography>
+                            </Box>
+                            <Divider sx={{ my: 1 }} />
+                            <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
+                                <Typography variant="subtitle2" color="text.secondary">
+                                    Method
+                                </Typography>
+                                <Typography variant="body2">
+                                    {payment.method}
+                                </Typography>
+                            </Box>
+                            <Divider sx={{ my: 1 }} />
+                            <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
+                                <Typography variant="subtitle2" color="text.secondary">
+                                    Reference
+                                </Typography>
+                                <Typography variant="body2" sx={{ wordBreak: 'break-word', maxWidth: '60%', textAlign: 'right' }}>
+                                    {payment.reference}
+                                </Typography>
+                            </Box>
+                            <Divider sx={{ my: 1 }} />
+                            <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 0 }}>
+                                <Typography variant="subtitle2" color="text.secondary">
+                                    Amount
+                                </Typography>
+                                <Typography variant="body2" fontWeight="bold">
+                                    {formatCurrency(payment.amount)}
+                                </Typography>
+                            </Box>
+                        </CardContent>
+                    </Card>
+                ))}
+            </Stack>
+        );
+    };
+
     return (
-        <Paper variant="outlined" sx={{ p: 2 }}>
-            <Typography variant="h6" gutterBottom>
+        <Paper variant="outlined" sx={{ p: isMobile ? 1.5 : 2 }}>
+            <Typography variant={isMobile ? "subtitle1" : "h6"} gutterBottom>
                 Payment History
             </Typography>
             
@@ -114,6 +169,8 @@ const PaymentHistory = ({ payments = [], reservationId }) => {
                 <Typography align="center" sx={{ py: 2 }}>
                     There are no payments recorded for this reservation.
                 </Typography>
+            ) : isMobile || isTablet ? (
+                renderMobileCards()
             ) : (
                 <TableContainer>
                     <Table size="small">
