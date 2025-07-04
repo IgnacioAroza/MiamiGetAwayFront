@@ -2,34 +2,28 @@ import { useMemo } from 'react';
 
 export const useReservationTrends = (reservations) => {
     return useMemo(() => {
-        if (!reservations || reservations.length === 0) return [];
-
-        // Obtener mes actual y crear fecha base
+        if (!reservations || reservations.length === 0) return [];        // Obtener mes actual y crear fecha base
         const now = new Date();
+        const currentMonth = now.getMonth();
+        const currentYear = now.getFullYear();
 
-        // Crear array con mes anterior, actual y siguiente
-        const monthsData = [
-            {
-                date: new Date(now.getFullYear(), now.getMonth() - 1, 1),
-                isCurrent: false,
-                label: 'previous'
-            },
-            {
-                date: new Date(now.getFullYear(), now.getMonth(), 1),
-                isCurrent: true,
-                label: 'current'
-            },
-            {
-                date: new Date(now.getFullYear(), now.getMonth() + 1, 1),
-                isCurrent: false,
-                label: 'next'
-            }
-        ];
+        // Crear array con todos los meses del año actual (enero a diciembre)
+        const monthsData = [];
+        for (let i = 0; i < 12; i++) {
+            // Creamos una fecha para cada mes del año actual
+            const targetDate = new Date(currentYear, i, 1);
+
+            monthsData.push({
+                date: targetDate,
+                isCurrent: i === currentMonth, // Comprobamos si es el mes actual
+                label: i === currentMonth ? 'current' : (i === currentMonth - 1 ? 'previous' : 'other')
+            });
+        }
 
         // Agrupar reservas por mes
         const monthlyData = {};
 
-        // Inicializar los 3 meses con 0 reservas
+        // Inicializar los 12 meses con 0 reservas
         monthsData.forEach(({ date, isCurrent }) => {
             const monthKey = date.toISOString().slice(0, 7);
             monthlyData[monthKey] = {
