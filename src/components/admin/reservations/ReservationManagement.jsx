@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { useParams, useNavigate } from 'react-router-dom';
-import { Box, Container, Grid, Paper, Typography, Button, Alert, Snackbar } from '@mui/material';
+import { Box, Container, Grid, Paper, Typography, Button, Alert, Snackbar, Skeleton } from '@mui/material';
 import { ArrowBack as ArrowBackIcon } from '@mui/icons-material';
 import { fetchReservationById } from '../../../redux/reservationSlice';
 import ReservationForm from './ReservationForm';
@@ -124,7 +124,32 @@ const ReservationManagement = () => {
                 </Box>
                 
                 {loading ? (
-                    <Typography>Loading...</Typography>
+                    <Box>
+                        <Box display="flex" alignItems="center" mb={3}>
+                            <Skeleton variant="rectangular" width={100} height={36} sx={{ mr: 2 }} />
+                            <Skeleton variant="text" width={240} height={40} />
+                        </Box>
+                        <Grid container spacing={3}>
+                            <Grid item xs={12} md={8}>
+                                <Paper elevation={3} sx={{ p: 3 }}>
+                                    <Skeleton variant="text" width={200} height={32} sx={{ mb: 2 }} />
+                                    {[...Array(8)].map((_, idx) => (
+                                        <Skeleton key={idx} variant="text" width={`${80 - idx * 5}%`} />
+                                    ))}
+                                    <Skeleton variant="rectangular" height={48} sx={{ mt: 2 }} />
+                                </Paper>
+                            </Grid>
+                            <Grid item xs={12} md={4}>
+                                <Paper elevation={3} sx={{ p: 3 }}>
+                                    <Skeleton variant="text" width={160} height={28} />
+                                    {[...Array(6)].map((_, idx) => (
+                                        <Skeleton key={idx} variant="text" width={`${70 - idx * 5}%`} />
+                                    ))}
+                                    <Skeleton variant="rectangular" height={40} sx={{ mt: 2 }} />
+                                </Paper>
+                            </Grid>
+                        </Grid>
+                    </Box>
                 ) : error ? (
                     <Typography color="error">Error: {error}</Typography>
                 ) : (

@@ -17,6 +17,7 @@ import {
   useTheme,
   Tabs,
   Tab,
+  Skeleton,
 } from "@mui/material";
 import {
   TrendingUp as TrendingUpIcon,
@@ -55,6 +56,9 @@ const AdminDashboard = () => {
   const reviewError = useSelector((state) => state.reviews.error);
   const { reservations } = useSelector((state) => state.reservations);
   const payments = useSelector((state) => state.reservationPayments.payments);
+  const reservationsLoading = useSelector((state) => state.reservations.loading);
+  const usersStatus = useSelector((state) => state.users.status);
+  const paymentsLoading = useSelector((state) => state.reservationPayments.loading);
   const totalUsers = useSelector(selectUserCount);
   const reviews = useSelector((state) => state.reviews.items);
 
@@ -171,7 +175,14 @@ const AdminDashboard = () => {
           <Grid container spacing={4}>
             {!isMobile && (
               <Grid item xs={12} md={8}>
-                <BookingTrendsChart reservations={reservations} />
+                {reservationsLoading ? (
+                  <Paper sx={{ p: 3 }}>
+                    <Skeleton variant="text" width={220} height={36} />
+                    <Skeleton variant="rectangular" height={280} sx={{ mt: 2 }} />
+                  </Paper>
+                ) : (
+                  <BookingTrendsChart reservations={reservations} />
+                )}
               </Grid>
             )}
 
@@ -208,9 +219,20 @@ const AdminDashboard = () => {
                   </Button>
                 </Box>
                 <Divider sx={{ mb: 2 }} />
-
                 <List>
-                  {latestReservations.length === 0 ? (
+                  {reservationsLoading ? (
+                    [...Array(3)].map((_, idx) => (
+                      <ListItem key={idx} sx={{ mb: 1 }}>
+                        <ListItemIcon>
+                          <Skeleton variant="circular" width={24} height={24} />
+                        </ListItemIcon>
+                        <ListItemText
+                          primary={<Skeleton variant="text" width="60%" />}
+                          secondary={<Skeleton variant="text" width="40%" />}
+                        />
+                      </ListItem>
+                    ))
+                  ) : latestReservations.length === 0 ? (
                     <ListItem>
                       <ListItemText primary="No reservations available" />
                     </ListItem>

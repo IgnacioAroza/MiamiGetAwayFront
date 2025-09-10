@@ -1,30 +1,16 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
-import axios from 'axios';
-import config from '../config';
+import api from '../utils/api';
 
-const getToken = () => localStorage.getItem('adminToken');
-
-const api = axios.create({
-    baseURL: config.API_URL,
-});
-
-api.interceptors.request.use(
-    (config) => {
-        const token = getToken();
-        if (token) {
-            config.headers['Authorization'] = `Bearer ${token}`;
-        }
-        return config;
-    },
-    (error) => Promise.reject(error)
-);
+// Usamos el cliente API centralizado con interceptores compartidos
 
 const handleApiError = (error) => {
     if (error.response) {
         if (error.response.status === 401) {
+            // El interceptor global ya maneja limpieza/redirección
             throw new Error('Unauthorized: Please log in again.');
         }
-        throw new Error(error.response.data.message || 'An error occurred');
+        const message = error.response.data?.message || error.response.data?.error || 'An error occurred';
+        throw new Error(message);
     } else if (error.request) {
         throw new Error('No response received from server');
     } else {

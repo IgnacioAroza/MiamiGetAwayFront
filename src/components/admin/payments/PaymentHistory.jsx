@@ -10,6 +10,7 @@ import {
     Typography,
     Box,
     CircularProgress,
+    Skeleton,
     Alert,
     Card,
     CardContent,
@@ -158,9 +159,45 @@ const PaymentHistory = ({ payments = [], reservationId }) => {
             </Typography>
             
             {loading ? (
-                <Box sx={{ display: 'flex', justifyContent: 'center', p: 3 }}>
-                    <CircularProgress size={30} />
-                </Box>
+                isMobile || isTablet ? (
+                    <Stack spacing={2}>
+                        {[...Array(3)].map((_, idx) => (
+                            <Card key={idx} variant="outlined">
+                                <CardContent sx={{ p: 2, '&:last-child': { pb: 2 } }}>
+                                    <Skeleton variant="text" width="40%" />
+                                    <Divider sx={{ my: 1 }} />
+                                    <Skeleton variant="text" width="30%" />
+                                    <Divider sx={{ my: 1 }} />
+                                    <Skeleton variant="text" width="60%" />
+                                    <Divider sx={{ my: 1 }} />
+                                    <Skeleton variant="text" width="20%" />
+                                </CardContent>
+                            </Card>
+                        ))}
+                    </Stack>
+                ) : (
+                    <TableContainer>
+                        <Table size="small">
+                            <TableHead>
+                                <TableRow>
+                                    {['Date','Method','Reference','Amount'].map((h) => (
+                                        <TableCell key={h}><Skeleton variant="text" width={100} /></TableCell>
+                                    ))}
+                                </TableRow>
+                            </TableHead>
+                            <TableBody>
+                                {[...Array(4)].map((_, idx) => (
+                                    <TableRow key={idx}>
+                                        <TableCell><Skeleton variant="text" width={120} /></TableCell>
+                                        <TableCell><Skeleton variant="text" width={100} /></TableCell>
+                                        <TableCell><Skeleton variant="text" width={220} /></TableCell>
+                                        <TableCell align="right"><Skeleton variant="text" width={80} /></TableCell>
+                                    </TableRow>
+                                ))}
+                            </TableBody>
+                        </Table>
+                    </TableContainer>
+                )
             ) : error ? (
                 <Alert severity="error" sx={{ mt: 2, mb: 2 }}>
                     {error}

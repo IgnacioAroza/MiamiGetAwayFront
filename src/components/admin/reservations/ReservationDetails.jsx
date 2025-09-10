@@ -15,6 +15,7 @@ import {
     Snackbar,
     Alert,
     CircularProgress,
+    Skeleton,
     Menu,
     MenuItem,
     ListItemIcon,
@@ -435,8 +436,10 @@ const ReservationDetails = ({ reservation, apartmentLoading, apartmentError, apa
                         </Typography>
                         
                         {apartmentLoading ? (
-                            <Box sx={{ display: 'flex', justifyContent: 'center', mt: 2 }}>
-                                <CircularProgress size={24} />
+                            <Box sx={{ mt: 1 }}>
+                                <Skeleton variant="text" width="60%" />
+                                <Skeleton variant="text" width="80%" />
+                                <Skeleton variant="text" width="90%" />
                             </Box>
                         ) : apartmentError ? (
                             <Alert severity="error" sx={{ mt: 2, mb: 2 }}>

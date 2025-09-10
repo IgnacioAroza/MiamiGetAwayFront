@@ -19,6 +19,7 @@ import {
     Divider,
     Tooltip,
     CircularProgress,
+    Skeleton,
     TableSortLabel,
     Card,
     CardContent,
@@ -238,9 +239,33 @@ const ReservationList = ({ filter = {} }) => {
     const renderMobileCards = () => {
         if (loading) {
             return (
-                <Box sx={{ display: 'flex', justifyContent: 'center', p: 3 }}>
-                    <CircularProgress />
-                </Box>
+                <Grid container spacing={2}>
+                    {[...Array(3)].map((_, idx) => (
+                        <Grid item xs={12} key={idx}>
+                            <Card elevation={2} sx={{ bgcolor: theme.palette.mode === 'dark' ? '#1e1e1e' : '#f5f5f5' }}>
+                                <CardContent>
+                                    <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 1 }}>
+                                        <Skeleton variant="text" width={160} height={28} />
+                                        <Stack direction="row" spacing={1}>
+                                            <Skeleton variant="rounded" width={60} height={24} />
+                                            <Skeleton variant="rounded" width={70} height={24} />
+                                        </Stack>
+                                    </Box>
+                                    <Divider sx={{ mb: 2 }} />
+                                    <Skeleton variant="text" width="50%" />
+                                    <Skeleton variant="text" width="70%" />
+                                    <Skeleton variant="text" width="60%" />
+                                </CardContent>
+                                <Divider />
+                                <CardActions sx={{ justifyContent: 'flex-end', p: 1 }}>
+                                    <Skeleton variant="circular" width={32} height={32} />
+                                    <Skeleton variant="circular" width={32} height={32} sx={{ ml: 1 }} />
+                                    <Skeleton variant="circular" width={32} height={32} sx={{ ml: 1 }} />
+                                </CardActions>
+                            </Card>
+                        </Grid>
+                    ))}
+                </Grid>
             );
         }
 
@@ -511,9 +536,23 @@ const ReservationList = ({ filter = {} }) => {
                         </TableHead>
                         <TableBody>
                             {loading ? (
-                                <TableRow>
-                                    <TableCell colSpan={10} align="center">Loading...</TableCell>
-                                </TableRow>
+                                [...Array(6)].map((_, idx) => (
+                                    <TableRow key={idx}>
+                                        {[...Array(10)].map((__, cidx) => (
+                                            <TableCell key={cidx}>
+                                                {cidx === 9 ? (
+                                                    <>
+                                                        <Skeleton variant="circular" width={28} height={28} />
+                                                        <Skeleton variant="circular" width={28} height={28} sx={{ ml: 1 }} />
+                                                        <Skeleton variant="circular" width={28} height={28} sx={{ ml: 1 }} />
+                                                    </>
+                                                ) : (
+                                                    <Skeleton variant="text" width={cidx % 3 === 0 ? 80 : 140} />
+                                                )}
+                                            </TableCell>
+                                        ))}
+                                    </TableRow>
+                                ))
                             ) : !sortedReservations || sortedReservations.length === 0 ? (
                                 <TableRow>
                                     <TableCell colSpan={10} align="center">No reservations found</TableCell>

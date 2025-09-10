@@ -11,6 +11,7 @@ import {
   Paper,
   Button,
   CircularProgress,
+  Skeleton,
   Card,
   CardContent,
   CardActions,
@@ -34,9 +35,70 @@ const ServiceTable = ({
   const { isMobile } = useDeviceDetection();
 
   if (status === 'loading') {
+    // Skeletons para carga
+    const headerMap = {
+      cars: ['Brand', 'Model', 'Description', 'Price', 'Images', 'Actions'],
+      yachts: ['Name', 'Description', 'Capacity', 'Price', 'Images', 'Actions'],
+      apartments: ['Name', 'Description', 'Unit Number', 'Address', 'Capacity', 'Bathrooms', 'Bedrooms', 'Price', 'Images', 'Actions'],
+      villas: ['Name', 'Description', 'Address', 'Capacity', 'Bathrooms', 'Bedrooms', 'Price', 'Images', 'Actions']
+    };
+    const headers = headerMap[selectedService] || headerMap.apartments;
+
     return (
-      <Box sx={{ display: 'flex', justifyContent: 'center', p: 3, mt: 2 }}>
-        <CircularProgress />
+      <Box sx={{ mt: 4 }}>
+        {isMobile ? (
+          <Grid container spacing={2}>
+            {[...Array(3)].map((_, idx) => (
+              <Grid item xs={12} key={idx}>
+                <Card sx={{ bgcolor: '#1e1e1e', boxShadow: 2 }}>
+                  <CardContent>
+                    <Skeleton variant="text" width={220} height={28} />
+                    <Skeleton variant="text" width="80%" />
+                    <Skeleton variant="text" width="60%" />
+                    <Box sx={{ mt: 2 }}>
+                      <Skeleton variant="rounded" width={90} height={28} />
+                      <Skeleton variant="rounded" width={110} height={28} sx={{ ml: 1, display: 'inline-block' }} />
+                    </Box>
+                  </CardContent>
+                  <CardActions>
+                    <Skeleton variant="rounded" width={80} height={32} />
+                    <Skeleton variant="rounded" width={80} height={32} sx={{ ml: 1 }} />
+                  </CardActions>
+                </Card>
+              </Grid>
+            ))}
+          </Grid>
+        ) : (
+          <TableContainer component={Paper} sx={{ bgcolor: '#1e1e1e' }}>
+            <Table size="small">
+              <TableHead>
+                <TableRow>
+                  {headers.map((h) => (
+                    <TableCell key={h}><Skeleton variant="text" width={120} /></TableCell>
+                  ))}
+                </TableRow>
+              </TableHead>
+              <TableBody>
+                {[...Array(5)].map((_, rIdx) => (
+                  <TableRow key={rIdx}>
+                    {headers.map((h, cIdx) => (
+                      <TableCell key={cIdx}>
+                        {h === 'Actions' ? (
+                          <>
+                            <Skeleton variant="rounded" width={70} height={28} />
+                            <Skeleton variant="rounded" width={70} height={28} sx={{ ml: 1 }} />
+                          </>
+                        ) : (
+                          <Skeleton variant="text" width={cIdx % 3 === 0 ? 160 : 100} />
+                        )}
+                      </TableCell>
+                    ))}
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </TableContainer>
+        )}
       </Box>
     );
   }
