@@ -39,6 +39,7 @@ import {
 } from '@mui/icons-material';
 import { fetchReservations, deleteReservation, setSelectedReservation } from '../../../redux/reservationSlice';
 import adminApartmentService from '../../../services/adminApartmentService';
+import userService from '../../../services/userService';
 import ReservationFilters from './ReservationFilters';
 import { formatDateForDisplay, parseStringToDate } from '../../../utils/dateUtils';
 import useDeviceDetection from '../../../hooks/useDeviceDetection';
@@ -57,6 +58,7 @@ const ReservationList = ({ filter = {} }) => {
     const [orderBy, setOrderBy] = useState('created_at');
     const [order, setOrder] = useState('desc');
     const [activeFilters, setActiveFilters] = useState({});
+    const [clientMap, setClientMap] = useState({});
     
     // Función para ordenar las reservas localmente
     const sortReservations = (reservations, orderBy, order) => {
@@ -115,6 +117,40 @@ const ReservationList = ({ filter = {} }) => {
         
         loadApartments();
     }, []);
+
+    // Cargar datos de clientes faltantes si la reserva no trae nombre/email
+    useEffect(() => {
+        const fetchMissingClients = async () => {
+            try {
+                if (!reservations || reservations.length === 0) return;
+                const missingIds = new Set();
+                reservations.forEach((r) => {
+                    const hasClientInfo = (r.client_name || r.clientName) && (r.client_email || r.clientEmail);
+                    const cid = r.client_id || r.clientId;
+                    if (!hasClientInfo && cid && !clientMap[cid]) {
+                        missingIds.add(cid);
+                    }
+                });
+                if (missingIds.size === 0) return;
+
+                const results = await Promise.allSettled(
+                    Array.from(missingIds).map((id) => userService.getUserById(id))
+                );
+                const newMap = { ...clientMap };
+                results.forEach((res, idx) => {
+                    if (res.status === 'fulfilled' && res.value && res.value.id) {
+                        const u = res.value;
+                        newMap[u.id] = u; // u.name, u.lastname, u.email, u.phone normalizados
+                    }
+                });
+                setClientMap(newMap);
+            } catch (e) {
+                // Silenciar errores para no bloquear la vista
+            }
+        };
+        fetchMissingClients();
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [reservations]);
     
     // Obtener las reservas ordenadas
     const sortedReservations = sortReservations(reservations, orderBy, order);
@@ -235,6 +271,17 @@ const ReservationList = ({ filter = {} }) => {
         return 'N/A';
     };
     
+    const getClientDisplay = (reservation) => {
+        const name = reservation.client_name || reservation.clientName;
+        const lastname = reservation.client_lastname || reservation.clientLastname;
+        const email = reservation.client_email || reservation.clientEmail;
+        if (name || lastname) return `${name || ''} ${lastname || ''}`.trim();
+        const cid = reservation.client_id || reservation.clientId;
+        const user = cid ? clientMap[cid] : null;
+        if (user) return `${user.name || ''} ${user.lastname || ''}`.trim() || user.email || 'N/A';
+        return 'N/A';
+    };
+
     // Renderizar las tarjetas para la vista móvil
     const renderMobileCards = () => {
         if (loading) {
@@ -311,11 +358,14 @@ const ReservationList = ({ filter = {} }) => {
                                                 <PersonIcon sx={{ mr: 1, color: 'primary.main' }} />
                                                 <Box>
                                                     <Typography variant="subtitle1">
-                                                        {reservation.client_name || 'N/A'} {reservation.client_lastname || ''}
+                                                        {getClientDisplay(reservation)}
                                                     </Typography>
-                                                    <Typography variant="body2" color="text.secondary">
-                                                        {reservation.client_email}
-                                                    </Typography>
+                                                    {/* Email si está disponible */}
+                                                    {(reservation.client_email || reservation.clientEmail || clientMap[(reservation.client_id||reservation.clientId)]?.email) && (
+                                                        <Typography variant="body2" color="text.secondary">
+                                                            {reservation.client_email || reservation.clientEmail || clientMap[(reservation.client_id||reservation.clientId)]?.email}
+                                                        </Typography>
+                                                    )}
                                                 </Box>
                                             </Box>
                                         </Grid>
@@ -564,10 +614,12 @@ const ReservationList = ({ filter = {} }) => {
                                         <TableRow key={reservation.id} hover>
                                             <TableCell>{reservation.id}</TableCell>
                                             <TableCell>
-                                                {reservation.client_name || 'N/A'} {reservation.client_lastname || ''}
-                                                <Typography variant="body2" color="textSecondary">
-                                                    {reservation.client_email}
-                                                </Typography>
+                                                {getClientDisplay(reservation)}
+                                                {(reservation.client_email || reservation.clientEmail || clientMap[(reservation.client_id||reservation.clientId)]?.email) && (
+                                                    <Typography variant="body2" color="textSecondary">
+                                                        {reservation.client_email || reservation.clientEmail || clientMap[(reservation.client_id||reservation.clientId)]?.email}
+                                                    </Typography>
+                                                )}
                                             </TableCell>
                                             <TableCell>
                                                 {getBuildingName(reservation)}

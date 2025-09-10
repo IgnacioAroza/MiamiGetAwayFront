@@ -1,5 +1,6 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import api from '../utils/api';
+import { normalizeServiceItemFromApi } from '../utils/normalizers';
 
 // Usamos el cliente API centralizado con interceptores compartidos
 
@@ -129,7 +130,8 @@ const servicesSlice = createSlice({
             .addCase(fetchServices.fulfilled, (state, action) => {
                 const { serviceType, data } = action.payload;
                 state.status[serviceType] = 'succeeded';
-                state.items[serviceType] = data;
+                const list = Array.isArray(data) ? data.map((item) => normalizeServiceItemFromApi(serviceType, item)) : [];
+                state.items[serviceType] = list;
                 state.error[serviceType] = null;
             })
             .addCase(fetchServices.rejected, (state, action) => {
@@ -139,14 +141,16 @@ const servicesSlice = createSlice({
             })
             .addCase(createService.fulfilled, (state, action) => {
                 const { serviceType, data } = action.payload;
-                state.items[serviceType].push(data);
+                const normalized = normalizeServiceItemFromApi(serviceType, data);
+                state.items[serviceType].push(normalized);
                 state.error[serviceType] = null;
             })
             .addCase(updateService.fulfilled, (state, action) => {
                 const { serviceType, data } = action.payload;
-                const index = state.items[serviceType].findIndex(item => item.id === data.id);
+                const normalized = normalizeServiceItemFromApi(serviceType, data);
+                const index = state.items[serviceType].findIndex(item => item.id === normalized.id);
                 if (index !== -1) {
-                    state.items[serviceType][index] = data;
+                    state.items[serviceType][index] = normalized;
                 }
                 state.error[serviceType] = null;
             })

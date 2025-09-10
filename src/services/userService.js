@@ -1,10 +1,12 @@
 import api from '../utils/api'
+import { normalizeUserFromApi } from '../utils/normalizers'
 
 const userService = {
     getAllUsers: async () => {
         try {
             const response = await api.get('/users');
-            return response.data;
+            const raw = response.data || [];
+            return Array.isArray(raw) ? raw.map(normalizeUserFromApi) : [];
         } catch (error) {
             console.error('Error fetching users:', error);
             throw error;
@@ -14,7 +16,7 @@ const userService = {
     getUserById: async (id) => {
         try {
             const response = await api.get(`/users/${id}`);
-            return response.data;
+            return normalizeUserFromApi(response.data);
         } catch (error) {
             console.error('Error fetching user by id:', error);
             throw error;
@@ -24,7 +26,7 @@ const userService = {
     createUser: async (userData) => {
         try {
             const response = await api.post('/users', userData);
-            return response.data;
+            return normalizeUserFromApi(response.data);
         } catch (error) {
             console.error('Error creating user:', error)
             throw error
@@ -39,7 +41,7 @@ const userService = {
             }
 
             const response = await api.put(`/users/${id}`, userData);
-            return response.data;
+            return normalizeUserFromApi(response.data);
         } catch (error) {
             console.error('Error updating user:', error);
             if (error.response) {

@@ -1,4 +1,5 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
+import { normalizeApartmentFromApi } from '../utils/normalizers';
 import axios from 'axios';
 import config from '../config';
 
@@ -95,7 +96,8 @@ const adminApartmentSlice = createSlice({
             })
             .addCase(fetchAdminApartments.fulfilled, (state, action) => {
                 state.status = 'succeeded';
-                state.apartments = action.payload;
+                const raw = action.payload || [];
+                state.apartments = Array.isArray(raw) ? raw.map(normalizeApartmentFromApi) : [];
                 state.loading = false;
                 state.error = null;
             })
@@ -111,7 +113,7 @@ const adminApartmentSlice = createSlice({
             })
             .addCase(fetchAdminApartmentById.fulfilled, (state, action) => {
                 state.status = 'succeeded';
-                state.selectedApartment = action.payload;
+                state.selectedApartment = normalizeApartmentFromApi(action.payload);
                 state.loading = false;
             })
             .addCase(fetchAdminApartmentById.rejected, (state, action) => {
@@ -121,7 +123,7 @@ const adminApartmentSlice = createSlice({
             })
             // Create
             .addCase(createAdminApartment.fulfilled, (state, action) => {
-                state.apartments.push(action.payload);
+                state.apartments.push(normalizeApartmentFromApi(action.payload));
                 state.error = null;
             })
             .addCase(createAdminApartment.rejected, (state, action) => {
@@ -129,12 +131,13 @@ const adminApartmentSlice = createSlice({
             })
             // Update
             .addCase(updateAdminApartment.fulfilled, (state, action) => {
-                const index = state.apartments.findIndex(apt => apt.id === action.payload.id);
+                const normalized = normalizeApartmentFromApi(action.payload);
+                const index = state.apartments.findIndex(apt => apt.id === normalized.id);
                 if (index !== -1) {
-                    state.apartments[index] = action.payload;
+                    state.apartments[index] = normalized;
                 }
-                if (state.selectedApartment?.id === action.payload.id) {
-                    state.selectedApartment = action.payload;
+                if (state.selectedApartment?.id === normalized.id) {
+                    state.selectedApartment = normalized;
                 }
                 state.error = null;
             })

@@ -15,6 +15,7 @@ import {
     Snackbar
 } from '@mui/material';
 import { fetchReservationById, generateReservationPdf, sendReservationConfirmation } from '../redux/reservationSlice';
+import { normalizeReservationFromApi } from '../utils/normalizers';
 import { fetchAdminApartmentById } from '../redux/adminApartmentSlice';
 import PaymentHistory from '../components/admin/payments/PaymentHistory';
 import ReservationDetails from '../components/admin/reservations/ReservationDetails';
@@ -92,52 +93,18 @@ const ReservationDetailsPage = () => {
         );
     }
 
-    // Verificar y normalizar los nombres de propiedades para evitar problemas
+    // Normalización unificada + aliases para compatibilidad
+    const normalizedApi = normalizeReservationFromApi(reservation);
     const normalizedReservation = {
-        id: reservation.id,
-        // Información del cliente
-        clientName: reservation.clientName || reservation.client_name || '',
-        clientLastname: reservation.clientLastname || reservation.client_lastname || '',
-        clientEmail: reservation.clientEmail || reservation.client_email || '',
-        clientPhone: reservation.clientPhone || reservation.client_phone || '',
-        clientAddress: reservation.clientAddress || reservation.client_address || '',
-        clientCity: reservation.clientCity || reservation.client_city || '',
-        clientCountry: reservation.clientCountry || reservation.client_country || '',
-        clientNotes: reservation.clientNotes || reservation.client_notes || reservation.notes || '',
-        
-        // Fechas y duración
-        checkInDate: reservation.checkInDate || reservation.check_in_date || '',
-        checkOutDate: reservation.checkOutDate || reservation.check_out_date || '',
-        checkIn: reservation.checkIn || reservation.checkInDate || reservation.check_in_date || '',
-        checkOut: reservation.checkOut || reservation.checkOutDate || reservation.check_out_date || '',
-        nights: reservation.nights || 0,
-        
-        // Información del apartamento
-        apartmentId: reservation.apartmentId || reservation.apartment_id || 0,
+        ...normalizedApi,
+        checkIn: normalizedApi.checkInDate,
+        checkOut: normalizedApi.checkOutDate,
+        clientNotes: normalizedApi.clientNotes || reservation.notes || '',
         buildingName: reservation.buildingName || '',
         unitNumber: reservation.unitNumber || '',
         capacity: reservation.capacity || 0,
-        
-        // Costos y pagos
-        pricePerNight: reservation.pricePerNight || reservation.price_per_night || 0,
-        cleaningFee: reservation.cleaningFee || reservation.cleaning_fee || 0,
-        parkingFee: reservation.parkingFee || reservation.parking_fee || 0,
-        otherExpenses: reservation.otherExpenses || reservation.other_expenses || 0,
-        taxes: reservation.taxes || 0,
-        totalAmount: reservation.totalAmount || reservation.total_amount || 0,
-        amountPaid: reservation.amountPaid || reservation.amount_paid || 0,
-        amountDue: reservation.amountDue || reservation.amount_due || 0,
-
-        // Notas
-        notes: reservation.notes || '',
-        
-        // Estados
-        status: reservation.status || '',
-        paymentStatus: reservation.paymentStatus || reservation.payment_status || '',
-        
-        // Otros datos
-        createdAt: reservation.createdAt || reservation.created_at || '',
         payments: reservation.payments || [],
+        notes: reservation.notes || normalizedApi.clientNotes || '',
     };
 
     // Datos del apartamento desde el estado

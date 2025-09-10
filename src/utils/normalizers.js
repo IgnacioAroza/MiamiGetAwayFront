@@ -115,3 +115,93 @@ export const normalizePaymentInput = (paymentData = {}) => {
   });
 };
 
+// Normaliza pago desde API a camelCase estándar
+export const normalizePaymentFromApi = (data = {}) => {
+  if (!data || typeof data !== 'object') return {};
+  const pick = (camel, snake, fallback = undefined) => data[camel] ?? data[snake] ?? fallback;
+  return {
+    id: pick('id', 'id'),
+    reservationId: pick('reservationId', 'reservation_id'),
+    clientId: pick('clientId', 'client_id'),
+    amount: numberOrUndefined(pick('amount', 'amount')) ?? 0,
+    paymentMethod: pick('paymentMethod', 'payment_method') || 'other',
+    paymentDate: pick('paymentDate', 'payment_date'),
+    notes: pick('notes', 'notes') || '',
+  };
+};
+
+// Normaliza apartment desde API a camelCase
+export const normalizeApartmentFromApi = (data = {}) => {
+  if (!data || typeof data !== 'object') return {};
+  const pick = (camel, snake, fallback = undefined) => data[camel] ?? data[snake] ?? fallback;
+  return {
+    id: pick('id', 'id'),
+    name: pick('name', 'building_name') || pick('title', 'title') || '',
+    unitNumber: pick('unitNumber', 'unit_number') || '',
+    address: pick('address', 'address') || pick('location', 'location') || '',
+    description: pick('description', 'description') || pick('desc', 'desc') || pick('about', 'about') || '',
+    capacity: numberOrUndefined(pick('capacity', 'capacity')) ?? 0,
+    bathrooms: numberOrUndefined(pick('bathrooms', 'bathrooms') ?? pick('bathroom_count', 'bathroom_count')) ?? 0,
+    rooms: numberOrUndefined(pick('rooms', 'rooms') ?? pick('bedrooms', 'bedrooms') ?? pick('bedroom_count', 'bedroom_count')) ?? 0,
+    price: numberOrUndefined(pick('price', 'price')) ?? 0,
+    images: pick('images', 'images') || [],
+  };
+};
+
+// Normaliza items de servicios según tipo
+export const normalizeServiceItemFromApi = (serviceType, data = {}) => {
+  if (!data || typeof data !== 'object') return {};
+  switch (serviceType) {
+    case 'cars':
+      return {
+        id: data.id,
+        brand: data.brand || data.make || '',
+        model: data.model || '',
+        description: data.description || data.desc || '',
+        price: numberOrUndefined(data.price) ?? 0,
+        images: data.images || [],
+      };
+    case 'yachts':
+      return {
+        id: data.id,
+        name: data.name || '',
+        description: data.description || data.desc || '',
+        capacity: numberOrUndefined(data.capacity) ?? 0,
+        price: numberOrUndefined(data.price) ?? 0,
+        images: data.images || [],
+      };
+    case 'apartments':
+      return normalizeApartmentFromApi(data);
+    case 'villas':
+      return {
+        id: data.id,
+        name: data.name || '',
+        description: data.description || data.desc || '',
+        address: data.address || data.location || '',
+        capacity: numberOrUndefined(data.capacity) ?? 0,
+        bathrooms: numberOrUndefined(data.bathrooms) ?? 0,
+        rooms: numberOrUndefined(data.rooms ?? data.bedrooms) ?? 0,
+        price: numberOrUndefined(data.price) ?? 0,
+        images: data.images || [],
+      };
+    default:
+      return { ...data };
+  }
+};
+
+// Normaliza usuario desde API a un esquema coherente
+export const normalizeUserFromApi = (data = {}) => {
+  if (!data || typeof data !== 'object') return {};
+  const pick = (camel, snake, fallback = undefined) => data[camel] ?? data[snake] ?? fallback;
+  return {
+    id: pick('id', 'id'),
+    name: pick('name', 'first_name') || pick('clientName', 'client_name') || '',
+    lastname: pick('lastname', 'last_name') || pick('clientLastname', 'client_lastname') || '',
+    email: pick('email', 'email') || pick('clientEmail', 'client_email') || '',
+    phone: pick('phone', 'phone') || pick('clientPhone', 'client_phone') || '',
+    address: pick('address', 'address') || pick('clientAddress', 'client_address') || '',
+    city: pick('city', 'city') || pick('clientCity', 'client_city') || '',
+    country: pick('country', 'country') || pick('clientCountry', 'client_country') || '',
+    notes: pick('notes', 'notes') || pick('clientNotes', 'client_notes') || '',
+  };
+};
