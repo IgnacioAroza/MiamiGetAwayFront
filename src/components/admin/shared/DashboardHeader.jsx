@@ -55,7 +55,7 @@ const DashboardHeader = () => {
     { text: 'Reservations', icon: <ReservationsIcon />, path: '/admin/reservations' },
     { text: 'Apartments', icon: <ApartmentIcon />, path: '/admin/apartments' },
     { text: 'Payments', icon: <PaymentIcon />, path: '/admin/payments' },
-    { text: 'Users', icon: <PeopleIcon />, path: '/admin/users' },
+    { text: 'Clients', icon: <PeopleIcon />, path: '/admin/users' },
   ];
 
   // Contenido del drawer para móviles
