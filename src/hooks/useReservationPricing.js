@@ -31,6 +31,7 @@ export const useReservationPricing = (formData, setFormData) => {
             const amountPaid = Number(formData.amountPaid) || 0;
 
             const accommodationTotal = price * nights;
+            // cancellationFee es un ítem aparte y NO suma al subtotal
             const subtotal = accommodationTotal + cleaningFee + parkingFee + otherExpenses;
             const taxRate = 0.07;
 

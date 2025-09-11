@@ -29,6 +29,7 @@ const ReservationSummary = ({ reservation }) => {
     const pricePerNight = Number(reservation.price_per_night || reservation.pricePerNight || 0);
     const nights = Number(reservation.nights || 0);
     const cleaningFee = Number(reservation.cleaning_fee || reservation.cleaningFee || 0);
+    const cancellationFee = Number(reservation.cancellation_fee || reservation.cancellationFee || 0);
     const parkingFee = Number(reservation.parking_fee || reservation.parkingFee || 0);
     const otherExpenses = Number(reservation.other_expenses || reservation.otherExpenses || 0);
     const taxes = Number(reservation.taxes || 0);
@@ -38,6 +39,7 @@ const ReservationSummary = ({ reservation }) => {
     
     // Calcular subtotal (si no viene calculado)
     const subtotal = pricePerNight * nights;
+    // cancellationFee es un ítem aparte y NO suma al subtotal imponible
     const taxableAmount = subtotal + cleaningFee + parkingFee + otherExpenses;
 
     return (
@@ -127,6 +129,20 @@ const ReservationSummary = ({ reservation }) => {
                             </Typography>
                             <Typography fontSize={isMobile ? "0.9rem" : "inherit"}>
                                 {formatCurrency(taxes)}
+                            </Typography>
+                        </Box>
+                    </Grid>
+                )}
+
+                {/* Cancellation */}
+                {cancellationFee > 0 && (
+                    <Grid item xs={12}>
+                        <Box display="flex" justifyContent="space-between" mb={0.5}>
+                            <Typography fontSize={isMobile ? "0.9rem" : "inherit"}>
+                                Cancellation Fee
+                            </Typography>
+                            <Typography fontSize={isMobile ? "0.9rem" : "inherit"}>
+                                {formatCurrency(cancellationFee)}
                             </Typography>
                         </Box>
                     </Grid>

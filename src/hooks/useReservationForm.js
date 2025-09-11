@@ -28,6 +28,7 @@ export const useReservationForm = (initialData) => {
         price: 0,
         nights: 0,
         cleaningFee: 0,
+        cancellationFee: 0,
         parkingFee: 0,
         otherExpenses: 0,
         taxes: 0,
@@ -75,6 +76,7 @@ export const useReservationForm = (initialData) => {
                 pricePerNight: parseFloat(initialData.pricePerNight) || 0,
                 nights: initialData.nights || 0,
                 cleaningFee: parseFloat(initialData.cleaningFee) || 0,
+                cancellationFee: parseFloat(initialData.cancellationFee) || 0,
                 parkingFee: parseFloat(initialData.parkingFee) || 0,
                 otherExpenses: parseFloat(initialData.otherExpenses) || 0,
                 taxes: parseFloat(initialData.taxes) || 0,
@@ -130,6 +132,7 @@ export const useReservationForm = (initialData) => {
             const amountPaid = Number(formData.amountPaid) || 0;
 
             const accommodationTotal = price * nights;
+            // cancellationFee es un ítem aparte y NO suma al subtotal
             const subtotal = accommodationTotal + cleaningFee + parkingFee + otherExpenses;
             const taxRate = 0.07;
 
@@ -279,6 +282,7 @@ export const useReservationForm = (initialData) => {
             price: 0,
             nights: 0,
             cleaningFee: 0,
+            cancellationFee: 0,
             parkingFee: 0,
             otherExpenses: 0,
             taxes: 0,

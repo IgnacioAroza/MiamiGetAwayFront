@@ -459,6 +459,11 @@ const reservationService = {
                 dataToSend.cleaningFee = value;
             }
 
+            if (feeData.cancellationFee !== undefined) {
+                const value = Math.max(0, parseFloat(feeData.cancellationFee) || 0);
+                dataToSend.cancellationFee = value;
+            }
+
             if (feeData.otherExpenses !== undefined) {
                 const value = Math.max(0, parseFloat(feeData.otherExpenses) || 0);
                 dataToSend.otherExpenses = value;
@@ -534,25 +539,26 @@ const reservationService = {
         });
 
         // 4. Crear un objeto de datos normalizado para usar en la generación del PDF
-        const normalizedData = {
-            id: reservationData.id,
-            clientName: reservationData.clientName || reservationData.client_name,
-            clientEmail: reservationData.clientEmail || reservationData.client_email,
-            clientPhone: reservationData.clientPhone || reservationData.client_phone,
-            clientAddress: reservationData.clientAddress || reservationData.client_address,
-            clientCity: reservationData.clientCity || reservationData.client_city,
-            clientCountry: reservationData.clientCountry || reservationData.client_country,
-            clientNotes: reservationData.clientNotes || reservationData.client_notes,
-            checkInDate: reservationData.checkInDate || reservationData.check_in_date,
-            checkOutDate: reservationData.checkOutDate || reservationData.check_out_date,
-            nights: reservationData.nights,
-            pricePerNight: reservationData.pricePerNight || reservationData.price_per_night,
-            cleaningFee: reservationData.cleaningFee || reservationData.cleaning_fee,
-            parkingFee: reservationData.parkingFee || reservationData.parking_fee,
-            otherExpenses: reservationData.otherExpenses || reservationData.other_expenses,
-            taxes: reservationData.taxes,
-            totalAmount: reservationData.totalAmount || reservationData.total_amount,
-            amountPaid: reservationData.amountPaid || reservationData.amount_paid,
+            const normalizedData = {
+                id: reservationData.id,
+                clientName: reservationData.clientName || reservationData.client_name,
+                clientEmail: reservationData.clientEmail || reservationData.client_email,
+                clientPhone: reservationData.clientPhone || reservationData.client_phone,
+                clientAddress: reservationData.clientAddress || reservationData.client_address,
+                clientCity: reservationData.clientCity || reservationData.client_city,
+                clientCountry: reservationData.clientCountry || reservationData.client_country,
+                clientNotes: reservationData.clientNotes || reservationData.client_notes,
+                checkInDate: reservationData.checkInDate || reservationData.check_in_date,
+                checkOutDate: reservationData.checkOutDate || reservationData.check_out_date,
+                nights: reservationData.nights,
+                pricePerNight: reservationData.pricePerNight || reservationData.price_per_night,
+                cleaningFee: reservationData.cleaningFee || reservationData.cleaning_fee,
+                cancellationFee: reservationData.cancellationFee || reservationData.cancellation_fee,
+                parkingFee: reservationData.parkingFee || reservationData.parking_fee,
+                otherExpenses: reservationData.otherExpenses || reservationData.other_expenses,
+                taxes: reservationData.taxes,
+                totalAmount: reservationData.totalAmount || reservationData.total_amount,
+                amountPaid: reservationData.amountPaid || reservationData.amount_paid,
             amountDue: reservationData.amountDue || reservationData.amount_due,
             status: reservationData.status,
             paymentStatus: reservationData.paymentStatus || reservationData.payment_status

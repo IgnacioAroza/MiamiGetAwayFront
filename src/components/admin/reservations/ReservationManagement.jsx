@@ -34,6 +34,7 @@ const ReservationManagement = () => {
                             price: reservation.pricePerNight || 0,
                             pricePerNight: reservation.pricePerNight || 0,
                             cleaningFee: reservation.cleaningFee || 0,
+                            cancellationFee: reservation.cancellationFee || 0,
                             parkingFee: reservation.parkingFee || 0,
                             otherExpenses: reservation.otherExpenses || 0,
                             amountPaid: reservation.amountPaid || 0,

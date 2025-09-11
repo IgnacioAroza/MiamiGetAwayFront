@@ -34,6 +34,7 @@ export const normalizeReservationInput = (reservationData = {}, { partial = fals
     nights: numberOrUndefined(reservationData.nights),
     pricePerNight: numberOrUndefined(reservationData.price ?? reservationData.pricePerNight),
     cleaningFee: numberOrUndefined(reservationData.cleaningFee),
+    cancellationFee: numberOrUndefined(reservationData.cancellationFee),
     parkingFee: numberOrUndefined(reservationData.parkingFee),
     otherExpenses: numberOrUndefined(reservationData.otherExpenses),
     taxes: numberOrUndefined(reservationData.taxes),
@@ -89,6 +90,7 @@ export const normalizeReservationFromApi = (data = {}) => {
 
     pricePerNight: pick('pricePerNight', 'price_per_night'),
     cleaningFee: pick('cleaningFee', 'cleaning_fee'),
+    cancellationFee: pick('cancellationFee', 'cancellation_fee'),
     parkingFee: pick('parkingFee', 'parking_fee'),
     otherExpenses: pick('otherExpenses', 'other_expenses'),
     taxes: pick('taxes', 'taxes'),

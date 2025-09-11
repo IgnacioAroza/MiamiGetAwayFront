@@ -17,6 +17,7 @@ const StatusSection = ({ formData, onChange }) => {
                         <MenuItem value="confirmed">Confirmed</MenuItem>
                         <MenuItem value="checked_in">Check-in</MenuItem>
                         <MenuItem value="checked_out">Check-out</MenuItem>
+                        <MenuItem value="cancelled">Cancelled</MenuItem>
                     </Select>
                 </FormControl>
             </Grid>

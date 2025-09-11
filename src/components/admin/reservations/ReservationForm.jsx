@@ -80,6 +80,7 @@ const ReservationForm = ({ initialData, onSubmit }) => {
                 price: Number(formData.price),
                 pricePerNight: Number(formData.price),
                 cleaningFee: Number(formData.cleaningFee) || 0,
+                cancellationFee: Number(formData.cancellationFee) || 0,
                 parkingFee: Number(formData.parkingFee) || 0,
                 otherExpenses: Number(formData.otherExpenses) || 0,
                 taxes: Number(formData.taxes),
@@ -187,7 +188,7 @@ const ReservationForm = ({ initialData, onSubmit }) => {
                     />
 
                     {/* Sección de Pago - Solo mostrar si es creación */}
-                    {!initialData && (
+                    {/* {!initialData && (
                         <>
                             <Grid item xs={12}>
                                 <Typography variant="h6" gutterBottom sx={{ mt: 2 }}>
@@ -201,7 +202,7 @@ const ReservationForm = ({ initialData, onSubmit }) => {
                                 onChange={handleChange} 
                             />
                         </>
-                    )}
+                    )} */}
 
                     {/* Sección de Estado */}
                     <Grid item xs={12}>
