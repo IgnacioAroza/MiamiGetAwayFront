@@ -27,15 +27,18 @@ import {
     Email as EmailIcon,
     Receipt as ReceiptIcon,
     Update as UpdateIcon,
-    Payment as PaymentIcon
+    Payment as PaymentIcon,
+    ArrowBack as ArrowBackIcon
 } from '@mui/icons-material';
 import { useReservation } from '../../../hooks/useReservation';
+import { useNavigate } from 'react-router-dom';
 import ReservationSummary from '../payments/ReservationSummary';
 import { formatDateForDisplay } from '../../../utils/dateUtils';
 import useDeviceDetection from '../../../hooks/useDeviceDetection';
 
 const ReservationDetails = ({ reservation, apartmentLoading, apartmentError, apartmentData, onError }) => {
     const { handleGeneratePdf, handleSendConfirmation } = useReservation();
+    const navigate = useNavigate();
     const theme = useTheme();
     const { isMobile, isTablet } = useDeviceDetection();
     const [openEmailDialog, setOpenEmailDialog] = useState(false);
@@ -265,6 +268,10 @@ const ReservationDetails = ({ reservation, apartmentLoading, apartmentError, apa
         return formatDateForDisplay(date, true);
     };
 
+    const handleBackClick = () => {
+        navigate(-1); // Navegar hacia atrás en el historial
+    };
+
     return (
         <Paper elevation={3} sx={{ p: { xs: 2, md: 3 }, mb: 3 }}>
             {/* Encabezado */}
@@ -275,9 +282,29 @@ const ReservationDetails = ({ reservation, apartmentLoading, apartmentError, apa
                 alignItems={isMobile ? "flex-start" : "center"} 
                 mb={3}
             >
-                <Typography variant={isMobile ? "h5" : "h4"} sx={{ mb: isMobile ? 2 : 0 }}>
-                    Reservation #{reservation?.id}
-                </Typography>
+                <Box 
+                    display="flex" 
+                    alignItems="center" 
+                    mb={isMobile ? 2 : 0}
+                    sx={{ width: isMobile ? "100%" : "auto" }}
+                >
+                    <Button
+                        variant="outlined"
+                        startIcon={<ArrowBackIcon />}
+                        onClick={handleBackClick}
+                        sx={{ 
+                            mr: 2,
+                            minWidth: isMobile ? "auto" : "120px",
+                            px: isMobile ? 1.5 : 2
+                        }}
+                        size={isMobile ? "small" : "medium"}
+                    >
+                        {isMobile ? "" : "Back"}
+                    </Button>
+                    <Typography variant={isMobile ? "h5" : "h4"}>
+                        Reservation #{reservation?.id}
+                    </Typography>
+                </Box>
                 <Stack 
                     direction={isMobile ? "column" : "row"} 
                     spacing={1} 

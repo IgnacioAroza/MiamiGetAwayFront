@@ -330,7 +330,20 @@ const ReservationList = ({ filter = {} }) => {
                     .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
                     .map((reservation) => (
                         <Grid item xs={12} key={reservation.id}>
-                            <Card elevation={2} sx={{ bgcolor: theme.palette.mode === 'dark' ? '#1e1e1e' : '#f5f5f5' }}>
+                            <Card 
+                                elevation={2} 
+                                sx={{ 
+                                    bgcolor: theme.palette.mode === 'dark' ? '#1e1e1e' : '#f5f5f5',
+                                    cursor: 'pointer',
+                                    transition: 'all 0.2s ease-in-out',
+                                    '&:hover': {
+                                        elevation: 4,
+                                        transform: 'translateY(-2px)',
+                                        bgcolor: theme.palette.mode === 'dark' ? '#2a2a2a' : '#eeeeee'
+                                    }
+                                }}
+                                onClick={() => handleViewClick(reservation)}
+                            >
                                 <CardContent>
                                     <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 1 }}>
                                         <Typography variant="h6">
@@ -429,7 +442,10 @@ const ReservationList = ({ filter = {} }) => {
 
                                 <Divider />
 
-                                <CardActions sx={{ justifyContent: 'space-between', p: 2 }}>
+                                <CardActions 
+                                    sx={{ justifyContent: 'space-between', p: 2 }}
+                                    onClick={(e) => e.stopPropagation()}
+                                >
                                     <Typography variant="caption" color="text.secondary">
                                         Created: {formatDate(reservation.created_at || reservation.createdAt)}
                                     </Typography>
@@ -611,7 +627,17 @@ const ReservationList = ({ filter = {} }) => {
                                 sortedReservations
                                     .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
                                     .map((reservation) => (
-                                        <TableRow key={reservation.id} hover>
+                                        <TableRow 
+                                            key={reservation.id} 
+                                            hover
+                                            onClick={() => handleViewClick(reservation)}
+                                            sx={{ 
+                                                cursor: 'pointer',
+                                                '&:hover': {
+                                                    backgroundColor: theme.palette.action.hover
+                                                }
+                                            }}
+                                        >
                                             <TableCell>{reservation.id}</TableCell>
                                             <TableCell>
                                                 {getClientDisplay(reservation)}
@@ -647,7 +673,7 @@ const ReservationList = ({ filter = {} }) => {
                                                 />
                                             </TableCell>
                                             <TableCell>{formatDate(reservation.created_at || reservation.createdAt)}</TableCell>
-                                            <TableCell align="right">
+                                            <TableCell align="right" onClick={(e) => e.stopPropagation()}>
                                                 <Tooltip title="View details">
                                                     <IconButton 
                                                         size="small" 
