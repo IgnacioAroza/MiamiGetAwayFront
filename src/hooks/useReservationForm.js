@@ -225,10 +225,13 @@ export const useReservationForm = (initialData) => {
     const handleClientSelect = (client) => {
         setSelectedClient(client);
         if (client) {
+            // Manejar diferentes formatos de nombres (firstName/lastName o name/lastname)
+            const fullName = `${client.firstName || client.name || ''} ${client.lastName || client.lastname || ''}`.trim();
+            
             setFormData(prev => ({
                 ...prev,
                 clientId: client.id.toString(),
-                clientName: `${client.firstName} ${client.lastName}`,
+                clientName: fullName,
                 clientEmail: client.email,
                 clientPhone: client.phone,
                 clientAddress: client.address || '',
@@ -252,9 +255,16 @@ export const useReservationForm = (initialData) => {
     };
 
     const handleNewClientCreated = (newClient) => {
+        // Seleccionar el nuevo cliente como cliente activo
+        setSelectedClient(newClient);
+        
+        // Actualizar el formulario con los datos del nuevo cliente
+        const fullName = `${newClient.name || newClient.firstName || ''} ${newClient.lastname || newClient.lastName || ''}`.trim();
+        
         setFormData(prev => ({
             ...prev,
-            clientName: newClient.name,
+            clientId: newClient.id ? newClient.id.toString() : '',
+            clientName: fullName,
             clientEmail: newClient.email,
             clientPhone: newClient.phone || '',
             clientAddress: newClient.address || '',

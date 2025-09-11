@@ -252,7 +252,10 @@ const ReservationForm = ({ initialData, onSubmit }) => {
                 <DialogContent>
                     <CreateUser 
                         isDialog={true}
-                        onSuccess={handleNewClientCreated}
+                        onSuccess={(newClient) => {
+                            handleNewClientCreated(newClient);
+                            handleCloseNewClientDialog();
+                        }}
                         onCancel={handleCloseNewClientDialog}
                     />
                 </DialogContent>
