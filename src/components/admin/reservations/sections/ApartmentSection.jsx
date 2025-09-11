@@ -22,7 +22,7 @@ const ApartmentSection = ({ formData, apartments, selectedApartment, onChange })
     const handleApartmentChange = (event) => {
         const { value } = event.target;
         const apartment = apartments.find(apt => apt.id === parseInt(value));
-        console.log('depto seleccionado:',apartment);
+        console.log('depto seleccionado:', apartment);
 
         if (apartment) {
             onChange({
@@ -47,14 +47,22 @@ const ApartmentSection = ({ formData, apartments, selectedApartment, onChange })
 
     return (
         <>
-            <Grid item xs={12} md={6}>
+            <Grid item xs={12}>
                 <FormControl fullWidth>
-                    <InputLabel>Apartment</InputLabel>
+                    <InputLabel sx={{ color: '#ccc' }}>Select Apartment</InputLabel>
                     <Select
                         name="apartmentId"
                         value={apartmentIdValue}
                         onChange={handleApartmentChange}
-                        label="Apartment"
+                        label="Select Apartment"
+                        sx={{
+                            backgroundColor: '#1a1a1a',
+                            color: '#fff',
+                            '& .MuiOutlinedInput-notchedOutline': { borderColor: '#555' },
+                            '&:hover .MuiOutlinedInput-notchedOutline': { borderColor: '#777' },
+                            '&.Mui-focused .MuiOutlinedInput-notchedOutline': { borderColor: '#90caf9' },
+                            '& .MuiSvgIcon-root': { color: '#ccc' },
+                        }}
                     >
                         <MenuItem value="">Select...</MenuItem>
                         {apartments.map((apartment) => (
@@ -68,8 +76,14 @@ const ApartmentSection = ({ formData, apartments, selectedApartment, onChange })
 
             {/* Mostrar información del apartamento seleccionado */}
             {apartmentDetails && (
-                <Grid item xs={12} md={6}>
-                    <Card sx={{ display: 'flex', height: '100%' }}>
+                <Grid item xs={12}>
+                    <Card sx={{ 
+                        display: 'flex', 
+                        height: '120px',
+                        bgcolor: '#1a1a1a',
+                        color: '#fff',
+                        border: '1px solid #555'
+                    }}>
                         <CardMedia
                             component="img"
                             sx={{ width: 120, height: 120, objectFit: 'cover' }}
@@ -77,16 +91,16 @@ const ApartmentSection = ({ formData, apartments, selectedApartment, onChange })
                             alt={apartmentDetails.alt}
                         />
                         <Box sx={{ display: 'flex', flexDirection: 'column', pl: 2, pt: 1 }}>
-                            <Typography variant="h6">
+                            <Typography variant="h6" sx={{ color: '#fff' }}>
                                 {apartmentDetails.name}
                             </Typography>
-                            <Typography variant="body2" color="text.secondary">
+                            <Typography variant="body2" sx={{ color: '#ccc' }}>
                                 Unit: {apartmentDetails.unitNumber}
                             </Typography>
-                            <Typography variant="body2" color="text.secondary">
+                            <Typography variant="body2" sx={{ color: '#ccc' }}>
                                 Capacity: {apartmentDetails.capacity} people
                             </Typography>
-                            <Typography variant="body2" color="primary">
+                            <Typography variant="body2" sx={{ color: '#90caf9' }}>
                                 ${apartmentDetails.price} per night
                             </Typography>
                         </Box>

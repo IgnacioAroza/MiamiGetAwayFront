@@ -8,7 +8,22 @@ import {
     Dialog,
     DialogTitle,
     DialogContent,
+    Paper,
+    Card,
+    CardContent,
+    CardHeader,
+    IconButton,
 } from '@mui/material';
+import {
+    Apartment as ApartmentIcon,
+    CalendarToday as CalendarIcon,
+    Person as PersonIcon,
+    AttachMoney as MoneyIcon,
+    Receipt as ReceiptIcon,
+    Notes as NotesIcon,
+    Assessment as AssessmentIcon,
+    ExpandMore as ExpandMoreIcon,
+} from '@mui/icons-material';
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns';
 import { enUS } from 'date-fns/locale';
@@ -21,6 +36,7 @@ import PricingSection from './sections/PricingSection';
 import PaymentSection from './sections/PaymentSection';
 import StatusSection from './sections/StatusSection';
 import NotesSection from './sections/NotesSection';
+import ReservationPaymentSummary from './sections/ReservationPaymentSummary';
 import CreateUser from '../users/CreateUser';
 import EditUser from '../users/EditUser';
 import { useReservationForm } from '../../../hooks/useReservationForm';
@@ -111,126 +127,189 @@ const ReservationForm = ({ initialData, onSubmit }) => {
 
     return (
         <LocalizationProvider dateAdapter={AdapterDateFns} adapterLocale={enUS}>
-            <Box component="form" onSubmit={handleSubmit} p={3}>
+            <Box component="form" onSubmit={handleSubmit} sx={{ p: 2, bgcolor: '#1a1a1a', minHeight: '100vh' }}>
                 <Grid container spacing={3}>
-                    {/* Sección de Apartamento */}
-                    <Grid item xs={12}>
-                        <Typography variant="h6" gutterBottom>
-                            Apartment Information
-                        </Typography>
-                        <Divider sx={{ mb: 2 }} />
-                    </Grid>
-                    
-                    <ApartmentSection 
-                        formData={formData}
-                        apartments={apartments}
-                        selectedApartment={selectedApartment}
-                        onChange={handleChange}
-                    />
-
-                    {/* Sección de Fechas */}
-                    <Grid item xs={12}>
-                        <Typography variant="h6" gutterBottom sx={{ mt: 2 }}>
-                            Reservation Dates
-                        </Typography>
-                        <Divider sx={{ mb: 2 }} />
-                    </Grid>
-
-                    <DateSection 
-                        checkInDate={formData.checkInDate}
-                        checkOutDate={formData.checkOutDate}
-                        onDateChange={handleDateChange}
-                    />
-
-                    {/* Sección de Cliente */}
-                    <Grid item xs={12}>
-                        <Typography variant="h6" gutterBottom sx={{ mt: 2 }}>
-                            Client Information
-                        </Typography>
-                        <Divider sx={{ mb: 2 }} />
-                    </Grid>
-
-                    <ClientSection 
-                        formData={formData}
-                        clients={clients}
-                        selectedClient={selectedClient}
-                        onClientSelect={handleClientSelect}
-                        onNewClientCreated={handleNewClientCreated}
-                        onChange={handleChange}
-                        onOpenNewClient={handleOpenNewClientDialog}
-                        onOpenEditClient={handleOpenEditClientDialog}
-                    />
-
-                    {/* Sección de Precios y Extras */}
-                    <Grid item xs={12}>
-                        <Typography variant="h6" gutterBottom sx={{ mt: 2 }}>
-                            Prices and Extras
-                        </Typography>
-                        <Divider sx={{ mb: 2 }} />
-                    </Grid>
-                    
-                    <PricingSection 
-                        formData={formData} 
-                        onChange={handleChange} 
-                    />
-
-                    {/* Sección de Notas */}
-                    <Grid item xs={12}>
-                        <Typography variant="h6" gutterBottom sx={{ mt: 2 }}>
-                            Reservation Notes
-                        </Typography>
-                        <Divider sx={{ mb: 2 }} />
-                    </Grid>
-
-                    <NotesSection
-                        formData={formData}
-                        onChange={handleChange}
-                    />
-
-                    {/* Sección de Pago - Solo mostrar si es creación */}
-                    {/* {!initialData && (
-                        <>
-                            <Grid item xs={12}>
-                                <Typography variant="h6" gutterBottom sx={{ mt: 2 }}>
-                                    Payment Information
-                                </Typography>
-                                <Divider sx={{ mb: 2 }} />
-                            </Grid>
-                            
-                            <PaymentSection 
-                                formData={formData} 
-                                onChange={handleChange} 
+                    {/* Columna Izquierda */}
+                    <Grid item xs={12} md={8}>
+                        {/* Apartment Information */}
+                        <Card sx={{ mb: 3, bgcolor: '#2a2a2a', color: '#fff' }}>
+                            <CardHeader
+                                avatar={<ApartmentIcon sx={{ color: '#fff' }} />}
+                                title="Apartment Information"
+                                sx={{ 
+                                    bgcolor: '#333',
+                                    '& .MuiCardHeader-title': { color: '#fff', fontWeight: 'bold' }
+                                }}
                             />
-                        </>
-                    )} */}
+                            <CardContent>
+                                <ApartmentSection 
+                                    formData={formData}
+                                    apartments={apartments}
+                                    selectedApartment={selectedApartment}
+                                    onChange={handleChange}
+                                />
+                            </CardContent>
+                        </Card>
 
-                    {/* Sección de Estado */}
-                    <Grid item xs={12}>
-                        <Typography variant="h6" gutterBottom sx={{ mt: 2 }}>
-                            Reservation Status
-                        </Typography>
-                        <Divider sx={{ mb: 2 }} />
-                    </Grid>
-                    
-                    <StatusSection 
-                        formData={formData} 
-                        onChange={handleChange} 
-                    />
+                        {/* Reservation Dates */}
+                        <Card sx={{ mb: 3, bgcolor: '#2a2a2a', color: '#fff' }}>
+                            <CardHeader
+                                avatar={<CalendarIcon sx={{ color: '#fff' }} />}
+                                title="Reservation Dates"
+                                sx={{ 
+                                    bgcolor: '#333',
+                                    '& .MuiCardHeader-title': { color: '#fff', fontWeight: 'bold' }
+                                }}
+                            />
+                            <CardContent>
+                                <DateSection 
+                                    checkInDate={formData.checkInDate}
+                                    checkOutDate={formData.checkOutDate}
+                                    onDateChange={handleDateChange}
+                                />
+                            </CardContent>
+                        </Card>
 
-                    {/* Botones de Acción */}
-                    <Grid item xs={12}>
-                        <Box sx={{ display: 'flex', justifyContent: 'flex-end', gap: 2, mt: 2 }}>
+                        {/* Client Information */}
+                        <Card sx={{ mb: 3, bgcolor: '#2a2a2a', color: '#fff' }}>
+                            <CardHeader
+                                avatar={<PersonIcon sx={{ color: '#fff' }} />}
+                                title="Client Information"
+                                sx={{ 
+                                    bgcolor: '#333',
+                                    '& .MuiCardHeader-title': { color: '#fff', fontWeight: 'bold' }
+                                }}
+                            />
+                            <CardContent>
+                                <ClientSection 
+                                    formData={formData}
+                                    clients={clients}
+                                    selectedClient={selectedClient}
+                                    onClientSelect={handleClientSelect}
+                                    onNewClientCreated={handleNewClientCreated}
+                                    onChange={handleChange}
+                                    onOpenNewClient={handleOpenNewClientDialog}
+                                    onOpenEditClient={handleOpenEditClientDialog}
+                                />
+                            </CardContent>
+                        </Card>
+
+                        {/* Prices and Extras */}
+                        <Card sx={{ mb: 3, bgcolor: '#2a2a2a', color: '#fff' }}>
+                            <CardHeader
+                                avatar={<MoneyIcon sx={{ color: '#fff' }} />}
+                                title="Prices and Extras"
+                                sx={{ 
+                                    bgcolor: '#333',
+                                    '& .MuiCardHeader-title': { color: '#fff', fontWeight: 'bold' }
+                                }}
+                            />
+                            <CardContent>
+                                <PricingSection 
+                                    formData={formData} 
+                                    onChange={handleChange} 
+                                />
+                            </CardContent>
+                        </Card>
+
+                        {/* Reservation Notes */}
+                        <Card sx={{ mb: 3, bgcolor: '#2a2a2a', color: '#fff' }}>
+                            <CardHeader
+                                avatar={<NotesIcon sx={{ color: '#fff' }} />}
+                                title="Reservation Notes"
+                                sx={{ 
+                                    bgcolor: '#333',
+                                    '& .MuiCardHeader-title': { color: '#fff', fontWeight: 'bold' }
+                                }}
+                            />
+                            <CardContent>
+                                <NotesSection
+                                    formData={formData}
+                                    onChange={handleChange}
+                                />
+                            </CardContent>
+                        </Card>
+
+                        {/* Reservation Status */}
+                        <Card sx={{ mb: 3, bgcolor: '#2a2a2a', color: '#fff' }}>
+                            <CardHeader
+                                avatar={<AssessmentIcon sx={{ color: '#fff' }} />}
+                                title="Reservation Status"
+                                sx={{ 
+                                    bgcolor: '#333',
+                                    '& .MuiCardHeader-title': { color: '#fff', fontWeight: 'bold' }
+                                }}
+                            />
+                            <CardContent>
+                                <StatusSection 
+                                    formData={formData} 
+                                    onChange={handleChange} 
+                                />
+                            </CardContent>
+                        </Card>
+
+                        {/* Botones de Acción */}
+                        <Box sx={{ display: 'flex', justifyContent: 'flex-end', gap: 2, mt: 3 }}>
                             <Button 
                                 variant="outlined" 
                                 color="secondary" 
                                 onClick={resetForm}
+                                size="large"
                             >
                                 Cancel
                             </Button>
-                            <Button type="submit" variant="contained" color="primary">
-                                {initialData ? 'Update Reservation' : 'Create Reservation'}
+                            <Button 
+                                type="submit" 
+                                variant="contained" 
+                                color="success"
+                                size="large"
+                                sx={{ minWidth: '120px' }}
+                            >
+                                {initialData ? 'Save' : 'Create Reservation'}
                             </Button>
                         </Box>
+                    </Grid>
+
+                    {/* Columna Derecha - Payment Summary */}
+                    <Grid item xs={12} md={4}>
+                        <Card sx={{ bgcolor: '#2a2a2a', color: '#fff', position: 'sticky', top: 20 }}>
+                            <CardHeader
+                                avatar={<ReceiptIcon sx={{ color: '#fff' }} />}
+                                title="Payment Summary"
+                                action={
+                                    <Box sx={{ 
+                                        bgcolor: '#ff9800', 
+                                        color: '#000', 
+                                        px: 1.5, 
+                                        py: 0.5, 
+                                        borderRadius: 1,
+                                        fontSize: '0.75rem',
+                                        fontWeight: 'bold'
+                                    }}>
+                                        PENDING
+                                    </Box>
+                                }
+                                sx={{ 
+                                    bgcolor: '#333',
+                                    '& .MuiCardHeader-title': { color: '#fff', fontWeight: 'bold' }
+                                }}
+                            />
+                            <CardContent>
+                                {/* Payment Summary Data */}
+                                <ReservationPaymentSummary formData={formData} />
+                                
+                                {/* Payment Registration Section */}
+                                <Box sx={{ mt: 3 }}>
+                                    <Typography variant="h6" sx={{ mb: 2, color: '#fff' }}>
+                                        Payment Registration
+                                    </Typography>
+                                    <PaymentSection 
+                                        formData={formData} 
+                                        onChange={handleChange} 
+                                    />
+                                </Box>
+                            </CardContent>
+                        </Card>
                     </Grid>
                 </Grid>
             </Box>

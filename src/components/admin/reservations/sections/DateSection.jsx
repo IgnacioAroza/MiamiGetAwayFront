@@ -27,7 +27,17 @@ const DateSection = ({ checkInDate, checkOutDate, onDateChange }) => {
                     // Convertir el string a objeto Date para el componente
                     value={checkInDate ? parseStringToDate(checkInDate) : null}
                     onChange={handleDateChange('checkInDate')}
-                    TextField={(params) => <TextField {...params} fullWidth />}
+                    TextField={(params) => <TextField {...params} fullWidth sx={{
+                        '& .MuiOutlinedInput-root': {
+                            backgroundColor: '#1a1a1a',
+                            '& fieldset': { borderColor: '#555' },
+                            '&:hover fieldset': { borderColor: '#777' },
+                            '&.Mui-focused fieldset': { borderColor: '#90caf9' },
+                        },
+                        '& .MuiInputLabel-root': { color: '#ccc' },
+                        '& .MuiOutlinedInput-input': { color: '#fff' },
+                        '& .MuiSvgIcon-root': { color: '#ccc' },
+                    }} />}
                     minDate={new Date()} // No permitir fechas en el pasado
                     ampm={false} // Usar formato de 24 horas en lugar de AM/PM
                 />
@@ -39,7 +49,17 @@ const DateSection = ({ checkInDate, checkOutDate, onDateChange }) => {
                     // Convertir el string a objeto Date para el componente
                     value={checkOutDate ? parseStringToDate(checkOutDate) : null}
                     onChange={handleDateChange('checkOutDate')}
-                    TextField={(params) => <TextField {...params} fullWidth />}
+                    TextField={(params) => <TextField {...params} fullWidth sx={{
+                        '& .MuiOutlinedInput-root': {
+                            backgroundColor: '#1a1a1a',
+                            '& fieldset': { borderColor: '#555' },
+                            '&:hover fieldset': { borderColor: '#777' },
+                            '&.Mui-focused fieldset': { borderColor: '#90caf9' },
+                        },
+                        '& .MuiInputLabel-root': { color: '#ccc' },
+                        '& .MuiOutlinedInput-input': { color: '#fff' },
+                        '& .MuiSvgIcon-root': { color: '#ccc' },
+                    }} />}
                     minDate={minCheckoutDate || new Date()} // Mínimo 1 día después del checkin o la fecha actual
                     disabled={!checkInDate} // Deshabilitar hasta seleccionar checkin
                     ampm={false} // Usar formato de 24 horas en lugar de AM/PM

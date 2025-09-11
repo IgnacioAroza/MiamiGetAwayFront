@@ -5,7 +5,6 @@ import { Box, Container, Grid, Paper, Typography, Button, Alert, Snackbar, Skele
 import { ArrowBack as ArrowBackIcon } from '@mui/icons-material';
 import { fetchReservationById } from '../../../redux/reservationSlice';
 import ReservationForm from './ReservationForm';
-import PaymentSummary from '../payments/PaymentSummary';
 import reservationService from '../../../services/reservationService';
 import { format, parseISO } from 'date-fns';
 
@@ -154,26 +153,10 @@ const ReservationManagement = () => {
                 ) : error ? (
                     <Typography color="error">Error: {error}</Typography>
                 ) : (
-                    <Grid container spacing={3}>
-                        <Grid item xs={12} md={8}>
-                            <Paper elevation={3} sx={{ p: 3 }}>
-                                <ReservationForm
-                                    initialData={initialData}
-                                    onSubmit={handleFormSubmit}
-                                />
-                            </Paper>
-                        </Grid>
-                        <Grid item xs={12} md={4}>
-                            {selectedReservation && (
-                                <Paper elevation={3} sx={{ p: 3 }}>
-                                    <PaymentSummary
-                                        reservation={selectedReservation}
-                                        onPaymentRegistered={() => dispatch(fetchReservationById(id))}
-                                    />
-                                </Paper>
-                            )}
-                        </Grid>
-                    </Grid>
+                    <ReservationForm
+                        initialData={initialData}
+                        onSubmit={handleFormSubmit}
+                    />
                 )}
                 
                 <Snackbar
