@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { Grid, TextField, Button, FormControl, InputLabel, Select, MenuItem, Box, Typography } from '@mui/material';
 import reservationService from '../../../../services/reservationService';
+import { useToast } from '../../../../hooks/useToast';
+import ToastNotification from '../../../common/ToastNotification';
 
 const PaymentSection = ({ formData, onChange, onPaymentRegistered, onInitialPaymentChange, initialPaymentData }) => {
     // Usar datos del prop o estado local
@@ -10,6 +12,7 @@ const PaymentSection = ({ formData, onChange, onPaymentRegistered, onInitialPaym
         paymentNotes: ''
     });
     const [isLoading, setIsLoading] = useState(false);
+    const { toast, success, error, warning, hideToast } = useToast();
 
     // Verificar si la reserva ya existe
     const isNewReservation = !formData.id;
@@ -46,7 +49,7 @@ const PaymentSection = ({ formData, onChange, onPaymentRegistered, onInitialPaym
 
     const handleRegisterPayment = async () => {
         if (!paymentData.paymentAmount || paymentData.paymentAmount <= 0) {
-            alert('Please enter a valid payment amount');
+            warning('Please enter a valid payment amount');
             return;
         }
 
@@ -59,13 +62,13 @@ const PaymentSection = ({ formData, onChange, onPaymentRegistered, onInitialPaym
                     notes: paymentData.paymentNotes
                 });
             }
-            alert('Payment will be registered when the reservation is saved');
+            success('Initial payment added! It will be registered when the reservation is saved');
             return;
         }
 
         // Para reservas existentes, funcionar como antes
         if (!formData.id) {
-            alert('Cannot register payment: Reservation not yet created');
+            error('Cannot register payment: Reservation not yet created');
             return;
         }
 
@@ -110,34 +113,16 @@ const PaymentSection = ({ formData, onChange, onPaymentRegistered, onInitialPaym
                 onPaymentRegistered(response);
             }
 
-            alert('Payment registered successfully!');
+            success('Payment registered successfully!');
         } catch (error) {
             console.error('Error registering payment:', error);
-            alert('Error registering payment. Please try again.');
+            error('Error registering payment. Please try again.');
         } finally {
             setIsLoading(false);
         }
     };
     return (
-        <Box>
-            {isNewReservation && (
-                <Box sx={{ 
-                    mb: 2, 
-                    p: 2, 
-                    bgcolor: '#333', 
-                    borderRadius: 1, 
-                    border: '1px solid #555' 
-                }}>
-                    <Typography sx={{ 
-                        color: '#4caf50', 
-                        fontSize: '0.85rem',
-                        textAlign: 'center'
-                    }}>
-                        💡 Initial payment will be registered with the reservation
-                    </Typography>
-                </Box>
-            )}
-            
+        <Box>            
             <Grid container spacing={2}>
                 <Grid item xs={6}>
                     <TextField
@@ -182,7 +167,10 @@ const PaymentSection = ({ formData, onChange, onPaymentRegistered, onInitialPaym
                             <MenuItem value="cash">Cash</MenuItem>
                             <MenuItem value="card">Card</MenuItem>
                             <MenuItem value="transfer">Transfer</MenuItem>
-                            <MenuItem value="check">Check</MenuItem>
+                            <MenuItem value="paypal">PayPal</MenuItem>
+                            <MenuItem value="zelle">Zelle</MenuItem>
+                            <MenuItem value="stripe">Stripe</MenuItem>
+                            <MenuItem value="other">Other</MenuItem>
                         </Select>
                     </FormControl>
                 </Grid>
@@ -232,6 +220,9 @@ const PaymentSection = ({ formData, onChange, onPaymentRegistered, onInitialPaym
                     </Button>
                 </Grid>
             </Grid>
+            
+            {/* Toast Notification */}
+            <ToastNotification toast={toast} onClose={hideToast} />
         </Box>
     );
 };

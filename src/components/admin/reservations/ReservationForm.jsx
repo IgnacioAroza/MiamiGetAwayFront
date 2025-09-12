@@ -41,6 +41,8 @@ import ReservationPaymentSummary from './sections/ReservationPaymentSummary';
 import CreateUser from '../users/CreateUser';
 import EditUser from '../users/EditUser';
 import { useReservationForm } from '../../../hooks/useReservationForm';
+import { useToast } from '../../../hooks/useToast';
+import ToastNotification from '../../common/ToastNotification';
 
 const ReservationForm = ({ initialData, onSubmit }) => {
     const navigate = useNavigate();
@@ -61,6 +63,7 @@ const ReservationForm = ({ initialData, onSubmit }) => {
 
     const [openNewClientDialog, setOpenNewClientDialog] = useState(false);
     const [openEditClientDialog, setOpenEditClientDialog] = useState(false);
+    const { toast, warning, error, hideToast } = useToast();
 
     // Manejadores de diálogos
     const handleOpenNewClientDialog = () => setOpenNewClientDialog(true);
@@ -73,22 +76,48 @@ const ReservationForm = ({ initialData, onSubmit }) => {
         navigate(-1); // Volver a la página anterior
     };
 
+    // Función para obtener el estilo y texto del estado de pago
+    const getPaymentStatusDisplay = (paymentStatus) => {
+        switch (paymentStatus) {
+            case 'complete':
+            case 'paid':
+                return {
+                    text: 'PAID',
+                    bgcolor: '#4caf50', // Verde
+                    color: '#fff'
+                };
+            case 'partial':
+                return {
+                    text: 'PARTIAL',
+                    bgcolor: '#ff9800', // Naranja
+                    color: '#000'
+                };
+            case 'pending':
+            default:
+                return {
+                    text: 'PENDING',
+                    bgcolor: '#f44336', // Rojo
+                    color: '#fff'
+                };
+        }
+    };
+
     const handleSubmit = (event) => {
         event.preventDefault();
         
         // Validar que los campos requeridos estén completos
         if (!formData.apartmentId) {
-            alert('Please select an apartment');
+            warning('Please select an apartment');
             return;
         }
         
         if (!formData.checkInDate || !formData.checkOutDate) {
-            alert('Please select both check-in and check-out dates');
+            warning('Please select both check-in and check-out dates');
             return;
         }
         
         if (!formData.clientName || !formData.clientEmail) {
-            alert('Client name and email are required');
+            warning('Client name and email are required');
             return;
         }
         
@@ -139,7 +168,7 @@ const ReservationForm = ({ initialData, onSubmit }) => {
             onSubmit(dataToSubmit);
         } catch (error) {
             console.error('Error en handleSubmit:', error);
-            alert('Error al enviar el formulario');
+            error('Error submitting the form. Please try again.');
         }
     };
 
@@ -325,15 +354,15 @@ const ReservationForm = ({ initialData, onSubmit }) => {
                                 title="Payment Summary"
                                 action={
                                     <Box sx={{ 
-                                        bgcolor: '#ff9800', 
-                                        color: '#000', 
+                                        bgcolor: getPaymentStatusDisplay(formData.paymentStatus).bgcolor,
+                                        color: getPaymentStatusDisplay(formData.paymentStatus).color,
                                         px: 1.5, 
                                         py: 0.5, 
                                         borderRadius: 1,
                                         fontSize: '0.75rem',
                                         fontWeight: 'bold'
                                     }}>
-                                        PENDING
+                                        {getPaymentStatusDisplay(formData.paymentStatus).text}
                                     </Box>
                                 }
                                 sx={{ 
@@ -348,6 +377,10 @@ const ReservationForm = ({ initialData, onSubmit }) => {
                             }}>
                                 {/* Payment Summary Data - Compacto */}
                                 <ReservationPaymentSummary formData={formData} />
+
+                                <Grid item xs={12}>
+                                    <Divider sx={{ bgcolor: "#555", my: 2 }} />
+                                </Grid>
                                 
                                 {/* Payment Registration Section */}
                                 <Box sx={{ mt: 2 }}>
@@ -358,7 +391,7 @@ const ReservationForm = ({ initialData, onSubmit }) => {
                                         formData={formData} 
                                         onChange={handleChange}
                                         onPaymentRegistered={(paymentResponse) => {
-                                            console.log('Payment registered:', paymentResponse);
+                                            // Payment successfully registered
                                         }}
                                         onInitialPaymentChange={handleInitialPaymentChange}
                                         initialPaymentData={initialPaymentData}
@@ -421,6 +454,9 @@ const ReservationForm = ({ initialData, onSubmit }) => {
                     />
                 </DialogContent>
             </Dialog>
+            
+            {/* Toast Notification */}
+            <ToastNotification toast={toast} onClose={hideToast} />
         </LocalizationProvider>
     );
 };
