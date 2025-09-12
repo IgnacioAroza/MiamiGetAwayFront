@@ -3,7 +3,8 @@ export const useApartmentImages = (apartment) => {
         if (apartment && apartment.images && apartment.images.length > 0) {
             return apartment.images[0];
         }
-        return 'https://via.placeholder.com/150?text=No+Image';
+        // Retornar null en lugar de una URL que podría fallar
+        return null;
     };
 
     const getApartmentDetails = () => {

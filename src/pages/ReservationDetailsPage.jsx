@@ -116,6 +116,10 @@ const ReservationDetailsPage = () => {
         bathrooms: apartment.bathrooms || apartment.bathroom_count || 0,
         bedrooms: apartment.rooms || apartment.bedrooms || apartment.bedroom_count || 0,
         image: apartment.image || apartment.coverImage || apartment.cover_image || apartment.thumbnail || '',
+        // Agregar images como array para compatibilidad con useApartmentImages
+        images: apartment.images && apartment.images.length > 0 ? apartment.images : 
+                apartment.image || apartment.coverImage || apartment.cover_image || apartment.thumbnail ? 
+                [apartment.image || apartment.coverImage || apartment.cover_image || apartment.thumbnail] : [],
         capacity: apartment.capacity || apartment.max_guests || apartment.maxGuests || 0
     } : null;
 

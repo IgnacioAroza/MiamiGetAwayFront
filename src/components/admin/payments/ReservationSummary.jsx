@@ -43,24 +43,49 @@ const ReservationSummary = ({ reservation }) => {
     const taxableAmount = subtotal + cleaningFee + parkingFee + otherExpenses;
 
     return (
-        <Paper variant="outlined" sx={{ p: isMobile ? 1.5 : 2 }}>
+        <Paper 
+            variant="outlined" 
+            sx={{ 
+                p: isMobile ? 1.5 : 2,
+                bgcolor: '#2a2a2a',
+                borderColor: '#555',
+                color: '#fff',
+                height: isMobile ? 'auto' : '675px', // Altura fija en desktop, auto en mobile
+                minHeight: isMobile ? '400px' : '580px', // Altura mínima
+                display: 'flex',
+                flexDirection: 'column'
+            }}
+        >
             {/* Título */}
-            <Box display="flex" alignItems="center" mb={2}>
-                <ReceiptIcon sx={{ mr: 1 }} />
-                <Typography variant={isMobile ? "subtitle1" : "h6"}>
+            <Box 
+                display="flex" 
+                alignItems="center" 
+                mb={2}
+                sx={{ 
+                    bgcolor: '#333',
+                    mx: -2,
+                    mt: -2,
+                    px: 2,
+                    py: 1.5,
+                    borderBottom: '1px solid #555'
+                }}
+            >
+                <ReceiptIcon sx={{ mr: 1, color: '#fff' }} />
+                <Typography variant={isMobile ? "subtitle1" : "h6"} sx={{ color: '#fff', fontWeight: 'bold' }}>
                     Payment Summary
                 </Typography>
             </Box>
 
             {/* Detalles del cálculo */}
-            <Grid container spacing={isMobile ? 1 : 2}>
+            <Box sx={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
+                <Grid container spacing={isMobile ? 1 : 2} sx={{ mt: 1, flex: 1 }}>
                 {/* Noches */}
                 <Grid item xs={12}>
                     <Box display="flex" justifyContent="space-between" mb={0.5}>
-                        <Typography fontSize={isMobile ? "0.9rem" : "inherit"}>
-                            {nights} {nights === 1 ? 'Night' : 'Nights'} x {formatCurrency(pricePerNight)}
+                        <Typography fontSize={isMobile ? "0.9rem" : "inherit"} sx={{ color: '#ccc' }}>
+                            {nights} {nights === 1 ? 'night' : 'nights'} × {formatCurrency(pricePerNight)}
                         </Typography>
-                        <Typography fontSize={isMobile ? "0.9rem" : "inherit"}>
+                        <Typography fontSize={isMobile ? "0.9rem" : "inherit"} sx={{ color: '#fff' }}>
                             {formatCurrency(subtotal)}
                         </Typography>
                     </Box>
@@ -70,10 +95,10 @@ const ReservationSummary = ({ reservation }) => {
                 {cleaningFee > 0 && (
                     <Grid item xs={12}>
                         <Box display="flex" justifyContent="space-between" mb={0.5}>
-                            <Typography fontSize={isMobile ? "0.9rem" : "inherit"}>
+                            <Typography fontSize={isMobile ? "0.9rem" : "inherit"} sx={{ color: '#ccc' }}>
                                 Cleaning Fee
                             </Typography>
-                            <Typography fontSize={isMobile ? "0.9rem" : "inherit"}>
+                            <Typography fontSize={isMobile ? "0.9rem" : "inherit"} sx={{ color: '#fff' }}>
                                 {formatCurrency(cleaningFee)}
                             </Typography>
                         </Box>
@@ -84,10 +109,10 @@ const ReservationSummary = ({ reservation }) => {
                 {parkingFee > 0 && (
                     <Grid item xs={12}>
                         <Box display="flex" justifyContent="space-between" mb={0.5}>
-                            <Typography fontSize={isMobile ? "0.9rem" : "inherit"}>
+                            <Typography fontSize={isMobile ? "0.9rem" : "inherit"} sx={{ color: '#ccc' }}>
                                 Parking Fee
                             </Typography>
-                            <Typography fontSize={isMobile ? "0.9rem" : "inherit"}>
+                            <Typography fontSize={isMobile ? "0.9rem" : "inherit"} sx={{ color: '#fff' }}>
                                 {formatCurrency(parkingFee)}
                             </Typography>
                         </Box>
@@ -98,37 +123,11 @@ const ReservationSummary = ({ reservation }) => {
                 {otherExpenses > 0 && (
                     <Grid item xs={12}>
                         <Box display="flex" justifyContent="space-between" mb={0.5}>
-                            <Typography fontSize={isMobile ? "0.9rem" : "inherit"}>
+                            <Typography fontSize={isMobile ? "0.9rem" : "inherit"} sx={{ color: '#ccc' }}>
                                 Other Expenses
                             </Typography>
-                            <Typography fontSize={isMobile ? "0.9rem" : "inherit"}>
+                            <Typography fontSize={isMobile ? "0.9rem" : "inherit"} sx={{ color: '#fff' }}>
                                 {formatCurrency(otherExpenses)}
-                            </Typography>
-                        </Box>
-                    </Grid>
-                )}
-
-                {/* Subtotal */}
-                <Grid item xs={12}>
-                    <Box display="flex" justifyContent="space-between" mb={0.5}>
-                        <Typography fontWeight="bold" fontSize={isMobile ? "0.9rem" : "inherit"}>
-                            Subtotal
-                        </Typography>
-                        <Typography fontWeight="bold" fontSize={isMobile ? "0.9rem" : "inherit"}>
-                            {formatCurrency(taxableAmount)}
-                        </Typography>
-                    </Box>
-                </Grid>
-
-                {/* Impuestos - solo mostrar si son mayores que cero */}
-                {taxes > 0 && (
-                    <Grid item xs={12}>
-                        <Box display="flex" justifyContent="space-between" mb={0.5}>
-                            <Typography fontSize={isMobile ? "0.9rem" : "inherit"}>
-                                Taxes
-                            </Typography>
-                            <Typography fontSize={isMobile ? "0.9rem" : "inherit"}>
-                                {formatCurrency(taxes)}
                             </Typography>
                         </Box>
                     </Grid>
@@ -138,27 +137,53 @@ const ReservationSummary = ({ reservation }) => {
                 {cancellationFee > 0 && (
                     <Grid item xs={12}>
                         <Box display="flex" justifyContent="space-between" mb={0.5}>
-                            <Typography fontSize={isMobile ? "0.9rem" : "inherit"}>
+                            <Typography fontSize={isMobile ? "0.9rem" : "inherit"} sx={{ color: '#ccc' }}>
                                 Cancellation Fee
                             </Typography>
-                            <Typography fontSize={isMobile ? "0.9rem" : "inherit"}>
+                            <Typography fontSize={isMobile ? "0.9rem" : "inherit"} sx={{ color: '#fff' }}>
                                 {formatCurrency(cancellationFee)}
                             </Typography>
                         </Box>
                     </Grid>
                 )}
 
+                {/* Subtotal */}
                 <Grid item xs={12}>
-                    <Divider sx={{ my: isMobile ? 1 : 2 }} />
+                    <Box display="flex" justifyContent="space-between" mb={0.5}>
+                        <Typography fontWeight="bold" fontSize={isMobile ? "0.9rem" : "inherit"} sx={{ color: '#fff' }}>
+                            Subtotal
+                        </Typography>
+                        <Typography fontWeight="bold" fontSize={isMobile ? "0.9rem" : "inherit"} sx={{ color: '#fff' }}>
+                            {formatCurrency(taxableAmount)}
+                        </Typography>
+                    </Box>
+                </Grid>
+
+                {/* Impuestos - solo mostrar si son mayores que cero */}
+                {taxes > 0 && (
+                    <Grid item xs={12}>
+                        <Box display="flex" justifyContent="space-between" mb={0.5}>
+                            <Typography fontSize={isMobile ? "0.9rem" : "inherit"} sx={{ color: '#ccc' }}>
+                                Taxes
+                            </Typography>
+                            <Typography fontSize={isMobile ? "0.9rem" : "inherit"} sx={{ color: '#fff' }}>
+                                {formatCurrency(taxes)}
+                            </Typography>
+                        </Box>
+                    </Grid>
+                )}
+
+                <Grid item xs={12}>
+                    <Divider sx={{ my: isMobile ? 1 : 2, bgcolor: '#555' }} />
                 </Grid>
 
                 {/* Total */}
                 <Grid item xs={12}>
                     <Box display="flex" justifyContent="space-between" mb={isMobile ? 1 : 2}>
-                        <Typography variant={isMobile ? "body1" : "h6"} fontWeight="bold">
+                        <Typography variant={isMobile ? "body1" : "h6"} fontWeight="bold" sx={{ color: '#fff' }}>
                             Total
                         </Typography>
-                        <Typography variant={isMobile ? "body1" : "h6"} fontWeight="bold">
+                        <Typography variant={isMobile ? "body1" : "h6"} fontWeight="bold" sx={{ color: '#fff' }}>
                             {formatCurrency(totalAmount)}
                         </Typography>
                     </Box>
@@ -167,10 +192,10 @@ const ReservationSummary = ({ reservation }) => {
                 {/* Pagos recibidos */}
                 <Grid item xs={12}>
                     <Box display="flex" justifyContent="space-between" mb={0.5}>
-                        <Typography fontSize={isMobile ? "0.9rem" : "inherit"}>
-                            Paid Amount
+                        <Typography fontSize={isMobile ? "0.9rem" : "inherit"} sx={{ color: '#ccc' }}>
+                            Amount Paid
                         </Typography>
-                        <Typography color="success.main" fontSize={isMobile ? "0.9rem" : "inherit"}>
+                        <Typography sx={{ color: '#4caf50', fontSize: isMobile ? "0.9rem" : "inherit" }}>
                             {formatCurrency(amountPaid)}
                         </Typography>
                     </Box>
@@ -178,18 +203,30 @@ const ReservationSummary = ({ reservation }) => {
 
                 {/* Saldo pendiente */}
                 <Grid item xs={12}>
-                    <Paper sx={{ p: isMobile ? 1 : 2, bgcolor: 'background.default' }}>
-                        <Box display="flex" justifyContent="space-between" mb={0}>
-                            <Typography fontWeight="bold" fontSize={isMobile ? "0.9rem" : "inherit"}>
-                                Pending Balance
-                            </Typography>
-                            <Typography fontWeight="bold" color={amountDue > 0 ? "error.main" : "success.main"} fontSize={isMobile ? "0.9rem" : "inherit"}>
-                                {formatCurrency(amountDue)}
-                            </Typography>
-                        </Box>
-                    </Paper>
+                    <Box display="flex" justifyContent="space-between" mb={0}>
+                        <Typography fontWeight="bold" fontSize={isMobile ? "0.9rem" : "inherit"} sx={{ color: '#ccc' }}>
+                            Pending Balance
+                        </Typography>
+                        <Typography 
+                            fontWeight="bold" 
+                            sx={{ 
+                                color: amountDue > 0 ? "#f44336" : "#4caf50",
+                                fontSize: isMobile ? "0.9rem" : "inherit"
+                            }}
+                        >
+                            {formatCurrency(amountDue)}
+                        </Typography>
+                    </Box>
                 </Grid>
+                
+                {/* Espaciador flexible para empujar contenido hacia arriba */}
+                {!isMobile && (
+                    <Grid item xs={12} sx={{ flex: 1 }}>
+                        <Box sx={{ flex: 1 }} />
+                    </Grid>
+                )}
             </Grid>
+            </Box>
         </Paper>
     );
 };
