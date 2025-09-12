@@ -20,52 +20,132 @@ const DateSection = ({ checkInDate, checkOutDate, onDateChange }) => {
     };
 
     return (
-        <>
-            <Grid item xs={12} md={6}>
+        <Grid container spacing={2}>
+            <Grid item xs={6}>
                 <DateTimePicker
                     label="Check-in"
                     // Convertir el string a objeto Date para el componente
                     value={checkInDate ? parseStringToDate(checkInDate) : null}
                     onChange={handleDateChange('checkInDate')}
-                    TextField={(params) => <TextField {...params} fullWidth sx={{
-                        '& .MuiOutlinedInput-root': {
-                            backgroundColor: '#1a1a1a',
-                            '& fieldset': { borderColor: '#555' },
-                            '&:hover fieldset': { borderColor: '#777' },
-                            '&.Mui-focused fieldset': { borderColor: '#90caf9' },
+                    slotProps={{
+                        textField: {
+                            fullWidth: true,
+                            sx: {
+                                '& .MuiOutlinedInput-root': {
+                                    backgroundColor: '#4A4747',
+                                    borderRadius: 1,
+                                    '& fieldset': { borderColor: '#717171' },
+                                    '&:hover fieldset': { borderColor: '#717171' },
+                                    '&.Mui-focused fieldset': { borderColor: '#717171' },
+                                },
+                                '& .MuiInputLabel-root': { 
+                                    color: '#888',
+                                    '&.Mui-focused': { color: '#888' }
+                                },
+                                '& .MuiOutlinedInput-input': { 
+                                    color: '#fff',
+                                    padding: '12px 16px'
+                                },
+                                '& .MuiSvgIcon-root': { color: '#ccc' },
+                            }
                         },
-                        '& .MuiInputLabel-root': { color: '#ccc' },
-                        '& .MuiOutlinedInput-input': { color: '#fff' },
-                        '& .MuiSvgIcon-root': { color: '#ccc' },
-                    }} />}
+                        popper: {
+                            sx: {
+                                '& .MuiPaper-root': {
+                                    backgroundColor: '#333',
+                                    color: '#fff',
+                                },
+                                '& .MuiPickersDay-root': {
+                                    color: '#fff',
+                                    '&:hover': { backgroundColor: '#444' },
+                                    '&.Mui-selected': { 
+                                        backgroundColor: '#555',
+                                        color: '#fff'
+                                    }
+                                },
+                                '& .MuiPickersCalendarHeader-root': {
+                                    color: '#fff'
+                                },
+                                '& .MuiIconButton-root': {
+                                    color: '#fff'
+                                },
+                                '& .MuiClock-root': {
+                                    backgroundColor: '#333'
+                                },
+                                '& .MuiClockNumber-root': {
+                                    color: '#fff'
+                                }
+                            }
+                        }
+                    }}
                     minDate={new Date()} // No permitir fechas en el pasado
                     ampm={false} // Usar formato de 24 horas en lugar de AM/PM
                 />
             </Grid>
 
-            <Grid item xs={12} md={6}>
+            <Grid item xs={6}>
                 <DateTimePicker
                     label="Check-out"
                     // Convertir el string a objeto Date para el componente
                     value={checkOutDate ? parseStringToDate(checkOutDate) : null}
                     onChange={handleDateChange('checkOutDate')}
-                    TextField={(params) => <TextField {...params} fullWidth sx={{
-                        '& .MuiOutlinedInput-root': {
-                            backgroundColor: '#1a1a1a',
-                            '& fieldset': { borderColor: '#555' },
-                            '&:hover fieldset': { borderColor: '#777' },
-                            '&.Mui-focused fieldset': { borderColor: '#90caf9' },
+                    slotProps={{
+                        textField: {
+                            fullWidth: true,
+                            sx: {
+                                '& .MuiOutlinedInput-root': {
+                                    backgroundColor: '#4A4747',
+                                    borderRadius: 1,
+                                    '& fieldset': { borderColor: '#717171' },
+                                    '&:hover fieldset': { borderColor: '#717171' },
+                                    '&.Mui-focused fieldset': { borderColor: '#717171' },
+                                },
+                                '& .MuiInputLabel-root': { 
+                                    color: '#888',
+                                    '&.Mui-focused': { color: '#888' }
+                                },
+                                '& .MuiOutlinedInput-input': { 
+                                    color: '#fff',
+                                    padding: '12px 16px'
+                                },
+                                '& .MuiSvgIcon-root': { color: '#ccc' },
+                            }
                         },
-                        '& .MuiInputLabel-root': { color: '#ccc' },
-                        '& .MuiOutlinedInput-input': { color: '#fff' },
-                        '& .MuiSvgIcon-root': { color: '#ccc' },
-                    }} />}
+                        popper: {
+                            sx: {
+                                '& .MuiPaper-root': {
+                                    backgroundColor: '#333',
+                                    color: '#fff',
+                                },
+                                '& .MuiPickersDay-root': {
+                                    color: '#fff',
+                                    '&:hover': { backgroundColor: '#444' },
+                                    '&.Mui-selected': { 
+                                        backgroundColor: '#555',
+                                        color: '#fff'
+                                    }
+                                },
+                                '& .MuiPickersCalendarHeader-root': {
+                                    color: '#fff'
+                                },
+                                '& .MuiIconButton-root': {
+                                    color: '#fff'
+                                },
+                                '& .MuiClock-root': {
+                                    backgroundColor: '#333'
+                                },
+                                '& .MuiClockNumber-root': {
+                                    color: '#fff'
+                                }
+                            }
+                        }
+                    }}
                     minDate={minCheckoutDate || new Date()} // Mínimo 1 día después del checkin o la fecha actual
                     disabled={!checkInDate} // Deshabilitar hasta seleccionar checkin
                     ampm={false} // Usar formato de 24 horas en lugar de AM/PM
                 />
             </Grid>
-        </>
+        </Grid>
     );
 };
 

@@ -12,6 +12,7 @@ export const useReservationForm = (initialData) => {
     const clientsStatus = useSelector(selectUserStatus);
 
     const [formData, setFormData] = useState({
+        id: null, // Agregar el ID para reservas existentes
         apartmentId: '',
         name: '',
         unitNumber: '',
@@ -58,6 +59,7 @@ export const useReservationForm = (initialData) => {
     useEffect(() => {
         if (initialData) {
             const formattedData = {
+                id: initialData.id || initialData.reservationId, // Agregar el ID de la reserva
                 apartmentId: initialData.apartmentId ? String(initialData.apartmentId) : '',
                 name: initialData.apartmentName || '',
                 unitNumber: initialData.unitNumber || '',
@@ -227,7 +229,7 @@ export const useReservationForm = (initialData) => {
         if (client) {
             // Manejar diferentes formatos de nombres (firstName/lastName o name/lastname)
             const fullName = `${client.firstName || client.name || ''} ${client.lastName || client.lastname || ''}`.trim();
-            
+
             setFormData(prev => ({
                 ...prev,
                 clientId: client.id.toString(),
@@ -257,10 +259,10 @@ export const useReservationForm = (initialData) => {
     const handleNewClientCreated = (newClient) => {
         // Seleccionar el nuevo cliente como cliente activo
         setSelectedClient(newClient);
-        
+
         // Actualizar el formulario con los datos del nuevo cliente
         const fullName = `${newClient.name || newClient.firstName || ''} ${newClient.lastname || newClient.lastName || ''}`.trim();
-        
+
         setFormData(prev => ({
             ...prev,
             clientId: newClient.id ? newClient.id.toString() : '',

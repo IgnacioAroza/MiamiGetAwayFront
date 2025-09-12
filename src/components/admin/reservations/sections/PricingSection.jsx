@@ -2,10 +2,6 @@ import React from "react";
 import {
   Grid,
   TextField,
-  Typography,
-  Paper,
-  Box,
-  Divider,
 } from "@mui/material";
 
 const PricingSection = ({ formData, onChange }) => {
@@ -34,6 +30,26 @@ const PricingSection = ({ formData, onChange }) => {
         value: processedValue,
       },
     });
+  };
+
+  // Manejar el focus para limpiar el valor 0
+  const handleFocus = (e) => {
+    const { name, value } = e.target;
+    if (value === "0" || value === 0) {
+      onChange({
+        target: {
+          name: name,
+          value: "",
+        },
+      });
+    }
+  };
+
+  // Prevenir submit al presionar Enter
+  const handleKeyDown = (e) => {
+    if (e.key === 'Enter') {
+      e.preventDefault();
+    }
   };
 
   // Calcular resumen para mostrar
@@ -66,24 +82,61 @@ const PricingSection = ({ formData, onChange }) => {
 
   const summary = calculateSummary();
 
+  // Estilos comunes para todos los campos
+  const fieldStyles = {
+    '& .MuiOutlinedInput-root': {
+      backgroundColor: '#4A4747',
+      borderRadius: 1,
+      '& fieldset': { borderColor: '#717171' },
+      '&:hover fieldset': { borderColor: '#717171' },
+      '&.Mui-focused fieldset': { borderColor: '#717171' },
+      '&.Mui-disabled': {
+        backgroundColor: '#3a3a3a',
+        '& fieldset': { borderColor: '#555' }
+      }
+    },
+    '& .MuiInputLabel-root': { 
+      color: '#888',
+      '&.Mui-focused': { color: '#888' },
+      '&.Mui-disabled': { color: '#666' }
+    },
+    '& .MuiOutlinedInput-input': { 
+      color: '#fff',
+      padding: '12px 16px',
+      '&.Mui-disabled': { 
+        color: '#aaa',
+        WebkitTextFillColor: '#aaa'
+      }
+    },
+    '& .MuiInputAdornment-root': {
+      color: '#ccc'
+    },
+    '& .MuiFormHelperText-root': {
+      color: '#888'
+    }
+  };
+
   return (
-    <>
-      <Grid item xs={12} md={3}>
+    <Grid container spacing={2}>
+      <Grid item xs={6} md={3}>
         <TextField
           fullWidth
-          label="Price per night"
+          label="Price per Night"
           name="price"
           type="number"
           value={formData.price}
           onChange={handleNumericChange}
+          onFocus={handleFocus}
+          onKeyDown={handleKeyDown}
           InputProps={{
             startAdornment: "$",
-            inputProps: { min: 0 }, // Agregar restricción de valor mínimo
+            inputProps: { min: 0 },
           }}
+          sx={fieldStyles}
         />
       </Grid>
 
-      <Grid item xs={12} md={3}>
+      <Grid item xs={6} md={3}>
         <TextField
           fullWidth
           label="Nights"
@@ -94,43 +147,52 @@ const PricingSection = ({ formData, onChange }) => {
             Boolean(formData.checkInDate) && Boolean(formData.checkOutDate)
           }
           onChange={onChange}
+          onFocus={handleFocus}
+          onKeyDown={handleKeyDown}
           InputProps={{
-            inputProps: { min: 1 }, // Agregar restricción de valor mínimo
+            inputProps: { min: 1 },
           }}
+          sx={fieldStyles}
         />
       </Grid>
 
-      <Grid item xs={12} md={3}>
+      <Grid item xs={6} md={3}>
         <TextField
           fullWidth
-          label="Cleaning fee"
+          label="Cleaning Fee"
           name="cleaningFee"
           type="number"
           value={formData.cleaningFee}
           onChange={handleNumericChange}
+          onFocus={handleFocus}
+          onKeyDown={handleKeyDown}
           InputProps={{
             startAdornment: "$",
-            inputProps: { min: 0 }, // Agregar restricción de valor mínimo
+            inputProps: { min: 0 },
           }}
+          sx={fieldStyles}
         />
       </Grid>
 
-      <Grid item xs={12} md={3}>
+      <Grid item xs={6} md={3}>
         <TextField
           fullWidth
-          label="Parking fee"
+          label="Parking Fee"
           name="parkingFee"
           type="number"
           value={formData.parkingFee}
           onChange={handleNumericChange}
+          onFocus={handleFocus}
+          onKeyDown={handleKeyDown}
           InputProps={{
             startAdornment: "$",
-            inputProps: { min: 0 }, // Agregar restricción de valor mínimo
+            inputProps: { min: 0 },
           }}
+          sx={fieldStyles}
         />
       </Grid>
 
-      <Grid item xs={12} md={3}>
+      <Grid item xs={6} md={4}>
         <TextField
           fullWidth
           label="Other expenses"
@@ -138,29 +200,17 @@ const PricingSection = ({ formData, onChange }) => {
           type="number"
           value={formData.otherExpenses}
           onChange={handleNumericChange}
-          InputProps={{
-            startAdornment: "$",
-            inputProps: { min: 0 }, // Agregar restricción de valor mínimo
-          }}
-        />
-      </Grid>
-
-      <Grid item xs={12} md={3}>
-        <TextField
-          fullWidth
-          label="Cancellation fee"
-          name="cancellationFee"
-          type="number"
-          value={formData.cancellationFee}
-          onChange={handleNumericChange}
+          onFocus={handleFocus}
+          onKeyDown={handleKeyDown}
           InputProps={{
             startAdornment: "$",
             inputProps: { min: 0 },
           }}
+          sx={fieldStyles}
         />
       </Grid>
 
-      <Grid item xs={12} md={3}>
+      <Grid item xs={6} md={4}>
         <TextField
           fullWidth
           label="Taxes"
@@ -168,147 +218,34 @@ const PricingSection = ({ formData, onChange }) => {
           type="number"
           value={formData.taxes}
           onChange={handleNumericChange}
-          helperText="Enter tax amount manually"
+          onFocus={handleFocus}
+          onKeyDown={handleKeyDown}
           InputProps={{
             startAdornment: "$",
-            inputProps: { min: 0 }, // Agregar restricción de valor mínimo
+            inputProps: { min: 0 },
           }}
+          sx={fieldStyles}
         />
       </Grid>
 
-      {/* Resumen de precios */}
-      <Grid item xs={12}>
-        {summary && (
-          <Paper
-            elevation={3}
-            sx={{ p: 2, border: "1px solid #2f2f2f", mt: 2 }}
-          >
-            <Typography
-              variant="subtitle1"
-              fontWeight="bold"
-              gutterBottom
-              color="primary"
-            >
-              Pricing summary
-            </Typography>
-
-            <Box
-              sx={{ display: "flex", justifyContent: "space-between", mb: 1 }}
-            >
-              <Typography variant="body2" color="text.primary">
-                Accommodation ({formData.nights}{" "}
-                {formData.nights === 1 ? "night" : "nights"} x ${formData.price}
-                )
-              </Typography>
-              <Typography variant="body2" color="text.primary">
-                ${summary.accommodation.toFixed(2)}
-              </Typography>
-            </Box>
-
-            {summary.cleaning > 0 && (
-              <Box
-                sx={{ display: "flex", justifyContent: "space-between", mb: 1 }}
-              >
-                <Typography variant="body2" color="text.primary">
-                  Cleaning fee
-                </Typography>
-                <Typography variant="body2" color="text.primary">
-                  ${summary.cleaning.toFixed(2)}
-                </Typography>
-              </Box>
-            )}
-
-            {summary.parking > 0 && (
-              <Box
-                sx={{ display: "flex", justifyContent: "space-between", mb: 1 }}
-              >
-                <Typography variant="body2" color="text.primary">
-                  Parking fee
-                </Typography>
-                <Typography variant="body2" color="text.primary">
-                  ${summary.parking.toFixed(2)}
-                </Typography>
-              </Box>
-            )}
-
-            {summary.other > 0 && (
-              <Box
-                sx={{ display: "flex", justifyContent: "space-between", mb: 1 }}
-              >
-                <Typography variant="body2" color="text.primary">
-                  Other expenses
-                </Typography>
-                <Typography variant="body2" color="text.primary">
-                  ${summary.other.toFixed(2)}
-                </Typography>
-              </Box>
-            )}
-
-            <Box
-              sx={{ display: "flex", justifyContent: "space-between", mb: 1 }}
-            >
-              <Typography variant="body2" color="text.primary">
-                Subtotal
-              </Typography>
-              <Typography variant="body2" color="text.primary">
-                ${summary.subtotal.toFixed(2)}
-              </Typography>
-            </Box>
-
-            <Box
-              sx={{ display: "flex", justifyContent: "space-between", mb: 1 }}
-            >
-              <Typography variant="body2" color="text.primary">
-                Taxes
-              </Typography>
-              <Typography variant="body2" color="text.primary">
-                ${summary.taxes.toFixed(2)}
-              </Typography>
-            </Box>
-
-            <Divider sx={{ my: 1 }} />
-
-            {summary.cancellation > 0 && (
-              <Box
-                sx={{ display: "flex", justifyContent: "space-between", mb: 1 }}
-              >
-                <Typography variant="body2" color="text.primary">
-                  Cancellation fee
-                </Typography>
-                <Typography variant="body2" color="text.primary">
-                  ${summary.cancellation.toFixed(2)}
-                </Typography>
-              </Box>
-            )}
-
-            <Divider sx={{ my: 1 }} />
-
-            <Box
-              sx={{
-                display: "flex",
-                justifyContent: "space-between",
-                fontWeight: "bold",
-              }}
-            >
-              <Typography
-                variant="body1"
-                color="text.primary"
-                fontWeight="bold"
-              >
-                Total
-              </Typography>
-              <Typography
-                variant="body1"
-                color="text.primary"
-                fontWeight="bold"
-              >
-                ${summary.total.toFixed(2)}
-              </Typography>
-            </Box>
-          </Paper>
-        )}
+      <Grid item xs={6} md={4}>
+        <TextField
+          fullWidth
+          label="Cancellation Fee"
+          name="cancellationFee"
+          type="number"
+          value={formData.cancellationFee}
+          onChange={handleNumericChange}
+          onFocus={handleFocus}
+          onKeyDown={handleKeyDown}
+          InputProps={{
+            startAdornment: "$",
+            inputProps: { min: 0 },
+          }}
+          sx={fieldStyles}
+        />
       </Grid>
-    </>
+    </Grid>
   );
 };
 

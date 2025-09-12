@@ -27,6 +27,7 @@ const ReservationManagement = () => {
                         const checkOutDate = parseISO(reservation.checkOutDate);
 
                         setInitialData({
+                            id: reservation.id || id,
                             checkInDate: reservation.checkInDate || '',
                             checkOutDate: reservation.checkOutDate || '',
                             nights: reservation.nights || 1,

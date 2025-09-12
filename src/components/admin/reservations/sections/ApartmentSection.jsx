@@ -49,25 +49,44 @@ const ApartmentSection = ({ formData, apartments, selectedApartment, onChange })
         <>
             <Grid item xs={12}>
                 <FormControl fullWidth>
-                    <InputLabel sx={{ color: '#ccc' }}>Select Apartment</InputLabel>
                     <Select
                         name="apartmentId"
                         value={apartmentIdValue}
                         onChange={handleApartmentChange}
-                        label="Select Apartment"
+                        displayEmpty
                         sx={{
-                            backgroundColor: '#1a1a1a',
+                            backgroundColor: '#333',
                             color: '#fff',
-                            '& .MuiOutlinedInput-notchedOutline': { borderColor: '#555' },
-                            '&:hover .MuiOutlinedInput-notchedOutline': { borderColor: '#777' },
-                            '&.Mui-focused .MuiOutlinedInput-notchedOutline': { borderColor: '#90caf9' },
+                            border: 'none',
+                            borderRadius: 1,
+                            '& .MuiOutlinedInput-notchedOutline': { border: 'none' },
+                            '&:hover .MuiOutlinedInput-notchedOutline': { border: 'none' },
+                            '&.Mui-focused .MuiOutlinedInput-notchedOutline': { border: 'none' },
                             '& .MuiSvgIcon-root': { color: '#ccc' },
+                            '& .MuiSelect-select': {
+                                padding: '12px 16px',
+                                color: apartmentIdValue ? '#fff' : '#888',
+                            },
+                        }}
+                        MenuProps={{
+                            PaperProps: {
+                                sx: {
+                                    bgcolor: '#333',
+                                    '& .MuiMenuItem-root': {
+                                        color: '#fff',
+                                        '&:hover': { bgcolor: '#444' },
+                                        '&.Mui-selected': { bgcolor: '#555' },
+                                    },
+                                },
+                            },
                         }}
                     >
-                        <MenuItem value="">Select...</MenuItem>
+                        <MenuItem value="" disabled>
+                            <Box sx={{ color: '#888' }}>Select Apartment</Box>
+                        </MenuItem>
                         {apartments.map((apartment) => (
                             <MenuItem key={apartment.id} value={apartment.id.toString()}>
-                                {apartment.name} - Rooms: {apartment.rooms === 0 ? 0 : apartment.rooms || 'N/A'}
+                                {apartment.name}
                             </MenuItem>
                         ))}
                     </Select>
@@ -76,32 +95,34 @@ const ApartmentSection = ({ formData, apartments, selectedApartment, onChange })
 
             {/* Mostrar información del apartamento seleccionado */}
             {apartmentDetails && (
-                <Grid item xs={12}>
+                <Grid item xs={12} sx={{ mt: 2 }}>
                     <Card sx={{ 
                         display: 'flex', 
-                        height: '120px',
-                        bgcolor: '#1a1a1a',
+                        height: '80px',
+                        bgcolor: '#444',
                         color: '#fff',
-                        border: '1px solid #555'
+                        border: 'none',
+                        borderRadius: 2,
+                        overflow: 'hidden'
                     }}>
                         <CardMedia
                             component="img"
-                            sx={{ width: 120, height: 120, objectFit: 'cover' }}
+                            sx={{ width: 80, height: 80, objectFit: 'cover' }}
                             image={apartmentDetails.image}
                             alt={apartmentDetails.alt}
                         />
-                        <Box sx={{ display: 'flex', flexDirection: 'column', pl: 2, pt: 1 }}>
-                            <Typography variant="h6" sx={{ color: '#fff' }}>
+                        <Box sx={{ 
+                            display: 'flex', 
+                            flexDirection: 'column', 
+                            justifyContent: 'center',
+                            pl: 2, 
+                            flex: 1
+                        }}>
+                            <Typography variant="subtitle1" sx={{ color: '#fff', fontSize: '1.15rem', fontWeight: 500, mb: 0.5 }}>
                                 {apartmentDetails.name}
                             </Typography>
-                            <Typography variant="body2" sx={{ color: '#ccc' }}>
-                                Unit: {apartmentDetails.unitNumber}
-                            </Typography>
-                            <Typography variant="body2" sx={{ color: '#ccc' }}>
-                                Capacity: {apartmentDetails.capacity} people
-                            </Typography>
-                            <Typography variant="body2" sx={{ color: '#90caf9' }}>
-                                ${apartmentDetails.price} per night
+                            <Typography variant="body2" sx={{ color: '#ccc', fontSize: '0.95rem' }}>
+                                {apartmentDetails.unitNumber} • {apartmentDetails.capacity} people • ${apartmentDetails.price} per night
                             </Typography>
                         </Box>
                     </Card>

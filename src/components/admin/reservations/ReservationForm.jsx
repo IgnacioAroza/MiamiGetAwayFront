@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import {
     Grid,
     Typography,
@@ -42,6 +43,7 @@ import EditUser from '../users/EditUser';
 import { useReservationForm } from '../../../hooks/useReservationForm';
 
 const ReservationForm = ({ initialData, onSubmit }) => {
+    const navigate = useNavigate();
     const {
         formData,
         selectedApartment,
@@ -63,6 +65,11 @@ const ReservationForm = ({ initialData, onSubmit }) => {
     const handleCloseNewClientDialog = () => setOpenNewClientDialog(false);
     const handleOpenEditClientDialog = () => setOpenEditClientDialog(true);
     const handleCloseEditClientDialog = () => setOpenEditClientDialog(false);
+
+    // Manejar cancelar - navegar de vuelta
+    const handleCancel = () => {
+        navigate(-1); // Volver a la página anterior
+    };
 
     const handleSubmit = (event) => {
         event.preventDefault();
@@ -251,19 +258,40 @@ const ReservationForm = ({ initialData, onSubmit }) => {
                         {/* Botones de Acción */}
                         <Box sx={{ display: 'flex', justifyContent: 'flex-end', gap: 2, mt: 3 }}>
                             <Button 
-                                variant="outlined" 
-                                color="secondary" 
-                                onClick={resetForm}
+                                variant="contained"
+                                onClick={handleCancel}
                                 size="large"
+                                sx={{
+                                    backgroundColor: '#666',
+                                    color: '#fff',
+                                    borderRadius: 1,
+                                    textTransform: 'none',
+                                    fontSize: '0.95rem',
+                                    fontWeight: 500,
+                                    minWidth: '100px',
+                                    '&:hover': {
+                                        backgroundColor: '#555'
+                                    }
+                                }}
                             >
                                 Cancel
                             </Button>
                             <Button 
                                 type="submit" 
-                                variant="contained" 
-                                color="success"
+                                variant="contained"
                                 size="large"
-                                sx={{ minWidth: '120px' }}
+                                sx={{
+                                    backgroundColor: '#4caf50',
+                                    color: '#fff',
+                                    borderRadius: 1,
+                                    textTransform: 'none',
+                                    fontSize: '0.95rem',
+                                    fontWeight: 500,
+                                    minWidth: '120px',
+                                    '&:hover': {
+                                        backgroundColor: '#45a049'
+                                    }
+                                }}
                             >
                                 {initialData ? 'Save' : 'Create Reservation'}
                             </Button>
@@ -272,7 +300,15 @@ const ReservationForm = ({ initialData, onSubmit }) => {
 
                     {/* Columna Derecha - Payment Summary */}
                     <Grid item xs={12} md={4}>
-                        <Card sx={{ bgcolor: '#2a2a2a', color: '#fff', position: 'sticky', top: 20 }}>
+                        <Card sx={{ 
+                            bgcolor: '#2a2a2a', 
+                            color: '#fff', 
+                            position: 'sticky', 
+                            top: 20,
+                            height: 'fit-content',
+                            maxHeight: 'calc(100vh - 40px)',
+                            overflow: 'hidden'
+                        }}>
                             <CardHeader
                                 avatar={<ReceiptIcon sx={{ color: '#fff' }} />}
                                 title="Payment Summary"
@@ -291,21 +327,29 @@ const ReservationForm = ({ initialData, onSubmit }) => {
                                 }
                                 sx={{ 
                                     bgcolor: '#333',
-                                    '& .MuiCardHeader-title': { color: '#fff', fontWeight: 'bold' }
+                                    '& .MuiCardHeader-title': { color: '#fff', fontWeight: 'bold' },
+                                    pb: 1
                                 }}
                             />
-                            <CardContent>
-                                {/* Payment Summary Data */}
+                            <CardContent sx={{ 
+                                py: 1,
+                                '&:last-child': { pb: 2 }
+                            }}>
+                                {/* Payment Summary Data - Compacto */}
                                 <ReservationPaymentSummary formData={formData} />
                                 
                                 {/* Payment Registration Section */}
-                                <Box sx={{ mt: 3 }}>
-                                    <Typography variant="h6" sx={{ mb: 2, color: '#fff' }}>
+                                <Box sx={{ mt: 2 }}>
+                                    <Typography variant="h6" sx={{ mb: 1.5, color: '#fff', fontSize: '1rem' }}>
                                         Payment Registration
                                     </Typography>
                                     <PaymentSection 
                                         formData={formData} 
-                                        onChange={handleChange} 
+                                        onChange={handleChange}
+                                        onPaymentRegistered={(paymentResponse) => {
+                                            console.log('Payment registered:', paymentResponse);
+                                            // Aquí podrías agregar lógica adicional si necesitas
+                                        }}
                                     />
                                 </Box>
                             </CardContent>

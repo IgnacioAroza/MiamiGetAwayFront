@@ -17,7 +17,7 @@ const ReservationPaymentSummary = ({ formData }) => {
 
     return (
         <Box sx={{ mb: 3 }}>
-            <Grid container spacing={2}>
+            <Grid container spacing={1.2}>
                 <Grid item xs={8}>
                     <Typography sx={{ color: '#ccc', fontSize: '0.9rem' }}>
                         {nights} nights × ${pricePerNight.toFixed(2)}
@@ -29,60 +29,80 @@ const ReservationPaymentSummary = ({ formData }) => {
                     </Typography>
                 </Grid>
                 
-                <Grid item xs={8}>
-                    <Typography sx={{ color: '#ccc', fontSize: '0.9rem' }}>
-                        Cleaning Fee
-                    </Typography>
-                </Grid>
-                <Grid item xs={4}>
-                    <Typography sx={{ color: '#fff', textAlign: 'right' }}>
-                        ${cleaningFee.toFixed(2)}
-                    </Typography>
-                </Grid>
+                {cleaningFee > 0 && (
+                    <>
+                        <Grid item xs={8}>
+                            <Typography sx={{ color: '#ccc', fontSize: '0.9rem' }}>
+                                Cleaning Fee
+                            </Typography>
+                        </Grid>
+                        <Grid item xs={4}>
+                            <Typography sx={{ color: '#fff', textAlign: 'right' }}>
+                                ${cleaningFee.toFixed(2)}
+                            </Typography>
+                        </Grid>
+                    </>
+                )}
                 
-                <Grid item xs={8}>
-                    <Typography sx={{ color: '#ccc', fontSize: '0.9rem' }}>
-                        Parking Fee
-                    </Typography>
-                </Grid>
-                <Grid item xs={4}>
-                    <Typography sx={{ color: '#fff', textAlign: 'right' }}>
-                        ${parkingFee.toFixed(2)}
-                    </Typography>
-                </Grid>
+                {parkingFee > 0 && (
+                    <>
+                        <Grid item xs={8}>
+                            <Typography sx={{ color: '#ccc', fontSize: '0.9rem' }}>
+                                Parking Fee
+                            </Typography>
+                        </Grid>
+                        <Grid item xs={4}>
+                            <Typography sx={{ color: '#fff', textAlign: 'right' }}>
+                                ${parkingFee.toFixed(2)}
+                            </Typography>
+                        </Grid>
+                    </>
+                )}
                 
-                <Grid item xs={8}>
-                    <Typography sx={{ color: '#ccc', fontSize: '0.9rem' }}>
-                        Other Expenses
-                    </Typography>
-                </Grid>
-                <Grid item xs={4}>
-                    <Typography sx={{ color: '#fff', textAlign: 'right' }}>
-                        ${otherExpenses.toFixed(2)}
-                    </Typography>
-                </Grid>
+                {otherExpenses > 0 && (
+                    <>
+                        <Grid item xs={8}>
+                            <Typography sx={{ color: '#ccc', fontSize: '0.9rem' }}>
+                                Other Expenses
+                            </Typography>
+                        </Grid>
+                        <Grid item xs={4}>
+                            <Typography sx={{ color: '#fff', textAlign: 'right' }}>
+                                ${otherExpenses.toFixed(2)}
+                            </Typography>
+                        </Grid>
+                    </>
+                )}
                 
-                <Grid item xs={8}>
-                    <Typography sx={{ color: '#ccc', fontSize: '0.9rem' }}>
-                        Taxes
-                    </Typography>
-                </Grid>
-                <Grid item xs={4}>
-                    <Typography sx={{ color: '#fff', textAlign: 'right' }}>
-                        ${taxes.toFixed(2)}
-                    </Typography>
-                </Grid>
+                {taxes > 0 && (
+                    <>
+                        <Grid item xs={8}>
+                            <Typography sx={{ color: '#ccc', fontSize: '0.9rem' }}>
+                                Taxes
+                            </Typography>
+                        </Grid>
+                        <Grid item xs={4}>
+                            <Typography sx={{ color: '#fff', textAlign: 'right' }}>
+                                ${taxes.toFixed(2)}
+                            </Typography>
+                        </Grid>
+                    </>
+                )}
                 
-                <Grid item xs={8}>
-                    <Typography sx={{ color: '#ccc', fontSize: '0.9rem' }}>
-                        Cancellation Fee
-                    </Typography>
-                </Grid>
-                <Grid item xs={4}>
-                    <Typography sx={{ color: '#fff', textAlign: 'right' }}>
-                        ${cancellationFee.toFixed(2)}
-                    </Typography>
-                </Grid>
+                {cancellationFee > 0 && (
+                    <>
+                        <Grid item xs={8}>
+                            <Typography sx={{ color: '#ccc', fontSize: '0.9rem' }}>
+                                Cancellation Fee
+                            </Typography>
+                        </Grid>
+                        <Grid item xs={4}>
+                            <Typography sx={{ color: '#fff', textAlign: 'right' }}>
+                                ${cancellationFee.toFixed(2)}
+                            </Typography>
+                        </Grid>
+                    </>
+                )}
 
                 <Grid item xs={12}>
                     <Divider sx={{ bgcolor: '#555', my: 2 }} />
