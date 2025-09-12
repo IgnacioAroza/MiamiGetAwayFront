@@ -50,10 +50,12 @@ const ReservationForm = ({ initialData, onSubmit }) => {
         selectedClient,
         apartments,
         clients,
+        initialPaymentData,
         handleChange,
         handleDateChange,
         handleClientSelect,
         handleNewClientCreated,
+        handleInitialPaymentChange,
         resetForm
     } = useReservationForm(initialData);
 
@@ -122,7 +124,16 @@ const ReservationForm = ({ initialData, onSubmit }) => {
                     clientCity: formData.clientCity,
                     clientCountry: formData.clientCountry,
                     clientNotes: formData.clientNotes
-                })
+                }),
+                // Incluir pago inicial si existe y es una reserva nueva
+                ...(initialPaymentData && initialPaymentData.amount && initialPaymentData.amount > 0 && !formData.id ? {
+                    initialPayment: {
+                        amount: Number(initialPaymentData.amount),
+                        paymentMethod: initialPaymentData.paymentMethod,
+                        paymentReference: "Payment recorded upon creation of the reservation",
+                        notes: initialPaymentData.notes || "Initial payment"
+                    }
+                } : {})
             };
             
             onSubmit(dataToSubmit);
@@ -348,8 +359,9 @@ const ReservationForm = ({ initialData, onSubmit }) => {
                                         onChange={handleChange}
                                         onPaymentRegistered={(paymentResponse) => {
                                             console.log('Payment registered:', paymentResponse);
-                                            // Aquí podrías agregar lógica adicional si necesitas
                                         }}
+                                        onInitialPaymentChange={handleInitialPaymentChange}
+                                        initialPaymentData={initialPaymentData}
                                     />
                                 </Box>
                             </CardContent>

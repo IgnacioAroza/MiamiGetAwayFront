@@ -59,7 +59,12 @@ export const normalizeReservationInput = (reservationData = {}, { partial = fals
     clientNotes: reservationData.clientNotes,
   } : {};
 
-  const merged = { ...base, ...clientFields };
+  // Incluir initialPayment si existe (para reservas nuevas con pago inicial)
+  const initialPaymentField = reservationData.initialPayment ? {
+    initialPayment: reservationData.initialPayment
+  } : {};
+
+  const merged = { ...base, ...clientFields, ...initialPaymentField };
 
   // Para peticiones parciales, remover undefined; para creación también conviene limpiar
   return stripUndefined(merged);

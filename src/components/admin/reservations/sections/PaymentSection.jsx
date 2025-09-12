@@ -1,9 +1,10 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Grid, TextField, Button, FormControl, InputLabel, Select, MenuItem, Box, Typography } from '@mui/material';
 import reservationService from '../../../../services/reservationService';
 
-const PaymentSection = ({ formData, onChange, onPaymentRegistered }) => {
-    const [paymentData, setPaymentData] = useState({
+const PaymentSection = ({ formData, onChange, onPaymentRegistered, onInitialPaymentChange, initialPaymentData }) => {
+    // Usar datos del prop o estado local
+    const [paymentData, setPaymentData] = useState(initialPaymentData || {
         paymentAmount: '',
         paymentMethod: 'cash',
         paymentNotes: ''
@@ -13,12 +14,34 @@ const PaymentSection = ({ formData, onChange, onPaymentRegistered }) => {
     // Verificar si la reserva ya existe
     const isNewReservation = !formData.id;
 
+    // Sincronizar con initialPaymentData cuando cambie
+    useEffect(() => {
+        if (initialPaymentData) {
+            setPaymentData({
+                paymentAmount: initialPaymentData.amount || '',
+                paymentMethod: initialPaymentData.paymentMethod || 'cash',
+                paymentNotes: initialPaymentData.notes || ''
+            });
+        }
+    }, [initialPaymentData]);
+
     const handlePaymentChange = (event) => {
         const { name, value } = event.target;
-        setPaymentData(prev => ({
-            ...prev,
+        const newPaymentData = {
+            ...paymentData,
             [name]: value
-        }));
+        };
+        
+        setPaymentData(newPaymentData);
+        
+        // Si es reserva nueva, notificar al componente padre
+        if (isNewReservation && onInitialPaymentChange) {
+            onInitialPaymentChange({
+                amount: newPaymentData.paymentAmount,
+                paymentMethod: newPaymentData.paymentMethod,
+                notes: newPaymentData.paymentNotes
+            });
+        }
     };
 
     const handleRegisterPayment = async () => {
@@ -27,6 +50,20 @@ const PaymentSection = ({ formData, onChange, onPaymentRegistered }) => {
             return;
         }
 
+        // Para reservas nuevas, solo actualizar el estado (se enviará con la reserva)
+        if (isNewReservation) {
+            if (onInitialPaymentChange) {
+                onInitialPaymentChange({
+                    amount: parseFloat(paymentData.paymentAmount),
+                    paymentMethod: paymentData.paymentMethod,
+                    notes: paymentData.paymentNotes
+                });
+            }
+            alert('Payment will be registered when the reservation is saved');
+            return;
+        }
+
+        // Para reservas existentes, funcionar como antes
         if (!formData.id) {
             alert('Cannot register payment: Reservation not yet created');
             return;
@@ -92,11 +129,11 @@ const PaymentSection = ({ formData, onChange, onPaymentRegistered }) => {
                     border: '1px solid #555' 
                 }}>
                     <Typography sx={{ 
-                        color: '#ff9800', 
+                        color: '#4caf50', 
                         fontSize: '0.85rem',
                         textAlign: 'center'
                     }}>
-                        💡 Save the reservation first to register payments
+                        💡 Initial payment will be registered with the reservation
                     </Typography>
                 </Box>
             )}
@@ -180,7 +217,7 @@ const PaymentSection = ({ formData, onChange, onPaymentRegistered }) => {
                         color="success"
                         size="medium"
                         onClick={handleRegisterPayment}
-                        disabled={isLoading || !paymentData.paymentAmount || isNewReservation}
+                        disabled={isLoading || !paymentData.paymentAmount}
                         sx={{
                             bgcolor: '#4caf50',
                             '&:hover': { bgcolor: '#45a049' },
@@ -190,7 +227,7 @@ const PaymentSection = ({ formData, onChange, onPaymentRegistered }) => {
                         }}
                     >
                         {isLoading ? 'Processing...' : 
-                         isNewReservation ? 'Save Reservation First' : 
+                         isNewReservation ? 'Add Initial Payment' : 
                          'Register Payment'}
                     </Button>
                 </Grid>
