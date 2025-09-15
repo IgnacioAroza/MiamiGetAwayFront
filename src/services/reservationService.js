@@ -107,7 +107,37 @@ const reservationService = {
             const response = await api.delete(`/reservations/${id}`);
             return response.data;
         } catch (error) {
-            throw error.response?.data?.message || 'Error deleting reservation';
+            // Si es un error 400 con datos relacionados, usar el mensaje específico del servidor
+            if (error.response?.status === 400 && error.response?.data) {
+                const errorData = error.response.data;
+
+                // Si es el error específico de datos relacionados
+                if (errorData.error === 'Cannot delete reservation due to related data') {
+                    const detailedError = new Error(errorData.message || 'Cannot delete reservation with related data');
+                    detailedError.details = errorData.details;
+                    detailedError.suggestedAction = errorData.suggestedAction;
+                    detailedError.isRelatedDataError = true;
+                    throw detailedError;
+                }
+
+                // Otros errores 400
+                throw new Error(errorData.message || 'Bad request when deleting reservation');
+            }
+
+            // Para otros códigos de error, usar mensaje genérico mejorado
+            const statusCode = error.response?.status;
+            const serverMessage = error.response?.data?.message;
+
+            switch (statusCode) {
+                case 404:
+                    throw new Error('Reservation not found');
+                case 403:
+                    throw new Error('Not authorized to delete this reservation');
+                case 500:
+                    throw new Error('Server error while deleting reservation');
+                default:
+                    throw new Error(serverMessage || 'Error deleting reservation');
+            }
         }
     },
 
@@ -539,26 +569,26 @@ const reservationService = {
         });
 
         // 4. Crear un objeto de datos normalizado para usar en la generación del PDF
-            const normalizedData = {
-                id: reservationData.id,
-                clientName: reservationData.clientName || reservationData.client_name,
-                clientEmail: reservationData.clientEmail || reservationData.client_email,
-                clientPhone: reservationData.clientPhone || reservationData.client_phone,
-                clientAddress: reservationData.clientAddress || reservationData.client_address,
-                clientCity: reservationData.clientCity || reservationData.client_city,
-                clientCountry: reservationData.clientCountry || reservationData.client_country,
-                clientNotes: reservationData.clientNotes || reservationData.client_notes,
-                checkInDate: reservationData.checkInDate || reservationData.check_in_date,
-                checkOutDate: reservationData.checkOutDate || reservationData.check_out_date,
-                nights: reservationData.nights,
-                pricePerNight: reservationData.pricePerNight || reservationData.price_per_night,
-                cleaningFee: reservationData.cleaningFee || reservationData.cleaning_fee,
-                cancellationFee: reservationData.cancellationFee || reservationData.cancellation_fee,
-                parkingFee: reservationData.parkingFee || reservationData.parking_fee,
-                otherExpenses: reservationData.otherExpenses || reservationData.other_expenses,
-                taxes: reservationData.taxes,
-                totalAmount: reservationData.totalAmount || reservationData.total_amount,
-                amountPaid: reservationData.amountPaid || reservationData.amount_paid,
+        const normalizedData = {
+            id: reservationData.id,
+            clientName: reservationData.clientName || reservationData.client_name,
+            clientEmail: reservationData.clientEmail || reservationData.client_email,
+            clientPhone: reservationData.clientPhone || reservationData.client_phone,
+            clientAddress: reservationData.clientAddress || reservationData.client_address,
+            clientCity: reservationData.clientCity || reservationData.client_city,
+            clientCountry: reservationData.clientCountry || reservationData.client_country,
+            clientNotes: reservationData.clientNotes || reservationData.client_notes,
+            checkInDate: reservationData.checkInDate || reservationData.check_in_date,
+            checkOutDate: reservationData.checkOutDate || reservationData.check_out_date,
+            nights: reservationData.nights,
+            pricePerNight: reservationData.pricePerNight || reservationData.price_per_night,
+            cleaningFee: reservationData.cleaningFee || reservationData.cleaning_fee,
+            cancellationFee: reservationData.cancellationFee || reservationData.cancellation_fee,
+            parkingFee: reservationData.parkingFee || reservationData.parking_fee,
+            otherExpenses: reservationData.otherExpenses || reservationData.other_expenses,
+            taxes: reservationData.taxes,
+            totalAmount: reservationData.totalAmount || reservationData.total_amount,
+            amountPaid: reservationData.amountPaid || reservationData.amount_paid,
             amountDue: reservationData.amountDue || reservationData.amount_due,
             status: reservationData.status,
             paymentStatus: reservationData.paymentStatus || reservationData.payment_status

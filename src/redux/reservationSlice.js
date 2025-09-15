@@ -77,7 +77,19 @@ export const deleteReservation = createAsyncThunk(
             await reservationService.deleteReservation(id);
             return id;
         } catch (error) {
-            return rejectWithValue(error.response?.data?.message || 'Error deleting reservation');
+            // Preservar el error completo con sus propiedades personalizadas
+            if (error.isRelatedDataError) {
+                return rejectWithValue({
+                    message: error.message,
+                    details: error.details,
+                    suggestedAction: error.suggestedAction,
+                    isRelatedDataError: true
+                });
+            }
+
+            // Para otros errores, usar el mensaje original
+            const message = error.message || error.response?.data?.message || 'Error deleting reservation';
+            return rejectWithValue({ message, isRelatedDataError: false });
         }
     }
 );

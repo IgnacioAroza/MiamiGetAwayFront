@@ -25,7 +25,14 @@ import {
     CardContent,
     CardActions,
     Stack,
-    useTheme
+    useTheme,
+    Dialog,
+    DialogActions,
+    DialogContent,
+    DialogContentText,
+    DialogTitle,
+    Snackbar,
+    Alert
 } from '@mui/material';
 import {
     Edit as EditIcon,
@@ -69,6 +76,18 @@ const ReservationList = ({ filter = {} }) => {
     });
     const [activeFilters, setActiveFilters] = useState({});
     const [clientMap, setClientMap] = useState({});
+    const [deleteDialog, setDeleteDialog] = useState({
+        open: false,
+        reservationId: null,
+        reservationName: '',
+        hasWarning: false,
+        warningMessage: ''
+    });
+    const [toast, setToast] = useState({
+        open: false,
+        message: '',
+        severity: 'success'
+    });
     
     // Función para ordenar las reservas localmente
     const sortReservations = (reservations, orderBy, order) => {
@@ -313,10 +332,89 @@ const ReservationList = ({ filter = {} }) => {
     };
     
     // Manejar clic en eliminar
-    const handleDeleteClick = (id) => {
-        if (window.confirm('Are you sure you want to delete this reservation?')) {
-            dispatch(deleteReservation(id));
+    const handleDeleteClick = (reservation) => {
+        const clientName = getClientDisplay(reservation);
+        const hasPayments = (reservation.amountPaid || reservation.amount_paid) > 0;
+        
+        let warningMessage = '';
+        if (hasPayments) {
+            warningMessage = '\n\nWarning: This reservation has registered payments. Deletion may not be possible.';
         }
+        
+        setDeleteDialog({
+            open: true,
+            reservationId: reservation.id,
+            reservationName: `Reservation #${reservation.id} - ${clientName}`,
+            hasWarning: hasPayments,
+            warningMessage: warningMessage
+        });
+    };
+    
+    // Confirmar eliminación
+    const handleConfirmDelete = async () => {
+        try {
+            await dispatch(deleteReservation(deleteDialog.reservationId)).unwrap();
+            setToast({
+                open: true,
+                message: 'Reservation deleted successfully',
+                severity: 'success'
+            });
+        } catch (error) {
+            console.error('Delete reservation error:', error);
+            
+            // Manejar error específico de datos relacionados
+            if (error.isRelatedDataError) {
+                setToast({
+                    open: true,
+                    message: `${error.message}\n\n${error.details || ''}\n\nSuggestion: ${error.suggestedAction || 'Consider canceling the reservation instead of deleting it.'}`,
+                    severity: 'warning'
+                });
+            } else {
+                // Para otros tipos de error
+                let errorMessage = 'Error deleting reservation. Please try again.';
+                
+                if (typeof error === 'string') {
+                    errorMessage = error;
+                } else if (error.message) {
+                    errorMessage = error.message;
+                } else if (error.error) {
+                    errorMessage = error.error;
+                }
+                
+                setToast({
+                    open: true,
+                    message: errorMessage,
+                    severity: 'error'
+                });
+            }
+        } finally {
+            setDeleteDialog({ 
+                open: false, 
+                reservationId: null, 
+                reservationName: '',
+                hasWarning: false,
+                warningMessage: ''
+            });
+        }
+    };
+    
+    // Cancelar eliminación
+    const handleCancelDelete = () => {
+        setDeleteDialog({ 
+            open: false, 
+            reservationId: null, 
+            reservationName: '',
+            hasWarning: false,
+            warningMessage: ''
+        });
+    };
+    
+    // Cerrar toast
+    const handleCloseToast = (event, reason) => {
+        if (reason === 'clickaway') {
+            return;
+        }
+        setToast({ ...toast, open: false });
     };
     
     // Agregar nueva reserva
@@ -541,7 +639,7 @@ const ReservationList = ({ filter = {} }) => {
                                         </IconButton>
                                         <IconButton 
                                             size="small" 
-                                            onClick={() => handleDeleteClick(reservation.id)}
+                                            onClick={() => handleDeleteClick(reservation)}
                                             color="error"
                                         >
                                             <DeleteIcon />
@@ -780,7 +878,7 @@ const ReservationList = ({ filter = {} }) => {
                                                 <Tooltip title="Delete">
                                                     <IconButton 
                                                         size="small" 
-                                                        onClick={() => handleDeleteClick(reservation.id)}
+                                                        onClick={() => handleDeleteClick(reservation)}
                                                         color="error"
                                                     >
                                                         <DeleteIcon />
@@ -804,6 +902,99 @@ const ReservationList = ({ filter = {} }) => {
                     />
                 </TableContainer>
             )}
+
+            {/* Dialog de confirmación para eliminar */}
+            <Dialog
+                open={deleteDialog.open}
+                onClose={handleCancelDelete}
+                aria-labelledby="delete-dialog-title"
+                aria-describedby="delete-dialog-description"
+                maxWidth="sm"
+                fullWidth
+            >
+                <DialogTitle 
+                    id="delete-dialog-title"
+                    sx={{ 
+                        color: 'error.main',
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: 1
+                    }}
+                >
+                    <DeleteIcon />
+                    Delete Reservation
+                </DialogTitle>
+                <DialogContent>
+                    <DialogContentText id="delete-dialog-description">
+                        Are you sure you want to delete <strong>{deleteDialog.reservationName}</strong>?
+                        <br /><br />
+                        This action cannot be undone and will permanently remove all reservation data.
+                        {deleteDialog.hasWarning && (
+                            <>
+                                <br />
+                                <Box 
+                                    component="span" 
+                                    sx={{ 
+                                        color: 'black', 
+                                        fontWeight: 'medium',
+                                        display: 'block',
+                                        mt: 2,
+                                        p: 1,
+                                        bgcolor: 'warning.light',
+                                        borderRadius: 1,
+                                        border: 1,
+                                        borderColor: 'warning.main'
+                                    }}
+                                >
+                                    ⚠️ This reservation has registered payments and may not be deletable.
+                                </Box>
+                            </>
+                        )}
+                    </DialogContentText>
+                </DialogContent>
+                <DialogActions sx={{ p: 2, gap: 1 }}>
+                    <Button 
+                        onClick={handleCancelDelete}
+                        variant="outlined"
+                        color="inherit"
+                    >
+                        Cancel
+                    </Button>
+                    <Button 
+                        onClick={handleConfirmDelete}
+                        variant="contained"
+                        color="error"
+                        startIcon={<DeleteIcon />}
+                    >
+                        Delete Reservation
+                    </Button>
+                </DialogActions>
+            </Dialog>
+
+            {/* Toast de notificaciones */}
+            <Snackbar
+                open={toast.open}
+                autoHideDuration={toast.severity === 'warning' ? 8000 : 4000}
+                onClose={handleCloseToast}
+                anchorOrigin={{ vertical: 'top', horizontal: 'center' }}
+                sx={{ maxWidth: '600px' }}
+            >
+                <Alert 
+                    onClose={handleCloseToast} 
+                    severity={toast.severity}
+                    variant="filled"
+                    sx={{ 
+                        width: '100%',
+                        '& .MuiAlert-message': {
+                            whiteSpace: 'pre-line',
+                            fontSize: '0.9rem',
+                            lineHeight: 1.4
+                        }
+                    }}
+                >
+                    {toast.message}
+                </Alert>
+            </Snackbar>
         </Box>
     );
 };
