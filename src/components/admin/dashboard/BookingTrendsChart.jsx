@@ -1,5 +1,5 @@
-import React from 'react';
-import { Box, Paper, Typography } from '@mui/material';
+import React, { useState } from 'react';
+import { Box, Paper, Typography, FormControl, Select, MenuItem, InputLabel } from '@mui/material';
 import { useTheme } from '@mui/material';
 import {
     LineChart,
@@ -60,7 +60,17 @@ const CustomTooltip = ({ active, payload, label }) => {
 
 const BookingTrendsChart = ({ reservations }) => {
     const theme = useTheme();
-    const trendData = useReservationTrends(reservations);
+    const currentYear = new Date().getFullYear();
+    const [selectedYear, setSelectedYear] = useState(currentYear);
+    
+    // Generar opciones de años específicos (2023-2027)
+    const yearOptions = [2023, 2024, 2025, 2026, 2027];
+    
+    const trendData = useReservationTrends(reservations, selectedYear);
+
+    const handleYearChange = (event) => {
+        setSelectedYear(event.target.value);
+    };
 
     // Crear los segmentos de color
     const segments = trendData.map((point, index) => {
@@ -78,9 +88,30 @@ const BookingTrendsChart = ({ reservations }) => {
 
     return (
         <Paper sx={{ p: 3 }}>
-            <Typography variant="h5" component="h2" gutterBottom>
-                Booking Trends
-            </Typography>
+            <Box sx={{ 
+                display: 'flex', 
+                justifyContent: 'space-between', 
+                alignItems: 'center',
+                mb: 2 
+            }}>
+                <Typography variant="h5" component="h2">
+                    Booking Trends
+                </Typography>
+                <FormControl size="small" sx={{ minWidth: 120 }}>
+                    <InputLabel>Year</InputLabel>
+                    <Select
+                        value={selectedYear}
+                        onChange={handleYearChange}
+                        label="Year"
+                    >
+                        {yearOptions.map((year) => (
+                            <MenuItem key={year} value={year}>
+                                {year}
+                            </MenuItem>
+                        ))}
+                    </Select>
+                </FormControl>
+            </Box>
             <Box sx={{ height: 250 }}>
                 <ResponsiveContainer width="100%" height="100%">
                     <LineChart
