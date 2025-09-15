@@ -6,15 +6,9 @@ import {
     Container,
     CircularProgress,
     Alert,
-    Button,
-    Dialog,
-    DialogTitle,
-    DialogContent,
-    DialogActions,
-    TextField,
     Snackbar
 } from '@mui/material';
-import { fetchReservationById, generateReservationPdf, sendReservationConfirmation } from '../redux/reservationSlice';
+import { fetchReservationById } from '../redux/reservationSlice';
 import { normalizeReservationFromApi } from '../utils/normalizers';
 import { fetchAdminApartmentById } from '../redux/adminApartmentSlice';
 import PaymentHistory from '../components/admin/payments/PaymentHistory';
@@ -26,9 +20,6 @@ const ReservationDetailsPage = () => {
     const dispatch = useDispatch();
     const { selectedReservation: reservation, loading, error } = useSelector(state => state.reservations);
     
-    // Estado para el diálogo de email y notificaciones
-    const [openEmailDialog, setOpenEmailDialog] = useState(false);
-    const [email, setEmail] = useState('');
     const [snackbar, setSnackbar] = useState({
         open: false,
         message: '',
@@ -134,55 +125,6 @@ const ReservationDetailsPage = () => {
         capacity: 'N/A'
     };
 
-    const handleSendEmail = async () => {
-        try {
-            // Validar email
-            if (!email || !email.includes('@')) {
-                throw new Error('Please enter a valid email');
-            }
-            
-            // Enviar el PDF por email
-            await dispatch(generateReservationPdf({ id, email })).unwrap();
-            
-            setOpenEmailDialog(false);
-            setSnackbar({
-                open: true,
-                message: 'Email sent successfully',
-                severity: 'success'
-            });
-        } catch (error) {
-            setSnackbar({
-                open: true,
-                message: 'Error sending email: ' + (error.message || 'Unknown error'),
-                severity: 'error'
-            });
-        }
-    };
-
-    const handleSendConfirmationEmail = async () => {
-        try {
-            await dispatch(sendReservationConfirmation({ 
-                id: normalizedReservation.id, 
-                notificationType: 'confirmation' 
-            })).unwrap();
-            
-            setOpenEmailDialog(false);
-            setSnackbar({
-                open: true,
-                message: 'Confirmation sent successfully',
-                severity: 'success'
-            });
-        } catch (error) {
-            // No mostrar Snackbar para errores de envío de notificaciones
-            // Los errores serán manejados por el componente hijo
-            console.log('Error handled by child component:', error);
-        }
-    };
-
-    const handleCloseSnackbar = () => {
-        setSnackbar({ ...snackbar, open: false });
-    };
-
     return (
         <Container maxWidth="xl" sx={{ py: 4 }}>
             <ReservationDetails 
@@ -201,40 +143,15 @@ const ReservationDetailsPage = () => {
             
             <PaymentHistory reservationId={id} />
 
-            {/* Diálogo para enviar email */}
-            {/* <Dialog open={openEmailDialog} onClose={() => setOpenEmailDialog(false)}>
-                <DialogTitle>Send Reservation by Email</DialogTitle>
-                <DialogContent>
-                    <TextField
-                        autoFocus
-                        margin="dense"
-                        id="email"
-                        label="Email"
-                        type="email"
-                        fullWidth
-                        variant="outlined"
-                        value={email}
-                        onChange={(e) => setEmail(e.target.value)}
-                    />
-                </DialogContent>
-                <DialogActions>
-                    <Button onClick={() => setOpenEmailDialog(false)}>Cancel</Button>
-                    <Button onClick={handleSendEmail} variant="contained">Send PDF</Button>
-                    <Button onClick={handleSendConfirmationEmail} color="secondary" variant="contained">
-                        Send Confirmation
-                    </Button>
-                </DialogActions>
-            </Dialog> */}
-
             {/* Snackbar para todos los mensajes */}
             <Snackbar 
                 open={snackbar.open} 
                 autoHideDuration={6000} 
-                onClose={handleCloseSnackbar}
+                onClose={() => setSnackbar({ ...snackbar, open: false })}
                 anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
             >
                 <Alert 
-                    onClose={handleCloseSnackbar} 
+                    onClose={() => setSnackbar({ ...snackbar, open: false })} 
                     severity={snackbar.severity}
                     sx={{ width: '100%' }}
                 >

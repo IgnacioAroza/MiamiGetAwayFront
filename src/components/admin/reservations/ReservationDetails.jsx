@@ -31,10 +31,13 @@ import {
     Receipt as ReceiptIcon,
     Update as UpdateIcon,
     Payment as PaymentIcon,
-    ArrowBack as ArrowBackIcon
+    ArrowBack as ArrowBackIcon,
+    Edit as EditIcon
 } from '@mui/icons-material';
 import { useReservation } from '../../../hooks/useReservation';
 import { useNavigate } from 'react-router-dom';
+import { useDispatch } from 'react-redux';
+import { setSelectedReservation } from '../../../redux/reservationSlice';
 import ReservationSummary from '../payments/ReservationSummary';
 import { formatDateForDisplay } from '../../../utils/dateUtils';
 import useDeviceDetection from '../../../hooks/useDeviceDetection';
@@ -43,6 +46,7 @@ import { useApartmentImages } from '../../../hooks/useApartmentImages';
 const ReservationDetails = ({ reservation, apartmentLoading, apartmentError, apartmentData, onError }) => {
     const { handleGeneratePdf, handleSendConfirmation } = useReservation();
     const navigate = useNavigate();
+    const dispatch = useDispatch();
     const theme = useTheme();
     const { isMobile, isTablet } = useDeviceDetection();
     
@@ -278,7 +282,12 @@ const ReservationDetails = ({ reservation, apartmentLoading, apartmentError, apa
     };
 
     const handleBackClick = () => {
-        navigate(-1); // Navegar hacia atrás en el historial
+        navigate('/admin/reservations'); // Navegar siempre a la lista de reservas
+    };
+
+    const handleEditClick = () => {
+        dispatch(setSelectedReservation(reservation));
+        navigate(`/admin/reservations/edit/${reservation.id}`);
     };
 
     return (
@@ -333,14 +342,29 @@ const ReservationDetails = ({ reservation, apartmentLoading, apartmentError, apa
                     />
                     <Button 
                         variant="contained" 
+                        startIcon={<EditIcon />}
+                        onClick={handleEditClick}
+                        fullWidth={isMobile}
+                        size={isMobile ? "small" : "medium"}
+                        sx={{
+                            bgcolor: '#2196f3',
+                            '&:hover': { bgcolor: '#1976d2' }
+                        }}
+                    >
+                        Edit
+                    </Button>
+                    <Button 
+                        variant="contained" 
                         startIcon={<ReceiptIcon />}
                         onClick={handleGeneratePdfClick}
                         disabled={loading}
                         fullWidth={isMobile}
                         size={isMobile ? "small" : "medium"}
                         sx={{
-                            bgcolor: '#4caf50',
-                            '&:hover': { bgcolor: '#45a049' }
+                            bgcolor: '#555',
+                            color: '#fff',
+                            '&:hover': { bgcolor: '#666' },
+                            '&:disabled': { bgcolor: '#333', color: '#888' }
                         }}
                     >
                         {loading ? <CircularProgress size={24} /> : 'Generate PDF'}
@@ -353,8 +377,10 @@ const ReservationDetails = ({ reservation, apartmentLoading, apartmentError, apa
                         fullWidth={isMobile}
                         size={isMobile ? "small" : "medium"}
                         sx={{
-                            bgcolor: '#ff9800',
-                            '&:hover': { bgcolor: '#f57c00' }
+                            bgcolor: '#6a6a6a',
+                            color: '#fff',
+                            '&:hover': { bgcolor: '#777' },
+                            '&:disabled': { bgcolor: '#333', color: '#888' }
                         }}
                     >
                         Send Email
@@ -538,7 +564,7 @@ const ReservationDetails = ({ reservation, apartmentLoading, apartmentError, apa
                                 </Alert>
                             ) : (
                                 <Grid container spacing={2}>
-                                    {/* Imagen del apartamento usando el mismo patrón que ApartmentSection */}
+                                    {/* Imagen del apartamento o placeholder mejorado */}
                                     <Grid item xs={12} sm={5}>
                                         {apartmentDetails && apartmentDetails.image ? (
                                             <CardMedia
@@ -555,30 +581,44 @@ const ReservationDetails = ({ reservation, apartmentLoading, apartmentError, apa
                                                 onError={(e) => {
                                                     console.error('Error loading apartment image:', apartmentDetails.image);
                                                     e.target.style.display = 'none';
+                                                    // Mostrar el placeholder cuando falla la imagen
+                                                    e.target.nextSibling.style.display = 'flex';
                                                 }}
                                             />
-                                        ) : (
-                                            <Box
-                                                sx={{
-                                                    width: '100%',
-                                                    height: 200,
-                                                    borderRadius: 1,
-                                                    bgcolor: '#3a3a3a',
-                                                    display: 'flex',
-                                                    flexDirection: 'column',
-                                                    alignItems: 'center',
-                                                    justifyContent: 'center',
-                                                    border: '2px dashed #555'
-                                                }}
-                                            >
-                                                <Typography variant="h6" sx={{ color: '#888', textAlign: 'center', mb: 1 }}>
+                                        ) : null}
+                                        
+                                        {/* Placeholder mejorado - siempre visible si no hay imagen */}
+                                        <Box
+                                            sx={{
+                                                width: '100%',
+                                                height: 200,
+                                                borderRadius: 1,
+                                                bgcolor: '#3a3a3a',
+                                                display: (!apartmentDetails || !apartmentDetails.image) ? 'flex' : 'none',
+                                                flexDirection: 'column',
+                                                alignItems: 'center',
+                                                justifyContent: 'center',
+                                                border: '2px dashed #555',
+                                                position: 'relative'
+                                            }}
+                                        >
+                                            <Box sx={{ textAlign: 'center', p: 2 }}>
+                                                <Typography variant="h4" sx={{ color: '#666', mb: 1 }}>
                                                     🏠
                                                 </Typography>
-                                                <Typography variant="caption" sx={{ color: '#888', textAlign: 'center' }}>
+                                                <Typography variant="subtitle1" sx={{ color: '#aaa', mb: 1, fontWeight: 500 }}>
+                                                    {apartmentDetails?.name || apartmentData?.name || 'Apartment'}
+                                                </Typography>
+                                                <Typography variant="caption" sx={{ color: '#888' }}>
                                                     No image available
                                                 </Typography>
+                                                {apartmentData?.address && (
+                                                    <Typography variant="caption" sx={{ color: '#777', display: 'block', mt: 0.5 }}>
+                                                        📍 {apartmentData.address}
+                                                    </Typography>
+                                                )}
                                             </Box>
-                                        )}
+                                        </Box>
                                     </Grid>
                                     {/* Detalles del apartamento */}
                                     <Grid item xs={12} sm={7}>

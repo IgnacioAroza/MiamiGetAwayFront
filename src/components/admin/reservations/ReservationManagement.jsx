@@ -88,7 +88,15 @@ const ReservationManagement = () => {
                 message: id ? 'Reservation updated successfully' : 'Reservation created successfully',
                 type: 'success'
             });
-            navigate('/admin/reservations');
+            
+            // Navegar según el contexto
+            if (id) {
+                // Si estamos editando, volver a la vista de detalles
+                navigate(`/admin/reservations/view/${id}`);
+            } else {
+                // Si estamos creando una nueva reserva, ir a la lista
+                navigate('/admin/reservations');
+            }
         } catch (error) {
             console.error('Error al procesar el formulario:', error);
             setNotification({
@@ -100,7 +108,13 @@ const ReservationManagement = () => {
     };
     
     const handleBack = () => {
-        navigate('/admin/reservations');
+        if (id) {
+            // Si estamos editando una reserva existente, volver a la vista de detalles
+            navigate(`/admin/reservations/view/${id}`);
+        } else {
+            // Si estamos creando una nueva reserva, volver a la lista
+            navigate('/admin/reservations');
+        }
     };
     
     const handleCloseNotification = () => {

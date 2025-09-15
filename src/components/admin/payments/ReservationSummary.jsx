@@ -3,7 +3,7 @@ import {
     Box,
     Typography,
     Divider,
-    Paper,
+    Card,
     Grid,
     Stack
 } from '@mui/material';
@@ -43,12 +43,11 @@ const ReservationSummary = ({ reservation }) => {
     const taxableAmount = subtotal + cleaningFee + parkingFee + otherExpenses;
 
     return (
-        <Paper 
-            variant="outlined" 
+        <Card 
             sx={{ 
                 p: isMobile ? 1.5 : 2,
                 bgcolor: '#2a2a2a',
-                borderColor: '#555',
+                borderRadius: 2,
                 color: '#fff',
                 height: isMobile ? 'auto' : '675px', // Altura fija en desktop, auto en mobile
                 minHeight: isMobile ? '400px' : '580px', // Altura mínima
@@ -227,7 +226,7 @@ const ReservationSummary = ({ reservation }) => {
                 )}
             </Grid>
             </Box>
-        </Paper>
+        </Card>
     );
 };
 
