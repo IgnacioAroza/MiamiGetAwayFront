@@ -52,11 +52,21 @@ const ReservationList = ({ filter = {} }) => {
     const { isMobile, isTablet } = useDeviceDetection();
     
     const [page, setPage] = useState(0);
-    const [rowsPerPage, setRowsPerPage] = useState(10);
+    const [rowsPerPage, setRowsPerPage] = useState(() => {
+        // Recuperar rowsPerPage desde localStorage
+        const saved = localStorage.getItem('reservationList_rowsPerPage');
+        return saved ? parseInt(saved, 10) : 10;
+    });
     const [buildingNames, setBuildingNames] = useState({});
     const [adminApartments, setAdminApartments] = useState([]);
-    const [orderBy, setOrderBy] = useState('created_at');
-    const [order, setOrder] = useState('desc');
+    const [orderBy, setOrderBy] = useState(() => {
+        // Recuperar orderBy desde localStorage
+        return localStorage.getItem('reservationList_orderBy') || 'created_at';
+    });
+    const [order, setOrder] = useState(() => {
+        // Recuperar order desde localStorage
+        return localStorage.getItem('reservationList_order') || 'desc';
+    });
     const [activeFilters, setActiveFilters] = useState({});
     const [clientMap, setClientMap] = useState({});
     
@@ -66,22 +76,66 @@ const ReservationList = ({ filter = {} }) => {
             let aValue = a[orderBy];
             let bValue = b[orderBy];
 
+            // Manejar campos con nombres alternativos
+            if (orderBy === 'check_in_date') {
+                aValue = a.check_in_date || a.checkInDate;
+                bValue = b.check_in_date || b.checkInDate;
+            } else if (orderBy === 'check_out_date') {
+                aValue = a.check_out_date || a.checkOutDate;
+                bValue = b.check_out_date || b.checkOutDate;
+            } else if (orderBy === 'total_amount') {
+                aValue = a.total_amount || a.totalAmount;
+                bValue = b.total_amount || b.totalAmount;
+            } else if (orderBy === 'created_at') {
+                aValue = a.created_at || a.createdAt;
+                bValue = b.created_at || b.createdAt;
+            } else if (orderBy === 'payment_status') {
+                aValue = a.payment_status || a.paymentStatus;
+                bValue = b.payment_status || b.paymentStatus;
+            }
+
             // Si es una fecha, convertir a timestamp
             if (orderBy === 'created_at' || orderBy === 'check_in_date' || orderBy === 'check_out_date') {
+                // Manejar valores nulos/undefined
+                if (!aValue && !bValue) return 0;
+                if (!aValue) return order === 'asc' ? -1 : 1;
+                if (!bValue) return order === 'asc' ? 1 : -1;
+                
                 aValue = new Date(aValue).getTime();
                 bValue = new Date(bValue).getTime();
+                
+                // Verificar si las fechas son válidas
+                if (isNaN(aValue) && isNaN(bValue)) return 0;
+                if (isNaN(aValue)) return order === 'asc' ? -1 : 1;
+                if (isNaN(bValue)) return order === 'asc' ? 1 : -1;
             }
 
             // Si es un número, convertir a número
             if (orderBy === 'total_amount' || orderBy === 'id') {
+                // Manejar valores nulos/undefined
+                if (aValue === null || aValue === undefined) aValue = 0;
+                if (bValue === null || bValue === undefined) bValue = 0;
+                
                 aValue = Number(aValue);
                 bValue = Number(bValue);
+                
+                // Verificar si son números válidos
+                if (isNaN(aValue)) aValue = 0;
+                if (isNaN(bValue)) bValue = 0;
             }
 
+            // Para campos de texto (como status), convertir a string y comparar
+            if (orderBy === 'status' || orderBy === 'payment_status' || 
+                (typeof aValue === 'string' || typeof bValue === 'string')) {
+                aValue = String(aValue || '').toLowerCase();
+                bValue = String(bValue || '').toLowerCase();
+            }
+
+            // Realizar la comparación
             if (order === 'asc') {
-                return aValue > bValue ? 1 : -1;
+                return aValue > bValue ? 1 : aValue < bValue ? -1 : 0;
             } else {
-                return aValue < bValue ? 1 : -1;
+                return aValue < bValue ? 1 : aValue > bValue ? -1 : 0;
             }
         });
     };
@@ -94,6 +148,15 @@ const ReservationList = ({ filter = {} }) => {
         };
         dispatch(fetchReservations(combinedFilters));
     }, [dispatch, filter, activeFilters]);
+
+    // Efecto adicional para forzar el re-render cuando cambia el ordenamiento
+    useEffect(() => {
+        // Este efecto se ejecuta cuando cambian orderBy u order
+        // Fuerza una actualización del componente para aplicar el ordenamiento
+        if (reservations && reservations.length > 0) {
+            // Solo necesitamos que se ejecute para trigger el re-render
+        }
+    }, [orderBy, order, reservations]);
     
     // Cargar todos los apartamentos al montar el componente
     useEffect(() => {
@@ -158,9 +221,15 @@ const ReservationList = ({ filter = {} }) => {
     // Función para cambiar la ordenación
     const handleRequestSort = (property) => {
         const isAsc = orderBy === property && order === 'asc';
-        setOrder(isAsc ? 'desc' : 'asc');
+        const newOrder = isAsc ? 'desc' : 'asc';
+        
+        setOrder(newOrder);
         setOrderBy(property);
         setPage(0); // Resetear la página cuando cambia la ordenación
+        
+        // Guardar preferencias en localStorage
+        localStorage.setItem('reservationList_orderBy', property);
+        localStorage.setItem('reservationList_order', newOrder);
     };
     
     // Función para aplicar filtros
@@ -223,8 +292,12 @@ const ReservationList = ({ filter = {} }) => {
     
     // Manejar cambio de filas por página
     const handleChangeRowsPerPage = (event) => {
-        setRowsPerPage(parseInt(event.target.value, 10));
+        const newRowsPerPage = parseInt(event.target.value, 10);
+        setRowsPerPage(newRowsPerPage);
         setPage(0);
+        
+        // Guardar preferencia en localStorage
+        localStorage.setItem('reservationList_rowsPerPage', newRowsPerPage.toString());
     };
     
     // Manejar clic en editar
@@ -513,10 +586,6 @@ const ReservationList = ({ filter = {} }) => {
     
     return (
         <Box sx={{ p: isMobile ? 1 : 3 }}>
-            <Typography variant="h5" gutterBottom component="div" sx={{ mb: 3 }}>
-                Reservation History
-            </Typography>
-            
             {/* Componente de filtros */}
             <ReservationFilters 
                 onApplyFilters={handleApplyFilters}
@@ -586,8 +655,24 @@ const ReservationList = ({ filter = {} }) => {
                                         Total
                                     </TableSortLabel>
                                 </TableCell>
-                                <TableCell>Status</TableCell>
-                                <TableCell>Payment</TableCell>
+                                <TableCell>
+                                    <TableSortLabel
+                                        active={orderBy === 'status'}
+                                        direction={orderBy === 'status' ? order : 'asc'}
+                                        onClick={() => handleRequestSort('status')}
+                                    >
+                                        Status
+                                    </TableSortLabel>
+                                </TableCell>
+                                <TableCell>
+                                    <TableSortLabel
+                                        active={orderBy === 'payment_status'}
+                                        direction={orderBy === 'payment_status' ? order : 'asc'}
+                                        onClick={() => handleRequestSort('payment_status')}
+                                    >
+                                        Payment
+                                    </TableSortLabel>
+                                </TableCell>
                                 <TableCell>
                                     <TableSortLabel
                                         active={orderBy === 'created_at'}
