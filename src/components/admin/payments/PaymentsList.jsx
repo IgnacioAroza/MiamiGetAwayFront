@@ -33,7 +33,6 @@ import DeleteIcon from '@mui/icons-material/Delete';
 import AddIcon from '@mui/icons-material/Add';
 import PaymentIcon from '@mui/icons-material/Payment';
 import DateRangeIcon from '@mui/icons-material/DateRange';
-import AttachMoneyIcon from '@mui/icons-material/AttachMoney';
 import PersonIcon from '@mui/icons-material/Person';
 import NoteIcon from '@mui/icons-material/Note';
 import useDeviceDetection from '../../../hooks/useDeviceDetection';
@@ -45,6 +44,7 @@ import {
 } from '../../../redux/reservationPaymentSlice';
 import PaymentForm from './PaymentsForm';
 import PaymentDetails from './PaymentDetails';
+import PaymentFilters from './PaymentFilters';
 import userService from '../../../services/userService';
 import reservationService from '../../../services/reservationService';
 
@@ -59,6 +59,7 @@ const PaymentsList = () => {
     const [openForm, setOpenForm] = useState(false);
     const [openDeleteDialog, setOpenDeleteDialog] = useState(false);
     const [paymentToDelete, setPaymentToDelete] = useState(null);
+    const [activeFilters, setActiveFilters] = useState({});
     const [snackbar, setSnackbar] = useState({
         open: false,
         message: '',
@@ -68,10 +69,10 @@ const PaymentsList = () => {
     const [reservationsData, setReservationsData] = useState({});
     const [clientsData, setClientsData] = useState({});
 
-    // Cargar pagos al montar el componente
+    // Cargar pagos al montar el componente o cuando cambian los filtros
     useEffect(() => {
-        dispatch(fetchAllPayments());
-    }, [dispatch]);
+        dispatch(fetchAllPayments(activeFilters));
+    }, [dispatch, activeFilters]);
 
     // Cargar datos de reservas y clientes cuando cambian los pagos
     useEffect(() => {
@@ -255,6 +256,16 @@ const PaymentsList = () => {
         return methodMap[method] || method;
     };
 
+    // Función para aplicar filtros
+    const handleApplyFilters = (filters) => {
+        setActiveFilters(filters);
+    };
+
+    // Función para limpiar filtros
+    const handleClearFilters = () => {
+        setActiveFilters({});
+    };
+
     // Función para renderizar tarjetas en vista móvil
     const renderMobileCards = () => {
         if (payments.length === 0) {
@@ -428,6 +439,12 @@ const PaymentsList = () => {
                     New Payment
                 </Button>
             </Box>
+
+            {/* Componente de filtros */}
+            <PaymentFilters 
+                onApplyFilters={handleApplyFilters}
+                onClearFilters={handleClearFilters}
+            />
 
             {isMobile || isTablet ? (
                 // Mostrar tarjetas en vista móvil o tablet

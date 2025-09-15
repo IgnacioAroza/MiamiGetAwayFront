@@ -1,9 +1,21 @@
 import api from '../utils/api';
 
 const reservationPaymentService = {
-    getAllPayments: async () => {
+    getAllPayments: async (filters = {}) => {
         try {
-            const response = await api.get('/reservation-payments');
+            // Construir los parámetros de consulta
+            const queryParams = new URLSearchParams();
+
+            Object.keys(filters).forEach(key => {
+                if (filters[key] !== null && filters[key] !== undefined && filters[key] !== '') {
+                    queryParams.append(key, filters[key]);
+                }
+            });
+
+            const queryString = queryParams.toString();
+            const url = queryString ? `/reservation-payments?${queryString}` : '/reservation-payments';
+
+            const response = await api.get(url);
             return response.data;
         } catch (error) {
             throw error.response?.data?.message || 'Error fetching all payments';

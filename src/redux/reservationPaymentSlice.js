@@ -13,9 +13,9 @@ const initialState = {
 // Thunks
 export const fetchAllPayments = createAsyncThunk(
     'reservationPayments/fetchAll',
-    async (_, { rejectWithValue }) => {
+    async (filters = {}, { rejectWithValue }) => {
         try {
-            const data = await reservationPaymentService.getAllPayments();
+            const data = await reservationPaymentService.getAllPayments(filters);
             return data;
         } catch (error) {
             return rejectWithValue(error.message);

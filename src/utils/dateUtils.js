@@ -1,9 +1,10 @@
 /**
- * Convierte un objeto Date a una cadena con formato MM-DD-YYYY HH:mm
+ * Convierte un objeto Date a una cadena con formato MM-DD-YYYY HH:mm o MM-DD-YYYY
  * @param {Date} date - Objeto Date a formatear
- * @returns {string} - Fecha formateada como MM-DD-YYYY HH:mm
+ * @param {boolean} includeTime - Si incluir la hora o no (por defecto true)
+ * @returns {string} - Fecha formateada como MM-DD-YYYY HH:mm o MM-DD-YYYY
  */
-export const formatDateToString = (date) => {
+export const formatDateToString = (date, includeTime = true) => {
     if (!date) return '';
 
     // Asegurarse de que date sea un objeto Date
@@ -17,6 +18,11 @@ export const formatDateToString = (date) => {
     const month = String(dateObj.getMonth() + 1).padStart(2, '0');
     const day = String(dateObj.getDate()).padStart(2, '0');
     const year = dateObj.getFullYear();
+
+    if (!includeTime) {
+        return `${month}-${day}-${year}`;
+    }
+
     const hours = String(dateObj.getHours()).padStart(2, '0');
     const minutes = String(dateObj.getMinutes()).padStart(2, '0');
 
