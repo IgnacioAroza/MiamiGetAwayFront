@@ -18,9 +18,16 @@ const ClientSection = ({
     onOpenNewClient,
     onOpenEditClient
 }) => {
+    // Ordenar clientes alfabéticamente por apellido
+    const sortedClients = [...clients].sort((a, b) => {
+        const lastNameA = (a.lastName || a.lastname || '').toLowerCase();
+        const lastNameB = (b.lastName || b.lastname || '').toLowerCase();
+        return lastNameA.localeCompare(lastNameB);
+    });
+
     // Formatear nombre completo para el Autocomplete
     const getFullName = (client) => {
-        const name = `${client.firstName || client.name} ${client.lastName || client.lastname}`;
+        const name = `${client.lastName || client.lastname}, ${client.firstName || client.name}`;
         return client.email ? `${name} (${client.email})` : name;
     };
 
@@ -35,7 +42,7 @@ const ClientSection = ({
             <Grid item xs={12} md={8}>
                 <Autocomplete
                     id="client-select"
-                    options={clients}
+                    options={sortedClients}
                     getOptionLabel={getFullName}
                     value={selectedClient}
                     onChange={handleClientSelectChange}
