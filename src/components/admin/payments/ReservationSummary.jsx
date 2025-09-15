@@ -132,20 +132,6 @@ const ReservationSummary = ({ reservation }) => {
                     </Grid>
                 )}
 
-                {/* Cancellation */}
-                {cancellationFee > 0 && (
-                    <Grid item xs={12}>
-                        <Box display="flex" justifyContent="space-between" mb={0.5}>
-                            <Typography fontSize={isMobile ? "0.9rem" : "inherit"} sx={{ color: '#ccc' }}>
-                                Cancellation Fee
-                            </Typography>
-                            <Typography fontSize={isMobile ? "0.9rem" : "inherit"} sx={{ color: '#fff' }}>
-                                {formatCurrency(cancellationFee)}
-                            </Typography>
-                        </Box>
-                    </Grid>
-                )}
-
                 {/* Subtotal */}
                 <Grid item xs={12}>
                     <Box display="flex" justifyContent="space-between" mb={0.5}>
@@ -157,6 +143,20 @@ const ReservationSummary = ({ reservation }) => {
                         </Typography>
                     </Box>
                 </Grid>
+
+                {/* Cancellation */}
+                {cancellationFee > 0 && (
+                    <Grid item xs={12}>
+                        <Box display="flex" justifyContent="space-between" mb={0.5}>
+                            <Typography fontSize={isMobile ? "0.9rem" : "inherit"} sx={{ color: '#ccc' }}>
+                                Cancellation Fee
+                            </Typography>
+                            <Typography fontSize={isMobile ? "0.9rem" : "inherit"} sx={{ color: '#f44336' }}>
+                                -{formatCurrency(cancellationFee)}
+                            </Typography>
+                        </Box>
+                    </Grid>
+                )}
 
                 {/* Impuestos - solo mostrar si son mayores que cero */}
                 {taxes > 0 && (

@@ -93,8 +93,8 @@ const ReservationPaymentSummary = ({ formData }) => {
               </Typography>
             </Grid>
             <Grid item xs={4}>
-              <Typography sx={{ color: "#fff", textAlign: "right" }}>
-                ${cancellationFee.toFixed(2)}
+              <Typography sx={{ color: "#f44336", textAlign: "right" }}>
+                -${cancellationFee.toFixed(2)}
               </Typography>
             </Grid>
           </>
