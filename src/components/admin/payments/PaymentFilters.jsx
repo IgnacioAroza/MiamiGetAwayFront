@@ -16,36 +16,29 @@ import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns';
 import { es } from 'date-fns/locale';
 import { Clear as ClearIcon, FilterAlt as FilterIcon } from '@mui/icons-material';
-import { formatDateToString, parseStringToDate } from '../../../utils/dateUtils';
+import { formatDateToString } from '../../../utils/dateUtils';
 import useDeviceDetection from '../../../hooks/useDeviceDetection';
 
-const ReservationFilters = ({ onApplyFilters, onClearFilters }) => {
+const PaymentFilters = ({ onApplyFilters, onClearFilters }) => {
     const { isMobile } = useDeviceDetection();
     const [filters, setFilters] = useState({
         startDate: null,
         endDate: null,
-        status: '',
-        clientName: '',
-        clientEmail: '',
-        q: '', // Búsqueda general
-        clientLastname: '', // Apellido del cliente
-        upcoming: '', // Reservaciones futuras
-        fromDate: null, // Fecha base para upcoming
-        withinDays: '' // Días límite para upcoming
+        paymentMethod: '',
+        reservationId: '',
+        q: '', // Búsqueda general por nombre o apellido
+        clientEmail: ''
     });
 
-    const statusOptions = [
-        { value: '', label: 'All Status' },
-        { value: 'pending', label: 'Pending' },
-        { value: 'confirmed', label: 'Confirmed' },
-        { value: 'checked_in', label: 'Check-in' },
-        { value: 'checked_out', label: 'Check-out' },
-        { value: 'cancelled', label: 'Cancelled' },
-    ];
-
-    const upcomingOptions = [
-        { value: '', label: 'All reservations' },
-        { value: 'true', label: 'Upcoming only' },
+    const paymentMethodOptions = [
+        { value: '', label: 'All Methods' },
+        { value: 'cash', label: 'Cash' },
+        { value: 'card', label: 'Card' },
+        { value: 'transfer', label: 'Transfer' },
+        { value: 'paypal', label: 'PayPal' },
+        { value: 'zelle', label: 'Zelle' },
+        { value: 'stripe', label: 'Stripe' },
+        { value: 'other', label: 'Other' },
     ];
 
     const handleFilterChange = (field, value) => {
@@ -58,9 +51,8 @@ const ReservationFilters = ({ onApplyFilters, onClearFilters }) => {
     const handleApplyFilters = () => {
         const formattedFilters = {
             ...filters,
-            startDate: filters.startDate ? formatDateToString(filters.startDate) : null,
-            endDate: filters.endDate ? formatDateToString(filters.endDate) : null,
-            fromDate: filters.fromDate ? formatDateToString(filters.fromDate, false) : null, // Solo fecha, sin hora
+            startDate: filters.startDate ? formatDateToString(filters.startDate, false) : null, // Solo fecha, sin hora
+            endDate: filters.endDate ? formatDateToString(filters.endDate, false) : null, // Solo fecha, sin hora
         };
         
         // Limpiar campos vacíos para enviar solo los filtros activos
@@ -78,14 +70,10 @@ const ReservationFilters = ({ onApplyFilters, onClearFilters }) => {
         setFilters({
             startDate: null,
             endDate: null,
-            status: '',
-            clientName: '',
-            clientEmail: '',
+            paymentMethod: '',
+            reservationId: '',
             q: '',
-            clientLastname: '',
-            upcoming: '',
-            fromDate: null,
-            withinDays: ''
+            clientEmail: ''
         });
         onClearFilters();
     };
@@ -117,7 +105,7 @@ const ReservationFilters = ({ onApplyFilters, onClearFilters }) => {
             }}>
                 <Typography variant="subtitle1" component="div" sx={{ color: '#fff' }}>
                     {isMobile ? <FilterIcon fontSize="small" sx={{ mr: 0.5, verticalAlign: 'middle' }} /> : null}
-                    Search filters
+                    Payment filters
                 </Typography>
                 <Tooltip title="Clear filters">
                     <IconButton 
@@ -131,8 +119,8 @@ const ReservationFilters = ({ onApplyFilters, onClearFilters }) => {
             </Box>
             
             <Grid container spacing={1}>
-                {/* Primera fila - Filtros principales */}
-                <Grid item xs={12} sm={6} md={4} lg={2.4}>
+                {/* Una sola fila con todos los filtros */}
+                <Grid item xs={12} sm={6} md={4} lg={2}>
                     <LocalizationProvider dateAdapter={AdapterDateFns} adapterLocale={es}>
                         <DatePicker
                             label="Start date"
@@ -154,7 +142,7 @@ const ReservationFilters = ({ onApplyFilters, onClearFilters }) => {
                         />
                     </LocalizationProvider>
                 </Grid>
-                <Grid item xs={12} sm={6} md={4} lg={2.4}>
+                <Grid item xs={12} sm={6} md={4} lg={2}>
                     <LocalizationProvider dateAdapter={AdapterDateFns} adapterLocale={es}>
                         <DatePicker
                             label="End date"
@@ -176,24 +164,42 @@ const ReservationFilters = ({ onApplyFilters, onClearFilters }) => {
                         />
                     </LocalizationProvider>
                 </Grid>
-                <Grid item xs={12} sm={6} md={4} lg={2.4}>
+                <Grid item xs={12} sm={6} md={4} lg={2}>
                     <TextField
                         select
                         fullWidth
-                        label="Status"
-                        value={filters.status}
-                        onChange={(e) => handleFilterChange('status', e.target.value)}
+                        label="Payment Method"
+                        value={filters.paymentMethod}
+                        onChange={(e) => handleFilterChange('paymentMethod', e.target.value)}
                         size="small"
                         sx={inputStyle}
                     >
-                        {statusOptions.map((option) => (
+                        {paymentMethodOptions.map((option) => (
                             <MenuItem key={option.value} value={option.value}>
                                 {option.label}
                             </MenuItem>
                         ))}
                     </TextField>
                 </Grid>
-                <Grid item xs={12} sm={6} md={4} lg={2.4}>
+                <Grid item xs={12} sm={6} md={4} lg={2}>
+                    <TextField
+                        fullWidth
+                        label="Reservation ID"
+                        value={filters.reservationId}
+                        onChange={(e) => {
+                            // Solo permitir números
+                            const value = e.target.value;
+                            if (value === '' || /^\d+$/.test(value)) {
+                                handleFilterChange('reservationId', value);
+                            }
+                        }}
+                        size="small"
+                        sx={inputStyle}
+                        type="number"
+                        placeholder="123"
+                    />
+                </Grid>
+                <Grid item xs={12} sm={6} md={4} lg={2}>
                     <TextField
                         fullWidth
                         label="Client search"
@@ -204,7 +210,7 @@ const ReservationFilters = ({ onApplyFilters, onClearFilters }) => {
                         placeholder="Name or surname"
                     />
                 </Grid>
-                <Grid item xs={12} sm={6} md={4} lg={2.4}>
+                <Grid item xs={12} sm={6} md={4} lg={2}>
                     <TextField
                         fullWidth
                         label="Client email"
@@ -212,84 +218,27 @@ const ReservationFilters = ({ onApplyFilters, onClearFilters }) => {
                         onChange={(e) => handleFilterChange('clientEmail', e.target.value)}
                         size="small"
                         sx={inputStyle}
+                        type="email"
                     />
                 </Grid>
 
-                {/* Segunda fila - Filtros de timeline y botón */}
-                <Grid item xs={12} sm={6} md={4} lg={2.4}>
-                    <TextField
-                        select
-                        fullWidth
-                        label="Upcoming"
-                        value={filters.upcoming}
-                        onChange={(e) => handleFilterChange('upcoming', e.target.value)}
-                        size="small"
-                        sx={inputStyle}
-                    >
-                        {upcomingOptions.map((option) => (
-                            <MenuItem key={option.value} value={option.value}>
-                                {option.label}
-                            </MenuItem>
-                        ))}
-                    </TextField>
+                {/* Segunda fila solo para el botón */}
+                <Grid item xs={12} sm={6} md={4} lg={2}>
+                    {/* Espacio vacío */}
                 </Grid>
-                <Grid item xs={12} sm={6} md={4} lg={2.4}>
-                    <LocalizationProvider dateAdapter={AdapterDateFns} adapterLocale={es}>
-                        <DatePicker
-                            label="From date"
-                            value={filters.fromDate}
-                            onChange={(newValue) => handleFilterChange('fromDate', newValue)}
-                            disabled={filters.upcoming !== 'true'}
-                            slotProps={{
-                                textField: {
-                                    fullWidth: true,
-                                    size: "small",
-                                    sx: {
-                                        ...inputStyle,
-                                        ...(filters.upcoming !== 'true' && { 
-                                            '& .MuiInputBase-root': { 
-                                                ...inputStyle['& .MuiInputBase-root'],
-                                                opacity: 0.5 
-                                            } 
-                                        })
-                                    },
-                                    helperText: filters.upcoming === 'true' ? 'Base date' : ''
-                                }
-                            }}
-                            sx={{
-                                width: '100%',
-                                '& .MuiInputBase-root': {
-                                    height: '40px'
-                                }
-                            }}
-                        />
-                    </LocalizationProvider>
+                <Grid item xs={12} sm={6} md={4} lg={2}>
+                    {/* Espacio vacío */}
                 </Grid>
-                <Grid item xs={12} sm={6} md={4} lg={2.4}>
-                    <TextField
-                        fullWidth
-                        label="Within days"
-                        value={filters.withinDays}
-                        onChange={(e) => handleFilterChange('withinDays', e.target.value)}
-                        size="small"
-                        type="number"
-                        disabled={filters.upcoming !== 'true'}
-                        sx={{
-                            ...inputStyle,
-                            ...(filters.upcoming !== 'true' && { 
-                                '& .MuiInputBase-root': { 
-                                    ...inputStyle['& .MuiInputBase-root'],
-                                    opacity: 0.5 
-                                } 
-                            })
-                        }}
-                        helperText={filters.upcoming === 'true' ? 'Limit days' : ''}
-                    />
+                <Grid item xs={12} sm={6} md={4} lg={2}>
+                    {/* Espacio vacío */}
                 </Grid>
-                <Grid item xs={12} sm={6} md={4} lg={2.4}>
-                    {/* Espacio vacío para balance visual */}
+                <Grid item xs={12} sm={6} md={4} lg={2}>
+                    {/* Espacio vacío */}
                 </Grid>
-                <Grid item xs={12} sm={6} md={4} lg={2.4}>
+                <Grid item xs={12} sm={6} md={4} lg={2}>
+                    {/* Espacio vacío */}
+                </Grid>
+                <Grid item xs={12} sm={6} md={4} lg={2}>
                     <Button 
                         variant="contained" 
                         color="primary" 
@@ -308,4 +257,4 @@ const ReservationFilters = ({ onApplyFilters, onClearFilters }) => {
     );
 };
 
-export default ReservationFilters;
+export default PaymentFilters;

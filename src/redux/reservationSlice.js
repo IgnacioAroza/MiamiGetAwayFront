@@ -1,5 +1,6 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import reservationService from '../services/reservationService';
+import { normalizeReservationFromApi } from '../utils/normalizers';
 
 const initialState = {
     reservations: [],
@@ -76,7 +77,19 @@ export const deleteReservation = createAsyncThunk(
             await reservationService.deleteReservation(id);
             return id;
         } catch (error) {
-            return rejectWithValue(error.response?.data?.message || 'Error deleting reservation');
+            // Preservar el error completo con sus propiedades personalizadas
+            if (error.isRelatedDataError) {
+                return rejectWithValue({
+                    message: error.message,
+                    details: error.details,
+                    suggestedAction: error.suggestedAction,
+                    isRelatedDataError: true
+                });
+            }
+
+            // Para otros errores, usar el mensaje original
+            const message = error.message || error.response?.data?.message || 'Error deleting reservation';
+            return rejectWithValue({ message, isRelatedDataError: false });
         }
     }
 );
@@ -209,7 +222,8 @@ const reservationSlice = createSlice({
             })
             .addCase(fetchReservations.fulfilled, (state, action) => {
                 state.status = 'succeeded';
-                state.reservations = action.payload;
+                const raw = action.payload || [];
+                state.reservations = Array.isArray(raw) ? raw.map(normalizeReservationFromApi) : [];
                 state.loading = false;
             })
             .addCase(fetchReservations.rejected, (state, action) => {
@@ -223,7 +237,7 @@ const reservationSlice = createSlice({
                 state.error = null;
             })
             .addCase(fetchReservationById.fulfilled, (state, action) => {
-                state.selectedReservation = action.payload;
+                state.selectedReservation = normalizeReservationFromApi(action.payload);
                 state.loading = false;
             })
             .addCase(fetchReservationById.rejected, (state, action) => {
@@ -232,16 +246,18 @@ const reservationSlice = createSlice({
             })
             // Create
             .addCase(createReservation.fulfilled, (state, action) => {
-                state.reservations.push(action.payload);
+                const normalized = normalizeReservationFromApi(action.payload);
+                state.reservations.push(normalized);
             })
             // Update
             .addCase(updateReservation.fulfilled, (state, action) => {
-                const index = state.reservations.findIndex(res => res.id === action.payload.id);
+                const updated = normalizeReservationFromApi(action.payload);
+                const index = state.reservations.findIndex(res => res.id === updated.id);
                 if (index !== -1) {
-                    state.reservations[index] = action.payload;
+                    state.reservations[index] = updated;
                 }
-                if (state.selectedReservation?.id === action.payload.id) {
-                    state.selectedReservation = action.payload;
+                if (state.selectedReservation?.id === updated.id) {
+                    state.selectedReservation = updated;
                 }
             })
             .addCase(updateReservation.rejected, (state, action) => {
@@ -323,21 +339,28 @@ const reservationSlice = createSlice({
                 state.status = 'succeeded';
                 state.loading = false;
 
-                // Actualizar la reserva en el listado
-                const index = state.reservations.findIndex(res => res.id === action.payload.id);
-                if (index !== -1 && action.payload.data) {
-                    // Actualizar solo los campos de pago
+                const { id, data } = action.payload || {};
+                const normalized = data ? normalizeReservationFromApi(data) : {};
+
+                // Campos de pago a actualizar si vienen del backend
+                const paymentPatch = {
+                    ...(normalized.paymentStatus !== undefined ? { paymentStatus: normalized.paymentStatus } : {}),
+                    ...(normalized.amountPaid !== undefined ? { amountPaid: normalized.amountPaid } : {}),
+                    ...(normalized.amountDue !== undefined ? { amountDue: normalized.amountDue } : {}),
+                };
+
+                const index = state.reservations.findIndex(res => res.id === id);
+                if (index !== -1 && (data || Object.keys(paymentPatch).length)) {
                     state.reservations[index] = {
                         ...state.reservations[index],
-                        ...action.payload.data
+                        ...paymentPatch
                     };
                 }
 
-                // Actualizar la reserva seleccionada si es la misma
-                if (state.selectedReservation?.id === action.payload.id && action.payload.data) {
+                if (state.selectedReservation?.id === id && (data || Object.keys(paymentPatch).length)) {
                     state.selectedReservation = {
                         ...state.selectedReservation,
-                        ...action.payload.data
+                        ...paymentPatch
                     };
                 }
             })
@@ -359,4 +382,3 @@ export const {
 } = reservationSlice.actions;
 
 export default reservationSlice.reducer;
-

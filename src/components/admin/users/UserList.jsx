@@ -14,6 +14,7 @@ import {
     IconButton,
     Tooltip,
     CircularProgress,
+    Skeleton,
     Card,
     CardContent,
     CardActions,
@@ -180,8 +181,64 @@ const UserList = () => {
 
     if (status === 'loading') {
         return (
-            <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '50vh' }}>
-                <CircularProgress />
+            <Box sx={{ p: 3 }}>
+                <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
+                    <Skeleton variant="text" width={160} height={40} />
+                    <Skeleton variant="rectangular" width={140} height={36} />
+                </Box>
+                {isMobile || isTablet ? (
+                    <Grid container spacing={2}>
+                        {[...Array(3)].map((_, idx) => (
+                            <Grid item xs={12} key={idx}>
+                                <Card elevation={2} sx={{ bgcolor: theme.palette.mode === 'dark' ? '#1e1e1e' : '#f5f5f5' }}>
+                                    <CardContent>
+                                        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 1 }}>
+                                            <Skeleton variant="text" width={180} height={28} />
+                                            <Skeleton variant="rounded" width={80} height={24} />
+                                        </Box>
+                                        <Divider sx={{ my: 1.5 }} />
+                                        <Skeleton variant="text" width="60%" />
+                                        <Skeleton variant="text" width="40%" />
+                                        <Skeleton variant="text" width="30%" />
+                                    </CardContent>
+                                    <Divider />
+                                    <CardActions sx={{ justifyContent: 'flex-end', p: 1 }}>
+                                        <Skeleton variant="circular" width={32} height={32} />
+                                        <Skeleton variant="circular" width={32} height={32} sx={{ ml: 1 }} />
+                                    </CardActions>
+                                </Card>
+                            </Grid>
+                        ))}
+                    </Grid>
+                ) : (
+                    <TableContainer component={Paper} sx={{ bgcolor: '#1e1e1e' }}>
+                        <Table>
+                            <TableHead>
+                                <TableRow>
+                                    {['Name','Last Name','Email','Phone','City','Country','Actions'].map((h) => (
+                                        <TableCell key={h}>{h}</TableCell>
+                                    ))}
+                                </TableRow>
+                            </TableHead>
+                            <TableBody>
+                                {[...Array(5)].map((_, idx) => (
+                                    <TableRow key={idx}>
+                                        <TableCell><Skeleton variant="text" width={140} /></TableCell>
+                                        <TableCell><Skeleton variant="text" width={140} /></TableCell>
+                                        <TableCell><Skeleton variant="text" width={220} /></TableCell>
+                                        <TableCell><Skeleton variant="text" width={120} /></TableCell>
+                                        <TableCell><Skeleton variant="text" width={120} /></TableCell>
+                                        <TableCell><Skeleton variant="text" width={120} /></TableCell>
+                                        <TableCell>
+                                            <Skeleton variant="circular" width={32} height={32} />
+                                            <Skeleton variant="circular" width={32} height={32} sx={{ ml: 1 }} />
+                                        </TableCell>
+                                    </TableRow>
+                                ))}
+                            </TableBody>
+                        </Table>
+                    </TableContainer>
+                )}
             </Box>
         );
     }

@@ -1,5 +1,6 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import reservationPaymentService from '../services/reservationPaymentsService';
+import { normalizePaymentFromApi } from '../utils/normalizers';
 
 const initialState = {
     payments: [],
@@ -12,9 +13,9 @@ const initialState = {
 // Thunks
 export const fetchAllPayments = createAsyncThunk(
     'reservationPayments/fetchAll',
-    async (_, { rejectWithValue }) => {
+    async (filters = {}, { rejectWithValue }) => {
         try {
-            const data = await reservationPaymentService.getAllPayments();
+            const data = await reservationPaymentService.getAllPayments(filters);
             return data;
         } catch (error) {
             return rejectWithValue(error.message);
@@ -93,7 +94,8 @@ const reservationPaymentSlice = createSlice({
             })
             .addCase(fetchAllPayments.fulfilled, (state, action) => {
                 state.status = 'succeeded';
-                state.payments = action.payload;
+                const raw = action.payload || [];
+                state.payments = Array.isArray(raw) ? raw.map(normalizePaymentFromApi) : [];
                 state.loading = false;
             })
             .addCase(fetchAllPayments.rejected, (state, action) => {
@@ -103,20 +105,21 @@ const reservationPaymentSlice = createSlice({
             })
             // Fetch By Id
             .addCase(fetchPaymentById.fulfilled, (state, action) => {
-                state.selectedPayment = action.payload;
+                state.selectedPayment = normalizePaymentFromApi(action.payload);
             })
             // Create
             .addCase(createPayment.fulfilled, (state, action) => {
-                state.payments.push(action.payload);
+                state.payments.push(normalizePaymentFromApi(action.payload));
             })
             // Update
             .addCase(updatePayment.fulfilled, (state, action) => {
-                const index = state.payments.findIndex(payment => payment.id === action.payload.id);
+                const normalized = normalizePaymentFromApi(action.payload);
+                const index = state.payments.findIndex(payment => payment.id === normalized.id);
                 if (index !== -1) {
-                    state.payments[index] = action.payload;
+                    state.payments[index] = normalized;
                 }
-                if (state.selectedPayment?.id === action.payload.id) {
-                    state.selectedPayment = action.payload;
+                if (state.selectedPayment?.id === normalized.id) {
+                    state.selectedPayment = normalized;
                 }
             })
             // Delete

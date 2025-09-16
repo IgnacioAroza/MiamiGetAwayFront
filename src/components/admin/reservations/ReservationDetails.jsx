@@ -15,28 +15,45 @@ import {
     Snackbar,
     Alert,
     CircularProgress,
+    Skeleton,
     Menu,
     MenuItem,
     ListItemIcon,
     ListItemText,
     useTheme,
-    Stack
+    Stack,
+    Card,
+    CardContent,
+    CardMedia
 } from '@mui/material';
 import {
     Email as EmailIcon,
     Receipt as ReceiptIcon,
     Update as UpdateIcon,
-    Payment as PaymentIcon
+    Payment as PaymentIcon,
+    ArrowBack as ArrowBackIcon,
+    Edit as EditIcon
 } from '@mui/icons-material';
 import { useReservation } from '../../../hooks/useReservation';
+import { useNavigate } from 'react-router-dom';
+import { useDispatch } from 'react-redux';
+import { setSelectedReservation } from '../../../redux/reservationSlice';
 import ReservationSummary from '../payments/ReservationSummary';
 import { formatDateForDisplay } from '../../../utils/dateUtils';
 import useDeviceDetection from '../../../hooks/useDeviceDetection';
+import { useApartmentImages } from '../../../hooks/useApartmentImages';
 
 const ReservationDetails = ({ reservation, apartmentLoading, apartmentError, apartmentData, onError }) => {
     const { handleGeneratePdf, handleSendConfirmation } = useReservation();
+    const navigate = useNavigate();
+    const dispatch = useDispatch();
     const theme = useTheme();
     const { isMobile, isTablet } = useDeviceDetection();
+    
+    // Usar el hook useApartmentImages igual que en ApartmentSection
+    const { getApartmentDetails, getApartmentImage } = useApartmentImages(apartmentData);
+    const apartmentDetails = getApartmentDetails();
+    
     const [openEmailDialog, setOpenEmailDialog] = useState(false);
     const [email, setEmail] = useState('');
     const [snackbar, setSnackbar] = useState({
@@ -264,8 +281,17 @@ const ReservationDetails = ({ reservation, apartmentLoading, apartmentError, apa
         return formatDateForDisplay(date, true);
     };
 
+    const handleBackClick = () => {
+        navigate('/admin/reservations'); // Navegar siempre a la lista de reservas
+    };
+
+    const handleEditClick = () => {
+        dispatch(setSelectedReservation(reservation));
+        navigate(`/admin/reservations/edit/${reservation.id}`);
+    };
+
     return (
-        <Paper elevation={3} sx={{ p: { xs: 2, md: 3 }, mb: 3 }}>
+        <Box sx={{ bgcolor: '#1a1a1a', minHeight: '100vh', p: 2 }}>
             {/* Encabezado */}
             <Box 
                 display="flex" 
@@ -274,20 +300,59 @@ const ReservationDetails = ({ reservation, apartmentLoading, apartmentError, apa
                 alignItems={isMobile ? "flex-start" : "center"} 
                 mb={3}
             >
-                <Typography variant={isMobile ? "h5" : "h4"} sx={{ mb: isMobile ? 2 : 0 }}>
-                    Reservation #{reservation?.id}
-                </Typography>
+                <Box 
+                    display="flex" 
+                    alignItems="center" 
+                    mb={isMobile ? 2 : 0}
+                    sx={{ width: isMobile ? "100%" : "auto" }}
+                >
+                    <Button
+                        variant="outlined"
+                        startIcon={<ArrowBackIcon />}
+                        onClick={handleBackClick}
+                        sx={{ 
+                            mr: 2,
+                            minWidth: isMobile ? "auto" : "120px",
+                            px: isMobile ? 1.5 : 2,
+                            color: '#fff',
+                            borderColor: '#555',
+                            '&:hover': {
+                                borderColor: '#777',
+                                bgcolor: 'rgba(255,255,255,0.05)'
+                            }
+                        }}
+                        size={isMobile ? "small" : "medium"}
+                    >
+                        {isMobile ? "" : "Back"}
+                    </Button>
+                    <Typography variant={isMobile ? "h5" : "h4"} sx={{ color: '#fff' }}>
+                        Reservation #{reservation?.id}
+                    </Typography>
+                </Box>
                 <Stack 
                     direction={isMobile ? "column" : "row"} 
                     spacing={1} 
                     width={isMobile ? "100%" : "auto"}
                 >
                     <Chip
-                        label={reservation?.status}
+                        label={reservation?.status?.toUpperCase()}
                         color={getStatusColor(reservation?.status)}
                         size="large"
                         sx={{ alignSelf: isMobile ? "flex-start" : "center" }}
                     />
+                    <Button 
+                        variant="contained" 
+                        startIcon={<EditIcon />}
+                        onClick={handleEditClick}
+                        fullWidth={isMobile}
+                        size={isMobile ? "small" : "medium"}
+                        sx={{
+                            bgcolor: '#2196f3',
+                            '&:hover': { bgcolor: '#1976d2' }
+                        }}
+                    >
+                        Edit
+                    </Button>
                     <Button 
                         variant="contained" 
                         startIcon={<ReceiptIcon />}
@@ -295,19 +360,30 @@ const ReservationDetails = ({ reservation, apartmentLoading, apartmentError, apa
                         disabled={loading}
                         fullWidth={isMobile}
                         size={isMobile ? "small" : "medium"}
+                        sx={{
+                            bgcolor: '#555',
+                            color: '#fff',
+                            '&:hover': { bgcolor: '#666' },
+                            '&:disabled': { bgcolor: '#333', color: '#888' }
+                        }}
                     >
                         {loading ? <CircularProgress size={24} /> : 'Generate PDF'}
                     </Button>
                     <Button
                         variant="contained"
-                        color="primary"
                         startIcon={<EmailIcon />}
                         onClick={handleMenuClick}
                         disabled={loading}
                         fullWidth={isMobile}
                         size={isMobile ? "small" : "medium"}
+                        sx={{
+                            bgcolor: '#6a6a6a',
+                            color: '#fff',
+                            '&:hover': { bgcolor: '#777' },
+                            '&:disabled': { bgcolor: '#333', color: '#888' }
+                        }}
                     >
-                        Send Emails
+                        Send Email
                     </Button>
                 </Stack>
             </Box>
@@ -375,90 +451,239 @@ const ReservationDetails = ({ reservation, apartmentLoading, apartmentError, apa
                 </MenuItem>
             </Menu>
 
-            <Divider sx={{ mb: 3 }} />
+            <Divider sx={{ mb: 3, borderColor: '#333' }} />
 
-            {/* Información principal */}
-            <Grid container spacing={isMobile ? 2 : 3}>
-                {/* Detalles del Cliente */}
+            {/* Layout principal: 50/50 - Información agrupada a la izquierda, Payment Summary a la derecha */}
+            <Grid container spacing={3}>
+                {/* Columna izquierda: Todas las secciones agrupadas - 50% */}
                 <Grid item xs={12} md={6}>
-                    <Paper variant="outlined" sx={{ p: isMobile ? 1.5 : 2 }}>
-                        <Typography variant="h6" gutterBottom>
-                            Client Information
-                        </Typography>
-                        <Typography sx={{ mb: 1, fontSize: isMobile ? '0.9rem' : 'inherit' }}>
-                            <strong>Name:</strong> {reservation?.clientName}, {reservation?.clientLastname}
-                        </Typography>
-                        <Typography sx={{ mb: 1, fontSize: isMobile ? '0.9rem' : 'inherit' }}>
-                            <strong>Email:</strong> {reservation?.clientEmail}
-                        </Typography>
-                        <Typography sx={{ mb: 1, fontSize: isMobile ? '0.9rem' : 'inherit' }}>
-                            <strong>Phone:</strong> {reservation?.clientPhone}
-                        </Typography>
-                        <Typography sx={{ mb: 1, fontSize: isMobile ? '0.9rem' : 'inherit' }}>
-                            <strong>City:</strong> {reservation?.clientCity}
-                        </Typography>
-                        <Typography sx={{ mb: 1, fontSize: isMobile ? '0.9rem' : 'inherit' }}>
-                            <strong>Country:</strong> {reservation?.clientCountry}
-                        </Typography>
-                    </Paper>
+                    <Card sx={{ bgcolor: '#2a2a2a', borderRadius: 2 }}>
+                        <CardContent sx={{ p: isMobile ? 2 : 3 }}>
+                            {/* Client Information y Reservation Details lado a lado */}
+                            <Grid container spacing={3}>
+                                {/* Client Information - 50% */}
+                                <Grid item xs={12} sm={6}>
+                                    <Typography variant="h6" sx={{ mb: 2, color: '#fff', fontWeight: 600 }}>
+                                        Client Information
+                                    </Typography>
+                                    <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1.5 }}>
+                                        <Box>
+                                            <Typography variant="body2" sx={{ color: '#bbb', fontSize: '0.875rem' }}>
+                                                Name:
+                                            </Typography>
+                                            <Typography sx={{ color: '#fff', fontSize: isMobile ? '0.9rem' : 'inherit' }}>
+                                                {reservation?.clientName}, {reservation?.clientLastname}
+                                            </Typography>
+                                        </Box>
+                                        <Box>
+                                            <Typography variant="body2" sx={{ color: '#bbb', fontSize: '0.875rem' }}>
+                                                Email:
+                                            </Typography>
+                                            <Typography sx={{ color: '#fff', fontSize: isMobile ? '0.9rem' : 'inherit' }}>
+                                                {reservation?.clientEmail}
+                                            </Typography>
+                                        </Box>
+                                        <Box>
+                                            <Typography variant="body2" sx={{ color: '#bbb', fontSize: '0.875rem' }}>
+                                                Country:
+                                            </Typography>
+                                            <Typography sx={{ color: '#fff', fontSize: isMobile ? '0.9rem' : 'inherit' }}>
+                                                {reservation?.clientCountry}
+                                            </Typography>
+                                        </Box>
+                                        <Box>
+                                            <Typography variant="body2" sx={{ color: '#bbb', fontSize: '0.875rem' }}>
+                                                Phone:
+                                            </Typography>
+                                            <Typography sx={{ color: '#fff', fontSize: isMobile ? '0.9rem' : 'inherit' }}>
+                                                {reservation?.clientPhone}
+                                            </Typography>
+                                        </Box>
+                                    </Box>
+                                </Grid>
+
+                                {/* Reservation Details - 50% */}
+                                <Grid item xs={12} sm={6}>
+                                    <Typography variant="h6" sx={{ mb: 2, color: '#fff', fontWeight: 600 }}>
+                                        Reservation Details
+                                    </Typography>
+                                    <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1.5 }}>
+                                        <Box>
+                                            <Typography variant="body2" sx={{ color: '#bbb', fontSize: '0.875rem' }}>
+                                                Check-in:
+                                            </Typography>
+                                            <Typography sx={{ color: '#fff', fontSize: isMobile ? '0.9rem' : 'inherit' }}>
+                                                {formatDate(reservation?.checkIn)}
+                                            </Typography>
+                                        </Box>
+                                        <Box>
+                                            <Typography variant="body2" sx={{ color: '#bbb', fontSize: '0.875rem' }}>
+                                                Check-out:
+                                            </Typography>
+                                            <Typography sx={{ color: '#fff', fontSize: isMobile ? '0.9rem' : 'inherit' }}>
+                                                {formatDate(reservation?.checkOut)}
+                                            </Typography>
+                                        </Box>
+                                        <Box>
+                                            <Typography variant="body2" sx={{ color: '#bbb', fontSize: '0.875rem' }}>
+                                                Nights:
+                                            </Typography>
+                                            <Typography sx={{ color: '#fff', fontSize: isMobile ? '0.9rem' : 'inherit' }}>
+                                                {reservation?.nights}
+                                            </Typography>
+                                        </Box>
+                                        <Box>
+                                            <Typography variant="body2" sx={{ color: '#bbb', fontSize: '0.875rem' }}>
+                                                Notes:
+                                            </Typography>
+                                            <Typography sx={{ color: '#fff', fontSize: isMobile ? '0.9rem' : 'inherit', wordBreak: 'break-word' }}>
+                                                {reservation?.notes || '$50 keys'}
+                                            </Typography>
+                                        </Box>
+                                    </Box>
+                                </Grid>
+                            </Grid>
+
+                            <Divider sx={{ my: 3, borderColor: '#444' }} />
+
+                            {/* Apartment Details - Ancho completo */}
+                            <Typography variant="h6" sx={{ mb: 2, color: '#fff', fontWeight: 600 }}>
+                                Apartment Details
+                            </Typography>
+                            
+                            {apartmentLoading ? (
+                                <Box sx={{ mt: 1 }}>
+                                    <Skeleton variant="rectangular" height={200} sx={{ bgcolor: '#3a3a3a', mb: 2, borderRadius: 1 }} />
+                                    <Skeleton variant="text" width="60%" sx={{ bgcolor: '#3a3a3a' }} />
+                                    <Skeleton variant="text" width="80%" sx={{ bgcolor: '#3a3a3a' }} />
+                                    <Skeleton variant="text" width="90%" sx={{ bgcolor: '#3a3a3a' }} />
+                                </Box>
+                            ) : apartmentError ? (
+                                <Alert severity="error" sx={{ mt: 2, mb: 2, bgcolor: '#4a2c2c', color: '#ffcdd2' }}>
+                                    Error loading apartment data: {apartmentError}
+                                </Alert>
+                            ) : (
+                                <Grid container spacing={2}>
+                                    {/* Imagen del apartamento o placeholder mejorado */}
+                                    <Grid item xs={12} sm={5}>
+                                        {apartmentDetails && apartmentDetails.image ? (
+                                            <CardMedia
+                                                component="img"
+                                                sx={{
+                                                    width: '100%',
+                                                    height: 200,
+                                                    objectFit: 'cover',
+                                                    borderRadius: 1,
+                                                    bgcolor: '#3a3a3a'
+                                                }}
+                                                image={apartmentDetails.image}
+                                                alt={apartmentDetails.alt}
+                                                onError={(e) => {
+                                                    console.error('Error loading apartment image:', apartmentDetails.image);
+                                                    e.target.style.display = 'none';
+                                                    // Mostrar el placeholder cuando falla la imagen
+                                                    e.target.nextSibling.style.display = 'flex';
+                                                }}
+                                            />
+                                        ) : null}
+                                        
+                                        {/* Placeholder mejorado - siempre visible si no hay imagen */}
+                                        <Box
+                                            sx={{
+                                                width: '100%',
+                                                height: 200,
+                                                borderRadius: 1,
+                                                bgcolor: '#3a3a3a',
+                                                display: (!apartmentDetails || !apartmentDetails.image) ? 'flex' : 'none',
+                                                flexDirection: 'column',
+                                                alignItems: 'center',
+                                                justifyContent: 'center',
+                                                border: '2px dashed #555',
+                                                position: 'relative'
+                                            }}
+                                        >
+                                            <Box sx={{ textAlign: 'center', p: 2 }}>
+                                                <Typography variant="h4" sx={{ color: '#666', mb: 1 }}>
+                                                    🏠
+                                                </Typography>
+                                                <Typography variant="subtitle1" sx={{ color: '#aaa', mb: 1, fontWeight: 500 }}>
+                                                    {apartmentDetails?.name || apartmentData?.name || 'Apartment'}
+                                                </Typography>
+                                                <Typography variant="caption" sx={{ color: '#888' }}>
+                                                    No image available
+                                                </Typography>
+                                                {apartmentData?.address && (
+                                                    <Typography variant="caption" sx={{ color: '#777', display: 'block', mt: 0.5 }}>
+                                                        📍 {apartmentData.address}
+                                                    </Typography>
+                                                )}
+                                            </Box>
+                                        </Box>
+                                    </Grid>
+                                    {/* Detalles del apartamento */}
+                                    <Grid item xs={12} sm={7}>
+                                        <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1.5 }}>
+                                            <Box>
+                                                <Typography variant="body2" sx={{ color: '#bbb', fontSize: '0.875rem' }}>
+                                                    Name:
+                                                </Typography>
+                                                <Typography sx={{ color: '#fff', fontSize: isMobile ? '0.9rem' : 'inherit' }}>
+                                                    {apartmentDetails?.name || apartmentData?.name || 'N/A'}
+                                                </Typography>
+                                            </Box>
+                                            <Box>
+                                                <Typography variant="body2" sx={{ color: '#bbb', fontSize: '0.875rem' }}>
+                                                    Address:
+                                                </Typography>
+                                                <Typography sx={{ color: '#fff', fontSize: isMobile ? '0.9rem' : 'inherit' }}>
+                                                    {apartmentData?.address || 'N/A'}
+                                                </Typography>
+                                            </Box>
+                                            <Box>
+                                                <Typography variant="body2" sx={{ color: '#bbb', fontSize: '0.875rem' }}>
+                                                    Price per night:
+                                                </Typography>
+                                                <Typography sx={{ color: '#fff', fontSize: isMobile ? '0.9rem' : 'inherit' }}>
+                                                    ${apartmentDetails?.price || reservation?.pricePerNight || 'N/A'}
+                                                </Typography>
+                                            </Box>
+                                            <Box>
+                                                <Typography variant="body2" sx={{ color: '#bbb', fontSize: '0.875rem' }}>
+                                                    Description:
+                                                </Typography>
+                                                <Typography sx={{ color: '#fff', fontSize: isMobile ? '0.9rem' : 'inherit', wordBreak: 'break-word' }}>
+                                                    {apartmentData?.description || 'N/A'}
+                                                </Typography>
+                                            </Box>
+                                            {apartmentData?.distribution && (
+                                                <Box>
+                                                    <Typography variant="body2" sx={{ color: '#bbb', fontSize: '0.875rem' }}>
+                                                        Distribution:
+                                                    </Typography>
+                                                    <Typography sx={{ color: '#fff', fontSize: isMobile ? '0.9rem' : 'inherit' }}>
+                                                        {apartmentData.distribution}
+                                                    </Typography>
+                                                </Box>
+                                            )}
+                                            {apartmentDetails?.capacity && (
+                                                <Box>
+                                                    <Typography variant="body2" sx={{ color: '#bbb', fontSize: '0.875rem' }}>
+                                                        Capacity:
+                                                    </Typography>
+                                                    <Typography sx={{ color: '#fff', fontSize: isMobile ? '0.9rem' : 'inherit' }}>
+                                                        {apartmentDetails.capacity} people
+                                                    </Typography>
+                                                </Box>
+                                            )}
+                                        </Box>
+                                    </Grid>
+                                </Grid>
+                            )}
+                        </CardContent>
+                    </Card>
                 </Grid>
 
-                {/* Detalles de la Reserva */}
-                <Grid item xs={12} md={6}>
-                    <Paper variant="outlined" sx={{ p: isMobile ? 1.5 : 2 }}>
-                        <Typography variant="h6" gutterBottom>
-                            Reservation Details
-                        </Typography>
-                        <Typography sx={{ mb: 1, fontSize: isMobile ? '0.9rem' : 'inherit' }}>
-                            <strong>Check-in:</strong> {formatDate(reservation?.checkIn)}
-                        </Typography>
-                        <Typography sx={{ mb: 1, fontSize: isMobile ? '0.9rem' : 'inherit' }}>
-                            <strong>Check-out:</strong> {formatDate(reservation?.checkOut)}
-                        </Typography>
-                        <Typography sx={{ mb: 1, fontSize: isMobile ? '0.9rem' : 'inherit' }}>
-                            <strong>Nights:</strong> {reservation?.nights}
-                        </Typography>
-                        <Typography sx={{ mb: 1, fontSize: isMobile ? '0.9rem' : 'inherit', wordBreak: 'break-word' }}>
-                            <strong>Notes:</strong> {reservation?.notes || 'N/A'}
-                        </Typography>
-                    </Paper>
-                </Grid>
-
-                {/* Detalles del Apartamento */}
-                <Grid item xs={12} md={6}>
-                    <Paper variant="outlined" sx={{ p: isMobile ? 1.5 : 2 }}>
-                        <Typography variant="h6" gutterBottom>
-                            Apartment Details
-                        </Typography>
-                        <Typography sx={{ mb: 1, fontSize: isMobile ? '0.9rem' : 'inherit' }}>
-                            <strong>Price per night:</strong> ${reservation?.pricePerNight}
-                        </Typography>
-                        
-                        {apartmentLoading ? (
-                            <Box sx={{ display: 'flex', justifyContent: 'center', mt: 2 }}>
-                                <CircularProgress size={24} />
-                            </Box>
-                        ) : apartmentError ? (
-                            <Alert severity="error" sx={{ mt: 2, mb: 2 }}>
-                                Error loading apartment data: {apartmentError}
-                            </Alert>
-                        ) : (
-                            <Box sx={{ mt: 1 }}>
-                                <Typography sx={{ mb: 1, fontSize: isMobile ? '0.9rem' : 'inherit' }}>
-                                    <strong>Name:</strong> {apartmentData?.name}
-                                </Typography>     
-                                <Typography sx={{ mb: 1, fontSize: isMobile ? '0.9rem' : 'inherit' }}>
-                                    <strong>Address:</strong> {apartmentData?.address}
-                                </Typography>
-                                <Typography sx={{ mb: 0, fontSize: isMobile ? '0.9rem' : 'inherit', wordBreak: 'break-word' }}>
-                                    <strong>Description:</strong> {apartmentData?.description}
-                                </Typography>
-                            </Box>
-                        )}
-                    </Paper>
-                </Grid>
-
-                {/* Resumen de Costos */}
+                {/* Columna derecha: Payment Summary - 50% */}
                 <Grid item xs={12} md={6}>
                     <ReservationSummary reservation={reservation} />
                 </Grid>
@@ -567,7 +792,7 @@ const ReservationDetails = ({ reservation, apartmentLoading, apartmentError, apa
                     {snackbar.message}
                 </Alert>
             </Snackbar>
-        </Paper>
+        </Box>
     );
 };
 

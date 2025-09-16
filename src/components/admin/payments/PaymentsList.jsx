@@ -13,6 +13,7 @@ import {
     Box,
     Typography,
     CircularProgress,
+    Skeleton,
     Dialog,
     DialogTitle,
     DialogContent,
@@ -32,7 +33,6 @@ import DeleteIcon from '@mui/icons-material/Delete';
 import AddIcon from '@mui/icons-material/Add';
 import PaymentIcon from '@mui/icons-material/Payment';
 import DateRangeIcon from '@mui/icons-material/DateRange';
-import AttachMoneyIcon from '@mui/icons-material/AttachMoney';
 import PersonIcon from '@mui/icons-material/Person';
 import NoteIcon from '@mui/icons-material/Note';
 import useDeviceDetection from '../../../hooks/useDeviceDetection';
@@ -44,6 +44,7 @@ import {
 } from '../../../redux/reservationPaymentSlice';
 import PaymentForm from './PaymentsForm';
 import PaymentDetails from './PaymentDetails';
+import PaymentFilters from './PaymentFilters';
 import userService from '../../../services/userService';
 import reservationService from '../../../services/reservationService';
 
@@ -58,6 +59,7 @@ const PaymentsList = () => {
     const [openForm, setOpenForm] = useState(false);
     const [openDeleteDialog, setOpenDeleteDialog] = useState(false);
     const [paymentToDelete, setPaymentToDelete] = useState(null);
+    const [activeFilters, setActiveFilters] = useState({});
     const [snackbar, setSnackbar] = useState({
         open: false,
         message: '',
@@ -67,10 +69,10 @@ const PaymentsList = () => {
     const [reservationsData, setReservationsData] = useState({});
     const [clientsData, setClientsData] = useState({});
 
-    // Cargar pagos al montar el componente
+    // Cargar pagos al montar el componente o cuando cambian los filtros
     useEffect(() => {
-        dispatch(fetchAllPayments());
-    }, [dispatch]);
+        dispatch(fetchAllPayments(activeFilters));
+    }, [dispatch, activeFilters]);
 
     // Cargar datos de reservas y clientes cuando cambian los pagos
     useEffect(() => {
@@ -254,6 +256,16 @@ const PaymentsList = () => {
         return methodMap[method] || method;
     };
 
+    // Función para aplicar filtros
+    const handleApplyFilters = (filters) => {
+        setActiveFilters(filters);
+    };
+
+    // Función para limpiar filtros
+    const handleClearFilters = () => {
+        setActiveFilters({});
+    };
+
     // Función para renderizar tarjetas en vista móvil
     const renderMobileCards = () => {
         if (payments.length === 0) {
@@ -343,8 +355,64 @@ const PaymentsList = () => {
 
     if (loading) {
         return (
-            <Box display="flex" justifyContent="center" alignItems="center" minHeight="200px">
-                <CircularProgress />
+            <Box sx={{ p: 3 }}>
+                <Box display="flex" justifyContent="space-between" alignItems="center" mb={3}>
+                    <Skeleton variant="text" width={220} height={36} />
+                    <Skeleton variant="rectangular" width={160} height={36} />
+                </Box>
+
+                {isMobile || isTablet ? (
+                    <Grid container spacing={2}>
+                        {[...Array(3)].map((_, idx) => (
+                            <Grid item xs={12} key={idx}>
+                                <Card elevation={2} sx={{ bgcolor: theme.palette.mode === 'dark' ? '#1e1e1e' : '#f5f5f5' }}>
+                                    <CardContent>
+                                        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 1 }}>
+                                            <Skeleton variant="text" width={120} height={28} />
+                                            <Skeleton variant="rounded" width={90} height={24} />
+                                        </Box>
+                                        <Divider sx={{ my: 1.5 }} />
+                                        <Skeleton variant="text" width="50%" />
+                                        <Skeleton variant="text" width="60%" />
+                                        <Skeleton variant="text" width="40%" />
+                                    </CardContent>
+                                    <Divider />
+                                    <CardActions sx={{ justifyContent: 'flex-end', p: 1 }}>
+                                        <Skeleton variant="circular" width={32} height={32} />
+                                        <Skeleton variant="circular" width={32} height={32} sx={{ ml: 1 }} />
+                                    </CardActions>
+                                </Card>
+                            </Grid>
+                        ))}
+                    </Grid>
+                ) : (
+                    <TableContainer component={Paper} sx={{ bgcolor: '#1e1e1e' }}>
+                        <Table>
+                            <TableHead>
+                                <TableRow>
+                                    {['Date','Amount','Method','Client','Notes','Actions'].map((h) => (
+                                        <TableCell key={h}>{h}</TableCell>
+                                    ))}
+                                </TableRow>
+                            </TableHead>
+                            <TableBody>
+                                {[...Array(5)].map((_, idx) => (
+                                    <TableRow key={idx}>
+                                        <TableCell><Skeleton variant="text" width={120} /></TableCell>
+                                        <TableCell><Skeleton variant="text" width={80} /></TableCell>
+                                        <TableCell><Skeleton variant="text" width={110} /></TableCell>
+                                        <TableCell><Skeleton variant="text" width={180} /></TableCell>
+                                        <TableCell><Skeleton variant="text" width={220} /></TableCell>
+                                        <TableCell align="center">
+                                            <Skeleton variant="circular" width={28} height={28} />
+                                            <Skeleton variant="circular" width={28} height={28} sx={{ ml: 1 }} />
+                                        </TableCell>
+                                    </TableRow>
+                                ))}
+                            </TableBody>
+                        </Table>
+                    </TableContainer>
+                )}
             </Box>
         );
     }
@@ -371,6 +439,12 @@ const PaymentsList = () => {
                     New Payment
                 </Button>
             </Box>
+
+            {/* Componente de filtros */}
+            <PaymentFilters 
+                onApplyFilters={handleApplyFilters}
+                onClearFilters={handleClearFilters}
+            />
 
             {isMobile || isTablet ? (
                 // Mostrar tarjetas en vista móvil o tablet

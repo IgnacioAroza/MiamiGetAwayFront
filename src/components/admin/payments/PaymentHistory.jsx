@@ -10,6 +10,7 @@ import {
     Typography,
     Box,
     CircularProgress,
+    Skeleton,
     Alert,
     Card,
     CardContent,
@@ -107,40 +108,40 @@ const PaymentHistory = ({ payments = [], reservationId }) => {
         return (
             <Stack spacing={2}>
                 {normalizedPayments.map((payment) => (
-                    <Card key={payment.id} variant="outlined">
+                    <Card key={payment.id} variant="outlined" sx={{ bgcolor: '#333', borderColor: '#555' }}>
                         <CardContent sx={{ p: 2, '&:last-child': { pb: 2 } }}>
                             <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
-                                <Typography variant="subtitle2" color="text.secondary">
+                                <Typography variant="subtitle2" sx={{ color: '#bbb' }}>
                                     Date
                                 </Typography>
-                                <Typography variant="body2">
+                                <Typography variant="body2" sx={{ color: '#fff' }}>
                                     {formatDate(payment.date)}
                                 </Typography>
                             </Box>
-                            <Divider sx={{ my: 1 }} />
+                            <Divider sx={{ my: 1, borderColor: '#555' }} />
                             <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
-                                <Typography variant="subtitle2" color="text.secondary">
+                                <Typography variant="subtitle2" sx={{ color: '#bbb' }}>
                                     Method
                                 </Typography>
-                                <Typography variant="body2">
+                                <Typography variant="body2" sx={{ color: '#fff' }}>
                                     {payment.method}
                                 </Typography>
                             </Box>
-                            <Divider sx={{ my: 1 }} />
+                            <Divider sx={{ my: 1, borderColor: '#555' }} />
                             <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
-                                <Typography variant="subtitle2" color="text.secondary">
+                                <Typography variant="subtitle2" sx={{ color: '#bbb' }}>
                                     Reference
                                 </Typography>
-                                <Typography variant="body2" sx={{ wordBreak: 'break-word', maxWidth: '60%', textAlign: 'right' }}>
+                                <Typography variant="body2" sx={{ wordBreak: 'break-word', maxWidth: '60%', textAlign: 'right', color: '#fff' }}>
                                     {payment.reference}
                                 </Typography>
                             </Box>
-                            <Divider sx={{ my: 1 }} />
+                            <Divider sx={{ my: 1, borderColor: '#555' }} />
                             <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 0 }}>
-                                <Typography variant="subtitle2" color="text.secondary">
+                                <Typography variant="subtitle2" sx={{ color: '#bbb' }}>
                                     Amount
                                 </Typography>
-                                <Typography variant="body2" fontWeight="bold">
+                                <Typography variant="body2" fontWeight="bold" sx={{ color: '#fff' }}>
                                     {formatCurrency(payment.amount)}
                                 </Typography>
                             </Box>
@@ -152,43 +153,82 @@ const PaymentHistory = ({ payments = [], reservationId }) => {
     };
 
     return (
-        <Paper variant="outlined" sx={{ p: isMobile ? 1.5 : 2 }}>
-            <Typography variant={isMobile ? "subtitle1" : "h6"} gutterBottom>
-                Payment History
-            </Typography>
+        <Card sx={{ bgcolor: '#2a2a2a', borderRadius: 2, mt: 3 }}>
+            <CardContent sx={{ p: isMobile ? 2 : 3 }}>
+                <Typography variant="h6" sx={{ mb: 2, color: '#fff', fontWeight: 600 }}>
+                    Payment History
+                </Typography>
             
             {loading ? (
-                <Box sx={{ display: 'flex', justifyContent: 'center', p: 3 }}>
-                    <CircularProgress size={30} />
-                </Box>
+                isMobile || isTablet ? (
+                    <Stack spacing={2}>
+                        {[...Array(3)].map((_, idx) => (
+                            <Card key={idx} variant="outlined" sx={{ bgcolor: '#333', borderColor: '#555' }}>
+                                <CardContent sx={{ p: 2, '&:last-child': { pb: 2 } }}>
+                                    <Skeleton variant="text" width="40%" sx={{ bgcolor: '#444' }} />
+                                    <Divider sx={{ my: 1, borderColor: '#555' }} />
+                                    <Skeleton variant="text" width="30%" sx={{ bgcolor: '#444' }} />
+                                    <Divider sx={{ my: 1, borderColor: '#555' }} />
+                                    <Skeleton variant="text" width="60%" sx={{ bgcolor: '#444' }} />
+                                    <Divider sx={{ my: 1, borderColor: '#555' }} />
+                                    <Skeleton variant="text" width="20%" sx={{ bgcolor: '#444' }} />
+                                </CardContent>
+                            </Card>
+                        ))}
+                    </Stack>
+                ) : (
+                    <TableContainer sx={{ bgcolor: '#2a2a2a' }}>
+                        <Table size="small">
+                            <TableHead>
+                                <TableRow>
+                                    {['Date','Method','Reference','Amount'].map((h) => (
+                                        <TableCell key={h} sx={{ color: '#fff', borderColor: '#444' }}>
+                                            <Skeleton variant="text" width={100} sx={{ bgcolor: '#444' }} />
+                                        </TableCell>
+                                    ))}
+                                </TableRow>
+                            </TableHead>
+                            <TableBody>
+                                {[...Array(4)].map((_, idx) => (
+                                    <TableRow key={idx}>
+                                        <TableCell sx={{ borderColor: '#444' }}><Skeleton variant="text" width={120} sx={{ bgcolor: '#444' }} /></TableCell>
+                                        <TableCell sx={{ borderColor: '#444' }}><Skeleton variant="text" width={100} sx={{ bgcolor: '#444' }} /></TableCell>
+                                        <TableCell sx={{ borderColor: '#444' }}><Skeleton variant="text" width={220} sx={{ bgcolor: '#444' }} /></TableCell>
+                                        <TableCell align="right" sx={{ borderColor: '#444' }}><Skeleton variant="text" width={80} sx={{ bgcolor: '#444' }} /></TableCell>
+                                    </TableRow>
+                                ))}
+                            </TableBody>
+                        </Table>
+                    </TableContainer>
+                )
             ) : error ? (
-                <Alert severity="error" sx={{ mt: 2, mb: 2 }}>
+                <Alert severity="error" sx={{ mt: 2, mb: 2, bgcolor: '#4a2c2c', color: '#ffcdd2' }}>
                     {error}
                 </Alert>
             ) : normalizedPayments.length === 0 ? (
-                <Typography align="center" sx={{ py: 2 }}>
+                <Typography align="center" sx={{ py: 2, color: '#ccc' }}>
                     There are no payments recorded for this reservation.
                 </Typography>
             ) : isMobile || isTablet ? (
                 renderMobileCards()
             ) : (
-                <TableContainer>
+                <TableContainer sx={{ bgcolor: '#2a2a2a' }}>
                     <Table size="small">
                         <TableHead>
                             <TableRow>
-                                <TableCell>Date</TableCell>
-                                <TableCell>Method</TableCell>
-                                <TableCell>Reference</TableCell>
-                                <TableCell align="right">Amount</TableCell>
+                                <TableCell sx={{ color: '#fff', borderColor: '#444', fontWeight: 600 }}>Date</TableCell>
+                                <TableCell sx={{ color: '#fff', borderColor: '#444', fontWeight: 600 }}>Method</TableCell>
+                                <TableCell sx={{ color: '#fff', borderColor: '#444', fontWeight: 600 }}>Reference</TableCell>
+                                <TableCell align="right" sx={{ color: '#fff', borderColor: '#444', fontWeight: 600 }}>Amount</TableCell>
                             </TableRow>
                         </TableHead>
                         <TableBody>
                             {normalizedPayments.map((payment) => (
                                 <TableRow key={payment.id}>
-                                    <TableCell>{formatDate(payment.date)}</TableCell>
-                                    <TableCell>{payment.method}</TableCell>
-                                    <TableCell>{payment.reference}</TableCell>
-                                    <TableCell align="right">
+                                    <TableCell sx={{ color: '#fff', borderColor: '#444' }}>{formatDate(payment.date)}</TableCell>
+                                    <TableCell sx={{ color: '#fff', borderColor: '#444' }}>{payment.method}</TableCell>
+                                    <TableCell sx={{ color: '#fff', borderColor: '#444' }}>{payment.reference}</TableCell>
+                                    <TableCell align="right" sx={{ color: '#fff', borderColor: '#444' }}>
                                         {formatCurrency(payment.amount)}
                                     </TableCell>
                                 </TableRow>
@@ -197,7 +237,8 @@ const PaymentHistory = ({ payments = [], reservationId }) => {
                     </Table>
                 </TableContainer>
             )}
-        </Paper>
+            </CardContent>
+        </Card>
     );
 };
 

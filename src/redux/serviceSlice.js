@@ -1,30 +1,17 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
-import axios from 'axios';
-import config from '../config';
+import api from '../utils/api';
+import { normalizeServiceItemFromApi } from '../utils/normalizers';
 
-const getToken = () => localStorage.getItem('adminToken');
-
-const api = axios.create({
-    baseURL: config.API_URL,
-});
-
-api.interceptors.request.use(
-    (config) => {
-        const token = getToken();
-        if (token) {
-            config.headers['Authorization'] = `Bearer ${token}`;
-        }
-        return config;
-    },
-    (error) => Promise.reject(error)
-);
+// Usamos el cliente API centralizado con interceptores compartidos
 
 const handleApiError = (error) => {
     if (error.response) {
         if (error.response.status === 401) {
+            // El interceptor global ya maneja limpieza/redirección
             throw new Error('Unauthorized: Please log in again.');
         }
-        throw new Error(error.response.data.message || 'An error occurred');
+        const message = error.response.data?.message || error.response.data?.error || 'An error occurred';
+        throw new Error(message);
     } else if (error.request) {
         throw new Error('No response received from server');
     } else {
@@ -143,7 +130,8 @@ const servicesSlice = createSlice({
             .addCase(fetchServices.fulfilled, (state, action) => {
                 const { serviceType, data } = action.payload;
                 state.status[serviceType] = 'succeeded';
-                state.items[serviceType] = data;
+                const list = Array.isArray(data) ? data.map((item) => normalizeServiceItemFromApi(serviceType, item)) : [];
+                state.items[serviceType] = list;
                 state.error[serviceType] = null;
             })
             .addCase(fetchServices.rejected, (state, action) => {
@@ -153,14 +141,16 @@ const servicesSlice = createSlice({
             })
             .addCase(createService.fulfilled, (state, action) => {
                 const { serviceType, data } = action.payload;
-                state.items[serviceType].push(data);
+                const normalized = normalizeServiceItemFromApi(serviceType, data);
+                state.items[serviceType].push(normalized);
                 state.error[serviceType] = null;
             })
             .addCase(updateService.fulfilled, (state, action) => {
                 const { serviceType, data } = action.payload;
-                const index = state.items[serviceType].findIndex(item => item.id === data.id);
+                const normalized = normalizeServiceItemFromApi(serviceType, data);
+                const index = state.items[serviceType].findIndex(item => item.id === normalized.id);
                 if (index !== -1) {
-                    state.items[serviceType][index] = data;
+                    state.items[serviceType][index] = normalized;
                 }
                 state.error[serviceType] = null;
             })

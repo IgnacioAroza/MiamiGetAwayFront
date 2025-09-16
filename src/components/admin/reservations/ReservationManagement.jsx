@@ -1,11 +1,10 @@
 import React, { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { useParams, useNavigate } from 'react-router-dom';
-import { Box, Container, Grid, Paper, Typography, Button, Alert, Snackbar } from '@mui/material';
+import { Box, Container, Grid, Paper, Typography, Button, Alert, Snackbar, Skeleton } from '@mui/material';
 import { ArrowBack as ArrowBackIcon } from '@mui/icons-material';
 import { fetchReservationById } from '../../../redux/reservationSlice';
 import ReservationForm from './ReservationForm';
-import PaymentSummary from '../payments/PaymentSummary';
 import reservationService from '../../../services/reservationService';
 import { format, parseISO } from 'date-fns';
 
@@ -28,12 +27,14 @@ const ReservationManagement = () => {
                         const checkOutDate = parseISO(reservation.checkOutDate);
 
                         setInitialData({
+                            id: reservation.id || id,
                             checkInDate: reservation.checkInDate || '',
                             checkOutDate: reservation.checkOutDate || '',
                             nights: reservation.nights || 1,
                             price: reservation.pricePerNight || 0,
                             pricePerNight: reservation.pricePerNight || 0,
                             cleaningFee: reservation.cleaningFee || 0,
+                            cancellationFee: reservation.cancellationFee || 0,
                             parkingFee: reservation.parkingFee || 0,
                             otherExpenses: reservation.otherExpenses || 0,
                             amountPaid: reservation.amountPaid || 0,
@@ -87,7 +88,15 @@ const ReservationManagement = () => {
                 message: id ? 'Reservation updated successfully' : 'Reservation created successfully',
                 type: 'success'
             });
-            navigate('/admin/reservations');
+            
+            // Navegar según el contexto
+            if (id) {
+                // Si estamos editando, volver a la vista de detalles
+                navigate(`/admin/reservations/view/${id}`);
+            } else {
+                // Si estamos creando una nueva reserva, ir a la lista
+                navigate('/admin/reservations');
+            }
         } catch (error) {
             console.error('Error al procesar el formulario:', error);
             setNotification({
@@ -99,7 +108,13 @@ const ReservationManagement = () => {
     };
     
     const handleBack = () => {
-        navigate('/admin/reservations');
+        if (id) {
+            // Si estamos editando una reserva existente, volver a la vista de detalles
+            navigate(`/admin/reservations/view/${id}`);
+        } else {
+            // Si estamos creando una nueva reserva, volver a la lista
+            navigate('/admin/reservations');
+        }
     };
     
     const handleCloseNotification = () => {
@@ -124,30 +139,39 @@ const ReservationManagement = () => {
                 </Box>
                 
                 {loading ? (
-                    <Typography>Loading...</Typography>
+                    <Box>
+                        <Box display="flex" alignItems="center" mb={3}>
+                            <Skeleton variant="rectangular" width={100} height={36} sx={{ mr: 2 }} />
+                            <Skeleton variant="text" width={240} height={40} />
+                        </Box>
+                        <Grid container spacing={3}>
+                            <Grid item xs={12} md={8}>
+                                <Paper elevation={3} sx={{ p: 3 }}>
+                                    <Skeleton variant="text" width={200} height={32} sx={{ mb: 2 }} />
+                                    {[...Array(8)].map((_, idx) => (
+                                        <Skeleton key={idx} variant="text" width={`${80 - idx * 5}%`} />
+                                    ))}
+                                    <Skeleton variant="rectangular" height={48} sx={{ mt: 2 }} />
+                                </Paper>
+                            </Grid>
+                            <Grid item xs={12} md={4}>
+                                <Paper elevation={3} sx={{ p: 3 }}>
+                                    <Skeleton variant="text" width={160} height={28} />
+                                    {[...Array(6)].map((_, idx) => (
+                                        <Skeleton key={idx} variant="text" width={`${70 - idx * 5}%`} />
+                                    ))}
+                                    <Skeleton variant="rectangular" height={40} sx={{ mt: 2 }} />
+                                </Paper>
+                            </Grid>
+                        </Grid>
+                    </Box>
                 ) : error ? (
                     <Typography color="error">Error: {error}</Typography>
                 ) : (
-                    <Grid container spacing={3}>
-                        <Grid item xs={12} md={8}>
-                            <Paper elevation={3} sx={{ p: 3 }}>
-                                <ReservationForm
-                                    initialData={initialData}
-                                    onSubmit={handleFormSubmit}
-                                />
-                            </Paper>
-                        </Grid>
-                        <Grid item xs={12} md={4}>
-                            {selectedReservation && (
-                                <Paper elevation={3} sx={{ p: 3 }}>
-                                    <PaymentSummary
-                                        reservation={selectedReservation}
-                                        onPaymentRegistered={() => dispatch(fetchReservationById(id))}
-                                    />
-                                </Paper>
-                            )}
-                        </Grid>
-                    </Grid>
+                    <ReservationForm
+                        initialData={initialData}
+                        onSubmit={handleFormSubmit}
+                    />
                 )}
                 
                 <Snackbar

@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import {
     Grid,
     Typography,
@@ -8,7 +9,22 @@ import {
     Dialog,
     DialogTitle,
     DialogContent,
+    Paper,
+    Card,
+    CardContent,
+    CardHeader,
+    IconButton,
 } from '@mui/material';
+import {
+    Apartment as ApartmentIcon,
+    CalendarToday as CalendarIcon,
+    Person as PersonIcon,
+    AttachMoney as MoneyIcon,
+    Receipt as ReceiptIcon,
+    Notes as NotesIcon,
+    Assessment as AssessmentIcon,
+    ExpandMore as ExpandMoreIcon,
+} from '@mui/icons-material';
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns';
 import { enUS } from 'date-fns/locale';
@@ -21,26 +37,33 @@ import PricingSection from './sections/PricingSection';
 import PaymentSection from './sections/PaymentSection';
 import StatusSection from './sections/StatusSection';
 import NotesSection from './sections/NotesSection';
+import ReservationPaymentSummary from './sections/ReservationPaymentSummary';
 import CreateUser from '../users/CreateUser';
 import EditUser from '../users/EditUser';
 import { useReservationForm } from '../../../hooks/useReservationForm';
+import { useToast } from '../../../hooks/useToast';
+import ToastNotification from '../../common/ToastNotification';
 
 const ReservationForm = ({ initialData, onSubmit }) => {
+    const navigate = useNavigate();
     const {
         formData,
         selectedApartment,
         selectedClient,
         apartments,
         clients,
+        initialPaymentData,
         handleChange,
         handleDateChange,
         handleClientSelect,
         handleNewClientCreated,
+        handleInitialPaymentChange,
         resetForm
     } = useReservationForm(initialData);
 
     const [openNewClientDialog, setOpenNewClientDialog] = useState(false);
     const [openEditClientDialog, setOpenEditClientDialog] = useState(false);
+    const { toast, warning, error, hideToast } = useToast();
 
     // Manejadores de diálogos
     const handleOpenNewClientDialog = () => setOpenNewClientDialog(true);
@@ -48,22 +71,53 @@ const ReservationForm = ({ initialData, onSubmit }) => {
     const handleOpenEditClientDialog = () => setOpenEditClientDialog(true);
     const handleCloseEditClientDialog = () => setOpenEditClientDialog(false);
 
+    // Manejar cancelar - navegar de vuelta
+    const handleCancel = () => {
+        navigate(-1); // Volver a la página anterior
+    };
+
+    // Función para obtener el estilo y texto del estado de pago
+    const getPaymentStatusDisplay = (paymentStatus) => {
+        switch (paymentStatus) {
+            case 'complete':
+            case 'paid':
+                return {
+                    text: 'PAID',
+                    bgcolor: '#4caf50', // Verde
+                    color: '#fff'
+                };
+            case 'partial':
+                return {
+                    text: 'PARTIAL',
+                    bgcolor: '#ff9800', // Naranja
+                    color: '#000'
+                };
+            case 'pending':
+            default:
+                return {
+                    text: 'PENDING',
+                    bgcolor: '#f44336', // Rojo
+                    color: '#fff'
+                };
+        }
+    };
+
     const handleSubmit = (event) => {
         event.preventDefault();
         
         // Validar que los campos requeridos estén completos
         if (!formData.apartmentId) {
-            alert('Please select an apartment');
+            warning('Please select an apartment');
             return;
         }
         
         if (!formData.checkInDate || !formData.checkOutDate) {
-            alert('Please select both check-in and check-out dates');
+            warning('Please select both check-in and check-out dates');
             return;
         }
         
         if (!formData.clientName || !formData.clientEmail) {
-            alert('Client name and email are required');
+            warning('Client name and email are required');
             return;
         }
         
@@ -80,6 +134,7 @@ const ReservationForm = ({ initialData, onSubmit }) => {
                 price: Number(formData.price),
                 pricePerNight: Number(formData.price),
                 cleaningFee: Number(formData.cleaningFee) || 0,
+                cancellationFee: Number(formData.cancellationFee) || 0,
                 parkingFee: Number(formData.parkingFee) || 0,
                 otherExpenses: Number(formData.otherExpenses) || 0,
                 taxes: Number(formData.taxes),
@@ -98,138 +153,252 @@ const ReservationForm = ({ initialData, onSubmit }) => {
                     clientCity: formData.clientCity,
                     clientCountry: formData.clientCountry,
                     clientNotes: formData.clientNotes
-                })
+                }),
+                // Incluir pago inicial si existe y es una reserva nueva
+                ...(initialPaymentData && initialPaymentData.amount && initialPaymentData.amount > 0 && !formData.id ? {
+                    initialPayment: {
+                        amount: Number(initialPaymentData.amount),
+                        paymentMethod: initialPaymentData.paymentMethod,
+                        paymentReference: "Payment recorded upon creation of the reservation",
+                        notes: initialPaymentData.notes || "Initial payment"
+                    }
+                } : {})
             };
             
             onSubmit(dataToSubmit);
         } catch (error) {
             console.error('Error en handleSubmit:', error);
-            alert('Error al enviar el formulario');
+            error('Error submitting the form. Please try again.');
         }
     };
 
     return (
         <LocalizationProvider dateAdapter={AdapterDateFns} adapterLocale={enUS}>
-            <Box component="form" onSubmit={handleSubmit} p={3}>
+            <Box component="form" onSubmit={handleSubmit} sx={{ p: 2, bgcolor: '#1a1a1a', minHeight: '100vh' }}>
                 <Grid container spacing={3}>
-                    {/* Sección de Apartamento */}
-                    <Grid item xs={12}>
-                        <Typography variant="h6" gutterBottom>
-                            Apartment Information
-                        </Typography>
-                        <Divider sx={{ mb: 2 }} />
-                    </Grid>
-                    
-                    <ApartmentSection 
-                        formData={formData}
-                        apartments={apartments}
-                        selectedApartment={selectedApartment}
-                        onChange={handleChange}
-                    />
-
-                    {/* Sección de Fechas */}
-                    <Grid item xs={12}>
-                        <Typography variant="h6" gutterBottom sx={{ mt: 2 }}>
-                            Reservation Dates
-                        </Typography>
-                        <Divider sx={{ mb: 2 }} />
-                    </Grid>
-
-                    <DateSection 
-                        checkInDate={formData.checkInDate}
-                        checkOutDate={formData.checkOutDate}
-                        onDateChange={handleDateChange}
-                    />
-
-                    {/* Sección de Cliente */}
-                    <Grid item xs={12}>
-                        <Typography variant="h6" gutterBottom sx={{ mt: 2 }}>
-                            Client Information
-                        </Typography>
-                        <Divider sx={{ mb: 2 }} />
-                    </Grid>
-
-                    <ClientSection 
-                        formData={formData}
-                        clients={clients}
-                        selectedClient={selectedClient}
-                        onClientSelect={handleClientSelect}
-                        onNewClientCreated={handleNewClientCreated}
-                        onChange={handleChange}
-                        onOpenNewClient={handleOpenNewClientDialog}
-                        onOpenEditClient={handleOpenEditClientDialog}
-                    />
-
-                    {/* Sección de Precios y Extras */}
-                    <Grid item xs={12}>
-                        <Typography variant="h6" gutterBottom sx={{ mt: 2 }}>
-                            Prices and Extras
-                        </Typography>
-                        <Divider sx={{ mb: 2 }} />
-                    </Grid>
-                    
-                    <PricingSection 
-                        formData={formData} 
-                        onChange={handleChange} 
-                    />
-
-                    {/* Sección de Notas */}
-                    <Grid item xs={12}>
-                        <Typography variant="h6" gutterBottom sx={{ mt: 2 }}>
-                            Reservation Notes
-                        </Typography>
-                        <Divider sx={{ mb: 2 }} />
-                    </Grid>
-
-                    <NotesSection
-                        formData={formData}
-                        onChange={handleChange}
-                    />
-
-                    {/* Sección de Pago - Solo mostrar si es creación */}
-                    {!initialData && (
-                        <>
-                            <Grid item xs={12}>
-                                <Typography variant="h6" gutterBottom sx={{ mt: 2 }}>
-                                    Payment Information
-                                </Typography>
-                                <Divider sx={{ mb: 2 }} />
-                            </Grid>
-                            
-                            <PaymentSection 
-                                formData={formData} 
-                                onChange={handleChange} 
+                    {/* Columna Izquierda */}
+                    <Grid item xs={12} md={8}>
+                        {/* Apartment Information */}
+                        <Card sx={{ mb: 3, bgcolor: '#2a2a2a', color: '#fff' }}>
+                            <CardHeader
+                                avatar={<ApartmentIcon sx={{ color: '#fff' }} />}
+                                title="Apartment Information"
+                                sx={{ 
+                                    bgcolor: '#333',
+                                    '& .MuiCardHeader-title': { color: '#fff', fontWeight: 'bold' }
+                                }}
                             />
-                        </>
-                    )}
+                            <CardContent>
+                                <ApartmentSection 
+                                    formData={formData}
+                                    apartments={apartments}
+                                    selectedApartment={selectedApartment}
+                                    onChange={handleChange}
+                                />
+                            </CardContent>
+                        </Card>
 
-                    {/* Sección de Estado */}
-                    <Grid item xs={12}>
-                        <Typography variant="h6" gutterBottom sx={{ mt: 2 }}>
-                            Reservation Status
-                        </Typography>
-                        <Divider sx={{ mb: 2 }} />
-                    </Grid>
-                    
-                    <StatusSection 
-                        formData={formData} 
-                        onChange={handleChange} 
-                    />
+                        {/* Reservation Dates */}
+                        <Card sx={{ mb: 3, bgcolor: '#2a2a2a', color: '#fff' }}>
+                            <CardHeader
+                                avatar={<CalendarIcon sx={{ color: '#fff' }} />}
+                                title="Reservation Dates"
+                                sx={{ 
+                                    bgcolor: '#333',
+                                    '& .MuiCardHeader-title': { color: '#fff', fontWeight: 'bold' }
+                                }}
+                            />
+                            <CardContent>
+                                <DateSection 
+                                    checkInDate={formData.checkInDate}
+                                    checkOutDate={formData.checkOutDate}
+                                    onDateChange={handleDateChange}
+                                />
+                            </CardContent>
+                        </Card>
 
-                    {/* Botones de Acción */}
-                    <Grid item xs={12}>
-                        <Box sx={{ display: 'flex', justifyContent: 'flex-end', gap: 2, mt: 2 }}>
+                        {/* Client Information */}
+                        <Card sx={{ mb: 3, bgcolor: '#2a2a2a', color: '#fff' }}>
+                            <CardHeader
+                                avatar={<PersonIcon sx={{ color: '#fff' }} />}
+                                title="Client Information"
+                                sx={{ 
+                                    bgcolor: '#333',
+                                    '& .MuiCardHeader-title': { color: '#fff', fontWeight: 'bold' }
+                                }}
+                            />
+                            <CardContent>
+                                <ClientSection 
+                                    formData={formData}
+                                    clients={clients}
+                                    selectedClient={selectedClient}
+                                    onClientSelect={handleClientSelect}
+                                    onNewClientCreated={handleNewClientCreated}
+                                    onChange={handleChange}
+                                    onOpenNewClient={handleOpenNewClientDialog}
+                                    onOpenEditClient={handleOpenEditClientDialog}
+                                />
+                            </CardContent>
+                        </Card>
+
+                        {/* Prices and Extras */}
+                        <Card sx={{ mb: 3, bgcolor: '#2a2a2a', color: '#fff' }}>
+                            <CardHeader
+                                avatar={<MoneyIcon sx={{ color: '#fff' }} />}
+                                title="Prices and Extras"
+                                sx={{ 
+                                    bgcolor: '#333',
+                                    '& .MuiCardHeader-title': { color: '#fff', fontWeight: 'bold' }
+                                }}
+                            />
+                            <CardContent>
+                                <PricingSection 
+                                    formData={formData} 
+                                    onChange={handleChange} 
+                                />
+                            </CardContent>
+                        </Card>
+
+                        {/* Reservation Notes */}
+                        <Card sx={{ mb: 3, bgcolor: '#2a2a2a', color: '#fff' }}>
+                            <CardHeader
+                                avatar={<NotesIcon sx={{ color: '#fff' }} />}
+                                title="Reservation Notes"
+                                sx={{ 
+                                    bgcolor: '#333',
+                                    '& .MuiCardHeader-title': { color: '#fff', fontWeight: 'bold' }
+                                }}
+                            />
+                            <CardContent>
+                                <NotesSection
+                                    formData={formData}
+                                    onChange={handleChange}
+                                />
+                            </CardContent>
+                        </Card>
+
+                        {/* Reservation Status */}
+                        <Card sx={{ mb: 3, bgcolor: '#2a2a2a', color: '#fff' }}>
+                            <CardHeader
+                                avatar={<AssessmentIcon sx={{ color: '#fff' }} />}
+                                title="Reservation Status"
+                                sx={{ 
+                                    bgcolor: '#333',
+                                    '& .MuiCardHeader-title': { color: '#fff', fontWeight: 'bold' }
+                                }}
+                            />
+                            <CardContent>
+                                <StatusSection 
+                                    formData={formData} 
+                                    onChange={handleChange} 
+                                />
+                            </CardContent>
+                        </Card>
+
+                        {/* Botones de Acción */}
+                        <Box sx={{ display: 'flex', justifyContent: 'flex-end', gap: 2, mt: 3 }}>
                             <Button 
-                                variant="outlined" 
-                                color="secondary" 
-                                onClick={resetForm}
+                                variant="contained"
+                                onClick={handleCancel}
+                                size="large"
+                                sx={{
+                                    backgroundColor: '#666',
+                                    color: '#fff',
+                                    borderRadius: 1,
+                                    textTransform: 'none',
+                                    fontSize: '0.95rem',
+                                    fontWeight: 500,
+                                    minWidth: '100px',
+                                    '&:hover': {
+                                        backgroundColor: '#555'
+                                    }
+                                }}
                             >
                                 Cancel
                             </Button>
-                            <Button type="submit" variant="contained" color="primary">
-                                {initialData ? 'Update Reservation' : 'Create Reservation'}
+                            <Button 
+                                type="submit" 
+                                variant="contained"
+                                size="large"
+                                sx={{
+                                    backgroundColor: '#4caf50',
+                                    color: '#fff',
+                                    borderRadius: 1,
+                                    textTransform: 'none',
+                                    fontSize: '0.95rem',
+                                    fontWeight: 500,
+                                    minWidth: '120px',
+                                    '&:hover': {
+                                        backgroundColor: '#45a049'
+                                    }
+                                }}
+                            >
+                                {initialData ? 'Save' : 'Create Reservation'}
                             </Button>
                         </Box>
+                    </Grid>
+
+                    {/* Columna Derecha - Payment Summary */}
+                    <Grid item xs={12} md={4}>
+                        <Card sx={{ 
+                            bgcolor: '#2a2a2a', 
+                            color: '#fff', 
+                            position: 'sticky', 
+                            top: 20,
+                            height: 'fit-content',
+                            maxHeight: 'calc(100vh - 40px)',
+                            overflow: 'hidden'
+                        }}>
+                            <CardHeader
+                                avatar={<ReceiptIcon sx={{ color: '#fff' }} />}
+                                title="Payment Summary"
+                                action={
+                                    <Box sx={{ 
+                                        bgcolor: getPaymentStatusDisplay(formData.paymentStatus).bgcolor,
+                                        color: getPaymentStatusDisplay(formData.paymentStatus).color,
+                                        px: 1.5, 
+                                        py: 0.5, 
+                                        borderRadius: 1,
+                                        fontSize: '0.75rem',
+                                        fontWeight: 'bold'
+                                    }}>
+                                        {getPaymentStatusDisplay(formData.paymentStatus).text}
+                                    </Box>
+                                }
+                                sx={{ 
+                                    bgcolor: '#333',
+                                    '& .MuiCardHeader-title': { color: '#fff', fontWeight: 'bold' },
+                                    pb: 1
+                                }}
+                            />
+                            <CardContent sx={{ 
+                                py: 1,
+                                '&:last-child': { pb: 2 }
+                            }}>
+                                {/* Payment Summary Data - Compacto */}
+                                <ReservationPaymentSummary formData={formData} />
+
+                                <Grid item xs={12}>
+                                    <Divider sx={{ bgcolor: "#555", my: 2 }} />
+                                </Grid>
+                                
+                                {/* Payment Registration Section */}
+                                <Box sx={{ mt: 2 }}>
+                                    <Typography variant="h6" sx={{ mb: 1.5, color: '#fff', fontSize: '1rem' }}>
+                                        Payment Registration
+                                    </Typography>
+                                    <PaymentSection 
+                                        formData={formData} 
+                                        onChange={handleChange}
+                                        onPaymentRegistered={(paymentResponse) => {
+                                            // Payment successfully registered
+                                        }}
+                                        onInitialPaymentChange={handleInitialPaymentChange}
+                                        initialPaymentData={initialPaymentData}
+                                    />
+                                </Box>
+                            </CardContent>
+                        </Card>
                     </Grid>
                 </Grid>
             </Box>
@@ -251,7 +420,10 @@ const ReservationForm = ({ initialData, onSubmit }) => {
                 <DialogContent>
                     <CreateUser 
                         isDialog={true}
-                        onSuccess={handleNewClientCreated}
+                        onSuccess={(newClient) => {
+                            handleNewClientCreated(newClient);
+                            handleCloseNewClientDialog();
+                        }}
                         onCancel={handleCloseNewClientDialog}
                     />
                 </DialogContent>
@@ -282,6 +454,9 @@ const ReservationForm = ({ initialData, onSubmit }) => {
                     />
                 </DialogContent>
             </Dialog>
+            
+            {/* Toast Notification */}
+            <ToastNotification toast={toast} onClose={hideToast} />
         </LocalizationProvider>
     );
 };

@@ -1,5 +1,6 @@
 import api from '../utils/api'
 import { formatDateToString, parseStringToDate } from '../utils/dateUtils'
+import { normalizeReservationInput, stripUndefined, normalizePaymentInput } from '../utils/normalizers'
 
 const reservationService = {
     getAll: async (filters = {}) => {
@@ -37,45 +38,8 @@ const reservationService = {
                 }
             });
 
-            // Formateamos ciertos datos pero enviamos con los nombres exactos que espera el backend
-            const formattedData = {
-                // Datos básicos - respetando camelCase del backend
-                apartmentId: reservationData.apartmentId !== undefined ? Number(reservationData.apartmentId) : undefined,
-                clientId: reservationData.clientId !== undefined ? Number(reservationData.clientId) : undefined,
-
-                // Fechas - ahora en formato MM-DD-YYYY HH:mm
-                checkInDate: reservationData.checkInDate ? formatDateToString(reservationData.checkInDate) : undefined,
-                checkOutDate: reservationData.checkOutDate ? formatDateToString(reservationData.checkOutDate) : undefined,
-
-                // Datos numéricos IMPORTANTES - mantener como números y en camelCase
-                nights: reservationData.nights !== undefined ? Number(reservationData.nights) : undefined,
-                pricePerNight: reservationData.price !== undefined ? Number(reservationData.price) :
-                    reservationData.pricePerNight !== undefined ? Number(reservationData.pricePerNight) : undefined,
-                cleaningFee: reservationData.cleaningFee !== undefined ? Number(reservationData.cleaningFee) : undefined,
-                parkingFee: reservationData.parkingFee !== undefined ? Number(reservationData.parkingFee) : undefined,
-                otherExpenses: reservationData.otherExpenses !== undefined ? Number(reservationData.otherExpenses) : undefined,
-                taxes: reservationData.taxes !== undefined ? Number(reservationData.taxes) : undefined,
-                totalAmount: reservationData.totalAmount !== undefined ? Number(reservationData.totalAmount) : undefined,
-                amountPaid: reservationData.amountPaid !== undefined ? Number(reservationData.amountPaid) : undefined,
-                amountDue: reservationData.amountDue !== undefined ? Number(reservationData.amountDue) : undefined,
-
-                // Notas
-                notes: reservationData.notes,
-
-                // Estados
-                status: reservationData.status,
-                paymentStatus: reservationData.paymentStatus,
-
-                // Datos de cliente
-                clientName: reservationData.clientName,
-                clientLastname: reservationData.clientLastname,
-                clientEmail: reservationData.clientEmail,
-                clientPhone: reservationData.clientPhone,
-                clientAddress: reservationData.clientAddress,
-                clientCity: reservationData.clientCity,
-                clientCountry: reservationData.clientCountry,
-                clientNotes: reservationData.clientNotes
-            };
+            // Normalizar payload respetando el formato de fechas MM-DD-YYYY HH:mm y camelCase
+            const formattedData = normalizeReservationInput(reservationData);
 
             console.log('Datos formateados para enviar:', {
                 clientId: formattedData.clientId,
@@ -86,7 +50,7 @@ const reservationService = {
                 }
             });
 
-            // Validar que los campos requeridos estén presentes
+            // Validaciones mínimas
             if (formattedData.pricePerNight === undefined) {
                 throw new Error('The price per night is required');
             }
@@ -95,11 +59,8 @@ const reservationService = {
                 throw new Error('The cleaning fee is required');
             }
 
-            // Filtrar propiedades undefined para no enviar datos innecesarios
-            const dataToSend = Object.fromEntries(
-                Object.entries(formattedData)
-                    .filter(([_, value]) => value !== undefined)
-            );
+            // Filtrar undefined para no enviar campos innecesarios
+            const dataToSend = stripUndefined(formattedData);
 
             const response = await api.post('/reservations', dataToSend);
             console.log('Respuesta del servidor:', response.data);
@@ -124,54 +85,9 @@ const reservationService = {
                 throw new Error('No data provided to update the reservation');
             }
 
-            // Mantener camelCase como espera el backend
-            const formattedData = {
-                // Datos básicos
-                apartmentId: reservationData.apartmentId !== undefined ? Number(reservationData.apartmentId) : undefined,
-                clientId: reservationData.clientId !== undefined ? Number(reservationData.clientId) : undefined,
-
-                // Fechas - ahora en formato MM-DD-YYYY HH:mm
-                checkInDate: reservationData.checkInDate ? formatDateToString(reservationData.checkInDate) : undefined,
-                checkOutDate: reservationData.checkOutDate ? formatDateToString(reservationData.checkOutDate) : undefined,
-
-                // Datos numéricos - mantener como números
-                nights: reservationData.nights !== undefined ? Number(reservationData.nights) : undefined,
-                pricePerNight: reservationData.price !== undefined ? Number(reservationData.price) :
-                    reservationData.pricePerNight !== undefined ? Number(reservationData.pricePerNight) : undefined,
-                cleaningFee: reservationData.cleaningFee !== undefined ? Number(reservationData.cleaningFee) : undefined,
-                parkingFee: reservationData.parkingFee !== undefined ? Number(reservationData.parkingFee) : undefined,
-                otherExpenses: reservationData.otherExpenses !== undefined ? Number(reservationData.otherExpenses) : undefined,
-                taxes: reservationData.taxes !== undefined ? Number(reservationData.taxes) : undefined,
-                totalAmount: reservationData.totalAmount !== undefined ? Number(reservationData.totalAmount) : undefined,
-                amountPaid: reservationData.amountPaid !== undefined ? Number(reservationData.amountPaid) : undefined,
-                amountDue: reservationData.amountDue !== undefined ? Number(reservationData.amountDue) : undefined,
-
-                // Notas
-                notes: reservationData.notes,
-
-                // Estados
-                status: reservationData.status,
-                paymentStatus: reservationData.paymentStatus,
-
-                // NO incluir datos del cliente si hay un clientId
-                ...(reservationData.clientId ? {} : {
-                    // Datos de cliente - solo incluir si no hay clientId
-                    clientName: reservationData.clientName,
-                    clientLastname: reservationData.clientLastname,
-                    clientEmail: reservationData.clientEmail,
-                    clientPhone: reservationData.clientPhone,
-                    clientAddress: reservationData.clientAddress,
-                    clientCity: reservationData.clientCity,
-                    clientCountry: reservationData.clientCountry,
-                    clientNotes: reservationData.clientNotes
-                })
-            };
-
-            // Filtrar propiedades undefined para no enviar datos innecesarios
-            const dataToSend = Object.fromEntries(
-                Object.entries(formattedData)
-                    .filter(([_, value]) => value !== undefined)
-            );
+            // Normalizar payload parcial (solo campos presentes)
+            const formattedData = normalizeReservationInput(reservationData, { partial: true });
+            const dataToSend = stripUndefined(formattedData);
 
             // Hacer la petición al servidor
             const response = await api.put(`/reservations/${id}`, dataToSend);
@@ -191,7 +107,37 @@ const reservationService = {
             const response = await api.delete(`/reservations/${id}`);
             return response.data;
         } catch (error) {
-            throw error.response?.data?.message || 'Error deleting reservation';
+            // Si es un error 400 con datos relacionados, usar el mensaje específico del servidor
+            if (error.response?.status === 400 && error.response?.data) {
+                const errorData = error.response.data;
+
+                // Si es el error específico de datos relacionados
+                if (errorData.error === 'Cannot delete reservation due to related data') {
+                    const detailedError = new Error(errorData.message || 'Cannot delete reservation with related data');
+                    detailedError.details = errorData.details;
+                    detailedError.suggestedAction = errorData.suggestedAction;
+                    detailedError.isRelatedDataError = true;
+                    throw detailedError;
+                }
+
+                // Otros errores 400
+                throw new Error(errorData.message || 'Bad request when deleting reservation');
+            }
+
+            // Para otros códigos de error, usar mensaje genérico mejorado
+            const statusCode = error.response?.status;
+            const serverMessage = error.response?.data?.message;
+
+            switch (statusCode) {
+                case 404:
+                    throw new Error('Reservation not found');
+                case 403:
+                    throw new Error('Not authorized to delete this reservation');
+                case 500:
+                    throw new Error('Server error while deleting reservation');
+                default:
+                    throw new Error(serverMessage || 'Error deleting reservation');
+            }
         }
     },
 
@@ -206,12 +152,14 @@ const reservationService = {
             const hasReservationUpdate = !!paymentData.reservation_update;
 
             // Construir los datos para enviar al servidor
-            const formattedData = {
-                // Datos del pago
-                amount: parseFloat(paymentData.amount),
+            const paymentBase = normalizePaymentInput({
+                amount: paymentData.amount,
                 paymentMethod: paymentData.payment_method,
                 notes: paymentData.notes || '',
-                // Datos actualizados de la reserva (si existen)
+                paymentDate: paymentData.payment_date,
+            });
+            const formattedData = {
+                ...paymentBase,
                 reservation_update: hasReservationUpdate ? {
                     amount_paid: paymentData.reservation_update.amount_paid,
                     amount_due: paymentData.reservation_update.amount_due,
@@ -541,6 +489,11 @@ const reservationService = {
                 dataToSend.cleaningFee = value;
             }
 
+            if (feeData.cancellationFee !== undefined) {
+                const value = Math.max(0, parseFloat(feeData.cancellationFee) || 0);
+                dataToSend.cancellationFee = value;
+            }
+
             if (feeData.otherExpenses !== undefined) {
                 const value = Math.max(0, parseFloat(feeData.otherExpenses) || 0);
                 dataToSend.otherExpenses = value;
@@ -630,6 +583,7 @@ const reservationService = {
             nights: reservationData.nights,
             pricePerNight: reservationData.pricePerNight || reservationData.price_per_night,
             cleaningFee: reservationData.cleaningFee || reservationData.cleaning_fee,
+            cancellationFee: reservationData.cancellationFee || reservationData.cancellation_fee,
             parkingFee: reservationData.parkingFee || reservationData.parking_fee,
             otherExpenses: reservationData.otherExpenses || reservationData.other_expenses,
             taxes: reservationData.taxes,

@@ -12,6 +12,7 @@ import {
   Paper,
   Button,
   CircularProgress,
+  Skeleton,
   Rating,
   Dialog,
   DialogActions,
@@ -60,8 +61,28 @@ const AdminReviews = () => {
 
   if (status === 'loading') {
     return (
-      <Box sx={{ display: 'flex', justifyContent: 'center', p: 3 }}>
-        <CircularProgress />
+      <Box sx={{ p: 3 }}>
+        <Skeleton variant="text" width={240} height={40} sx={{ mb: 2 }} />
+        <TableContainer component={Paper}>
+          <Table>
+            <TableHead>
+              <TableRow>
+                {['Name','Comment','Actions'].map((h) => (
+                  <TableCell key={h}><Skeleton variant="text" width={120} /></TableCell>
+                ))}
+              </TableRow>
+            </TableHead>
+            <TableBody>
+              {[...Array(5)].map((_, idx) => (
+                <TableRow key={idx}>
+                  <TableCell><Skeleton variant="text" width={160} /></TableCell>
+                  <TableCell><Skeleton variant="text" width={320} /></TableCell>
+                  <TableCell><Skeleton variant="rounded" width={80} height={28} /></TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        </TableContainer>
       </Box>
     );
   }
