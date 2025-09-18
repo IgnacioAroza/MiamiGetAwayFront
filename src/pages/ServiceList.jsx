@@ -90,10 +90,10 @@ function ServiceList() {
             <Typography>{t('services.capacity')}: {service.capacity}</Typography>
             <Typography>{t('services.address')}: {service.address}</Typography>
             <Typography sx={{ display: 'flex', alignItems: 'center', mt: 1 }}>
-              <BathtubOutlined sx={{ mr: 1 }} /> {service.bathrooms} {t('services.bathrooms')}
+              <BedOutlined sx={{ mr: 1 }} /> {service.rooms} {t('services.rooms')}
             </Typography>
             <Typography sx={{ display: 'flex', alignItems: 'center', mt: 1 }}>
-              <BedOutlined sx={{ mr: 1 }} /> {service.rooms} {t('services.rooms')}
+              <BathtubOutlined sx={{ mr: 1 }} /> {service.bathrooms} {t('services.bathrooms')}
             </Typography>
             <Typography sx={{ mt: 2, fontWeight: 'bold', variant: 'h6', fontSize: '1.3rem' }}>
               ${service.price ? parseFloat(service.price).toFixed(2) : t('general.notAvailable')}/{t('units.day')}
