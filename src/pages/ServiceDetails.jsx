@@ -100,14 +100,14 @@ function ServiceDetails() {
             </Grid2>
             <Grid2 item xs={12} sm={6} md={3}>
               <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                <BathtubOutlined sx={{ fontSize: '1.5rem' }} />
-                <Typography sx={textStyle}>{service.bathrooms} {t('services.bathrooms')}</Typography>
+                <BedOutlined sx={{ fontSize: '1.5rem' }} />
+                <Typography sx={textStyle}>{service.rooms} {t('services.rooms')}</Typography>
               </Box>
             </Grid2>
             <Grid2 item xs={12} sm={6} md={3}>
               <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                <BedOutlined sx={{ fontSize: '1.5rem' }} />
-                <Typography sx={textStyle}>{service.rooms} {t('services.rooms')}</Typography>
+                <BathtubOutlined sx={{ fontSize: '1.5rem' }} />
+                <Typography sx={textStyle}>{service.bathrooms} {t('services.bathrooms')}</Typography>
               </Box>
             </Grid2>
           </Grid2>
