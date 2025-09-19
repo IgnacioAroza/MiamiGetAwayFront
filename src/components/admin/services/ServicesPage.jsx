@@ -8,6 +8,7 @@ import DeleteDialog from '../dialogs/DeleteDialog';
 import CarForm from '../../form/CarForm';
 import YachtForm from '../../form/YachtForm';
 import PropertyForm from '../../form/PropertyForm';
+import ApartmentForm from '../apartments/ApartmentForm';
 import ImageUploader from '../../images/ImageUploader';
 import AddIcon from '@mui/icons-material/Add';
 
@@ -19,11 +20,16 @@ import {
   deleteService,
   setCurrentItem
 } from '../../../redux/serviceSlice';
+import {
+  fetchAdminApartments,
+  setSelectedApartment
+} from '../../../redux/adminApartmentSlice';
 
 const ServicesPage = () => {
   const dispatch = useDispatch();
   const [selectedService, setSelectedServiceLocal] = useState('apartments');
   const { items, status, error, currentItem } = useSelector((state) => state.services);
+  const adminApartments = useSelector((state) => state.adminApartments);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [itemToDelete, setItemToDelete] = useState(null);
@@ -37,29 +43,39 @@ const ServicesPage = () => {
 
   const handleServiceSelect = (serviceType) => {
     setSelectedServiceLocal(serviceType);
-    dispatch(setSelectedService(serviceType));
+    if (serviceType === 'apartments') {
+      dispatch(fetchAdminApartments());
+    } else {
+      dispatch(setSelectedService(serviceType));
+    }
   };
 
   const handleEdit = (item) => {
-    // Asegurarnos de que estamos preservando el unitNumber en apartamentos
-    const itemWithDefaults = {
-      ...item,
-      images: item.images || [],
-      unitNumber: item.unitNumber || ''
-    };
-    
-    dispatch(setCurrentItem(itemWithDefaults));
-    
-    // Configurar el estado local según el tipo de servicio
-    if (selectedService === 'cars') {
-      setCar(itemWithDefaults);
-    } else if (selectedService === 'yachts') {
-      setYacht(itemWithDefaults);
+    if (selectedService === 'apartments') {
+      // Para apartamentos, usar el adminApartmentSlice
+      dispatch(setSelectedApartment(item));
     } else {
-      setProperty(itemWithDefaults);
+      // Para otros servicios, usar la lógica original
+      const itemWithDefaults = {
+        ...item,
+        images: item.images || [],
+        unitNumber: item.unitNumber || ''
+      };
+      
+      dispatch(setCurrentItem(itemWithDefaults));
+      
+      // Configurar el estado local según el tipo de servicio
+      if (selectedService === 'cars') {
+        setCar(itemWithDefaults);
+      } else if (selectedService === 'yachts') {
+        setYacht(itemWithDefaults);
+      } else {
+        setProperty(itemWithDefaults);
+      }
+      
+      setNewImages([]);
     }
     
-    setNewImages([]);
     setDialogOpen(true);
   };
 
@@ -149,47 +165,48 @@ const ServicesPage = () => {
   };
 
   const handleCreateNew = () => {
-    // Crear un objeto vacío según el tipo de servicio
-    const emptyService = {
-      name: '',
-      description: '',
-      address: '',
-      capacity: '',
-      bathrooms: '',
-      rooms: '',
-      price: '',
-      unitNumber: '',
-      images: []
-    };
-    
-    dispatch(setCurrentItem(emptyService));
-    
-    if (selectedService === 'cars') {
-      setCar({
-        brand: '',
-        model: '',
-        description: '',
-        price: '',
-        images: []
-      });
-    } else if (selectedService === 'yachts') {
-      setYacht({
+    if (selectedService === 'apartments') {
+      // Para apartamentos, limpiar el selectedApartment en adminApartmentSlice
+      dispatch(setSelectedApartment(null));
+    } else {
+      // Para otros servicios, usar la lógica original
+      const emptyService = {
         name: '',
         description: '',
+        address: '',
         capacity: '',
+        bathrooms: '',
+        rooms: '',
         price: '',
+        unitNumber: '',
         images: []
-      });
-    } else if (selectedService === 'apartments') {
-      setProperty({
-        ...emptyService,
-        unitNumber: '' // Asegurarnos de que unitNumber esté explícitamente inicializado
-      });
-    } else {
-      setProperty(emptyService);
+      };
+      
+      dispatch(setCurrentItem(emptyService));
+      
+      if (selectedService === 'cars') {
+        setCar({
+          brand: '',
+          model: '',
+          description: '',
+          price: '',
+          images: []
+        });
+      } else if (selectedService === 'yachts') {
+        setYacht({
+          name: '',
+          description: '',
+          capacity: '',
+          price: '',
+          images: []
+        });
+      } else {
+        setProperty(emptyService);
+      }
+      
+      setNewImages([]);
     }
     
-    setNewImages([]);
     setDialogOpen(true);
   };
 
@@ -280,15 +297,23 @@ const ServicesPage = () => {
 
   useEffect(() => {
     if (selectedService) {
-      dispatch(fetchServices(selectedService));
+      if (selectedService === 'apartments') {
+        dispatch(fetchAdminApartments());
+      } else {
+        dispatch(fetchServices(selectedService));
+      }
     }
   }, [selectedService, dispatch]);
 
   useEffect(() => {
-    if (error && error[selectedService]) {
+    const hasError = selectedService === 'apartments' 
+      ? adminApartments.error 
+      : error && error[selectedService];
+      
+    if (hasError) {
       setOpenSnackbar(true);
     }
-  }, [error, selectedService]);
+  }, [error, selectedService, adminApartments.error]);
 
   const getServiceTitle = () => {
     const titles = {
@@ -318,21 +343,28 @@ const ServicesPage = () => {
       <ServiceButtons onServiceSelect={handleServiceSelect} />
       <ServiceTable 
         selectedService={selectedService}
-        services={items[selectedService] || []}
-        status={status[selectedService]}
-        error={error[selectedService]}
+        services={selectedService === 'apartments' ? (adminApartments.apartments || []) : (items[selectedService] || [])}
+        status={selectedService === 'apartments' ? adminApartments.status : status[selectedService]}
+        error={selectedService === 'apartments' ? adminApartments.error : error[selectedService]}
         onEdit={handleEdit}
         onDelete={handleDelete}
       />
 
-      <FormDialog
-        open={dialogOpen}
-        onClose={() => setDialogOpen(false)}
-        onSave={handleDialogSave}
-        title={currentItem?.id ? 'Editar' : 'Crear Nuevo'}
-      >
-        {renderForm()}
-      </FormDialog>
+      {selectedService === 'apartments' ? (
+        <ApartmentForm
+          open={dialogOpen}
+          onClose={() => setDialogOpen(false)}
+        />
+      ) : (
+        <FormDialog
+          open={dialogOpen}
+          onClose={() => setDialogOpen(false)}
+          onSave={handleDialogSave}
+          title={currentItem?.id ? 'Editar' : 'Crear Nuevo'}
+        >
+          {renderForm()}
+        </FormDialog>
+      )}
 
       <DeleteDialog
         open={deleteDialogOpen}
@@ -350,7 +382,7 @@ const ServicesPage = () => {
           severity="error" 
           sx={{ width: '100%' }}
         >
-          {error && error[selectedService]}
+          {selectedService === 'apartments' ? adminApartments.error : (error && error[selectedService])}
         </Alert>
       </Snackbar>
     </Box>
