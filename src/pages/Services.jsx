@@ -7,6 +7,7 @@ import {
   CardMedia,
   Grid,
   Container,
+  Box,
   useTheme,
   useMediaQuery } from '@mui/material';
 import { Link } from 'react-router-dom';

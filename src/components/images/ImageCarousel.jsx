@@ -1,13 +1,15 @@
 import React, { useState, useCallback, useMemo } from 'react';
-import { Box, IconButton } from '@mui/material';
+import { Box, IconButton, Typography } from '@mui/material';
 import Slider from "react-slick";
 import ChevronLeftIcon from '@mui/icons-material/ChevronLeft';
 import ChevronRightIcon from '@mui/icons-material/ChevronRight';
+import ImagePlaceholder from '../common/ImagePlaceholder';
 import "slick-carousel/slick/slick.css"; 
-import "slick-carousel/slick/slick-theme.css";
+import useImageWithPlaceholder from '../../hooks/useImageWithPlaceholder';
 
 const ImageCarousel = ({ images, height = '250px', width = '100%', aspectRatio = '16/9' }) => {
   const [sliderRef, setSliderRef] = useState(null);
+  const { hasImageError, createImageErrorHandler, createImageLoadHandler } = useImageWithPlaceholder();
 
   const normalizeImageArray = useCallback((images) => {
     if (!images) return [];
@@ -84,39 +86,47 @@ const ImageCarousel = ({ images, height = '250px', width = '100%', aspectRatio =
   if (imageArray.length === 0) {
     return (
       <ImageContainer>
-        <img 
-          src="https://via.placeholder.com/200?text=No+Image+Available"
-          alt="No Image Available"
-          style={{ 
-            width: '100%',
-            height: '100%',
-            objectFit: 'cover',
-            objectPosition: 'center 65%',
-            borderRadius: '16px',
-          }}
+        <ImagePlaceholder
+          width="100%"
+          height="100%"
+          title="Service Gallery"
+          subtitle="No images available"
+          emoji="🖼️"
+          variant="default"
+          showPattern={true}
         />
       </ImageContainer>
     );
   }
 
   if (imageArray.length === 1) {
+    const imageId = `carousel-single-${imageArray[0]}`;
     return (
       <ImageContainer>
-        <img 
-          src={imageArray[0]} 
-          alt="Service" 
-          style={{ 
-            width: '100%',
-            height: '100%',
-            objectFit: 'cover',
-            objectPosition: 'center 65%',
-            borderRadius: '16px',
-          }}
-          onError={(e) => {
-            e.target.onerror = null;
-            e.target.src = 'https://via.placeholder.com/200?text=Image+Not+Found';
-          }}
-        />
+        {hasImageError(imageId) || !imageArray[0] ? (
+          <ImagePlaceholder
+            title="Service Image"
+            subtitle="Image not available"
+            emoji="🖼️"
+            variant="default"
+            width="100%"
+            height="100%"
+          />
+        ) : (
+          <img
+            src={imageArray[0]}
+            alt="Service"
+            style={{
+              width: '100%',
+              height: '100%',
+              objectFit: 'cover',
+              objectPosition: 'center 65%',
+              borderRadius: '16px',
+            }}
+            onError={createImageErrorHandler(imageId)}
+            onLoad={createImageLoadHandler(imageId)}
+          />
+        )}
       </ImageContainer>
     );
   }
@@ -125,31 +135,43 @@ const ImageCarousel = ({ images, height = '250px', width = '100%', aspectRatio =
     <Box sx={{ position: 'relative' }}>
       <ImageContainer>
         <Slider ref={setSliderRef} {...settings} style={{ width: '100%', height: '100%' }}>
-          {imageArray.map((imagen, indice) => (
-            <div key={indice} style={{ 
-              height: '100%',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              padding: '0 8px',
-            }}>
-              <img 
-                src={imagen} 
-                alt={`Servicio ${indice + 1}`} 
-                style={{ 
-                  width: '100%',
-                  height: 'auto',
-                  objectFit: 'cover',
-
-                  borderRadius: '16px',
-                }}
-                onError={(e) => {
-                  e.target.onerror = null;
-                  e.target.src = 'https://via.placeholder.com/200?text=Imagen+no+encontrada';
-                }}
-              />
-            </div>
-          ))}
+          {imageArray.map((imagen, indice) => {
+            const imageId = `carousel-${indice}-${imagen}`;
+            return (
+              <div key={indice} style={{ 
+                height: '100%',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                padding: '0 8px',
+              }}>
+                {hasImageError(imageId) || !imagen ? (
+                  <ImagePlaceholder
+                    title={`Image ${indice + 1}`}
+                    subtitle="Image not found"
+                    emoji="🖼️"
+                    variant="default"
+                    borderRadius={16}
+                    width="100%"
+                    height="auto"
+                  />
+                ) : (
+                  <img
+                    src={imagen}
+                    alt={`Service ${indice + 1}`}
+                    style={{
+                      width: '100%',
+                      height: 'auto',
+                      objectFit: 'cover',
+                      borderRadius: '16px',
+                    }}
+                    onError={createImageErrorHandler(imageId)}
+                    onLoad={createImageLoadHandler(imageId)}
+                  />
+                )}
+              </div>
+            );
+          })}
         </Slider>
       </ImageContainer>
       {imageArray.length > 1 && (
