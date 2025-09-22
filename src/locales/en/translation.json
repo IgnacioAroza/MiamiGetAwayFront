@@ -52,6 +52,7 @@
     },
     "description": "Description",
     "capacity": "Capacity",
+    "passengers": "Passengers",
     "address": "Address",
     "bathrooms": "Bathrooms",
     "rooms": "Bedrooms",

@@ -190,6 +190,7 @@ const ServicesPage = () => {
           model: '',
           description: '',
           price: '',
+          passengers: '',
           images: []
         });
       } else if (selectedService === 'yachts') {
@@ -252,7 +253,7 @@ const ServicesPage = () => {
       <>
         <Divider sx={{ my: 3 }} />
         <Box sx={{ mt: 3 }}>
-          <Typography variant="h6" gutterBottom>Imágenes</Typography>
+          <Typography variant="h6" gutterBottom>Images</Typography>
           <ImageUploader 
             images={currentImages}
             newImages={newImages}
@@ -322,7 +323,7 @@ const ServicesPage = () => {
       yachts: 'Yachts',
       villas: 'Villas'
     };
-    return titles[selectedService] || 'Servicios';
+    return titles[selectedService] || 'Services';
   };
 
   return (
@@ -360,7 +361,7 @@ const ServicesPage = () => {
           open={dialogOpen}
           onClose={() => setDialogOpen(false)}
           onSave={handleDialogSave}
-          title={currentItem?.id ? 'Editar' : 'Crear Nuevo'}
+          title={currentItem?.id ? 'Edit' : 'Create New'}
         >
           {renderForm()}
         </FormDialog>

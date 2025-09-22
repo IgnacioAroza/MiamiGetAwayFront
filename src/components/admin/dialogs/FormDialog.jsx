@@ -12,7 +12,7 @@ const FormDialog = ({
   onClose, 
   onSave, 
   children, 
-  title = 'Editar' 
+  title = 'Edit' 
 }) => {
   return (
     <Dialog 
@@ -33,10 +33,10 @@ const FormDialog = ({
       </DialogContent>
       <DialogActions>
         <Button onClick={onClose} color="inherit">
-          Cancelar
+          Cancel
         </Button>
         <Button onClick={onSave} variant="contained" color="primary">
-          Guardar
+          Save
         </Button>
       </DialogActions>
     </Dialog>

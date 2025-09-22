@@ -37,7 +37,7 @@ const ServiceTable = ({
   if (status === 'loading') {
     // Skeletons para carga
     const headerMap = {
-      cars: ['Brand', 'Model', 'Description', 'Price', 'Images', 'Actions'],
+      cars: ['Brand', 'Model', 'Passengers', 'Description', 'Price', 'Images', 'Actions'],
       yachts: ['Name', 'Description', 'Capacity', 'Price', 'Images', 'Actions'],
       apartments: ['Name', 'Description', 'Unit Number', 'Address', 'Capacity', 'Bathrooms', 'Bedrooms', 'Price', 'Images', 'Actions'],
       villas: ['Name', 'Description', 'Address', 'Capacity', 'Bathrooms', 'Bedrooms', 'Price', 'Images', 'Actions']
@@ -117,7 +117,7 @@ const ServiceTable = ({
 
   const renderHeaders = () => {
     const headers = {
-      cars: ['Brand', 'Model', 'Description', 'Price', 'Images', 'Actions'],
+      cars: ['Brand', 'Model', 'Passengers', 'Description', 'Price', 'Images', 'Actions'],
       yachts: ['Name', 'Description', 'Capacity', 'Price', 'Images', 'Actions'],
       apartments: ['Name', 'Description', 'Unit Number', 'Address', 'Capacity', 'Bathrooms', 'Bedrooms', 'Price', 'Images', 'Actions'],
       villas: ['Name', 'Description', 'Address', 'Capacity', 'Bathrooms', 'Bedrooms', 'Price', 'Images', 'Actions']
@@ -138,6 +138,7 @@ const ServiceTable = ({
         <>
           <TableCell>{service.brand}</TableCell>
           <TableCell>{service.model}</TableCell>
+          <TableCell>{service.passengers || 0}</TableCell>
           <TableCell>{service.description}</TableCell>
           <TableCell>${service.price}</TableCell>
           <TableCell>{service.images?.length || 0} images</TableCell>
@@ -229,6 +230,7 @@ const ServiceTable = ({
           </Typography>
           <Box sx={{ mt: 2 }}>
             <Chip label={`$${car.price}`} color="primary" />
+            <Chip label={`${car.passengers || 0} passengers`} sx={{ ml: 1 }} />
             <Chip label={`${car.images?.length || 0} images`} sx={{ ml: 1 }} />
           </Box>
         </CardContent>

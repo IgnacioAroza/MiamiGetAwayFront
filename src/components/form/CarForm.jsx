@@ -8,7 +8,7 @@ const CarForm = ({ car, setCar }) => {
 
   return (
     <Grid2 container spacing={2} sx={{ mt: 2 }}>
-      <Grid2 item xs={12} sm={6}>
+      <Grid2 item xs={12} sm={3}>
         <TextField
           fullWidth
           label="Brand"
@@ -16,7 +16,7 @@ const CarForm = ({ car, setCar }) => {
           onChange={(e) => setCar({...car, brand: e.target.value})}
         />
       </Grid2>
-      <Grid2 item xs={12} sm={6}>
+      <Grid2 item xs={12} sm={3}>
         <TextField
           fullWidth
           label="Model"
@@ -27,11 +27,11 @@ const CarForm = ({ car, setCar }) => {
       <Grid2 item xs={12} sm={6}>
         <TextField
           fullWidth
-          label="Description"
-          multiline
-          rows={4}
-          value={car.description || ''}
-          onChange={(e) => setCar({...car, description: e.target.value})}
+          label="Passengers"
+          type="number"
+          value={car.passengers || ''}
+          onChange={(e) => setCar({...car, passengers: e.target.value})}
+          inputProps={{ min: 1, max: 50 }}
         />
       </Grid2>
       <Grid2 item xs={12} sm={6}>
@@ -41,6 +41,16 @@ const CarForm = ({ car, setCar }) => {
           type="number"
           value={car.price || ''}
           onChange={(e) => setCar({...car, price: e.target.value})}
+        />
+      </Grid2>
+      <Grid2 item xs={12} sm={6}>
+        <TextField
+          fullWidth
+          label="Description"
+          multiline
+          rows={3}
+          value={car.description || ''}
+          onChange={(e) => setCar({...car, description: e.target.value})}
         />
       </Grid2>
     </Grid2>
