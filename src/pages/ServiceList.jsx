@@ -21,6 +21,7 @@ import "slick-carousel/slick/slick-theme.css";
 
 import ImageCarousel from "../components/images/ImageCarousel";
 import WhatsAppIcon from "../components/WhatsAppIcon";
+import PublicServiceFilters from "../components/filters/PublicServiceFilters";
 
 import carService from "../services/carService";
 import apartmentService from "../services/apartmentService";
@@ -38,6 +39,7 @@ function ServiceList() {
   const [services, setServices] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [filters, setFilters] = useState({});
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
   const isTablet = useMediaQuery(theme.breakpoints.between("sm", "md"));
@@ -54,16 +56,16 @@ function ServiceList() {
         let data;
         switch (type) {
           case "cars":
-            data = await carService.getAllCars();
+            data = await carService.getAllCars(filters);
             break;
           case "apartments":
-            data = await apartmentService.getAllApartments();
+            data = await apartmentService.getAllApartments(filters);
             break;
           case "yachts":
-            data = await yachtService.getAllYachts();
+            data = await yachtService.getAllYachts(filters);
             break;
           case "villas":
-            data = await villaService.getAllVillas();
+            data = await villaService.getAllVillas(filters);
             break;
           default:
             throw new Error(t("errors.invalidServiceType", { type }));
@@ -79,7 +81,7 @@ function ServiceList() {
     };
 
     fetchServices();
-  }, [t, type]);
+  }, [t, type, filters]);
 
   const renderServiceDetails = (service) => {
     switch (type) {
@@ -225,21 +227,67 @@ function ServiceList() {
   }
 
   if (!services || services.length === 0) {
+    // Si hay filtros activos, mostrar mensaje diferente y mantener filtros visibles
+    const hasActiveFilters = Object.keys(filters).length > 0;
+    
     return (
-      <Container
-        sx={{
-          py: 8,
-          display: "flex",
-          flexDirection: "column",
-          justifyContent: "center",
-          width: "20vw",
-        }}
-        maxWidth="md"
-      >
-        <Typography>{t("services.noServicesFound")}</Typography>
-        <Button component={Link} to="/" variant="contained" sx={{ mt: 2 }}>
-          {t("navigation.backToHome")}
-        </Button>
+      <Container sx={{ py: 8 }} maxWidth="lg">
+        <Typography
+          component="h1"
+          variant="h2"
+          align="center"
+          color="text.primary"
+          fontWeight="400"
+          gutterBottom
+        >
+          {t(`services.types.${type}`)}
+        </Typography>
+
+        {/* Mantener filtros visibles cuando no hay resultados */}
+        {(type === 'cars' || type === 'apartments') && (
+          <PublicServiceFilters 
+            type={type} 
+            onFiltersChange={setFilters} 
+          />
+        )}
+
+        <Container
+          sx={{
+            py: 4,
+            display: "flex",
+            flexDirection: "column",
+            justifyContent: "center",
+            alignItems: "center",
+          }}
+          maxWidth="md"
+        >
+          {hasActiveFilters ? (
+            <>
+              <Typography variant="h5" gutterBottom sx={{ textAlign: 'center' }}>
+                {t("services.noResultsWithFilters") || "No se encontraron resultados con estos filtros"}
+              </Typography>
+              <Typography variant="body1" color="text.secondary" sx={{ mb: 3, textAlign: 'center' }}>
+                {t("services.tryAdjustingFilters") || "Intenta ajustar los filtros para encontrar más opciones"}
+              </Typography>
+              <Button 
+                variant="outlined" 
+                onClick={() => setFilters({})}
+                sx={{ mr: 2 }}
+              >
+                {t("filters.clearFilters") || "Limpiar Filtros"}
+              </Button>
+            </>
+          ) : (
+            <>
+              <Typography variant="h5" gutterBottom>
+                {t("services.noServicesFound")}
+              </Typography>
+              <Button component={Link} to="/" variant="contained" sx={{ mt: 2 }}>
+                {t("navigation.backToHome")}
+              </Button>
+            </>
+          )}
+        </Container>
       </Container>
     );
   }
@@ -270,6 +318,15 @@ function ServiceList() {
       >
         {t(`services.types.${type}`)}
       </Typography>
+
+      {/* Filtros - Solo para cars y apartments */}
+      {(type === 'cars' || type === 'apartments') && (
+        <PublicServiceFilters 
+          type={type} 
+          onFiltersChange={setFilters} 
+        />
+      )}
+
       <Grid
         container
         spacing={4}

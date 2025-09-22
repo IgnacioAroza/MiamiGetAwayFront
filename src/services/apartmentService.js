@@ -1,10 +1,29 @@
 import api from '../utils/api'
 
 const carService = {
-    getAllApartments: async () => {
+    getAllApartments: async (filters = {}) => {
         try {
-            const respose = await api.get('/apartments')
-            return respose.data
+            // Construir query params si hay filtros
+            const queryParams = new URLSearchParams();
+
+            if (filters.minPrice) {
+                queryParams.append('minPrice', filters.minPrice);
+            }
+            if (filters.maxPrice) {
+                queryParams.append('maxPrice', filters.maxPrice);
+            }
+            if (filters.capacity) {
+                queryParams.append('capacity', filters.capacity);
+            }
+            if (filters.q) {
+                queryParams.append('q', filters.q);
+            }
+
+            // Construir URL con o sin query params
+            const url = queryParams.toString() ? `/apartments?${queryParams.toString()}` : '/apartments';
+
+            const respose = await api.get(url);
+            return respose.data;
         } catch (error) {
             console.error('Error fetching apartments:', error)
             throw error

@@ -1,9 +1,26 @@
 import api from '../utils/api'
 
 const carService = {
-    getAllCars: async () => {
+    getAllCars: async (filters = {}) => {
         try {
-            const response = await api.get('/cars')
+            // Construir query params si hay filtros
+            const queryParams = new URLSearchParams();
+
+            if (filters.minPrice) {
+                queryParams.append('minPrice', filters.minPrice);
+            }
+            if (filters.maxPrice) {
+                queryParams.append('maxPrice', filters.maxPrice);
+            }
+            if (filters.passengers) {
+                queryParams.append('passengers', filters.passengers);
+            }
+
+            // Construir URL con o sin query params
+            const url = queryParams.toString() ? `/cars?${queryParams.toString()}` : '/cars';
+
+            const response = await api.get(url);
+
             if (response.data && Array.isArray(response.data)) {
                 return response.data;
             } else {
