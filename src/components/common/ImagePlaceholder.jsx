@@ -14,7 +14,7 @@ const ImagePlaceholder = ({
     variant = 'default', // 'default', 'compact', 'apartment'
     showPattern = true,
     borderRadius = 1,
-    isDarkMode = false
+    isDarkMode = true
 }) => {
     const getVariantStyles = () => {
         switch (variant) {
@@ -23,7 +23,7 @@ const ImagePlaceholder = ({
                     container: {
                         width,
                         height,
-                        bgcolor: isDarkMode ? '#3a3a3a' : '#f5f5f5',
+                        bgcolor: '#000000',
                         border: isDarkMode ? '2px dashed #555' : '2px dashed #ddd',
                         borderRadius,
                     },
@@ -52,7 +52,7 @@ const ImagePlaceholder = ({
                     container: {
                         width,
                         height,
-                        bgcolor: isDarkMode ? '#3a3a3a' : '#f5f5f5',
+                        bgcolor: '#000000',
                         border: isDarkMode ? '2px dashed #555' : '1px solid #e0e0e0',
                         borderRadius,
                     },
@@ -81,7 +81,7 @@ const ImagePlaceholder = ({
                     container: {
                         width,
                         height,
-                        bgcolor: isDarkMode ? '#2a2a2a' : '#f5f5f5',
+                        bgcolor: '#000000',
                         border: isDarkMode ? '2px dashed #444' : '1px solid #e0e0e0',
                         borderRadius,
                     },
@@ -109,10 +109,8 @@ const ImagePlaceholder = ({
 
     const styles = getVariantStyles();
 
-    // Patrón de fondo SVG
-    const backgroundPattern = showPattern ? {
-        backgroundImage: `url("data:image/svg+xml,%3csvg width='100' height='100' xmlns='http://www.w3.org/2000/svg'%3e%3cdefs%3e%3cpattern id='placeholderPattern' patternUnits='userSpaceOnUse' width='20' height='20' patternTransform='scale(2) rotate(0)'%3e%3crect x='0' y='0' width='100%25' height='100%25' fill='${isDarkMode ? '%233a3a3a' : '%23f5f5f5'}'/%3e%3cpath d='m0 10h20v10h-20z' fill='${isDarkMode ? '%23444' : '%23eeeeee'}' fill-opacity='0.4'/%3e%3c/pattern%3e%3c/defs%3e%3crect width='100%25' height='100%25' fill='url(%23placeholderPattern)'/%3e%3c/svg%3e")`
-    } : {};
+    // Patrón de fondo SVG - deshabilitado para usar fondo negro básico
+    const backgroundPattern = {}; // showPattern ? { ... } : {};
 
     return (
         <Box

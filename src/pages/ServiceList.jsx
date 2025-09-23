@@ -4,6 +4,7 @@ import {
   Container,
   Typography,
   Grid,
+  Box,
   Card,
   CardContent,
   CardActions,
@@ -231,63 +232,80 @@ function ServiceList() {
     const hasActiveFilters = Object.keys(filters).length > 0;
     
     return (
-      <Container sx={{ py: 8 }} maxWidth="lg">
-        <Typography
-          component="h1"
-          variant="h2"
-          align="center"
-          color="text.primary"
-          fontWeight="400"
-          gutterBottom
-        >
-          {t(`services.types.${type}`)}
-        </Typography>
-
-        {/* Mantener filtros visibles cuando no hay resultados */}
-        {(type === 'cars' || type === 'apartments') && (
-          <PublicServiceFilters 
-            type={type} 
-            onFiltersChange={setFilters} 
-          />
-        )}
-
-        <Container
-          sx={{
-            py: 4,
-            display: "flex",
-            flexDirection: "column",
-            justifyContent: "center",
-            alignItems: "center",
-          }}
-          maxWidth="md"
-        >
-          {hasActiveFilters ? (
-            <>
-              <Typography variant="h5" gutterBottom sx={{ textAlign: 'center' }}>
-                {t("services.noResultsWithFilters") || "No se encontraron resultados con estos filtros"}
-              </Typography>
-              <Typography variant="body1" color="text.secondary" sx={{ mb: 3, textAlign: 'center' }}>
-                {t("services.tryAdjustingFilters") || "Intenta ajustar los filtros para encontrar más opciones"}
-              </Typography>
-              <Button 
-                variant="outlined" 
-                onClick={() => setFilters({})}
-                sx={{ mr: 2 }}
-              >
-                {t("filters.clearFilters") || "Limpiar Filtros"}
-              </Button>
-            </>
-          ) : (
-            <>
-              <Typography variant="h5" gutterBottom>
-                {t("services.noServicesFound")}
-              </Typography>
-              <Button component={Link} to="/" variant="contained" sx={{ mt: 2 }}>
-                {t("navigation.backToHome")}
-              </Button>
-            </>
+      <Container sx={{ py: 8, px: { xs: 2, md: 3 } }} maxWidth="xl" disableGutters>
+        <Grid container rowSpacing={4} columnSpacing={{ xs: 2, md: 8, lg: 10 }}>
+          {(type === 'cars' || type === 'apartments') && (
+            <Grid item xs={12} md={2} lg={2} sx={{ pr: { md: 2 } }}>
+              {/* Espaciador: título oculto para alinear con el inicio de las tarjetas */}
+              <Box sx={{ display: { xs: 'none', md: 'block' } }}>
+                <Typography
+                  component="h1"
+                  variant="h2"
+                  sx={{ mb: 4, visibility: 'hidden' }}
+                >
+                  {t(`services.types.${type}`)}
+                </Typography>
+              </Box>
+              <PublicServiceFilters 
+                type={type} 
+                onFiltersChange={setFilters} 
+              />
+            </Grid>
           )}
-        </Container>
+
+          <Grid item xs={12} md={(type === 'cars' || type === 'apartments') ? 10 : 12} lg={(type === 'cars' || type === 'apartments') ? 10 : 12} sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+            <Box sx={{ width: '100%', maxWidth: 1200, mx: 'auto' }}>
+              <Typography
+                component="h1"
+                variant="h2"
+                align="center"
+                color="text.primary"
+                fontWeight="400"
+                gutterBottom
+                sx={{ mb: 4 }}
+              >
+                {t(`services.types.${type}`)}
+              </Typography>
+            </Box>
+            <Container
+              sx={{
+                py: 4,
+                display: "flex",
+                flexDirection: "column",
+                justifyContent: "center",
+                alignItems: "center",
+              }}
+              maxWidth="md"
+            >
+              {hasActiveFilters ? (
+                <>
+                  <Typography variant="h5" gutterBottom sx={{ textAlign: 'center' }}>
+                    {t("services.noResultsWithFilters") || "No se encontraron resultados con estos filtros"}
+                  </Typography>
+                  <Typography variant="body1" color="text.secondary" sx={{ mb: 3, textAlign: 'center' }}>
+                    {t("services.tryAdjustingFilters") || "Intenta ajustar los filtros para encontrar más opciones"}
+                  </Typography>
+                  <Button 
+                    variant="outlined" 
+                    onClick={() => setFilters({})}
+                    sx={{ mr: 2 }}
+                  >
+                    {t("filters.clearFilters") || "Limpiar Filtros"}
+                  </Button>
+                </>
+              ) : (
+                <>
+                  <Typography variant="h5" gutterBottom>
+                    {t("services.noServicesFound")}
+                  </Typography>
+                  <Button component={Link} to="/" variant="contained" sx={{ mt: 2 }}>
+                    {t("navigation.backToHome")}
+                  </Button>
+                </>
+              )}
+            </Container>
+          </Grid>
+        </Grid>
       </Container>
     );
   }
@@ -307,86 +325,113 @@ function ServiceList() {
   };
 
   return (
-    <Container sx={{ py: 8 }} maxWidth="lg">
-      <Typography
-        component="h1"
-        variant="h2"
-        align="center"
-        color="text.primary"
-        fontWeight="400"
-        gutterBottom
-      >
-        {t(`services.types.${type}`)}
-      </Typography>
+    <Container sx={{ py: 8, px: { xs: 2, md: 3 } }} maxWidth="xl" disableGutters>
+      <Grid container rowSpacing={4} columnSpacing={{ xs: 2, md: 8, lg: 10 }}>
+        {/* Columna izquierda - Filtros */}
+        {(type === 'cars' || type === 'apartments') && (
+          <Grid item xs={12} md={2} lg={2} sx={{ pr: { md: 2 } }}>
+            {/* Espaciador: título oculto para alinear con el inicio de las tarjetas */}
+            <Box sx={{ display: { xs: 'none', md: 'block' } }}>
+              <Typography
+                component="h1"
+                variant="h2"
+                sx={{ mb: 4, visibility: 'hidden' }}
+              >
+                {t(`services.types.${type}`)}
+              </Typography>
+            </Box>
+            <PublicServiceFilters 
+              type={type} 
+              onFiltersChange={setFilters} 
+            />
+          </Grid>
+        )}
 
-      {/* Filtros - Solo para cars y apartments */}
-      {(type === 'cars' || type === 'apartments') && (
-        <PublicServiceFilters 
-          type={type} 
-          onFiltersChange={setFilters} 
-        />
-      )}
-
-      <Grid
-        container
-        spacing={4}
-        sx={{
-          display: "flex",
-          justifyContent: "center",
-          alignContent: "center",
-        }}
-      >
-        {services.map((service) => (
-          <MotionGrid
-            item
-            xs={12}
-            sm={6}
-            md={4}
-            key={service.id}
-            variants={cardVariants}
-            initial="hidden"
-            animate="visible"
-            component={Link}
-            to={`/services/${type}/${service.id}`}
-            sx={{ textDecoration: "none" }}
-          >
-            <MotionCard
-              sx={{
-                height: "100%",
-                display: "flex",
-                flexDirection: "column",
-                width: "100%",
-              }}
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
+        {/* Columna derecha - Título y servicios */}
+        <Grid 
+          item 
+          xs={12} 
+          md={(type === 'cars' || type === 'apartments') ? 10 : 12}
+          lg={(type === 'cars' || type === 'apartments') ? 10 : 12}
+          sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}
+        >
+          <Box sx={{ width: '100%', maxWidth: 1200, mx: 'auto' }}>
+            <Typography
+              component="h1"
+              variant="h2"
+              align="center"
+              color="text.primary"
+              fontWeight="400"
+              gutterBottom
+              sx={{ mb: 4 }}
             >
-              <ImageCarousel
-                images={
-                  Array.isArray(service.images)
-                    ? service.images
-                    : [service.images]
-                }
-                height={isMobile ? "250px" : isTablet ? "220px" : "250px"}
-                width="95%"
-                aspectRatio="16/9"
-              />
-              <CardContent sx={{ flexGrow: 1, mt: 2, ml: 2 }}>
-                {renderServiceDetails(service)}
-              </CardContent>
-              <CardActions>
-                <Button
-                  sx={{ ml: 2, mb: 2 }}
-                  size="mediun"
-                  component={Link}
-                  variant="outlined"
-                  to={`/services/${type}/${service.id}`}
+              {t(`services.types.${type}`)}
+            </Typography>
+          </Box>
+
+          <Grid
+            container
+            spacing={4}
+            sx={{
+              display: "flex",
+              justifyContent: "center",
+              alignContent: "flex-start",
+            }}
+          >
+            {services.map((service) => (
+              <MotionGrid
+                item
+                xs={12}
+                sm={6}
+                md={4}
+                lg={4}
+                key={service.id}
+                variants={cardVariants}
+                initial="hidden"
+                animate="visible"
+                component={Link}
+                to={`/services/${type}/${service.id}`}
+                sx={{ textDecoration: "none" }}
+              >
+                <MotionCard
+                  sx={{
+                    height: "100%",
+                    display: "flex",
+                    flexDirection: "column",
+                    width: "100%",
+                  }}
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.98 }}
                 >
-                  {t("general.viewDetails")}
-                </Button>
-              </CardActions>
-            </MotionCard>
-          </MotionGrid>
-        ))}
+                  <ImageCarousel
+                    images={
+                      Array.isArray(service.images)
+                        ? service.images
+                        : [service.images]
+                    }
+                    height={isMobile ? "250px" : isTablet ? "220px" : "250px"}
+                    width="100%"
+                    aspectRatio="16/9"
+                  />
+                  <CardContent sx={{ flexGrow: 1, mt: 2, ml: 2 }}>
+                    {renderServiceDetails(service)}
+                  </CardContent>
+                  <CardActions>
+                    <Button
+                      sx={{ ml: 2, mb: 2 }}
+                      size="mediun"
+                      component={Link}
+                      variant="outlined"
+                      to={`/services/${type}/${service.id}`}
+                    >
+                      {t("general.viewDetails")}
+                    </Button>
+                  </CardActions>
+                </MotionCard>
+              </MotionGrid>
+            ))}
+          </Grid>
+        </Grid>
       </Grid>
       <WhatsAppIcon />
     </Container>
