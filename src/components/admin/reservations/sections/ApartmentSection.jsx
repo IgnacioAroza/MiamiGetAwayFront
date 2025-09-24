@@ -1,4 +1,4 @@
-import React, { useMemo } from 'react';
+import React, { useMemo, useState } from 'react';
 import {
     Grid,
     FormControl,
@@ -11,9 +11,12 @@ import {
     Box
 } from '@mui/material';
 import { useApartmentImages } from '../../../../hooks/useApartmentImages';
+import useImageWithPlaceholder from '../../../../hooks/useImageWithPlaceholder';
+import ImagePlaceholder from '../../../common/ImagePlaceholder';
 
 const ApartmentSection = ({ formData, apartments, selectedApartment, onChange }) => {
     const { getApartmentDetails } = useApartmentImages(selectedApartment);
+    const { hasImageError, createImageErrorHandler, createImageLoadHandler } = useImageWithPlaceholder();
 
     // Memorizar los detalles del apartamento para evitar cálculos innecesarios
     const apartmentDetails = useMemo(() => getApartmentDetails(), [getApartmentDetails]);
@@ -22,7 +25,6 @@ const ApartmentSection = ({ formData, apartments, selectedApartment, onChange })
     const handleApartmentChange = (event) => {
         const { value } = event.target;
         const apartment = apartments.find(apt => apt.id === parseInt(value));
-        console.log('depto seleccionado:', apartment);
 
         if (apartment) {
             onChange({
@@ -105,12 +107,29 @@ const ApartmentSection = ({ formData, apartments, selectedApartment, onChange })
                         borderRadius: 2,
                         overflow: 'hidden'
                     }}>
-                        <CardMedia
-                            component="img"
-                            sx={{ width: 80, height: 80, objectFit: 'cover' }}
-                            image={apartmentDetails.image}
-                            alt={apartmentDetails.alt}
-                        />
+                        {hasImageError(`apartment-${selectedApartment?.id}`) || !apartmentDetails.image ? (
+                            <ImagePlaceholder
+                                title="Apt"
+                                subtitle=""
+                                emoji="🏠"
+                                variant="compact"
+                                width={80}
+                                height={80}
+                                isDarkMode={true}
+                            />
+                        ) : (
+                            <img
+                                src={apartmentDetails.image}
+                                alt={apartmentDetails.alt}
+                                style={{
+                                    width: 80,
+                                    height: 80,
+                                    objectFit: 'cover'
+                                }}
+                                onError={createImageErrorHandler(`apartment-${selectedApartment?.id}`)}
+                                onLoad={createImageLoadHandler(`apartment-${selectedApartment?.id}`)}
+                            />
+                        )}
                         <Box sx={{ 
                             display: 'flex', 
                             flexDirection: 'column', 

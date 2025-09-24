@@ -118,7 +118,7 @@ function ServiceDetails() {
       {type === 'cars' && (
           <>
             <Grid2 container spacing={2} alignItems="center">
-              <Grid2 item xs={12} sm={6}>
+              <Grid2 item xs={12} sm={6} md={4}>
                 <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                   <DirectionsCar sx={{ fontSize: '1.5rem' }} />
                   <Typography sx={textStyle}>
@@ -126,11 +126,19 @@ function ServiceDetails() {
                   </Typography>
                 </Box>
               </Grid2>
-              <Grid2 item xs={12} sm={6}>
+              <Grid2 item xs={12} sm={6} md={4}>
                 <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                   <DirectionsCar sx={{ fontSize: '1.5rem' }} />
                   <Typography sx={textStyle}>
                     {t('services.model')}: {service.model}
+                  </Typography>
+                </Box>
+              </Grid2>
+              <Grid2 item xs={12} sm={6} md={4}>
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                  <People sx={{ fontSize: '1.5rem' }} />
+                  <Typography sx={textStyle}>
+                    {t('services.passengers')}: {service.passengers || 0}
                   </Typography>
                 </Box>
               </Grid2>

@@ -5,11 +5,11 @@ import { useToast } from '../../../../hooks/useToast';
 import ToastNotification from '../../../common/ToastNotification';
 
 const PaymentSection = ({ formData, onChange, onPaymentRegistered, onInitialPaymentChange, initialPaymentData }) => {
-    // Usar datos del prop o estado local
-    const [paymentData, setPaymentData] = useState(initialPaymentData || {
-        paymentAmount: '',
-        paymentMethod: 'cash',
-        paymentNotes: ''
+    // Usar datos del prop o estado local con valores por defecto
+    const [paymentData, setPaymentData] = useState({
+        paymentAmount: initialPaymentData?.amount || '',
+        paymentMethod: initialPaymentData?.paymentMethod || 'cash',
+        paymentNotes: initialPaymentData?.notes || ''
     });
     const [isLoading, setIsLoading] = useState(false);
     const { toast, success, error, warning, hideToast } = useToast();
@@ -130,7 +130,7 @@ const PaymentSection = ({ formData, onChange, onPaymentRegistered, onInitialPaym
                         label="Amount"
                         name="paymentAmount"
                         type="number"
-                        value={paymentData.paymentAmount}
+                        value={paymentData.paymentAmount || ''}
                         onChange={handlePaymentChange}
                         placeholder="$0.00"
                         size="small"
@@ -152,7 +152,7 @@ const PaymentSection = ({ formData, onChange, onPaymentRegistered, onInitialPaym
                         <InputLabel sx={{ color: '#ccc' }}>Method</InputLabel>
                         <Select
                             name="paymentMethod"
-                            value={paymentData.paymentMethod}
+                            value={paymentData.paymentMethod || 'cash'}
                             onChange={handlePaymentChange}
                             label="Method"
                             sx={{
@@ -180,7 +180,7 @@ const PaymentSection = ({ formData, onChange, onPaymentRegistered, onInitialPaym
                         fullWidth
                         label="Payment Notes"
                         name="paymentNotes"
-                        value={paymentData.paymentNotes}
+                        value={paymentData.paymentNotes || ''}
                         onChange={handlePaymentChange}
                         multiline
                         rows={2}

@@ -166,6 +166,7 @@ export const normalizeServiceItemFromApi = (serviceType, data = {}) => {
         model: data.model || '',
         description: data.description || data.desc || '',
         price: numberOrUndefined(data.price) ?? 0,
+        passengers: numberOrUndefined(data.passengers) ?? 0,
         images: data.images || [],
       };
     case 'yachts':

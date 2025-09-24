@@ -52,10 +52,24 @@
     },
     "description": "Descripción",
     "capacity": "Capacidad",
+    "passengers": "Pasajeros",
     "address": "Dirección",
     "bathrooms": "Baños",
     "rooms": "Habitaciones",
-    "noServicesFound": "No se encontraron servicios."
+    "noServicesFound": "No se encontraron servicios.",
+    "noResultsWithFilters": "No se encontraron resultados con estos filtros",
+    "tryAdjustingFilters": "Intenta ajustar los filtros para encontrar más opciones"
+  },
+  "filters": {
+    "title": "Filtros",
+    "priceRange": "Rango de precio",
+    "minPassengers": "Mín. pasajeros",
+    "minCapacity": "Mín. capacidad",
+    "location": "Ubicación",
+    "applyFilters": "Aplicar Filtros",
+    "clearFilters": "Limpiar Filtros",
+    "allPassengers": "Todos",
+    "allCapacities": "Todas"
   },
   "reviews": {
     "title": "Reseñas de Clientes",
