@@ -6,7 +6,7 @@ import WhatsAppIcon from '../components/WhatsAppIcon';
 
 import Services from './Services';
 import About from './About';
-import Reviews from '../components/ReviewsManager';
+import GoogleReviews from '../components/admin/reviews/GoogleReviewsManager';
 import AboutFounder from '../components/about/AboutFounder';
 import ContactForm from '../components/form/ContactForm';
 
@@ -152,7 +152,7 @@ const Home = () => {
         backgroundColor: '#1e1e1e',
       }}>
         <Container sx={{ mt: -10 }}>
-          <Reviews />
+          <GoogleReviews />
         </Container>
       </Box>
 

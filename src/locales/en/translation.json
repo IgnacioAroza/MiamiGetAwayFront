@@ -87,8 +87,14 @@
     "success": "Review submitted successfully!",
     "error": "Error submitting review. Please try again.",
     "submitting": "Sending...",
-    "noReviewsYet": "No rewies yet...",
-    "beTheFirst": "Be the first to comment"
+    "noReviewsYet": "No reviews yet...",
+    "beTheFirst": "Be the first to comment",
+    "fromGoogleBusiness": "Reviews from Google Business",
+    "totalReviews": "reviews",
+    "writeReviewOnGoogle": "Write Review on Google",
+    "businessReply": "Business Reply",
+    "loading": "Loading...",
+    "loadMore": "Load More Reviews"
   },
   "contact": {
     "title": "Contact Us",

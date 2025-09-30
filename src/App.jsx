@@ -17,7 +17,7 @@ const About = lazy(() => import('./pages/About'));
 const AboutFounder = lazy(() => import('./components/about/AboutFounder'));
 const AdminLogin = lazy(() => import('./components/admin/auth/AdminLogin'));
 const ContactForm = lazy(() => import('./components/form/ContactForm'));
-const ReviewsManager = lazy(() => import('./components/ReviewsManager'));
+const GoogleReviewsManager = lazy(() => import('./components/admin/reviews/GoogleReviewsManager'));
 const AdminLayout = lazy(() => import('./components/admin/shared/AdminLayout'));
 const ProtectedRoute = lazy(() => import('./components/admin/auth/ProtectedRoutes'));
 const AdminDashboard = lazy(() => import('./components/admin/AdminDashboard'));
@@ -81,7 +81,7 @@ function AppContent() {
             <Route path="/about" element={<About />} />
             <Route path="/aboutFounder" element={<AboutFounder />} />
             <Route path="/contactUs" element={<ContactForm />} />
-            <Route path="/reviews" element={<ReviewsManager />} />
+            <Route path="/reviews" element={<GoogleReviewsManager />} />
             <Route path="/admin/login" element={<AdminLogin />} />
             <Route path="/admin" element={
               <ProtectedRoute>

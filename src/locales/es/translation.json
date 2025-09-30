@@ -88,7 +88,13 @@
     "error": "Error al enviar la reseña. Por favor, inténtelo de nuevo.",
     "submitting": "Enviando...",
     "noReviewsYet": "Aún no hay comentarios...",
-    "beTheFirst": "Se el primero en comentar"
+    "beTheFirst": "Se el primero en comentar",
+    "fromGoogleBusiness": "Reseñas de Google Business",
+    "totalReviews": "reseñas",
+    "writeReviewOnGoogle": "Escribir Reseña en Google",
+    "businessReply": "Respuesta del Negocio",
+    "loading": "Cargando...",
+    "loadMore": "Cargar Más Reseñas"
   },
   "contact": {
     "title": "Contáctenos",
