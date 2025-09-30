@@ -78,7 +78,7 @@ const DateSection = ({ checkInDate, checkOutDate, onDateChange }) => {
                             }
                         }
                     }}
-                    minDate={new Date()} // No permitir fechas en el pasado
+                    // minDate={new Date()} // No permitir fechas en el pasado
                     ampm={false} // Usar formato de 24 horas en lugar de AM/PM
                 />
             </Grid>
@@ -140,7 +140,7 @@ const DateSection = ({ checkInDate, checkOutDate, onDateChange }) => {
                             }
                         }
                     }}
-                    minDate={minCheckoutDate || new Date()} // Mínimo 1 día después del checkin o la fecha actual
+                    minDate={minCheckoutDate} // Mínimo 1 día después del checkin
                     disabled={!checkInDate} // Deshabilitar hasta seleccionar checkin
                     ampm={false} // Usar formato de 24 horas en lugar de AM/PM
                 />
