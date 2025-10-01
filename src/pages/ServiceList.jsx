@@ -44,6 +44,8 @@ function ServiceList() {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
   const isTablet = useMediaQuery(theme.breakpoints.between("sm", "md"));
+  const isLaptop = useMediaQuery(theme.breakpoints.between("md", "lg"));
+  const isDesktop = useMediaQuery(theme.breakpoints.up("lg"));
 
   useEffect(() => {
     const fetchServices = async () => {
@@ -325,11 +327,18 @@ function ServiceList() {
   };
 
   return (
-    <Container sx={{ py: 8, px: { xs: 2, md: 3 } }} maxWidth="xl" disableGutters>
-      <Grid container rowSpacing={4} columnSpacing={{ xs: 2, md: 8, lg: 10 }}>
+    <Container 
+      sx={{ 
+        py: 8, 
+        px: { xs: 2, md: isLaptop ? 2 : 3, lg: 3 } 
+      }} 
+      maxWidth={isLaptop ? "xl" : "xl"} 
+      disableGutters={false}
+    >
+      <Grid container rowSpacing={4} columnSpacing={{ xs: 2, md: isLaptop ? 3 : 8, lg: 10 }}>
         {/* Columna izquierda - Filtros */}
         {(type === 'cars' || type === 'apartments') && (
-          <Grid item xs={12} md={2} lg={2} sx={{ pr: { md: 2 } }}>
+          <Grid item xs={12} md={isLaptop ? 3 : 2} lg={2} sx={{ pr: { md: 2 } }}>
             {/* Espaciador: título oculto para alinear con el inicio de las tarjetas */}
             <Box sx={{ display: { xs: 'none', md: 'block' } }}>
               <Typography
@@ -351,7 +360,7 @@ function ServiceList() {
         <Grid 
           item 
           xs={12} 
-          md={(type === 'cars' || type === 'apartments') ? 10 : 12}
+          md={(type === 'cars' || type === 'apartments') ? (isLaptop ? 9 : 10) : 12}
           lg={(type === 'cars' || type === 'apartments') ? 10 : 12}
           sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}
         >
@@ -371,11 +380,13 @@ function ServiceList() {
 
           <Grid
             container
-            spacing={4}
+            spacing={isLaptop ? 2 : 4}
             sx={{
               display: "flex",
-              justifyContent: "center",
+              justifyContent: "flex-start",
               alignContent: "flex-start",
+              maxWidth: isLaptop ? "900px" : "100%",
+              mx: "auto",
             }}
           >
             {services.map((service) => (
@@ -383,7 +394,7 @@ function ServiceList() {
                 item
                 xs={12}
                 sm={6}
-                md={4}
+                md={6}
                 lg={4}
                 key={service.id}
                 variants={cardVariants}
@@ -391,7 +402,11 @@ function ServiceList() {
                 animate="visible"
                 component={Link}
                 to={`/services/${type}/${service.id}`}
-                sx={{ textDecoration: "none" }}
+                sx={{ 
+                  textDecoration: "none",
+                  maxWidth: isLaptop ? "400px" : "100%",
+                  minWidth: isLaptop ? "350px" : "auto",
+                }}
               >
                 <MotionCard
                   sx={{
@@ -409,11 +424,25 @@ function ServiceList() {
                         ? service.images
                         : [service.images]
                     }
-                    height={isMobile ? "250px" : isTablet ? "220px" : "250px"}
+                    height={
+                      isMobile 
+                        ? "250px" 
+                        : isTablet 
+                        ? "220px" 
+                        : isLaptop 
+                        ? "240px" 
+                        : "250px"
+                    }
                     width="100%"
                     aspectRatio="16/9"
                   />
-                  <CardContent sx={{ flexGrow: 1, mt: 2, ml: 2 }}>
+                  <CardContent sx={{ 
+                    flexGrow: 1, 
+                    mt: 2, 
+                    ml: 2,
+                    px: 2,
+                    py: 2,
+                  }}>
                     {renderServiceDetails(service)}
                   </CardContent>
                   <CardActions>
