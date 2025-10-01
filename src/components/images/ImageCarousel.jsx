@@ -4,11 +4,14 @@ import Slider from "react-slick";
 import ChevronLeftIcon from '@mui/icons-material/ChevronLeft';
 import ChevronRightIcon from '@mui/icons-material/ChevronRight';
 import ImagePlaceholder from '../common/ImagePlaceholder';
+import LazyImage from '../common/LazyImage';
 import "slick-carousel/slick/slick.css"; 
 import useImageWithPlaceholder from '../../hooks/useImageWithPlaceholder';
+import useImagePreloader from '../../hooks/useImagePreloader';
 
 const ImageCarousel = ({ images, height = '250px', width = '100%', aspectRatio = '16/9' }) => {
   const [sliderRef, setSliderRef] = useState(null);
+  const [currentSlide, setCurrentSlide] = useState(0);
   const { hasImageError, createImageErrorHandler, createImageLoadHandler } = useImageWithPlaceholder();
 
   const normalizeImageArray = useCallback((images) => {
@@ -23,6 +26,9 @@ const ImageCarousel = ({ images, height = '250px', width = '100%', aspectRatio =
   }, []);
 
   const imageArray = useMemo(() => normalizeImageArray(images), [images, normalizeImageArray]);
+  
+  // Hook para precargar imágenes adyacentes
+  const { isImagePreloaded } = useImagePreloader(imageArray, currentSlide);
 
   const settings = useMemo(() => ({
     dots: true,
@@ -35,6 +41,9 @@ const ImageCarousel = ({ images, height = '250px', width = '100%', aspectRatio =
     centerMode: true,
     centerPadding: '0px',
     className: 'center',
+    lazyLoad: 'ondemand', // Lazy loading nativo de react-slick
+    waitForAnimate: false,
+    beforeChange: (current, next) => setCurrentSlide(next),
   }), []);
 
   const ImageContainer = useCallback(({ children }) => (
@@ -113,7 +122,7 @@ const ImageCarousel = ({ images, height = '250px', width = '100%', aspectRatio =
             height="100%"
           />
         ) : (
-          <img
+          <LazyImage
             src={imageArray[0]}
             alt="Service"
             style={{
@@ -123,8 +132,12 @@ const ImageCarousel = ({ images, height = '250px', width = '100%', aspectRatio =
               objectPosition: 'center 65%',
               borderRadius: '16px',
             }}
-            onError={createImageErrorHandler(imageId)}
             onLoad={createImageLoadHandler(imageId)}
+            onError={createImageErrorHandler(imageId)}
+            placeholderTitle="Service Image"
+            placeholderSubtitle="Loading..."
+            showSkeleton={!isImagePreloaded(imageArray[0])}
+            isPreloaded={isImagePreloaded(imageArray[0])}
           />
         )}
       </ImageContainer>
@@ -153,20 +166,24 @@ const ImageCarousel = ({ images, height = '250px', width = '100%', aspectRatio =
                     variant="default"
                     borderRadius={16}
                     width="100%"
-                    height="auto"
+                    height="100%"
                   />
                 ) : (
-                  <img
+                  <LazyImage
                     src={imagen}
                     alt={`Service ${indice + 1}`}
                     style={{
                       width: '100%',
-                      height: 'auto',
+                      height: '100%',
                       objectFit: 'cover',
                       borderRadius: '16px',
                     }}
-                    onError={createImageErrorHandler(imageId)}
                     onLoad={createImageLoadHandler(imageId)}
+                    onError={createImageErrorHandler(imageId)}
+                    placeholderTitle={`Image ${indice + 1}`}
+                    placeholderSubtitle="Loading..."
+                    showSkeleton={!isImagePreloaded(imagen)}
+                    isPreloaded={isImagePreloaded(imagen)}
                   />
                 )}
               </div>
