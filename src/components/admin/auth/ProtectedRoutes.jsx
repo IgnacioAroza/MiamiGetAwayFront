@@ -5,7 +5,11 @@ import Box from '@mui/material/Box';
 import adminService from '../../../services/adminService';
 
 const ProtectedRoute = ({ children }) => {
-    const [isLoading, setIsLoading] = useState(true);
+    // Verificación síncrona inicial del token
+    const token = localStorage.getItem('adminToken');
+    const hasToken = !!token;
+    
+    const [isLoading, setIsLoading] = useState(hasToken); // Solo loading si hay token
     const [isAuthenticated, setIsAuthenticated] = useState(false);
     const location = useLocation();
 
@@ -13,13 +17,15 @@ const ProtectedRoute = ({ children }) => {
         const verifyAuth = async () => {
             try {
                 const token = localStorage.getItem('adminToken');
+                
+                // Si no hay token, redirigir inmediatamente sin mostrar loading
                 if (!token) {
                     setIsAuthenticated(false);
                     setIsLoading(false);
                     return;
                 }
 
-                // Verificar que el token sea válido llamando al endpoint de perfil
+                // Solo si hay token, verificar que sea válido con el backend
                 await adminService.getProfile();
                 setIsAuthenticated(true);
             } catch (error) {
@@ -34,6 +40,12 @@ const ProtectedRoute = ({ children }) => {
         verifyAuth();
     }, []);
 
+    // Si no hay token, redirigir inmediatamente sin mostrar nada
+    if (!hasToken) {
+        return <Navigate to="/admin/login" state={{ from: location.pathname }} replace />;
+    }
+
+    // Solo mostrar loading si hay token y estamos verificando con el backend
     if (isLoading) {
         return (
             <Box 
@@ -48,6 +60,7 @@ const ProtectedRoute = ({ children }) => {
         );
     }
 
+    // Si la verificación falló, redirigir al login
     if (!isAuthenticated) {
         return <Navigate to="/admin/login" state={{ from: location.pathname }} replace />;
     }
