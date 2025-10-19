@@ -537,7 +537,7 @@ const ReservationDetails = ({ reservation, apartmentLoading, apartmentError, apa
                                                 Notes:
                                             </Typography>
                                             <Typography sx={{ color: '#fff', fontSize: isMobile ? '0.9rem' : 'inherit', wordBreak: 'break-word' }}>
-                                                {reservation?.notes || '$50 keys'}
+                                                {reservation?.notes || 'No notes'}
                                             </Typography>
                                         </Box>
                                     </Box>
