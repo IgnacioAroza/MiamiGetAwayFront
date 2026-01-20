@@ -40,6 +40,7 @@ import {
     selectUserError
 } from '../../../redux/userSlice';
 import DeleteDialog from '../dialogs/DeleteDialog';
+import UserFilters from './UserFilters';
 
 const UserList = () => {
     const navigate = useNavigate();
@@ -51,12 +52,11 @@ const UserList = () => {
     const error = useSelector(selectUserError);
     const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
     const [userToDelete, setUserToDelete] = useState(null);
+    const [activeFilters, setActiveFilters] = useState({});
 
     useEffect(() => {
-        if (status === 'idle') {
-            dispatch(fetchUsers());
-        }
-    }, [status, dispatch]);
+        dispatch(fetchUsers(activeFilters));
+    }, [dispatch, activeFilters]);
 
     const handleEdit = (userId) => {
         navigate(`/admin/users/edit/${userId}`);
@@ -86,6 +86,14 @@ const UserList = () => {
 
     const handleCreate = () => {
         navigate('/admin/users/create');
+    };
+
+    const handleApplyFilters = (filters) => {
+        setActiveFilters(filters);
+    };
+
+    const handleClearFilters = () => {
+        setActiveFilters({});
     };
 
     // Función para renderizar las tarjetas en vista móvil
@@ -265,6 +273,11 @@ const UserList = () => {
                     New User
                 </Button>
             </Box>
+
+            <UserFilters 
+                onApplyFilters={handleApplyFilters}
+                onClearFilters={handleClearFilters}
+            />
 
             {isMobile || isTablet ? (
                 renderMobileCards()

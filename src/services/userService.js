@@ -2,9 +2,17 @@ import api from '../utils/api'
 import { normalizeUserFromApi } from '../utils/normalizers'
 
 const userService = {
-    getAllUsers: async () => {
+    getAllUsers: async (filters = {}) => {
         try {
-            const response = await api.get('/users');
+            const params = {};
+            ['name', 'lastname', 'email', 'phone'].forEach((key) => {
+                const value = filters[key];
+                if (typeof value === 'string' && value.trim()) {
+                    params[key] = value.trim();
+                }
+            });
+
+            const response = await api.get('/users', { params });
             const raw = response.data || [];
             return Array.isArray(raw) ? raw.map(normalizeUserFromApi) : [];
         } catch (error) {
