@@ -245,20 +245,27 @@ const ReservationList = ({ filter = {} }) => {
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [reservations]);
     
+    const toLocalStartOfDay = (value) => {
+        if (!value) return null;
+        const parsed = parseStringToDate(value) || new Date(value);
+        if (!(parsed instanceof Date) || isNaN(parsed.getTime())) return null;
+        return new Date(parsed.getFullYear(), parsed.getMonth(), parsed.getDate());
+    };
+
     // Aplicar filtro local de próximas reservas (check-in >= hoy o desde fecha base) y luego ordenar
     const baseReservations = useMemo(() => {
         if (!reservations) return [];
 
         if (combinedFilters.upcoming === 'true') {
-            const from = combinedFilters.fromDate ? new Date(combinedFilters.fromDate) : new Date();
+            const fromDate = combinedFilters.fromDate ? toLocalStartOfDay(combinedFilters.fromDate) : toLocalStartOfDay(new Date());
+            const from = fromDate || new Date();
             const withinDays = combinedFilters.withinDays ? Number(combinedFilters.withinDays) : null;
 
             return [...reservations]
                 .filter((r) => {
-                    const checkIn = r.check_in_date || r.checkInDate;
-                    if (!checkIn) return false;
-                    const d = new Date(checkIn);
-                    if (isNaN(d)) return false;
+                    const checkInRaw = r.check_in_date || r.checkInDate;
+                    const d = toLocalStartOfDay(checkInRaw);
+                    if (!d) return false;
                     if (d < from) return false;
                     if (withinDays) {
                         const limit = new Date(from);
@@ -267,7 +274,12 @@ const ReservationList = ({ filter = {} }) => {
                     }
                     return true;
                 })
-                .sort((a, b) => new Date(a.check_in_date || a.checkInDate) - new Date(b.check_in_date || b.checkInDate));
+                .sort((a, b) => {
+                    const aDate = toLocalStartOfDay(a.check_in_date || a.checkInDate);
+                    const bDate = toLocalStartOfDay(b.check_in_date || b.checkInDate);
+                    if (!aDate || !bDate) return 0;
+                    return aDate - bDate;
+                });
         }
 
         return reservations;
