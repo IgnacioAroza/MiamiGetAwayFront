@@ -8,15 +8,9 @@ const DateSection = ({ checkInDate, checkOutDate, onDateChange }) => {
     const checkInDateObj = checkInDate ? parseStringToDate(checkInDate) : null;
     const minCheckoutDate = checkInDateObj ? new Date(checkInDateObj.getTime() + 24*60*60*1000) : null;
 
-    // Función para manejar cambios de fecha y convertirlos al nuevo formato string
+    // Manejar cambios de fecha delegando el formateo al hook (evita parseos dobles que fallan en Safari/iOS)
     const handleDateChange = (field) => (date) => {
-        if (date) {
-            // Convertir la fecha seleccionada al formato MM-DD-YYYY HH:mm
-            const formattedDate = formatDateToString(date);
-            onDateChange(field)(formattedDate);
-        } else {
-            onDateChange(field)(null);
-        }
+        onDateChange(field)(date || null);
     };
 
     return (
