@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
 import {
@@ -67,14 +67,14 @@ const ReservationList = ({ filter = {} }) => {
     const [buildingNames, setBuildingNames] = useState({});
     const [adminApartments, setAdminApartments] = useState([]);
     const [orderBy, setOrderBy] = useState(() => {
-        // Recuperar orderBy desde localStorage
-        return localStorage.getItem('reservationList_orderBy') || 'created_at';
+        // Recuperar orderBy desde localStorage (fall back a ordenar por check-in ascendente)
+        return localStorage.getItem('reservationList_orderBy') || 'check_in_date';
     });
     const [order, setOrder] = useState(() => {
-        // Recuperar order desde localStorage
-        return localStorage.getItem('reservationList_order') || 'desc';
+        // Recuperar order desde localStorage (fall back ascendente)
+        return localStorage.getItem('reservationList_order') || 'asc';
     });
-    const [activeFilters, setActiveFilters] = useState({});
+    const [activeFilters, setActiveFilters] = useState({ upcoming: 'true' });
     const [clientMap, setClientMap] = useState({});
     const [deleteDialog, setDeleteDialog] = useState({
         open: false,
@@ -159,14 +159,12 @@ const ReservationList = ({ filter = {} }) => {
         });
     };
     
+    const combinedFilters = useMemo(() => ({ ...filter, ...activeFilters }), [filter, activeFilters]);
+
     // Cargar reservas al montar el componente o cuando cambian los filtros
     useEffect(() => {
-        const combinedFilters = { 
-            ...filter, 
-            ...activeFilters
-        };
         dispatch(fetchReservations(combinedFilters));
-    }, [dispatch, filter, activeFilters]);
+    }, [dispatch, combinedFilters]);
 
     // Efecto adicional para forzar el re-render cuando cambia el ordenamiento
     useEffect(() => {
@@ -176,6 +174,19 @@ const ReservationList = ({ filter = {} }) => {
             // Solo necesitamos que se ejecute para trigger el re-render
         }
     }, [orderBy, order, reservations]);
+
+    // Si el filtro upcoming está activo, forzar el orden por check-in ascendente y persistirlo
+    useEffect(() => {
+        const upcomingActive = combinedFilters.upcoming === 'true';
+        const needsReset = upcomingActive && (orderBy !== 'check_in_date' || order !== 'asc');
+        if (needsReset) {
+            setOrderBy('check_in_date');
+            setOrder('asc');
+            localStorage.setItem('reservationList_orderBy', 'check_in_date');
+            localStorage.setItem('reservationList_order', 'asc');
+            setPage(0);
+        }
+    }, [combinedFilters.upcoming, orderBy, order]);
     
     // Cargar todos los apartamentos al montar el componente
     useEffect(() => {
@@ -234,8 +245,36 @@ const ReservationList = ({ filter = {} }) => {
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [reservations]);
     
+    // Aplicar filtro local de próximas reservas (check-in >= hoy o desde fecha base) y luego ordenar
+    const baseReservations = useMemo(() => {
+        if (!reservations) return [];
+
+        if (combinedFilters.upcoming === 'true') {
+            const from = combinedFilters.fromDate ? new Date(combinedFilters.fromDate) : new Date();
+            const withinDays = combinedFilters.withinDays ? Number(combinedFilters.withinDays) : null;
+
+            return [...reservations]
+                .filter((r) => {
+                    const checkIn = r.check_in_date || r.checkInDate;
+                    if (!checkIn) return false;
+                    const d = new Date(checkIn);
+                    if (isNaN(d)) return false;
+                    if (d < from) return false;
+                    if (withinDays) {
+                        const limit = new Date(from);
+                        limit.setDate(limit.getDate() + withinDays);
+                        return d <= limit;
+                    }
+                    return true;
+                })
+                .sort((a, b) => new Date(a.check_in_date || a.checkInDate) - new Date(b.check_in_date || b.checkInDate));
+        }
+
+        return reservations;
+    }, [reservations, combinedFilters]);
+
     // Obtener las reservas ordenadas
-    const sortedReservations = sortReservations(reservations, orderBy, order);
+    const sortedReservations = sortReservations(baseReservations, orderBy, order);
     
     // Función para cambiar la ordenación
     const handleRequestSort = (property) => {
