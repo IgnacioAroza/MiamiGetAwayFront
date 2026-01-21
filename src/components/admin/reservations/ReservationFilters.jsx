@@ -29,7 +29,7 @@ const ReservationFilters = ({ onApplyFilters, onClearFilters }) => {
         clientEmail: '',
         q: '', // Búsqueda general
         clientLastname: '', // Apellido del cliente
-        upcoming: '', // Reservaciones futuras
+        upcoming: 'true', // Reservaciones futuras (por defecto próximas)
         fromDate: null, // Fecha base para upcoming
         withinDays: '' // Días límite para upcoming
     });
