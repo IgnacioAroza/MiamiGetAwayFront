@@ -25,6 +25,7 @@ import {
     CardContent,
     CardActions,
     Stack,
+    Collapse,
     useTheme,
     Dialog,
     DialogActions,
@@ -42,7 +43,8 @@ import {
     Person as PersonIcon,
     Apartment as ApartmentIcon,
     AttachMoney as MoneyIcon,
-    Add as AddIcon
+    Add as AddIcon,
+    FilterAlt as FilterIcon
 } from '@mui/icons-material';
 import { fetchReservations, deleteReservation, setSelectedReservation } from '../../../redux/reservationSlice';
 import adminApartmentService from '../../../services/adminApartmentService';
@@ -88,6 +90,7 @@ const ReservationList = ({ filter = {} }) => {
         message: '',
         severity: 'success'
     });
+    const [filtersOpen, setFiltersOpen] = useState(() => !(isMobile || isTablet));
     
     // Función para ordenar las reservas localmente
     const sortReservations = (reservations, orderBy, order) => {
@@ -187,6 +190,11 @@ const ReservationList = ({ filter = {} }) => {
             setPage(0);
         }
     }, [combinedFilters.upcoming, orderBy, order]);
+
+    // Recalcular visibilidad de filtros cuando cambia el dispositivo
+    useEffect(() => {
+        setFiltersOpen(!(isMobile || isTablet));
+    }, [isMobile, isTablet]);
     
     // Cargar todos los apartamentos al montar el componente
     useEffect(() => {
@@ -735,11 +743,27 @@ const ReservationList = ({ filter = {} }) => {
     
     return (
         <Box sx={{ p: isMobile ? 1 : 3 }}>
+            {/* Toggle de filtros en móvil/tablet */}
+            {(isMobile || isTablet) && (
+                <Box sx={{ display: 'flex', justifyContent: 'flex-end', mb: 1 }}>
+                    <Button
+                        variant="outlined"
+                        size="small"
+                        startIcon={<FilterIcon />}
+                        onClick={() => setFiltersOpen((prev) => !prev)}
+                    >
+                        {filtersOpen ? 'Hide Filters' : 'Filters'}
+                    </Button>
+                </Box>
+            )}
+
             {/* Componente de filtros */}
-            <ReservationFilters 
-                onApplyFilters={handleApplyFilters}
-                onClearFilters={handleClearFilters}
-            />
+            <Collapse in={filtersOpen || (!isMobile && !isTablet)} timeout="auto" unmountOnExit>
+                <ReservationFilters 
+                    onApplyFilters={handleApplyFilters}
+                    onClearFilters={handleClearFilters}
+                />
+            </Collapse>
             
             <Grid container spacing={2} sx={{ mb: 3 }}>
                 <Grid item xs={12} sx={{ display: 'flex', justifyContent: 'flex-end' }}>
