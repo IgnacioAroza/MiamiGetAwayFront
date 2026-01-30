@@ -3,9 +3,8 @@ import config from '../config'
 
 const api = axios.create({
     baseURL: config.API_URL,
-    headers: {
-        'Content-Type': 'application/json'
-    },
+    // Deja que Axios determine automáticamente el Content-Type según el payload.
+    // Esto es clave para que FormData se envíe como multipart/form-data con boundary.
     withCredentials: true
 })
 
