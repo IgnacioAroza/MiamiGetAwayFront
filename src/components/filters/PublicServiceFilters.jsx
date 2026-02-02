@@ -59,7 +59,7 @@ const PublicServiceFilters = ({ type, onFiltersChange }) => {
 
     // Rangos de precio según el tipo
     const priceRanges = {
-        cars: { min: 50, max: 500, step: 25 },
+        cars: { min: 50, max: 2000, step: 25 },
         apartments: { min: 80, max: 800, step: 50 }
     };
 
