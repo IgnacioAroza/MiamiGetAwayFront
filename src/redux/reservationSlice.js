@@ -1,6 +1,7 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import reservationService from '../services/reservationService';
 import { normalizeReservationFromApi } from '../utils/normalizers';
+import { downloadReservationPdf } from '../utils/pdfUtils';
 
 const initialState = {
     reservations: [],
@@ -136,7 +137,7 @@ export const generateReservationPdf = createAsyncThunk(
             // Si no hay email, descargar el PDF directamente
             else {
                 // Iniciar la descarga directa del PDF
-                const downloadUrl = await reservationService.downloadPdf(id);
+                const downloadUrl = await downloadReservationPdf(id);
 
                 return {
                     id,
