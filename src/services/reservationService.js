@@ -28,27 +28,8 @@ const reservationService = {
 
     create: async (reservationData) => {
         try {
-            console.log('=== Creando nueva reserva ===');
-            console.log('Datos recibidos:', {
-                clientId: reservationData.clientId,
-                clientData: reservationData.clientId ? 'Solo clientId' : {
-                    clientName: reservationData.clientName,
-                    clientEmail: reservationData.clientEmail,
-                    clientPhone: reservationData.clientPhone
-                }
-            });
-
             // Normalizar payload respetando el formato de fechas MM-DD-YYYY HH:mm y camelCase
             const formattedData = normalizeReservationInput(reservationData);
-
-            console.log('Datos formateados para enviar:', {
-                clientId: formattedData.clientId,
-                clientData: formattedData.clientId ? 'Solo clientId' : {
-                    clientName: formattedData.clientName,
-                    clientEmail: formattedData.clientEmail,
-                    clientPhone: formattedData.clientPhone
-                }
-            });
 
             // Validaciones mínimas
             if (formattedData.pricePerNight === undefined) {
@@ -63,8 +44,6 @@ const reservationService = {
             const dataToSend = stripUndefined(formattedData);
 
             const response = await api.post('/reservations', dataToSend);
-            console.log('Respuesta del servidor:', response.data);
-            console.log('============================');
             return response.data;
         } catch (error) {
             console.error('Error creating reservation:', error);
