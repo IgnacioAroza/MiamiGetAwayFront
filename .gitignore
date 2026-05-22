@@ -25,3 +25,8 @@ dist-ssr
 *.sw?
 
 PLACEHOLDER_GUIDE.md
+/docs
+
+# Claude Code — local config and generic skills
+.claude/settings.local.json
+.claude/skills/
