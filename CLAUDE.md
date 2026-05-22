@@ -1,5 +1,7 @@
 # CLAUDE.md — MiamiGetAwayFront
 
+**AL INICIO DE CADA CONVERSACIÓN:** leer `docs/MEMORY.md` para retomar contexto: estado actual del proyecto, deuda técnica conocida y cambios pendientes.
+
 Guía de referencia para trabajar en este proyecto. Leer antes de tocar código.
 
 ---
