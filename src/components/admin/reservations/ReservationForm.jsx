@@ -41,6 +41,7 @@ import StatusSection from './sections/StatusSection';
 import NotesSection from './sections/NotesSection';
 import ReservationPaymentSummary from './sections/ReservationPaymentSummary';
 import SupplierPayoutSection from '../suppliers/SupplierPayoutSection';
+import SupplierPayoutSummary from '../suppliers/SupplierPayoutSummary';
 import CreateUser from '../users/CreateUser';
 import EditUser from '../users/EditUser';
 import { useReservationForm } from '../../../hooks/useReservationForm';
@@ -423,8 +424,8 @@ const ReservationForm = ({ initialData, onSubmit }) => {
                                     <Typography variant="h6" sx={{ mb: 1.5, color: '#fff', fontSize: '1rem' }}>
                                         Payment Registration
                                     </Typography>
-                                    <PaymentSection 
-                                        formData={formData} 
+                                    <PaymentSection
+                                        formData={formData}
                                         onChange={handleChange}
                                         onPaymentRegistered={(paymentResponse) => {
                                             // Payment successfully registered
@@ -433,6 +434,15 @@ const ReservationForm = ({ initialData, onSubmit }) => {
                                         initialPaymentData={initialPaymentData}
                                     />
                                 </Box>
+
+                                {/* Supplier Payout Summary — solo en modo edición */}
+                                {formData.id && (
+                                    <SupplierPayoutSummary
+                                        reservationId={formData.id}
+                                        nights={formData.nights || 0}
+                                        totalAmount={formData.totalAmount || 0}
+                                    />
+                                )}
                             </CardContent>
                         </Card>
                     </Grid>
