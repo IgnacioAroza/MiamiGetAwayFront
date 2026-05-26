@@ -171,6 +171,8 @@ const SupplierPayoutSection = ({ reservationId, nights = 0 }) => {
                 payment_terms: paymentTerms || undefined,
             });
             setAssignment(data);
+            // Sync the reservation's supplier_status field so the badge reflects reality
+            await supplierService.updateSupplierStatus(reservationId, 'confirmed');
             success('Supplier assigned');
         } catch (e) {
             error(typeof e === 'string' ? e : 'Error assigning supplier');
@@ -182,6 +184,7 @@ const SupplierPayoutSection = ({ reservationId, nights = 0 }) => {
     const handleUnassign = async () => {
         try {
             await supplierService.unassignSupplier(reservationId);
+            await supplierService.updateSupplierStatus(reservationId, 'unassigned');
             setAssignment(null);
             setPayments([]);
             setSelectedSupplierId('');
