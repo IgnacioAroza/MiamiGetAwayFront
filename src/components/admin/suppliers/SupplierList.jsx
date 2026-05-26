@@ -36,7 +36,9 @@ const fieldSx = {
 const initials = (name = '') =>
     name.split(' ').slice(0, 2).map(w => w[0] ?? '').join('').toUpperCase() || '?';
 
-const SupplierForm = ({ form, onChange }) => (
+const isValidEmail = (v) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v);
+
+const SupplierForm = ({ form, onChange, onEmailBlur, emailError }) => (
     <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2, pt: 1 }}>
         <TextField
             label="Name *" name="name" value={form.name}
@@ -45,8 +47,10 @@ const SupplierForm = ({ form, onChange }) => (
         />
         <TextField
             label="Email" name="email" value={form.email}
-            onChange={onChange} fullWidth sx={fieldSx}
+            onChange={onChange} onBlur={onEmailBlur} fullWidth sx={fieldSx}
             inputProps={{ maxLength: 200 }}
+            error={!!emailError}
+            helperText={emailError}
         />
         <TextField
             label="Phone" name="phone" value={form.phone}
@@ -72,6 +76,7 @@ const SupplierList = () => {
     const [deleteOpen, setDeleteOpen] = useState(false);
     const [selected, setSelected] = useState(null);
     const [form, setForm] = useState(emptyForm);
+    const [emailError, setEmailError] = useState('');
     const [saving, setSaving] = useState(false);
 
     useEffect(() => {
@@ -82,11 +87,27 @@ const SupplierList = () => {
 
     const handleFormChange = (e) => {
         const { name, value } = e.target;
+        if (name === 'email' && emailError && isValidEmail(value)) {
+            setEmailError('');
+        }
         setForm(prev => ({ ...prev, [name]: value }));
     };
 
-    const openCreate = () => {
+    const handleEmailBlur = () => {
+        if (form.email && !isValidEmail(form.email)) {
+            setEmailError('Enter a valid email address');
+        } else {
+            setEmailError('');
+        }
+    };
+
+    const resetForm = () => {
         setForm(emptyForm);
+        setEmailError('');
+    };
+
+    const openCreate = () => {
+        resetForm();
         setCreateOpen(true);
     };
 
@@ -98,6 +119,7 @@ const SupplierList = () => {
             phone: supplier.phone || '',
             notes: supplier.notes || '',
         });
+        setEmailError('');
         setEditOpen(true);
     };
 
@@ -107,7 +129,7 @@ const SupplierList = () => {
     };
 
     const handleCreate = async () => {
-        if (!form.name.trim()) return;
+        if (!form.name.trim() || emailError) return;
         setSaving(true);
         try {
             await dispatch(createSupplier(form)).unwrap();
@@ -118,7 +140,7 @@ const SupplierList = () => {
     };
 
     const handleEdit = async () => {
-        if (!form.name.trim() || !selected) return;
+        if (!form.name.trim() || !selected || emailError) return;
         setSaving(true);
         try {
             await dispatch(updateSupplier({ id: selected.id, data: form })).unwrap();
@@ -310,7 +332,7 @@ const SupplierList = () => {
             {/* Create dialog */}
             <Dialog
                 open={createOpen}
-                onClose={() => setCreateOpen(false)}
+                onClose={() => { setCreateOpen(false); resetForm(); }}
                 maxWidth="sm"
                 fullWidth
                 PaperProps={{ sx: { bgcolor: '#1a1a1a', color: '#fff' } }}
@@ -320,13 +342,16 @@ const SupplierList = () => {
                     New Supplier
                 </DialogTitle>
                 <DialogContent sx={{ pt: 2 }}>
-                    <SupplierForm form={form} onChange={handleFormChange} />
+                    <SupplierForm
+                        form={form} onChange={handleFormChange}
+                        onEmailBlur={handleEmailBlur} emailError={emailError}
+                    />
                 </DialogContent>
                 <DialogActions sx={{ borderTop: '1px solid #333', px: 3, py: 2 }}>
-                    <Button onClick={() => setCreateOpen(false)} sx={{ color: '#aaa' }}>Cancel</Button>
+                    <Button onClick={() => { setCreateOpen(false); resetForm(); }} sx={{ color: '#aaa' }}>Cancel</Button>
                     <Button
                         onClick={handleCreate}
-                        disabled={saving || !form.name.trim()}
+                        disabled={saving || !form.name.trim() || !!emailError}
                         variant="contained"
                         sx={{ bgcolor: '#6c5dd3', '&:hover': { bgcolor: '#7c5cbf' } }}
                         startIcon={saving ? <CircularProgress size={14} color="inherit" /> : null}
@@ -339,7 +364,7 @@ const SupplierList = () => {
             {/* Edit dialog */}
             <Dialog
                 open={editOpen}
-                onClose={() => setEditOpen(false)}
+                onClose={() => { setEditOpen(false); setEmailError(''); }}
                 maxWidth="sm"
                 fullWidth
                 PaperProps={{ sx: { bgcolor: '#1a1a1a', color: '#fff' } }}
@@ -349,13 +374,16 @@ const SupplierList = () => {
                     Edit Supplier
                 </DialogTitle>
                 <DialogContent sx={{ pt: 2 }}>
-                    <SupplierForm form={form} onChange={handleFormChange} />
+                    <SupplierForm
+                        form={form} onChange={handleFormChange}
+                        onEmailBlur={handleEmailBlur} emailError={emailError}
+                    />
                 </DialogContent>
                 <DialogActions sx={{ borderTop: '1px solid #333', px: 3, py: 2 }}>
-                    <Button onClick={() => setEditOpen(false)} sx={{ color: '#aaa' }}>Cancel</Button>
+                    <Button onClick={() => { setEditOpen(false); setEmailError(''); }} sx={{ color: '#aaa' }}>Cancel</Button>
                     <Button
                         onClick={handleEdit}
-                        disabled={saving || !form.name.trim()}
+                        disabled={saving || !form.name.trim() || !!emailError}
                         variant="contained"
                         sx={{ bgcolor: '#6c5dd3', '&:hover': { bgcolor: '#7c5cbf' } }}
                         startIcon={saving ? <CircularProgress size={14} color="inherit" /> : null}
