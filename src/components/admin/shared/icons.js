@@ -8,6 +8,7 @@ import SettingsIcon from '@mui/icons-material/Settings';
 import LogoutIcon from '@mui/icons-material/Logout';
 import HomeIcon from '@mui/icons-material/Home';
 import DesignServicesIcon from '@mui/icons-material/DesignServices';
+import HandshakeIcon from '@mui/icons-material/Handshake';
 
 export {
     DashboardIcon,
@@ -19,5 +20,6 @@ export {
     SettingsIcon,
     LogoutIcon,
     HomeIcon,
-    DesignServicesIcon
+    DesignServicesIcon,
+    HandshakeIcon,
 }; 
