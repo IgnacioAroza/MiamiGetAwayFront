@@ -6,6 +6,7 @@ import {
     Divider,
     Box,
     Button,
+    Chip,
     Dialog,
     DialogTitle,
     DialogContent,
@@ -24,6 +25,7 @@ import {
     Notes as NotesIcon,
     Assessment as AssessmentIcon,
     ExpandMore as ExpandMoreIcon,
+    Handshake as HandshakeIcon,
 } from '@mui/icons-material';
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns';
@@ -38,6 +40,7 @@ import PaymentSection from './sections/PaymentSection';
 import StatusSection from './sections/StatusSection';
 import NotesSection from './sections/NotesSection';
 import ReservationPaymentSummary from './sections/ReservationPaymentSummary';
+import SupplierPayoutSection from '../suppliers/SupplierPayoutSection';
 import CreateUser from '../users/CreateUser';
 import EditUser from '../users/EditUser';
 import { useReservationForm } from '../../../hooks/useReservationForm';
@@ -294,6 +297,39 @@ const ReservationForm = ({ initialData, onSubmit }) => {
                                 />
                             </CardContent>
                         </Card>
+
+                        {/* Supplier & Payout — solo para reservas existentes */}
+                        {formData.id && (
+                            <Card sx={{ mb: 3, bgcolor: '#2a2a2a', color: '#fff' }}>
+                                <CardHeader
+                                    avatar={<HandshakeIcon sx={{ color: '#fff' }} />}
+                                    title="Supplier & Payout"
+                                    action={
+                                        <Chip
+                                            label="INTERNAL"
+                                            size="small"
+                                            sx={{
+                                                bgcolor: '#2a2a4a',
+                                                color: '#9b8fef',
+                                                fontSize: '0.65rem',
+                                                fontWeight: 700,
+                                                height: 22,
+                                            }}
+                                        />
+                                    }
+                                    sx={{
+                                        bgcolor: '#333',
+                                        '& .MuiCardHeader-title': { color: '#fff', fontWeight: 'bold' }
+                                    }}
+                                />
+                                <CardContent>
+                                    <SupplierPayoutSection
+                                        reservationId={formData.id}
+                                        nights={formData.nights || 0}
+                                    />
+                                </CardContent>
+                            </Card>
+                        )}
 
                         {/* Botones de Acción */}
                         <Box sx={{ display: 'flex', justifyContent: 'flex-end', gap: 2, mt: 3 }}>

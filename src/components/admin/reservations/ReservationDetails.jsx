@@ -340,7 +340,26 @@ const ReservationDetails = ({ reservation, apartmentLoading, apartmentError, apa
                         size="large"
                         sx={{ alignSelf: isMobile ? "flex-start" : "center" }}
                     />
-                    <Button 
+                    {reservation?.supplierStatus && (
+                        <Chip
+                            label={`SUPPLIER: ${reservation.supplierStatus.toUpperCase()}`}
+                            size="small"
+                            sx={{
+                                alignSelf: isMobile ? "flex-start" : "center",
+                                bgcolor:
+                                    reservation.supplierStatus === 'confirmed' ? '#1b5e20' :
+                                    reservation.supplierStatus === 'searching' ? '#4a3900' :
+                                    '#4a1a1a',
+                                color:
+                                    reservation.supplierStatus === 'confirmed' ? '#69f0ae' :
+                                    reservation.supplierStatus === 'searching' ? '#ffd740' :
+                                    '#ef9a9a',
+                                fontWeight: 700,
+                                fontSize: '0.65rem',
+                            }}
+                        />
+                    )}
+                    <Button
                         variant="contained" 
                         startIcon={<EditIcon />}
                         onClick={handleEditClick}

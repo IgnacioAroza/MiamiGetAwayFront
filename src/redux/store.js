@@ -7,6 +7,7 @@ import adminApartmentReducer from './adminApartmentSlice';
 import reservationReducer from './reservationSlice';
 import reservationPaymentReducer from './reservationPaymentSlice';
 import summaryReducer from './summarySlice';
+import supplierReducer from './supplierSlice';
 
 export const store = configureStore({
     reducer: {
@@ -18,6 +19,7 @@ export const store = configureStore({
         reservations: reservationReducer,
         reservationPayments: reservationPaymentReducer,
         summary: summaryReducer,
+        suppliers: supplierReducer,
     },
 });
 

@@ -68,7 +68,6 @@ const reservationService = {
             const formattedData = normalizeReservationInput(reservationData, { partial: true });
             const dataToSend = stripUndefined(formattedData);
 
-            // Hacer la petición al servidor
             const response = await api.put(`/reservations/${id}`, dataToSend);
             return response.data;
         } catch (error) {

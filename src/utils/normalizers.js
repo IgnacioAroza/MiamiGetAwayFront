@@ -105,6 +105,7 @@ export const normalizeReservationFromApi = (data = {}) => {
 
     status: pick('status', 'status'),
     paymentStatus: pick('paymentStatus', 'payment_status'),
+    supplierStatus: pick('supplierStatus', 'supplier_status') || 'unassigned',
 
     createdAt: pick('createdAt', 'created_at'),
     updatedAt: pick('updatedAt', 'updated_at'),

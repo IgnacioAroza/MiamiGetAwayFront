@@ -23,9 +23,6 @@ const ReservationManagement = () => {
                     const reservation = await reservationService.getById(id);
 
                     if (reservation) {
-                        const checkInDate = parseISO(reservation.checkInDate);
-                        const checkOutDate = parseISO(reservation.checkOutDate);
-
                         setInitialData({
                             id: reservation.id || id,
                             checkInDate: reservation.checkInDate || '',
