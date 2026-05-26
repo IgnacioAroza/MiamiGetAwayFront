@@ -93,14 +93,13 @@ const ReservationManagement = () => {
                 message: id ? 'Reservation updated successfully' : 'Reservation created successfully',
                 type: 'success'
             });
-            
-            // Navegar según el contexto
+
             if (id) {
-                // Si estamos editando, volver a la vista de detalles
                 navigate(`/admin/reservations/view/${id}`);
             } else {
-                // Si estamos creando una nueva reserva, ir a la lista
-                navigate('/admin/reservations');
+                // Redirigir al form de edición para que el usuario pueda asignar supplier y ver todos los paneles
+                const newId = response?.id || response?.reservationId;
+                navigate(`/admin/reservations/edit/${newId}`);
             }
         } catch (error) {
             console.error('Error al procesar el formulario:', error);
