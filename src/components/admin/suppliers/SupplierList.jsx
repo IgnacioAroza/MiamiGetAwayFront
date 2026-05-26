@@ -36,6 +36,31 @@ const fieldSx = {
 const initials = (name = '') =>
     name.split(' ').slice(0, 2).map(w => w[0] ?? '').join('').toUpperCase() || '?';
 
+const SupplierForm = ({ form, onChange }) => (
+    <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2, pt: 1 }}>
+        <TextField
+            label="Name *" name="name" value={form.name}
+            onChange={onChange} fullWidth sx={fieldSx}
+            inputProps={{ maxLength: 120 }}
+        />
+        <TextField
+            label="Email" name="email" value={form.email}
+            onChange={onChange} fullWidth sx={fieldSx}
+            inputProps={{ maxLength: 200 }}
+        />
+        <TextField
+            label="Phone" name="phone" value={form.phone}
+            onChange={onChange} fullWidth sx={fieldSx}
+            inputProps={{ maxLength: 40 }}
+        />
+        <TextField
+            label="Notes" name="notes" value={form.notes}
+            onChange={onChange} fullWidth multiline rows={2}
+            sx={fieldSx} inputProps={{ maxLength: 500 }}
+        />
+    </Box>
+);
+
 const SupplierList = () => {
     const dispatch = useDispatch();
     const { isMobile, isTablet } = useDeviceDetection();
@@ -113,31 +138,6 @@ const SupplierList = () => {
             // error handled by slice
         }
     };
-
-    const SupplierForm = ({ onSubmit, submitLabel }) => (
-        <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2, pt: 1 }}>
-            <TextField
-                label="Name *" name="name" value={form.name}
-                onChange={handleFormChange} fullWidth sx={fieldSx}
-                inputProps={{ maxLength: 120 }}
-            />
-            <TextField
-                label="Email" name="email" value={form.email}
-                onChange={handleFormChange} fullWidth sx={fieldSx}
-                inputProps={{ maxLength: 200 }}
-            />
-            <TextField
-                label="Phone" name="phone" value={form.phone}
-                onChange={handleFormChange} fullWidth sx={fieldSx}
-                inputProps={{ maxLength: 40 }}
-            />
-            <TextField
-                label="Notes" name="notes" value={form.notes}
-                onChange={handleFormChange} fullWidth multiline rows={2}
-                sx={fieldSx} inputProps={{ maxLength: 500 }}
-            />
-        </Box>
-    );
 
     if (status === 'loading') {
         return (
@@ -320,7 +320,7 @@ const SupplierList = () => {
                     New Supplier
                 </DialogTitle>
                 <DialogContent sx={{ pt: 2 }}>
-                    <SupplierForm />
+                    <SupplierForm form={form} onChange={handleFormChange} />
                 </DialogContent>
                 <DialogActions sx={{ borderTop: '1px solid #333', px: 3, py: 2 }}>
                     <Button onClick={() => setCreateOpen(false)} sx={{ color: '#aaa' }}>Cancel</Button>
@@ -349,7 +349,7 @@ const SupplierList = () => {
                     Edit Supplier
                 </DialogTitle>
                 <DialogContent sx={{ pt: 2 }}>
-                    <SupplierForm />
+                    <SupplierForm form={form} onChange={handleFormChange} />
                 </DialogContent>
                 <DialogActions sx={{ borderTop: '1px solid #333', px: 3, py: 2 }}>
                     <Button onClick={() => setEditOpen(false)} sx={{ color: '#aaa' }}>Cancel</Button>
