@@ -92,9 +92,9 @@ const SupplierPayoutView = ({ reservationId, reservation }) => {
     const netMargin = totalAmount - owed;
     const marginPct = totalAmount > 0 ? Math.round((netMargin / totalAmount) * 100) : 0;
 
-    // badge color
-    const paidBadgeColor = pct === 100 ? '#1b5e20' : pct > 0 ? '#4a3900' : '#4a1a1a';
-    const paidTextColor = pct === 100 ? '#69f0ae' : pct > 0 ? '#ffd740' : '#ef9a9a';
+    // badge color — usa los mismos tonos que el resto del admin
+    const paidBadgeColor = pct === 100 ? 'rgba(76,175,80,0.15)' : pct > 0 ? 'rgba(255,152,0,0.15)' : 'rgba(244,67,54,0.15)';
+    const paidTextColor  = pct === 100 ? '#4caf50' : pct > 0 ? '#ff9800' : '#f44336';
 
     // ── register payment handlers ─────────────────────────────────────────────
     const handleOpenDialog = () => {
@@ -126,13 +126,13 @@ const SupplierPayoutView = ({ reservationId, reservation }) => {
         <>
             <ToastNotification toast={toast} />
 
-            <Box sx={{ mt: 3, bgcolor: '#1e1e2e', borderRadius: 2, overflow: 'hidden', border: '1px solid #333' }}>
+            <Box sx={{ mt: 3, bgcolor: '#2a2a2a', borderRadius: 2, overflow: 'hidden', border: '1px solid #444' }}>
 
                 {/* ── Header ──────────────────────────────────────────────── */}
                 <Box sx={{
                     display: 'flex', alignItems: 'center', justifyContent: 'space-between',
                     flexWrap: 'wrap', gap: 1.5,
-                    px: 3, py: 2, bgcolor: '#252535', borderBottom: '1px solid #333',
+                    px: 3, py: 2, bgcolor: '#333', borderBottom: '1px solid #444',
                 }}>
                     <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
                         <AccountBalanceIcon sx={{ color: '#9b8fef', fontSize: 22 }} />
@@ -158,7 +158,7 @@ const SupplierPayoutView = ({ reservationId, reservation }) => {
                             size="small"
                             startIcon={<AddIcon />}
                             onClick={handleOpenDialog}
-                            sx={{ bgcolor: '#2196f3', '&:hover': { bgcolor: '#1976d2' }, fontSize: '0.75rem', textTransform: 'none', fontWeight: 700 }}
+                            sx={{ bgcolor: '#6c5dd3', '&:hover': { bgcolor: '#5a4dc0' }, fontSize: '0.75rem', textTransform: 'none', fontWeight: 700 }}
                         >
                             Register Payment
                         </Button>
@@ -169,7 +169,7 @@ const SupplierPayoutView = ({ reservationId, reservation }) => {
                 <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0, p: 0 }}>
 
                     {/* Left — supplier info */}
-                    <Box sx={{ flex: '0 0 220px', minWidth: 0, p: 3, borderRight: '1px solid #2a2a3a' }}>
+                    <Box sx={{ flex: '0 0 220px', minWidth: 0, p: 3, borderRight: '1px solid #444' }}>
                         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, mb: 2 }}>
                             <Avatar sx={{ bgcolor: '#6c5dd3', width: 44, height: 44, fontSize: '0.95rem', fontWeight: 700 }}>
                                 {initials(supplier.name)}
@@ -201,12 +201,12 @@ const SupplierPayoutView = ({ reservationId, reservation }) => {
 
                         {assignment.payment_terms && (
                             <Box sx={{
-                                mt: 'auto', bgcolor: 'rgba(33,150,243,0.08)',
-                                border: '1px solid rgba(33,150,243,0.25)', borderRadius: 1, p: 1.2,
+                                mt: 'auto', bgcolor: '#252525',
+                                border: '1px solid #333', borderRadius: 1, p: 1.2,
                             }}>
                                 <Box sx={{ display: 'flex', gap: 0.8 }}>
-                                    <AttachFileIcon sx={{ color: '#64b5f6', fontSize: 14, mt: 0.2, flexShrink: 0 }} />
-                                    <Typography sx={{ fontSize: '0.72rem', color: '#90caf9', lineHeight: 1.5 }}>
+                                    <AttachFileIcon sx={{ color: '#aaa', fontSize: 14, mt: 0.2, flexShrink: 0 }} />
+                                    <Typography sx={{ fontSize: '0.72rem', color: '#ccc', lineHeight: 1.5 }}>
                                         {assignment.payment_terms}
                                     </Typography>
                                 </Box>
@@ -215,10 +215,10 @@ const SupplierPayoutView = ({ reservationId, reservation }) => {
                     </Box>
 
                     {/* Middle — stats */}
-                    <Box sx={{ flex: '1 1 260px', minWidth: 0, p: 3, borderRight: '1px solid #2a2a3a' }}>
+                    <Box sx={{ flex: '1 1 260px', minWidth: 0, p: 3, borderRight: '1px solid #444' }}>
                         <Box sx={{ mb: 2 }}>
                             <StatLabel>Rate per night to provider</StatLabel>
-                            <StatValue color="#ffa726">{USD(payoutPerNight)}</StatValue>
+                            <StatValue color="#ff9800">{USD(payoutPerNight)}</StatValue>
                             <Typography sx={{ fontSize: '0.75rem', color: '#888', mt: 0.3 }}>
                                 {nights} nights · {USD(owed)} total
                             </Typography>
@@ -226,12 +226,12 @@ const SupplierPayoutView = ({ reservationId, reservation }) => {
 
                         <Box sx={{ mb: 2 }}>
                             <StatLabel>Owed to provider</StatLabel>
-                            <StatValue color="#ffa726">{USD(owed)}</StatValue>
+                            <StatValue color="#ff9800">{USD(owed)}</StatValue>
                         </Box>
 
                         <Box sx={{ mb: 2 }}>
                             <StatLabel>Pending payout</StatLabel>
-                            <StatValue color={balance > 0 ? '#ef5350' : '#66bb6a'}>{USD(balance)}</StatValue>
+                            <StatValue color={balance > 0 ? '#f44336' : '#4caf50'}>{USD(balance)}</StatValue>
                         </Box>
 
                         <Box sx={{ mb: 2.5 }}>
@@ -239,8 +239,8 @@ const SupplierPayoutView = ({ reservationId, reservation }) => {
                                 variant="determinate"
                                 value={pct}
                                 sx={{
-                                    height: 8, borderRadius: 4, bgcolor: '#333',
-                                    '& .MuiLinearProgress-bar': { bgcolor: '#66bb6a', borderRadius: 4 },
+                                    height: 8, borderRadius: 4, bgcolor: '#3a3a3a',
+                                    '& .MuiLinearProgress-bar': { bgcolor: '#4caf50', borderRadius: 4 },
                                 }}
                             />
                             <Box sx={{ display: 'flex', justifyContent: 'space-between', mt: 0.6 }}>
@@ -251,13 +251,13 @@ const SupplierPayoutView = ({ reservationId, reservation }) => {
 
                         {/* Net margin */}
                         <Box sx={{
-                            bgcolor: netMargin >= 0 ? 'rgba(102,187,106,0.08)' : 'rgba(239,83,80,0.08)',
-                            border: `1px solid ${netMargin >= 0 ? '#2e7d32' : '#c62828'}`,
+                            bgcolor: '#252525',
+                            border: `1px solid ${netMargin >= 0 ? 'rgba(76,175,80,0.4)' : 'rgba(244,67,54,0.4)'}`,
                             borderRadius: 1, px: 2, py: 1.5,
                         }}>
                             <StatLabel>Net margin</StatLabel>
                             <Box sx={{ display: 'flex', alignItems: 'baseline', gap: 1.5 }}>
-                                <StatValue color={netMargin >= 0 ? '#66bb6a' : '#ef5350'}>{USD(netMargin)}</StatValue>
+                                <StatValue color={netMargin >= 0 ? '#4caf50' : '#f44336'}>{USD(netMargin)}</StatValue>
                                 <Typography sx={{ fontSize: '0.8rem', color: '#888' }}>
                                     {marginPct}% of {USD(totalAmount)}
                                 </Typography>
@@ -272,7 +272,7 @@ const SupplierPayoutView = ({ reservationId, reservation }) => {
                         <Box sx={{ mt: 1.5, display: 'flex', flexDirection: 'column', gap: 1.5 }}>
                             {payments.map((p) => (
                                 <Box key={p.id} sx={{ display: 'flex', alignItems: 'flex-start', gap: 1 }}>
-                                    <CheckCircleIcon sx={{ color: '#66bb6a', fontSize: 16, mt: 0.3, flexShrink: 0 }} />
+                                    <CheckCircleIcon sx={{ color: '#4caf50', fontSize: 16, mt: 0.3, flexShrink: 0 }} />
                                     <Box sx={{ flex: 1, minWidth: 0 }}>
                                         <Typography sx={{ color: '#fff', fontWeight: 600, fontSize: '0.82rem' }}>
                                             {METHOD_LABELS[p.method] || p.method}
@@ -281,7 +281,7 @@ const SupplierPayoutView = ({ reservationId, reservation }) => {
                                             {fmtDate(p.date)}{p.referenceNotes ? ` · ${p.referenceNotes}` : ''}
                                         </Typography>
                                     </Box>
-                                    <Typography sx={{ color: '#66bb6a', fontWeight: 700, fontSize: '0.88rem', flexShrink: 0 }}>
+                                    <Typography sx={{ color: '#4caf50', fontWeight: 700, fontSize: '0.88rem', flexShrink: 0 }}>
                                         {USD(p.amount)}
                                     </Typography>
                                 </Box>
@@ -290,7 +290,7 @@ const SupplierPayoutView = ({ reservationId, reservation }) => {
                             {/* Outstanding row */}
                             {balance > 0 && (
                                 <Box sx={{ display: 'flex', alignItems: 'flex-start', gap: 1 }}>
-                                    <HomeIcon sx={{ color: '#ffa726', fontSize: 16, mt: 0.3, flexShrink: 0 }} />
+                                    <HomeIcon sx={{ color: '#ff9800', fontSize: 16, mt: 0.3, flexShrink: 0 }} />
                                     <Box sx={{ flex: 1, minWidth: 0 }}>
                                         <Typography sx={{ color: '#fff', fontWeight: 600, fontSize: '0.82rem' }}>
                                             Outstanding
@@ -299,7 +299,7 @@ const SupplierPayoutView = ({ reservationId, reservation }) => {
                                             Due after check-out{reservation?.checkOut ? ` · ${fmtDate(reservation.checkOut)}` : ''}
                                         </Typography>
                                     </Box>
-                                    <Typography sx={{ color: '#ffa726', fontWeight: 700, fontSize: '0.88rem', flexShrink: 0 }}>
+                                    <Typography sx={{ color: '#ff9800', fontWeight: 700, fontSize: '0.88rem', flexShrink: 0 }}>
                                         {USD(balance)}
                                     </Typography>
                                 </Box>
@@ -333,7 +333,7 @@ const SupplierPayoutView = ({ reservationId, reservation }) => {
                 onClose={() => !saving && setDialogOpen(false)}
                 maxWidth="xs"
                 fullWidth
-                PaperProps={{ sx: { bgcolor: '#1e1e2e', color: '#fff' } }}
+                PaperProps={{ sx: { bgcolor: '#1a1a1a', color: '#fff' } }}
             >
                 <DialogTitle sx={{ color: '#fff' }}>Register Supplier Payment</DialogTitle>
                 <DialogContent sx={{ display: 'flex', flexDirection: 'column', gap: 2, pt: '16px !important' }}>
@@ -344,14 +344,14 @@ const SupplierPayoutView = ({ reservationId, reservation }) => {
                         onChange={e => setForm(f => ({ ...f, amount: e.target.value }))}
                         InputProps={{ startAdornment: <Typography sx={{ color: '#aaa', mr: 0.5 }}>$</Typography> }}
                         inputProps={{ min: 0, step: '0.01' }}
-                        sx={{ '& .MuiInputBase-input': { color: '#fff' }, '& .MuiInputLabel-root': { color: '#aaa' }, '& .MuiOutlinedInput-notchedOutline': { borderColor: '#555' } }}
+                        sx={{ '& .MuiOutlinedInput-input': { color: '#fff' }, '& .MuiInputLabel-root': { color: '#777' }, '& fieldset': { borderColor: '#3a3a3a' }, '&:hover fieldset': { borderColor: '#555' }, '&.Mui-focused fieldset': { borderColor: '#7c5cbf' } }}
                     />
                     <FormControl>
                         <Select
                             value={form.method}
                             onChange={e => setForm(f => ({ ...f, method: e.target.value }))}
-                            sx={{ color: '#fff', '& .MuiOutlinedInput-notchedOutline': { borderColor: '#555' }, '& .MuiSvgIcon-root': { color: '#aaa' } }}
-                            MenuProps={{ PaperProps: { sx: { bgcolor: '#2a2a3a', color: '#fff', '& .MuiMenuItem-root:hover': { bgcolor: '#333' } } } }}
+                            sx={{ color: '#fff', '& .MuiOutlinedInput-notchedOutline': { borderColor: '#3a3a3a' }, '& .MuiSvgIcon-root': { color: '#666' } }}
+                            MenuProps={{ PaperProps: { sx: { bgcolor: '#252525', color: '#fff', '& .MuiMenuItem-root:hover': { bgcolor: '#333' } } } }}
                         >
                             {Object.entries(METHOD_LABELS).map(([val, label]) => (
                                 <MenuItem key={val} value={val}>{label}</MenuItem>
@@ -364,7 +364,7 @@ const SupplierPayoutView = ({ reservationId, reservation }) => {
                         value={form.date}
                         onChange={e => setForm(f => ({ ...f, date: e.target.value }))}
                         InputLabelProps={{ shrink: true }}
-                        sx={{ '& .MuiInputBase-input': { color: '#fff', colorScheme: 'dark' }, '& .MuiInputLabel-root': { color: '#aaa' }, '& .MuiOutlinedInput-notchedOutline': { borderColor: '#555' } }}
+                        sx={{ '& .MuiOutlinedInput-input': { color: '#fff', colorScheme: 'dark' }, '& .MuiInputLabel-root': { color: '#777' }, '& fieldset': { borderColor: '#3a3a3a' }, '&:hover fieldset': { borderColor: '#555' }, '&.Mui-focused fieldset': { borderColor: '#7c5cbf' } }}
                     />
                     <TextField
                         label="Reference / Notes"
@@ -372,7 +372,7 @@ const SupplierPayoutView = ({ reservationId, reservation }) => {
                         rows={2}
                         value={form.referenceNotes}
                         onChange={e => setForm(f => ({ ...f, referenceNotes: e.target.value }))}
-                        sx={{ '& .MuiInputBase-input': { color: '#fff' }, '& .MuiInputLabel-root': { color: '#aaa' }, '& .MuiOutlinedInput-notchedOutline': { borderColor: '#555' } }}
+                        sx={{ '& .MuiOutlinedInput-input': { color: '#fff' }, '& .MuiInputLabel-root': { color: '#777' }, '& fieldset': { borderColor: '#3a3a3a' }, '&:hover fieldset': { borderColor: '#555' }, '&.Mui-focused fieldset': { borderColor: '#7c5cbf' } }}
                     />
                     <Box>
                         <Button
