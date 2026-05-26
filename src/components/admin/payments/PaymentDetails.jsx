@@ -104,6 +104,37 @@ const PaymentDetails = ({ payment }) => {
                             </Typography>
                         </Grid>
                     )}
+
+                    {/* Recibo */}
+                    {payment.receiptImage && (
+                        <Grid item xs={12}>
+                            <Divider sx={{ my: 2 }} />
+                            <Typography variant="subtitle1" gutterBottom>
+                                Receipt:
+                            </Typography>
+                            <Box
+                                component="a"
+                                href={payment.receiptImage}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                sx={{ display: 'inline-block', mt: 1 }}
+                            >
+                                <Box
+                                    component="img"
+                                    src={payment.receiptImage}
+                                    alt="Receipt"
+                                    sx={{
+                                        maxWidth: '100%',
+                                        maxHeight: 300,
+                                        borderRadius: 1,
+                                        border: '1px solid',
+                                        borderColor: 'divider',
+                                        display: 'block',
+                                    }}
+                                />
+                            </Box>
+                        </Grid>
+                    )}
                 </Grid>
             </CardContent>
         </Card>

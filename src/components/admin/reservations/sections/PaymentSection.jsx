@@ -1,5 +1,6 @@
-import React, { useState, useEffect } from 'react';
+import React, { useRef, useState, useEffect } from 'react';
 import { Grid, TextField, Button, FormControl, InputLabel, Select, MenuItem, Box, Typography } from '@mui/material';
+import AttachFileIcon from '@mui/icons-material/AttachFile';
 import reservationService from '../../../../services/reservationService';
 import { useToast } from '../../../../hooks/useToast';
 import ToastNotification from '../../../common/ToastNotification';
@@ -12,6 +13,8 @@ const PaymentSection = ({ formData, onChange, onPaymentRegistered, onInitialPaym
         paymentNotes: initialPaymentData?.notes || ''
     });
     const [isLoading, setIsLoading] = useState(false);
+    const [receiptImage, setReceiptImage] = useState(null);
+    const fileInputRef = useRef(null);
     const { toast, success, error, warning, hideToast } = useToast();
 
     // Verificar si la reserva ya existe
@@ -79,6 +82,7 @@ const PaymentSection = ({ formData, onChange, onPaymentRegistered, onInitialPaym
                 payment_method: paymentData.paymentMethod,
                 notes: paymentData.paymentNotes,
                 payment_date: new Date().toISOString(),
+                receipt_image: receiptImage || undefined,
                 reservation_update: {
                     amount_paid: (parseFloat(formData.amountPaid) || 0) + parseFloat(paymentData.paymentAmount),
                     amount_due: Math.max(0, (parseFloat(formData.totalAmount) || 0) - ((parseFloat(formData.amountPaid) || 0) + parseFloat(paymentData.paymentAmount))),
@@ -107,6 +111,8 @@ const PaymentSection = ({ formData, onChange, onPaymentRegistered, onInitialPaym
                 paymentMethod: 'cash',
                 paymentNotes: ''
             });
+            setReceiptImage(null);
+            if (fileInputRef.current) fileInputRef.current.value = '';
 
             // Notificar al componente padre si hay callback
             if (onPaymentRegistered) {
@@ -198,6 +204,34 @@ const PaymentSection = ({ formData, onChange, onPaymentRegistered, onInitialPaym
                     />
                 </Grid>
                 
+                {!isNewReservation && (
+                    <Grid item xs={12}>
+                        <input
+                            ref={fileInputRef}
+                            type="file"
+                            accept="image/*"
+                            style={{ display: 'none' }}
+                            onChange={(e) => setReceiptImage(e.target.files[0] || null)}
+                        />
+                        <Button
+                            fullWidth
+                            variant="outlined"
+                            size="small"
+                            startIcon={<AttachFileIcon />}
+                            onClick={() => fileInputRef.current?.click()}
+                            sx={{
+                                borderColor: '#555',
+                                color: receiptImage ? '#4caf50' : '#aaa',
+                                '&:hover': { borderColor: '#90caf9', color: '#90caf9' },
+                                textTransform: 'none',
+                                fontSize: '0.8rem',
+                            }}
+                        >
+                            {receiptImage ? receiptImage.name : 'Attach receipt (optional)'}
+                        </Button>
+                    </Grid>
+                )}
+
                 <Grid item xs={12}>
                     <Button
                         fullWidth

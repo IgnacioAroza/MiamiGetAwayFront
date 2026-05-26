@@ -33,27 +33,33 @@ const reservationPaymentService = {
 
     createPayment: async (paymentData) => {
         try {
-            // Extraer el ID de la reserva y el resto de los datos
-            const { reservationId, ...restPaymentData } = paymentData;
+            const { reservationId, receiptImage, ...restPaymentData } = paymentData;
 
             if (!reservationId) {
                 throw new Error('Se requiere el ID de la reserva');
             }
 
-            // Formatear los datos para el backend
-            const dataToSend = {
-                ...restPaymentData,
-                amount: parseFloat(restPaymentData.amount),
-                // Asegurarse de que el método de pago sea uno de los permitidos
-                payment_method: restPaymentData.paymentMethod || 'cash',
-                payment_date: restPaymentData.paymentDate,
-                // Eliminar los campos que no espera el backend
-                paymentMethod: undefined,
-                paymentDate: undefined
-            };
+            let body;
+            if (receiptImage instanceof File) {
+                body = new FormData();
+                body.append('amount', parseFloat(restPaymentData.amount));
+                body.append('paymentMethod', restPaymentData.paymentMethod || 'cash');
+                if (restPaymentData.paymentDate) body.append('paymentDate', restPaymentData.paymentDate);
+                if (restPaymentData.paymentReference) body.append('paymentReference', restPaymentData.paymentReference);
+                if (restPaymentData.notes) body.append('notes', restPaymentData.notes);
+                body.append('receipt_image', receiptImage);
+            } else {
+                body = {
+                    ...restPaymentData,
+                    amount: parseFloat(restPaymentData.amount),
+                    payment_method: restPaymentData.paymentMethod || 'cash',
+                    payment_date: restPaymentData.paymentDate,
+                    paymentMethod: undefined,
+                    paymentDate: undefined
+                };
+            }
 
-            // Llamar al endpoint de pagos de reservaciones
-            const response = await api.post(`/reservations/${reservationId}/payments`, dataToSend);
+            const response = await api.post(`/reservations/${reservationId}/payments`, body);
             return response.data;
         } catch (error) {
             throw error.response?.data?.message || 'Error creating payment';
@@ -62,7 +68,22 @@ const reservationPaymentService = {
 
     updatePayment: async (id, paymentData) => {
         try {
-            const response = await api.put(`/reservation-payments/${id}`, paymentData);
+            const { receiptImage, removeReceiptImage, ...rest } = paymentData;
+
+            if (receiptImage instanceof File || removeReceiptImage) {
+                const form = new FormData();
+                if (rest.amount !== undefined) form.append('amount', parseFloat(rest.amount));
+                if (rest.paymentMethod) form.append('paymentMethod', rest.paymentMethod);
+                if (rest.paymentDate) form.append('paymentDate', rest.paymentDate);
+                if (rest.paymentReference) form.append('paymentReference', rest.paymentReference);
+                if (rest.notes) form.append('notes', rest.notes);
+                if (receiptImage instanceof File) form.append('receipt_image', receiptImage);
+                if (removeReceiptImage) form.append('remove_receipt_image', 'true');
+                const response = await api.put(`/reservation-payments/${id}`, form);
+                return response.data;
+            }
+
+            const response = await api.put(`/reservation-payments/${id}`, rest);
             return response.data;
         } catch (error) {
             throw error.response?.data?.message || 'Error updating payment';

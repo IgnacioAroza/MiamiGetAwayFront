@@ -122,48 +122,41 @@ const reservationService = {
 
     registerPayment: async (id, paymentData) => {
         try {
-            // Verificar que tenemos los datos necesarios
             if (!paymentData || !paymentData.amount) {
                 throw new Error('The payment amount is required');
             }
 
-            // Verificar si hay datos para actualizar la reserva
             const hasReservationUpdate = !!paymentData.reservation_update;
+            const receiptImage = paymentData.receipt_image;
 
-            // Construir los datos para enviar al servidor
-            const paymentBase = normalizePaymentInput({
-                amount: paymentData.amount,
-                paymentMethod: paymentData.payment_method,
-                notes: paymentData.notes || '',
-                paymentDate: paymentData.payment_date,
-            });
-            const formattedData = {
-                ...paymentBase,
-                reservation_update: hasReservationUpdate ? {
-                    amount_paid: paymentData.reservation_update.amount_paid,
-                    amount_due: paymentData.reservation_update.amount_due,
-                    payment_status: paymentData.reservation_update.payment_status
-                } : undefined
-            };
-
-            // Intentar hacer la petición POST
-            try {
-                const response = await api.post(`/reservations/${id}/payments`, formattedData);
-                return response.data;
-            } catch (apiError) {
-                console.error("Error in the API request:", apiError);
-                if (apiError.response) {
-                    console.error("Response code:", apiError.response.status);
-                    console.error("Response data:", apiError.response.data);
-                }
-                throw apiError;
+            let body;
+            if (receiptImage instanceof File) {
+                body = new FormData();
+                body.append('amount', parseFloat(paymentData.amount));
+                body.append('paymentMethod', paymentData.payment_method || 'cash');
+                if (paymentData.payment_date) body.append('paymentDate', paymentData.payment_date);
+                if (paymentData.notes) body.append('notes', paymentData.notes);
+                body.append('receipt_image', receiptImage);
+            } else {
+                const paymentBase = normalizePaymentInput({
+                    amount: paymentData.amount,
+                    paymentMethod: paymentData.payment_method,
+                    notes: paymentData.notes || '',
+                    paymentDate: paymentData.payment_date,
+                });
+                body = {
+                    ...paymentBase,
+                    reservation_update: hasReservationUpdate ? {
+                        amount_paid: paymentData.reservation_update.amount_paid,
+                        amount_due: paymentData.reservation_update.amount_due,
+                        payment_status: paymentData.reservation_update.payment_status
+                    } : undefined
+                };
             }
+
+            const response = await api.post(`/reservations/${id}/payments`, body);
+            return response.data;
         } catch (error) {
-            console.error("Error registering payment:", error);
-            if (error.response) {
-                console.error("Error details:", error.response.data);
-                console.error("Status:", error.response.status);
-            }
             throw error.response?.data?.message || error.message || 'Error registering payment';
         }
     },

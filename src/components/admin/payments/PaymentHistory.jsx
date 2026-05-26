@@ -15,8 +15,11 @@ import {
     Card,
     CardContent,
     Divider,
-    Stack
+    Stack,
+    IconButton,
+    Tooltip,
 } from '@mui/material';
+import ReceiptLongIcon from '@mui/icons-material/ReceiptLong';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
 import api from '../../../utils/api';
@@ -94,13 +97,13 @@ const PaymentHistory = ({ payments = [], reservationId }) => {
         }
     };
 
-    // Normalizar los nombres de propiedades para diferentes formatos
     const normalizedPayments = loadedPayments.map(payment => ({
         id: payment.id,
         date: payment.paymentDate,
         method: payment.paymentMethod || 'N/A',
         reference: payment.notes || '-',
-        amount: payment.amount || 0
+        amount: payment.amount || 0,
+        receiptImage: payment.receiptImage || null,
     }));
 
     // Renderizado de tarjetas para móviles
@@ -145,6 +148,26 @@ const PaymentHistory = ({ payments = [], reservationId }) => {
                                     {formatCurrency(payment.amount)}
                                 </Typography>
                             </Box>
+                            {payment.receiptImage && (
+                                <>
+                                    <Divider sx={{ my: 1, borderColor: '#555' }} />
+                                    <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
+                                        <Typography variant="subtitle2" sx={{ color: '#bbb' }}>
+                                            Receipt
+                                        </Typography>
+                                        <Typography
+                                            component="a"
+                                            href={payment.receiptImage}
+                                            target="_blank"
+                                            rel="noopener noreferrer"
+                                            variant="body2"
+                                            sx={{ color: '#90caf9' }}
+                                        >
+                                            View
+                                        </Typography>
+                                    </Box>
+                                </>
+                            )}
                         </CardContent>
                     </Card>
                 ))}
@@ -220,6 +243,7 @@ const PaymentHistory = ({ payments = [], reservationId }) => {
                                 <TableCell sx={{ color: '#fff', borderColor: '#444', fontWeight: 600 }}>Method</TableCell>
                                 <TableCell sx={{ color: '#fff', borderColor: '#444', fontWeight: 600 }}>Reference</TableCell>
                                 <TableCell align="right" sx={{ color: '#fff', borderColor: '#444', fontWeight: 600 }}>Amount</TableCell>
+                                <TableCell align="center" sx={{ color: '#fff', borderColor: '#444', fontWeight: 600 }}>Receipt</TableCell>
                             </TableRow>
                         </TableHead>
                         <TableBody>
@@ -230,6 +254,24 @@ const PaymentHistory = ({ payments = [], reservationId }) => {
                                     <TableCell sx={{ color: '#fff', borderColor: '#444' }}>{payment.reference}</TableCell>
                                     <TableCell align="right" sx={{ color: '#fff', borderColor: '#444' }}>
                                         {formatCurrency(payment.amount)}
+                                    </TableCell>
+                                    <TableCell align="center" sx={{ borderColor: '#444' }}>
+                                        {payment.receiptImage ? (
+                                            <Tooltip title="View receipt">
+                                                <IconButton
+                                                    size="small"
+                                                    component="a"
+                                                    href={payment.receiptImage}
+                                                    target="_blank"
+                                                    rel="noopener noreferrer"
+                                                    sx={{ color: '#90caf9' }}
+                                                >
+                                                    <ReceiptLongIcon fontSize="small" />
+                                                </IconButton>
+                                            </Tooltip>
+                                        ) : (
+                                            <Typography variant="caption" sx={{ color: '#555' }}>—</Typography>
+                                        )}
                                     </TableCell>
                                 </TableRow>
                             ))}
