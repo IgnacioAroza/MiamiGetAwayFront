@@ -3,22 +3,28 @@ import { useDispatch, useSelector } from 'react-redux';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Box, Container, Grid, Paper, Typography, Button, Alert, Snackbar, Skeleton } from '@mui/material';
 import { ArrowBack as ArrowBackIcon } from '@mui/icons-material';
-import { fetchReservationById } from '../../../redux/reservationSlice';
 import ReservationForm from './ReservationForm';
 import reservationService from '../../../services/reservationService';
-import { format, parseISO } from 'date-fns';
+import { fetchAdminApartments } from '../../../redux/adminApartmentSlice';
 
 const ReservationManagement = () => {
     const dispatch = useDispatch();
     const navigate = useNavigate();
     const { id } = useParams();
-    const { selectedReservation, loading, error } = useSelector(state => state.reservations);
+    const apartmentsStatus = useSelector(state => state.adminApartments.status);
+    const [reservationLoading, setReservationLoading] = useState(!!id);
     const [notification, setNotification] = useState({ open: false, message: '', type: 'info' });
     const [initialData, setInitialData] = useState(null);
-    
+
     useEffect(() => {
+        // Disparar carga de apartamentos lo antes posible, antes de que el form monte
+        if (apartmentsStatus === 'idle' || apartmentsStatus === 'failed') {
+            dispatch(fetchAdminApartments());
+        }
+
         const loadReservationData = async () => {
             if (id) {
+                setReservationLoading(true);
                 try {
                     const reservation = await reservationService.getById(id);
 
@@ -61,6 +67,8 @@ const ReservationManagement = () => {
                         message: 'Error loading reservation data',
                         type: 'error'
                     });
+                } finally {
+                    setReservationLoading(false);
                 }
             }
         };
@@ -135,7 +143,7 @@ const ReservationManagement = () => {
                     </Typography>
                 </Box>
                 
-                {loading ? (
+                {reservationLoading ? (
                     <Box>
                         <Box display="flex" alignItems="center" mb={3}>
                             <Skeleton variant="rectangular" width={100} height={36} sx={{ mr: 2 }} />
@@ -162,8 +170,6 @@ const ReservationManagement = () => {
                             </Grid>
                         </Grid>
                     </Box>
-                ) : error ? (
-                    <Typography color="error">Error: {error}</Typography>
                 ) : (
                     <ReservationForm
                         initialData={initialData}
