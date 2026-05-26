@@ -1,9 +1,11 @@
 import React, { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { useParams, useNavigate } from 'react-router-dom';
-import { Box, Container, Grid, Paper, Typography, Button, Alert, Snackbar, Skeleton } from '@mui/material';
-import { ArrowBack as ArrowBackIcon } from '@mui/icons-material';
+import { Box, Card, CardContent, CardHeader, Container, Grid, Paper, Typography, Button, Alert, Snackbar, Skeleton } from '@mui/material';
+import { ArrowBack as ArrowBackIcon, CheckCircle as CheckCircleIcon } from '@mui/icons-material';
+import HandshakeIcon from '@mui/icons-material/Handshake';
 import ReservationForm from './ReservationForm';
+import SupplierPayoutSection from '../suppliers/SupplierPayoutSection';
 import reservationService from '../../../services/reservationService';
 import { fetchAdminApartments } from '../../../redux/adminApartmentSlice';
 
@@ -15,6 +17,7 @@ const ReservationManagement = () => {
     const [reservationLoading, setReservationLoading] = useState(!!id);
     const [notification, setNotification] = useState({ open: false, message: '', type: 'info' });
     const [initialData, setInitialData] = useState(null);
+    const [supplierStep, setSupplierStep] = useState(null); // { id, clientName, apartmentName }
 
     useEffect(() => {
         // Disparar carga de apartamentos lo antes posible, antes de que el form monte
@@ -97,9 +100,12 @@ const ReservationManagement = () => {
             if (id) {
                 navigate(`/admin/reservations/view/${id}`);
             } else {
-                // Redirigir al form de edición para que el usuario pueda asignar supplier y ver todos los paneles
                 const newId = response?.id || response?.reservationId;
-                navigate(`/admin/reservations/edit/${newId}`);
+                setSupplierStep({
+                    id: newId,
+                    clientName: response?.clientName || '',
+                    apartmentName: response?.apartmentName || response?.name || '',
+                });
             }
         } catch (error) {
             console.error('Error al procesar el formulario:', error);
@@ -125,12 +131,74 @@ const ReservationManagement = () => {
         setNotification({...notification, open: false});
     };
     
+    if (supplierStep) {
+        return (
+            <Container maxWidth="sm">
+                <Box py={3}>
+                    {/* Success banner */}
+                    <Box sx={{
+                        display: 'flex', alignItems: 'center', gap: 1.5,
+                        bgcolor: '#1b3a1f', border: '1px solid #2e7d32',
+                        borderRadius: 1, px: 2.5, py: 1.5, mb: 3,
+                    }}>
+                        <CheckCircleIcon sx={{ color: '#4caf50', flexShrink: 0 }} />
+                        <Box>
+                            <Typography variant="body1" sx={{ color: '#fff', fontWeight: 600 }}>
+                                Reservation created successfully
+                            </Typography>
+                            {(supplierStep.clientName || supplierStep.apartmentName) && (
+                                <Typography variant="body2" sx={{ color: '#aaa', mt: 0.25 }}>
+                                    {[supplierStep.clientName, supplierStep.apartmentName].filter(Boolean).join(' · ')}
+                                </Typography>
+                            )}
+                        </Box>
+                    </Box>
+
+                    {/* Supplier assignment */}
+                    <Card sx={{ bgcolor: '#2a2a2a', border: '1px solid #333' }}>
+                        <CardHeader
+                            avatar={<HandshakeIcon sx={{ color: '#6c5dd3' }} />}
+                            title="Assign Supplier"
+                            subheader="Optional — you can skip this and assign later from the reservation"
+                            sx={{
+                                bgcolor: '#333',
+                                '& .MuiCardHeader-title': { color: '#fff', fontWeight: 700 },
+                                '& .MuiCardHeader-subheader': { color: '#999', fontSize: '0.8rem' },
+                            }}
+                        />
+                        <CardContent>
+                            <SupplierPayoutSection reservationId={supplierStep.id} nights={0} />
+                        </CardContent>
+                    </Card>
+
+                    {/* Actions */}
+                    <Box sx={{ display: 'flex', justifyContent: 'flex-end', gap: 2, mt: 3 }}>
+                        <Button
+                            variant="outlined"
+                            onClick={() => navigate('/admin/reservations')}
+                            sx={{ color: '#aaa', borderColor: '#444' }}
+                        >
+                            Skip — Go to list
+                        </Button>
+                        <Button
+                            variant="contained"
+                            onClick={() => navigate(`/admin/reservations/view/${supplierStep.id}`)}
+                            sx={{ bgcolor: '#6c5dd3', '&:hover': { bgcolor: '#7c5cbf' } }}
+                        >
+                            Done — View Reservation
+                        </Button>
+                    </Box>
+                </Box>
+            </Container>
+        );
+    }
+
     return (
         <Container maxWidth="xl">
             <Box py={3}>
                 <Box display="flex" alignItems="center" mb={3}>
-                    <Button 
-                        startIcon={<ArrowBackIcon />} 
+                    <Button
+                        startIcon={<ArrowBackIcon />}
                         onClick={handleBack}
                         variant="outlined"
                         sx={{ mr: 2 }}
@@ -141,7 +209,7 @@ const ReservationManagement = () => {
                         {id ? 'Edit Reservation' : 'New Reservation'}
                     </Typography>
                 </Box>
-                
+
                 {reservationLoading ? (
                     <Box>
                         <Box display="flex" alignItems="center" mb={3}>
