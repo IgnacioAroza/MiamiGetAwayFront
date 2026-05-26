@@ -39,6 +39,7 @@ import { useNavigate } from 'react-router-dom';
 import { useDispatch } from 'react-redux';
 import { setSelectedReservation } from '../../../redux/reservationSlice';
 import ReservationSummary from '../payments/ReservationSummary';
+import SupplierPayoutView from '../suppliers/SupplierPayoutView';
 import { formatDateForDisplay } from '../../../utils/dateUtils';
 import useDeviceDetection from '../../../hooks/useDeviceDetection';
 import { useApartmentImages } from '../../../hooks/useApartmentImages';
@@ -707,6 +708,14 @@ const ReservationDetails = ({ reservation, apartmentLoading, apartmentError, apa
                     <ReservationSummary reservation={reservation} />
                 </Grid>
             </Grid>
+
+            {/* Provider Payout — solo si hay proveedor asignado */}
+            {reservation?.id && (
+                <SupplierPayoutView
+                    reservationId={reservation.id}
+                    reservation={reservation}
+                />
+            )}
 
             {/* Diálogo para enviar email */}
             <Dialog 
