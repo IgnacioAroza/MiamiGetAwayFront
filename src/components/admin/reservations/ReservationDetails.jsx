@@ -39,6 +39,7 @@ import { useNavigate } from 'react-router-dom';
 import { useDispatch } from 'react-redux';
 import { setSelectedReservation } from '../../../redux/reservationSlice';
 import ReservationSummary from '../payments/ReservationSummary';
+import SupplierPayoutView from '../suppliers/SupplierPayoutView';
 import { formatDateForDisplay } from '../../../utils/dateUtils';
 import useDeviceDetection from '../../../hooks/useDeviceDetection';
 import { useApartmentImages } from '../../../hooks/useApartmentImages';
@@ -340,7 +341,26 @@ const ReservationDetails = ({ reservation, apartmentLoading, apartmentError, apa
                         size="large"
                         sx={{ alignSelf: isMobile ? "flex-start" : "center" }}
                     />
-                    <Button 
+                    {reservation?.supplierStatus && (
+                        <Chip
+                            label={`SUPPLIER: ${reservation.supplierStatus.toUpperCase()}`}
+                            size="small"
+                            sx={{
+                                alignSelf: isMobile ? "flex-start" : "center",
+                                bgcolor:
+                                    reservation.supplierStatus === 'confirmed' ? '#1b5e20' :
+                                    reservation.supplierStatus === 'searching' ? '#4a3900' :
+                                    '#4a1a1a',
+                                color:
+                                    reservation.supplierStatus === 'confirmed' ? '#69f0ae' :
+                                    reservation.supplierStatus === 'searching' ? '#ffd740' :
+                                    '#ef9a9a',
+                                fontWeight: 700,
+                                fontSize: '0.65rem',
+                            }}
+                        />
+                    )}
+                    <Button
                         variant="contained" 
                         startIcon={<EditIcon />}
                         onClick={handleEditClick}
@@ -688,6 +708,14 @@ const ReservationDetails = ({ reservation, apartmentLoading, apartmentError, apa
                     <ReservationSummary reservation={reservation} />
                 </Grid>
             </Grid>
+
+            {/* Provider Payout — solo si hay proveedor asignado */}
+            {reservation?.id && (
+                <SupplierPayoutView
+                    reservationId={reservation.id}
+                    reservation={reservation}
+                />
+            )}
 
             {/* Diálogo para enviar email */}
             <Dialog 

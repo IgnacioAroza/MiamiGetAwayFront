@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import {
     Dialog,
@@ -14,8 +14,13 @@ import {
     Select,
     FormHelperText,
     CircularProgress,
-    Alert
+    Alert,
+    Box,
+    Typography,
+    Checkbox,
+    FormControlLabel,
 } from '@mui/material';
+import AttachFileIcon from '@mui/icons-material/AttachFile';
 import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns';
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import { DatePicker } from '@mui/x-date-pickers/DatePicker';
@@ -36,8 +41,8 @@ const PaymentForm = ({ open, onClose }) => {
     const dispatch = useDispatch();
     const selectedPayment = useSelector(state => state.reservationPayments.selectedPayment);
     const loading = useSelector(state => state.reservationPayments.loading);
+    const fileInputRef = useRef(null);
 
-    // Estado del formulario
     const [formData, setFormData] = useState({
         amount: '',
         payment_date: new Date(),
@@ -47,8 +52,9 @@ const PaymentForm = ({ open, onClose }) => {
         reservation_id: '',
         client_id: ''
     });
+    const [receiptImage, setReceiptImage] = useState(null);
+    const [removeReceiptImage, setRemoveReceiptImage] = useState(false);
 
-    // Estado de errores
     const [errors, setErrors] = useState({});
 
     // Cargar datos si es edición
@@ -66,7 +72,6 @@ const PaymentForm = ({ open, onClose }) => {
             };
             setFormData(normalizedPayment);
         } else {
-            // Resetear el formulario si no hay pago seleccionado
             setFormData({
                 amount: '',
                 payment_date: new Date(),
@@ -77,6 +82,9 @@ const PaymentForm = ({ open, onClose }) => {
                 client_id: ''
             });
         }
+        setReceiptImage(null);
+        setRemoveReceiptImage(false);
+        if (fileInputRef.current) fileInputRef.current.value = '';
     }, [selectedPayment]);
 
     // Validación del formulario
@@ -150,16 +158,17 @@ const PaymentForm = ({ open, onClose }) => {
             payment_reference: formData.payment_reference || null,
             notes: formData.notes || null,
             reservation_id: parseInt(formData.reservation_id),
-            client_id: selectedPayment?.client_id || null
+            client_id: selectedPayment?.client_id || null,
+            receiptImage: receiptImage || undefined,
+            removeReceiptImage: removeReceiptImage || undefined,
         };
 
         try {
             if (selectedPayment) {
-                const result = await dispatch(updatePayment({ 
-                    id: selectedPayment.id, 
-                    paymentData 
+                await dispatch(updatePayment({
+                    id: selectedPayment.id,
+                    paymentData
                 })).unwrap();
-                // Recargar la lista de pagos después de la actualización
                 await dispatch(fetchAllPayments()).unwrap();
             } else {
                 await dispatch(createPayment(paymentData)).unwrap();
@@ -174,6 +183,9 @@ const PaymentForm = ({ open, onClose }) => {
                 reservation_id: '',
                 client_id: ''
             });
+            setReceiptImage(null);
+            setRemoveReceiptImage(false);
+            if (fileInputRef.current) fileInputRef.current.value = '';
         } catch (error) {
             setErrors(prev => ({
                 ...prev,
@@ -192,6 +204,9 @@ const PaymentForm = ({ open, onClose }) => {
             reservation_id: '',
             client_id: ''
         });
+        setReceiptImage(null);
+        setRemoveReceiptImage(false);
+        if (fileInputRef.current) fileInputRef.current.value = '';
         setErrors({});
         onClose();
     };
@@ -322,6 +337,50 @@ const PaymentForm = ({ open, onClose }) => {
                                 onChange={handleChange}
                                 disabled={loading}
                             />
+                        </Grid>
+
+                        <Grid item xs={12}>
+                            <input
+                                ref={fileInputRef}
+                                type="file"
+                                accept="image/*"
+                                style={{ display: 'none' }}
+                                onChange={(e) => {
+                                    setReceiptImage(e.target.files[0] || null);
+                                    setRemoveReceiptImage(false);
+                                }}
+                            />
+                            <Button
+                                fullWidth
+                                variant="outlined"
+                                size="small"
+                                startIcon={<AttachFileIcon />}
+                                onClick={() => fileInputRef.current?.click()}
+                                disabled={loading || removeReceiptImage}
+                                sx={{ textTransform: 'none' }}
+                            >
+                                {receiptImage ? receiptImage.name : 'Attach receipt image (optional)'}
+                            </Button>
+                            {selectedPayment?.receiptImage && !receiptImage && (
+                                <Box sx={{ mt: 1 }}>
+                                    <Typography variant="caption" sx={{ color: '#aaa', display: 'block', mb: 0.5 }}>
+                                        Current receipt:&nbsp;
+                                        <a href={selectedPayment.receiptImage} target="_blank" rel="noopener noreferrer" style={{ color: '#90caf9' }}>
+                                            View
+                                        </a>
+                                    </Typography>
+                                    <FormControlLabel
+                                        control={
+                                            <Checkbox
+                                                size="small"
+                                                checked={removeReceiptImage}
+                                                onChange={(e) => setRemoveReceiptImage(e.target.checked)}
+                                            />
+                                        }
+                                        label={<Typography variant="caption">Remove current receipt</Typography>}
+                                    />
+                                </Box>
+                            )}
                         </Grid>
                     </Grid>
                 </DialogContent>

@@ -53,7 +53,7 @@ export const useReservationForm = (initialData) => {
 
     // Cargar datos iniciales
     useEffect(() => {
-        if (apartmentsStatus === 'idle') {
+        if (apartmentsStatus === 'idle' || apartmentsStatus === 'failed') {
             dispatch(fetchAdminApartments());
         }
 

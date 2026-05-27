@@ -26,6 +26,7 @@ dist-ssr
 
 PLACEHOLDER_GUIDE.md
 /docs
+!/docs/memory/
 
 # Claude Code — local config and generic skills
 .claude/settings.local.json

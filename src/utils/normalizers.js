@@ -105,6 +105,7 @@ export const normalizeReservationFromApi = (data = {}) => {
 
     status: pick('status', 'status'),
     paymentStatus: pick('paymentStatus', 'payment_status'),
+    supplierStatus: pick('supplierStatus', 'supplier_status') || 'unassigned',
 
     createdAt: pick('createdAt', 'created_at'),
     updatedAt: pick('updatedAt', 'updated_at'),
@@ -133,7 +134,9 @@ export const normalizePaymentFromApi = (data = {}) => {
     amount: numberOrUndefined(pick('amount', 'amount')) ?? 0,
     paymentMethod: pick('paymentMethod', 'payment_method') || 'other',
     paymentDate: pick('paymentDate', 'payment_date'),
+    paymentReference: pick('paymentReference', 'payment_reference') || '',
     notes: pick('notes', 'notes') || '',
+    receiptImage: pick('receiptImage', 'receipt_image') || null,
   };
 };
 

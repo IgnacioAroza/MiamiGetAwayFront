@@ -17,14 +17,15 @@ import {
   Divider
 } from '@mui/material';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { 
-  HomeIcon, 
-  BookIcon as ReservationsIcon, 
-  ApartmentIcon, 
-  PaymentIcon, 
-  PeopleIcon, 
+import {
+  HomeIcon,
+  BookIcon as ReservationsIcon,
+  ApartmentIcon,
+  PaymentIcon,
+  PeopleIcon,
   LogoutIcon,
-  DesignServicesIcon
+  DesignServicesIcon,
+  HandshakeIcon,
 } from './icons';
 import MenuIcon from '@mui/icons-material/Menu';
 import useDeviceDetection from '../../../hooks/useDeviceDetection';
@@ -56,6 +57,7 @@ const DashboardHeader = () => {
     { text: 'Apartments', icon: <ApartmentIcon />, path: '/admin/apartments' },
     { text: 'Payments', icon: <PaymentIcon />, path: '/admin/payments' },
     { text: 'Clients', icon: <PeopleIcon />, path: '/admin/users' },
+    { text: 'Suppliers', icon: <HandshakeIcon />, path: '/admin/suppliers' },
   ];
 
   // Contenido del drawer para móviles

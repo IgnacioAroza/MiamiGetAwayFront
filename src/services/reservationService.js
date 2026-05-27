@@ -28,27 +28,8 @@ const reservationService = {
 
     create: async (reservationData) => {
         try {
-            console.log('=== Creando nueva reserva ===');
-            console.log('Datos recibidos:', {
-                clientId: reservationData.clientId,
-                clientData: reservationData.clientId ? 'Solo clientId' : {
-                    clientName: reservationData.clientName,
-                    clientEmail: reservationData.clientEmail,
-                    clientPhone: reservationData.clientPhone
-                }
-            });
-
             // Normalizar payload respetando el formato de fechas MM-DD-YYYY HH:mm y camelCase
             const formattedData = normalizeReservationInput(reservationData);
-
-            console.log('Datos formateados para enviar:', {
-                clientId: formattedData.clientId,
-                clientData: formattedData.clientId ? 'Solo clientId' : {
-                    clientName: formattedData.clientName,
-                    clientEmail: formattedData.clientEmail,
-                    clientPhone: formattedData.clientPhone
-                }
-            });
 
             // Validaciones mínimas
             if (formattedData.pricePerNight === undefined) {
@@ -63,8 +44,6 @@ const reservationService = {
             const dataToSend = stripUndefined(formattedData);
 
             const response = await api.post('/reservations', dataToSend);
-            console.log('Respuesta del servidor:', response.data);
-            console.log('============================');
             return response.data;
         } catch (error) {
             console.error('Error creating reservation:', error);
@@ -89,7 +68,6 @@ const reservationService = {
             const formattedData = normalizeReservationInput(reservationData, { partial: true });
             const dataToSend = stripUndefined(formattedData);
 
-            // Hacer la petición al servidor
             const response = await api.put(`/reservations/${id}`, dataToSend);
             return response.data;
         } catch (error) {
@@ -143,48 +121,41 @@ const reservationService = {
 
     registerPayment: async (id, paymentData) => {
         try {
-            // Verificar que tenemos los datos necesarios
             if (!paymentData || !paymentData.amount) {
                 throw new Error('The payment amount is required');
             }
 
-            // Verificar si hay datos para actualizar la reserva
             const hasReservationUpdate = !!paymentData.reservation_update;
+            const receiptImage = paymentData.receipt_image;
 
-            // Construir los datos para enviar al servidor
-            const paymentBase = normalizePaymentInput({
-                amount: paymentData.amount,
-                paymentMethod: paymentData.payment_method,
-                notes: paymentData.notes || '',
-                paymentDate: paymentData.payment_date,
-            });
-            const formattedData = {
-                ...paymentBase,
-                reservation_update: hasReservationUpdate ? {
-                    amount_paid: paymentData.reservation_update.amount_paid,
-                    amount_due: paymentData.reservation_update.amount_due,
-                    payment_status: paymentData.reservation_update.payment_status
-                } : undefined
-            };
-
-            // Intentar hacer la petición POST
-            try {
-                const response = await api.post(`/reservations/${id}/payments`, formattedData);
-                return response.data;
-            } catch (apiError) {
-                console.error("Error in the API request:", apiError);
-                if (apiError.response) {
-                    console.error("Response code:", apiError.response.status);
-                    console.error("Response data:", apiError.response.data);
-                }
-                throw apiError;
+            let body;
+            if (receiptImage instanceof File) {
+                body = new FormData();
+                body.append('amount', parseFloat(paymentData.amount));
+                body.append('paymentMethod', paymentData.payment_method || 'cash');
+                if (paymentData.payment_date) body.append('paymentDate', paymentData.payment_date);
+                if (paymentData.notes) body.append('notes', paymentData.notes);
+                body.append('receipt_image', receiptImage);
+            } else {
+                const paymentBase = normalizePaymentInput({
+                    amount: paymentData.amount,
+                    paymentMethod: paymentData.payment_method,
+                    notes: paymentData.notes || '',
+                    paymentDate: paymentData.payment_date,
+                });
+                body = {
+                    ...paymentBase,
+                    reservation_update: hasReservationUpdate ? {
+                        amount_paid: paymentData.reservation_update.amount_paid,
+                        amount_due: paymentData.reservation_update.amount_due,
+                        payment_status: paymentData.reservation_update.payment_status
+                    } : undefined
+                };
             }
+
+            const response = await api.post(`/reservations/${id}/payments`, body);
+            return response.data;
         } catch (error) {
-            console.error("Error registering payment:", error);
-            if (error.response) {
-                console.error("Error details:", error.response.data);
-                console.error("Status:", error.response.status);
-            }
             throw error.response?.data?.message || error.message || 'Error registering payment';
         }
     },
@@ -206,70 +177,6 @@ const reservationService = {
             return response.data;
         } catch (error) {
             throw error.response?.data?.message || 'Error generating PDF';
-        }
-    },
-
-    // Nueva función para descarga directa del PDF
-    downloadPdf: async (id) => {
-        try {
-            // Obtener el token de autenticación del almacenamiento local
-            const token = localStorage.getItem('adminToken');
-
-            if (!token) {
-                throw new Error('No authentication token available. Please log in again.');
-            }
-
-            // Primero obtener todos los datos de la reserva
-            const reservationResponse = await api.get(`/reservations/${id}`);
-            const reservationData = reservationResponse.data;
-
-            // Construir la URL con query parameters para incluir datos importantes
-            const queryParams = new URLSearchParams();
-            queryParams.append('format', 'pdf');
-            queryParams.append('include_details', 'true');
-
-            // Incluir información adicional que podría ser útil
-            if (reservationData.client_name || reservationData.clientName) {
-                queryParams.append('client_name', reservationData.client_name || reservationData.clientName);
-            }
-
-            if (reservationData.check_in_date || reservationData.checkInDate) {
-                const checkInDate = reservationData.check_in_date || reservationData.checkInDate;
-                // Usar el nuevo formato de fecha MM-DD-YYYY HH:mm en lugar de ISO
-                queryParams.append('check_in_date', checkInDate);
-            }
-
-            const url = `/reservations/${id}/pdf/download?${queryParams.toString()}`;
-
-            // Realizar la solicitud para obtener el PDF
-            const response = await api.get(url, {
-                responseType: 'blob',
-                headers: {
-                    'Authorization': `Bearer ${token}`,
-                    'Accept': 'application/pdf'
-                }
-            });
-
-            // Crear un blob URL para el archivo PDF recibido
-            const blob = new Blob([response.data], { type: 'application/pdf' });
-            const blobUrl = window.URL.createObjectURL(blob);
-
-            // Crear un enlace temporal y hacer clic en él para descargar
-            const link = document.createElement('a');
-            link.href = blobUrl;
-            link.download = `reservation-${id}-${reservationData.clientLastname}-${reservationData.clientName}.pdf`;
-            document.body.appendChild(link);
-            link.click();
-
-            // Limpiar después de la descarga
-            setTimeout(() => {
-                document.body.removeChild(link);
-                window.URL.revokeObjectURL(blobUrl);
-            }, 100);
-
-            return blobUrl;
-        } catch (error) {
-            throw error.response?.data?.message || error.message || 'Error downloading PDF';
         }
     },
 
@@ -525,99 +432,6 @@ const reservationService = {
         }
     },
 
-    // Función para diagnosticar problemas con la generación de PDF
-    diagnosePdfGeneration: async (id) => {
-        // 1. Verificar que tenemos un ID válido
-        if (!id) {
-            throw new Error('The reservation ID is required');
-        }
-
-        // 2. Obtener datos completos de la reserva para verificar
-        const response = await api.get(`/reservations/${id}`);
-        const reservationData = response.data;
-
-        // 3. Verificar campos críticos para el PDF - considerando ambos formatos: camelCase y snake_case
-        const fieldsToCheck = [
-            { camelCase: 'id', snakeCase: 'id' },
-            { camelCase: 'clientName', snakeCase: 'client_name' },
-            { camelCase: 'clientEmail', snakeCase: 'client_email' },
-            { camelCase: 'clientPhone', snakeCase: 'client_phone' },
-            { camelCase: 'checkInDate', snakeCase: 'check_in_date' },
-            { camelCase: 'checkOutDate', snakeCase: 'check_out_date' },
-            { camelCase: 'nights', snakeCase: 'nights' },
-            { camelCase: 'pricePerNight', snakeCase: 'price_per_night' },
-            { camelCase: 'totalAmount', snakeCase: 'total_amount' },
-            { camelCase: 'amountPaid', snakeCase: 'amount_paid' },
-            { camelCase: 'amountDue', snakeCase: 'amount_due' }
-        ];
-
-        const missingFields = [];
-
-        fieldsToCheck.forEach(field => {
-            // Verificar si el campo existe en cualquiera de los dos formatos
-            const camelCaseValue = reservationData[field.camelCase];
-            const snakeCaseValue = reservationData[field.snakeCase];
-
-            // Un campo está "presente" si existe en cualquier formato y no es nulo/vacío
-            const isPresent =
-                (camelCaseValue !== undefined && camelCaseValue !== null && camelCaseValue !== '') ||
-                (snakeCaseValue !== undefined && snakeCaseValue !== null && snakeCaseValue !== '');
-
-            if (!isPresent) {
-                missingFields.push(field.camelCase);
-            }
-        });
-
-        // 4. Crear un objeto de datos normalizado para usar en la generación del PDF
-        const normalizedData = {
-            id: reservationData.id,
-            clientName: reservationData.clientName || reservationData.client_name,
-            clientEmail: reservationData.clientEmail || reservationData.client_email,
-            clientPhone: reservationData.clientPhone || reservationData.client_phone,
-            clientAddress: reservationData.clientAddress || reservationData.client_address,
-            clientCity: reservationData.clientCity || reservationData.client_city,
-            clientCountry: reservationData.clientCountry || reservationData.client_country,
-            clientNotes: reservationData.clientNotes || reservationData.client_notes,
-            checkInDate: reservationData.checkInDate || reservationData.check_in_date,
-            checkOutDate: reservationData.checkOutDate || reservationData.check_out_date,
-            nights: reservationData.nights,
-            pricePerNight: reservationData.pricePerNight || reservationData.price_per_night,
-            cleaningFee: reservationData.cleaningFee || reservationData.cleaning_fee,
-            cancellationFee: reservationData.cancellationFee || reservationData.cancellation_fee,
-            parkingFee: reservationData.parkingFee || reservationData.parking_fee,
-            otherExpenses: reservationData.otherExpenses || reservationData.other_expenses,
-            taxes: reservationData.taxes,
-            totalAmount: reservationData.totalAmount || reservationData.total_amount,
-            amountPaid: reservationData.amountPaid || reservationData.amount_paid,
-            amountDue: reservationData.amountDue || reservationData.amount_due,
-            status: reservationData.status,
-            paymentStatus: reservationData.paymentStatus || reservationData.payment_status
-        };
-
-        // 5. Verificar datos del apartamento
-        const apartmentId = reservationData.apartmentId || reservationData.apartment_id;
-        let apartmentData = null;
-
-        if (apartmentId) {
-            try {
-                const aptResponse = await api.get(`/apartments/${apartmentId}`);
-                apartmentData = aptResponse.data;
-            } catch (aptError) {
-                // Si hay error, dejamos apartmentData como null
-            }
-        }
-
-        // 6. Devolver resultados del diagnóstico
-        return {
-            success: missingFields.length === 0,
-            reservationData: normalizedData,
-            apartmentData,
-            missingFields,
-            message: missingFields.length === 0
-                ? 'All necessary data is present'
-                : `Missing required fields: ${missingFields.join(', ')}`
-        };
-    },
 }
 
 export default reservationService;

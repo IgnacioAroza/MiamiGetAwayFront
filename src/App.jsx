@@ -31,6 +31,7 @@ const ReservationsPage = lazy(() => import('./pages/ReservationsPage'));
 const ServicesPage = lazy(() => import('./components/admin/services/ServicesPage'));
 const CreateUser = lazy(() => import('./components/admin/users/CreateUser'));
 const EditUser = lazy(() => import('./components/admin/users/EditUser'));
+const SupplierList = lazy(() => import('./components/admin/suppliers/SupplierList'));
 
 const theme = createTheme({
   palette: {
@@ -105,6 +106,7 @@ function AppContent() {
 
               <Route path="reviews" element={<AdminReviews />} />
               <Route path="apartments" element={<ApartmentList />} />
+              <Route path="suppliers" element={<SupplierList />} />
             </Route>
             <Route path="/reservations" element={<ReservationsPage />} />
             <Route path="/reservations/:id" element={<ReservationDetailsPage />} />
