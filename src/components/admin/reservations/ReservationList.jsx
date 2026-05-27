@@ -362,6 +362,16 @@ const ReservationList = ({ filter = {} }) => {
         };
         return paymentColors[status] || 'default';
     };
+
+    // Obtener color para el estado del supplier
+    const getSupplierStatusColor = (status) => {
+        const supplierColors = {
+            unassigned: 'error',
+            searching: 'warning',
+            confirmed: 'success',
+        };
+        return supplierColors[status] || 'default';
+    };
     
     // Manejar cambio de página
     const handleChangePage = (event, newPage) => {
@@ -579,7 +589,7 @@ const ReservationList = ({ filter = {} }) => {
                                         <Typography variant="h6">
                                             Reservation #{reservation.id}
                                         </Typography>
-                                        <Stack direction="row" spacing={1}>
+                                        <Stack direction="row" spacing={1} flexWrap="wrap" useFlexGap>
                                             <Chip
                                                 label={reservation.status}
                                                 size="small"
@@ -590,6 +600,16 @@ const ReservationList = ({ filter = {} }) => {
                                                 size="small"
                                                 color={getPaymentStatusColor(reservation.payment_status || reservation.paymentStatus)}
                                             />
+                                            {(() => {
+                                                const ss = reservation.supplierStatus || reservation.supplier_status || 'unassigned';
+                                                return (
+                                                    <Chip
+                                                        label={ss}
+                                                        size="small"
+                                                        color={getSupplierStatusColor(ss)}
+                                                    />
+                                                );
+                                            })()}
                                         </Stack>
                                     </Box>
 
@@ -846,6 +866,7 @@ const ReservationList = ({ filter = {} }) => {
                                         Payment
                                     </TableSortLabel>
                                 </TableCell>
+                                <TableCell>Supplier</TableCell>
                                 <TableCell>
                                     <TableSortLabel
                                         active={orderBy === 'created_at'}
@@ -862,9 +883,9 @@ const ReservationList = ({ filter = {} }) => {
                             {loading ? (
                                 [...Array(6)].map((_, idx) => (
                                     <TableRow key={idx}>
-                                        {[...Array(10)].map((__, cidx) => (
+                                        {[...Array(11)].map((__, cidx) => (
                                             <TableCell key={cidx}>
-                                                {cidx === 9 ? (
+                                                {cidx === 10 ? (
                                                     <>
                                                         <Skeleton variant="circular" width={28} height={28} />
                                                         <Skeleton variant="circular" width={28} height={28} sx={{ ml: 1 }} />
@@ -879,7 +900,7 @@ const ReservationList = ({ filter = {} }) => {
                                 ))
                             ) : !sortedReservations || sortedReservations.length === 0 ? (
                                 <TableRow>
-                                    <TableCell colSpan={10} align="center">No reservations found</TableCell>
+                                    <TableCell colSpan={11} align="center">No reservations found</TableCell>
                                 </TableRow>
                             ) : (
                                 sortedReservations
@@ -929,6 +950,18 @@ const ReservationList = ({ filter = {} }) => {
                                                     size="small"
                                                     color={getPaymentStatusColor(reservation.payment_status || reservation.paymentStatus)}
                                                 />
+                                            </TableCell>
+                                            <TableCell>
+                                                {(() => {
+                                                    const ss = reservation.supplierStatus || reservation.supplier_status || 'unassigned';
+                                                    return (
+                                                        <Chip
+                                                            label={ss}
+                                                            size="small"
+                                                            color={getSupplierStatusColor(ss)}
+                                                        />
+                                                    );
+                                                })()}
                                             </TableCell>
                                             <TableCell>{formatDate(reservation.created_at || reservation.createdAt)}</TableCell>
                                             <TableCell align="right" onClick={(e) => e.stopPropagation()}>
