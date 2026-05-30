@@ -7,6 +7,7 @@ const normalizeAssignment = (data) => {
         reservationId: data.reservation_id ?? data.reservationId,
         supplier: data.supplier,
         payout_per_night: data.payout_per_night ?? data.payoutPerNight,
+        cleaning_fee: data.cleaning_fee ?? data.cleaningFee ?? 0,
         payment_terms: data.payment_terms ?? data.paymentTerms,
         calculated: data.calculated,
     };

@@ -14,13 +14,13 @@ import {
     Close as CloseIcon,
     Edit as EditIcon,
     Image as ImageIcon,
-    LinkOff as UnassignIcon,
 } from '@mui/icons-material';
 import { format } from 'date-fns';
 import supplierService from '../../../services/supplierService';
 import { createSupplier, fetchAllSuppliers, selectAllSuppliers } from '../../../redux/supplierSlice';
 import { useToast } from '../../../hooks/useToast';
 import ToastNotification from '../../common/ToastNotification';
+import ReceiptLightbox from '../../common/ReceiptLightbox';
 
 // ─── constants ────────────────────────────────────────────────────────────────
 const PAYMENT_TERMS_OPTIONS = [
@@ -106,12 +106,14 @@ const SupplierPayoutSection = ({ reservationId, nights = 0 }) => {
     // assign form
     const [selectedSupplierId, setSelectedSupplierId] = useState('');
     const [payoutPerNight, setPayoutPerNight] = useState('');
+    const [cleaningFee, setCleaningFee] = useState('');
     const [paymentTerms, setPaymentTerms] = useState('Within 48h after check-out');
     const [assigning, setAssigning] = useState(false);
 
     // edit terms
     const [editingTerms, setEditingTerms] = useState(false);
     const [editPayout, setEditPayout] = useState('');
+    const [editCleaningFee, setEditCleaningFee] = useState('');
     const [editTerms, setEditTerms] = useState('');
     const [savingTerms, setSavingTerms] = useState(false);
 
@@ -132,6 +134,11 @@ const SupplierPayoutSection = ({ reservationId, nights = 0 }) => {
 
     const fileInputRef = useRef(null);
     const cameraInputRef = useRef(null);
+
+    // lightbox
+    const [lightbox, setLightbox] = useState({ open: false, images: [], index: 0 });
+    const openLightbox = (images, index = 0) => setLightbox({ open: true, images, index });
+    const closeLightbox = () => setLightbox(prev => ({ ...prev, open: false }));
 
     // ── load ───────────────────────────────────────────────────────────────────
     useEffect(() => { dispatch(fetchAllSuppliers()); }, [dispatch]);
@@ -168,11 +175,10 @@ const SupplierPayoutSection = ({ reservationId, nights = 0 }) => {
             const data = await supplierService.assignSupplier(reservationId, {
                 supplier_id: Number(selectedSupplierId),
                 payout_per_night: Number(payoutPerNight),
+                cleaning_fee: cleaningFee ? Number(cleaningFee) : 0,
                 payment_terms: paymentTerms || undefined,
             });
             setAssignment(data);
-            // Sync the reservation's supplier_status field so the badge reflects reality
-            await supplierService.updateSupplierStatus(reservationId, 'confirmed');
             success('Supplier assigned');
         } catch (e) {
             error(typeof e === 'string' ? e : 'Error assigning supplier');
@@ -184,11 +190,11 @@ const SupplierPayoutSection = ({ reservationId, nights = 0 }) => {
     const handleUnassign = async () => {
         try {
             await supplierService.unassignSupplier(reservationId);
-            await supplierService.updateSupplierStatus(reservationId, 'unassigned');
             setAssignment(null);
             setPayments([]);
             setSelectedSupplierId('');
             setPayoutPerNight('');
+            setCleaningFee('');
             success('Supplier unassigned');
         } catch (e) {
             error(typeof e === 'string' ? e : 'Error unassigning supplier');
@@ -198,6 +204,7 @@ const SupplierPayoutSection = ({ reservationId, nights = 0 }) => {
     // ── handlers: edit terms ───────────────────────────────────────────────────
     const handleStartEditTerms = () => {
         setEditPayout(String(assignment.payout_per_night));
+        setEditCleaningFee(String(assignment.cleaning_fee ?? 0));
         setEditTerms(assignment.payment_terms || '');
         setEditingTerms(true);
     };
@@ -207,6 +214,7 @@ const SupplierPayoutSection = ({ reservationId, nights = 0 }) => {
         try {
             const data = await supplierService.updateSupplierTerms(reservationId, {
                 payout_per_night: Number(editPayout),
+                cleaning_fee: editCleaningFee ? Number(editCleaningFee) : 0,
                 payment_terms: editTerms,
             });
             setAssignment(data);
@@ -329,11 +337,14 @@ const SupplierPayoutSection = ({ reservationId, nights = 0 }) => {
                 )}
 
                 {assignment && (
-                    <Tooltip title="Unassign supplier">
-                        <IconButton size="small" onClick={handleUnassign} sx={{ color: '#555', '&:hover': { color: '#f44' } }}>
-                            <UnassignIcon fontSize="small" />
-                        </IconButton>
-                    </Tooltip>
+                    <Button
+                        size="small"
+                        onClick={handleUnassign}
+                        sx={{ whiteSpace: 'nowrap', minWidth: 84, color: '#888', borderColor: '#444', textTransform: 'none', '&:hover': { color: '#f44336', borderColor: '#f44336' } }}
+                        variant="outlined"
+                    >
+                        Unassign
+                    </Button>
                 )}
             </Box>
 
@@ -348,18 +359,26 @@ const SupplierPayoutSection = ({ reservationId, nights = 0 }) => {
                     {assignment && !editingTerms && (
                         <>
                             <Grid container spacing={1.5} sx={{ mb: 1.5 }}>
-                                <Grid item xs={5}>
+                                <Grid item xs={4}>
                                     <Box sx={{ bgcolor: '#252525', border: '1px solid #2e2e2e', borderRadius: 1, p: 1.5 }}>
-                                        <Typography sx={{ fontSize: '0.65rem', color: '#555', mb: 0.3 }}>Payout per Night</Typography>
+                                        <Typography sx={{ fontSize: '0.65rem', color: '#555', mb: 0.3 }}>Payout / Night</Typography>
                                         <Typography sx={{ fontWeight: 700 }}>
                                             ${Number(assignment.payout_per_night).toFixed(2)}
                                         </Typography>
                                     </Box>
                                 </Grid>
-                                <Grid item xs={7}>
+                                <Grid item xs={4}>
+                                    <Box sx={{ bgcolor: '#252525', border: '1px solid #2e2e2e', borderRadius: 1, p: 1.5 }}>
+                                        <Typography sx={{ fontSize: '0.65rem', color: '#555', mb: 0.3 }}>Cleaning Fee</Typography>
+                                        <Typography sx={{ fontWeight: 700 }}>
+                                            ${Number(assignment.cleaning_fee ?? 0).toFixed(2)}
+                                        </Typography>
+                                    </Box>
+                                </Grid>
+                                <Grid item xs={4}>
                                     <Box sx={{ bgcolor: '#252525', border: '1px solid #2e2e2e', borderRadius: 1, p: 1.5 }}>
                                         <Typography sx={{ fontSize: '0.65rem', color: '#555', mb: 0.3 }}>Payment Terms</Typography>
-                                        <Typography sx={{ fontWeight: 700, fontSize: '0.82rem', lineHeight: 1.3 }}>
+                                        <Typography sx={{ fontWeight: 700, fontSize: '0.72rem', lineHeight: 1.3 }}>
                                             {assignment.payment_terms || '—'}
                                         </Typography>
                                     </Box>
@@ -368,17 +387,15 @@ const SupplierPayoutSection = ({ reservationId, nights = 0 }) => {
 
                             {/* Stats */}
                             <Grid container spacing={1} sx={{ mb: 1.5 }}>
-                                <Grid item xs={4}>
+                                <Grid item xs={3}>
                                     <Box sx={{ bgcolor: '#1e1e1e', border: '1px solid #272727', borderRadius: 1, p: 1 }}>
-                                        <Typography sx={{ fontSize: '0.62rem', color: '#555', mb: 0.2 }}>
-                                            {nights} × ${Number(assignment.payout_per_night).toFixed(0)}
-                                        </Typography>
+                                        <Typography sx={{ fontSize: '0.62rem', color: '#555', mb: 0.2 }}>TOTAL</Typography>
                                         <Typography sx={{ fontWeight: 700 }}>
                                             {formatCurrency(assignment.calculated?.total)}
                                         </Typography>
                                     </Box>
                                 </Grid>
-                                <Grid item xs={4}>
+                                <Grid item xs={3}>
                                     <Box sx={{ bgcolor: '#1e1e1e', border: '1px solid #272727', borderRadius: 1, p: 1 }}>
                                         <Typography sx={{ fontSize: '0.62rem', color: '#555', mb: 0.2 }}>PAID</Typography>
                                         <Typography sx={{ fontWeight: 700, color: '#4caf50' }}>
@@ -386,11 +403,19 @@ const SupplierPayoutSection = ({ reservationId, nights = 0 }) => {
                                         </Typography>
                                     </Box>
                                 </Grid>
-                                <Grid item xs={4}>
+                                <Grid item xs={3}>
                                     <Box sx={{ bgcolor: '#1e1e1e', border: '1px solid #272727', borderRadius: 1, p: 1 }}>
                                         <Typography sx={{ fontSize: '0.62rem', color: '#555', mb: 0.2 }}>BALANCE</Typography>
                                         <Typography sx={{ fontWeight: 700, color: Number(assignment.calculated?.balance) > 0 ? '#f87171' : '#4caf50' }}>
                                             {formatCurrency(assignment.calculated?.balance)}
+                                        </Typography>
+                                    </Box>
+                                </Grid>
+                                <Grid item xs={3}>
+                                    <Box sx={{ bgcolor: '#1e1e1e', border: '1px solid #272727', borderRadius: 1, p: 1 }}>
+                                        <Typography sx={{ fontSize: '0.62rem', color: '#555', mb: 0.2 }}>PROFIT</Typography>
+                                        <Typography sx={{ fontWeight: 700, color: Number(assignment.calculated?.profit) >= 0 ? '#4caf50' : '#f87171' }}>
+                                            {formatCurrency(assignment.calculated?.profit)}
                                         </Typography>
                                     </Box>
                                 </Grid>
@@ -409,7 +434,7 @@ const SupplierPayoutSection = ({ reservationId, nights = 0 }) => {
                     {/* Edit terms mode */}
                     {assignment && editingTerms && (
                         <Grid container spacing={1.5} sx={{ mb: 2 }}>
-                            <Grid item xs={5}>
+                            <Grid item xs={4}>
                                 <TextField
                                     label="Payout per Night" size="small" fullWidth type="number"
                                     value={editPayout} onChange={e => setEditPayout(e.target.value)}
@@ -417,7 +442,15 @@ const SupplierPayoutSection = ({ reservationId, nights = 0 }) => {
                                     sx={fieldSx}
                                 />
                             </Grid>
-                            <Grid item xs={7}>
+                            <Grid item xs={4}>
+                                <TextField
+                                    label="Cleaning Fee" size="small" fullWidth type="number"
+                                    value={editCleaningFee} onChange={e => setEditCleaningFee(e.target.value)}
+                                    InputProps={{ startAdornment: <InputAdornment position="start">$</InputAdornment> }}
+                                    sx={fieldSx}
+                                />
+                            </Grid>
+                            <Grid item xs={4}>
                                 <FormControl fullWidth size="small">
                                     <Select value={editTerms} onChange={e => setEditTerms(e.target.value)} sx={selectSx}>
                                         {PAYMENT_TERMS_OPTIONS.map(o => <MenuItem key={o} value={o}>{o}</MenuItem>)}
@@ -441,7 +474,7 @@ const SupplierPayoutSection = ({ reservationId, nights = 0 }) => {
                     {/* Assign form (no assignment yet) */}
                     {!assignment && (
                         <Grid container spacing={1.5} sx={{ mb: 2 }}>
-                            <Grid item xs={5}>
+                            <Grid item xs={4}>
                                 <TextField
                                     label="Payout per Night" size="small" fullWidth type="number"
                                     value={payoutPerNight} onChange={e => setPayoutPerNight(e.target.value)}
@@ -449,7 +482,15 @@ const SupplierPayoutSection = ({ reservationId, nights = 0 }) => {
                                     sx={fieldSx}
                                 />
                             </Grid>
-                            <Grid item xs={7}>
+                            <Grid item xs={4}>
+                                <TextField
+                                    label="Cleaning Fee" size="small" fullWidth type="number"
+                                    value={cleaningFee} onChange={e => setCleaningFee(e.target.value)}
+                                    InputProps={{ startAdornment: <InputAdornment position="start">$</InputAdornment> }}
+                                    sx={fieldSx}
+                                />
+                            </Grid>
+                            <Grid item xs={4}>
                                 <FormControl fullWidth size="small">
                                     <Select value={paymentTerms} onChange={e => setPaymentTerms(e.target.value)} sx={selectSx}>
                                         {PAYMENT_TERMS_OPTIONS.map(o => <MenuItem key={o} value={o}>{o}</MenuItem>)}
@@ -487,7 +528,7 @@ const SupplierPayoutSection = ({ reservationId, nights = 0 }) => {
                                     <CheckCircleIcon sx={{ color: '#4caf50', fontSize: '1rem', mt: 0.35, flexShrink: 0 }} />
                                     <Box sx={{ flex: 1, minWidth: 0 }}>
                                         <Typography sx={{ fontWeight: 600, fontSize: '0.85rem', textTransform: 'capitalize' }}>
-                                            {p.method.charAt(0).toUpperCase() + p.method.slice(1)} transfer
+                                            {p.method.charAt(0).toUpperCase() + p.method.slice(1)}
                                         </Typography>
                                         <Typography sx={{ fontSize: '0.73rem', color: '#555' }}>
                                             {formatPaymentDate(p.date)}{p.referenceNotes ? ` · ${p.referenceNotes}` : ''}
@@ -496,6 +537,17 @@ const SupplierPayoutSection = ({ reservationId, nights = 0 }) => {
                                     <Typography sx={{ fontWeight: 600, color: '#4caf50', fontSize: '0.9rem', flexShrink: 0 }}>
                                         {formatCurrency(p.amount)}
                                     </Typography>
+                                    {p.receiptImages && p.receiptImages.length > 0 && (
+                                        <Tooltip title={`${p.receiptImages.length} receipt${p.receiptImages.length > 1 ? 's' : ''}`}>
+                                            <IconButton
+                                                size="small"
+                                                onClick={() => openLightbox(p.receiptImages, 0)}
+                                                sx={{ color: '#90caf9', p: 0.3, flexShrink: 0 }}
+                                            >
+                                                <ImageIcon sx={{ fontSize: '1.3rem' }} />
+                                            </IconButton>
+                                        </Tooltip>
+                                    )}
                                     <IconButton
                                         size="small" onClick={() => handleDeletePayment(p.id)}
                                         disabled={deletingPaymentId === p.id}
@@ -685,6 +737,12 @@ const SupplierPayoutSection = ({ reservationId, nights = 0 }) => {
                 </DialogActions>
             </Dialog>
 
+            <ReceiptLightbox
+                open={lightbox.open}
+                onClose={closeLightbox}
+                images={lightbox.images}
+                initialIndex={lightbox.index}
+            />
             <ToastNotification toast={toast} onClose={hideToast} />
         </Box>
     );
