@@ -21,6 +21,7 @@ import {
 } from '@mui/material';
 import ReceiptLongIcon from '@mui/icons-material/ReceiptLong';
 import { format } from 'date-fns';
+import ReceiptLightbox from '../../common/ReceiptLightbox';
 import { es } from 'date-fns/locale';
 import api from '../../../utils/api';
 import useDeviceDetection from '../../../hooks/useDeviceDetection';
@@ -30,7 +31,8 @@ const PaymentHistory = ({ payments = [], reservationId }) => {
     const [loadedPayments, setLoadedPayments] = useState([]);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState(null);
-    const [hasLoaded, setHasLoaded] = useState(false); // Estado para controlar si ya se cargaron los datos
+    const [hasLoaded, setHasLoaded] = useState(false);
+    const [lightboxImage, setLightboxImage] = useState(null);
 
     // Cargar pagos directamente desde la API si se proporciona un ID de reserva
     useEffect(() => {
@@ -151,17 +153,14 @@ const PaymentHistory = ({ payments = [], reservationId }) => {
                             {payment.receiptImage && (
                                 <>
                                     <Divider sx={{ my: 1, borderColor: '#555' }} />
-                                    <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
+                                    <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                                         <Typography variant="subtitle2" sx={{ color: '#bbb' }}>
                                             Receipt
                                         </Typography>
                                         <Typography
-                                            component="a"
-                                            href={payment.receiptImage}
-                                            target="_blank"
-                                            rel="noopener noreferrer"
                                             variant="body2"
-                                            sx={{ color: '#90caf9' }}
+                                            onClick={() => setLightboxImage(payment.receiptImage)}
+                                            sx={{ color: '#90caf9', cursor: 'pointer', '&:hover': { textDecoration: 'underline' } }}
                                         >
                                             View
                                         </Typography>
@@ -176,6 +175,12 @@ const PaymentHistory = ({ payments = [], reservationId }) => {
     };
 
     return (
+        <>
+        <ReceiptLightbox
+            open={!!lightboxImage}
+            onClose={() => setLightboxImage(null)}
+            images={lightboxImage ? [lightboxImage] : []}
+        />
         <Card sx={{ bgcolor: '#2a2a2a', borderRadius: 2, mt: 3 }}>
             <CardContent sx={{ p: isMobile ? 2 : 3 }}>
                 <Typography variant="h6" sx={{ mb: 2, color: '#fff', fontWeight: 600 }}>
@@ -260,13 +265,10 @@ const PaymentHistory = ({ payments = [], reservationId }) => {
                                             <Tooltip title="View receipt">
                                                 <IconButton
                                                     size="small"
-                                                    component="a"
-                                                    href={payment.receiptImage}
-                                                    target="_blank"
-                                                    rel="noopener noreferrer"
+                                                    onClick={() => setLightboxImage(payment.receiptImage)}
                                                     sx={{ color: '#90caf9' }}
                                                 >
-                                                    <ReceiptLongIcon fontSize="small" />
+                                                    <ReceiptLongIcon fontSize="medium" />
                                                 </IconButton>
                                             </Tooltip>
                                         ) : (
@@ -281,6 +283,7 @@ const PaymentHistory = ({ payments = [], reservationId }) => {
             )}
             </CardContent>
         </Card>
+        </>
     );
 };
 

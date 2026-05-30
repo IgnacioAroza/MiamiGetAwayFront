@@ -1,7 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import {
     Avatar, Box, Button, Chip, CircularProgress, Dialog, DialogActions,
-    DialogContent, DialogTitle, Divider, FormControl, LinearProgress,
+    DialogContent, DialogTitle, Divider, FormControl, IconButton, LinearProgress,
     MenuItem, Select, TextField, Tooltip, Typography,
 } from '@mui/material';
 import {
@@ -10,11 +10,13 @@ import {
     AttachFile as AttachFileIcon,
     CheckCircle as CheckCircleIcon,
     Home as HomeIcon,
+    Image as ImageIcon,
 } from '@mui/icons-material';
 import { format, parseISO } from 'date-fns';
 import supplierService from '../../../services/supplierService';
 import { useToast } from '../../../hooks/useToast';
 import ToastNotification from '../../common/ToastNotification';
+import ReceiptLightbox from '../../common/ReceiptLightbox';
 
 // ─── helpers ──────────────────────────────────────────────────────────────────
 const initials = (name = '') =>
@@ -29,8 +31,10 @@ const fmtDate = (dateStr) => {
 const USD = (n) => `$${Number(n ?? 0).toFixed(2)}`;
 
 const METHOD_LABELS = {
-    cash: 'Cash', wire_transfer: 'Wire transfer', bank_transfer: 'Bank transfer',
-    check: 'Check', zelle: 'Zelle', venmo: 'Venmo', other: 'Other',
+    cash: 'Cash',
+    wire: 'Wire',
+    card: 'Card',
+    transfer: 'Transfer',
 };
 
 // ─── sub-components ───────────────────────────────────────────────────────────
@@ -55,8 +59,11 @@ const SupplierPayoutView = ({ reservationId, reservation }) => {
     const [loading, setLoading] = useState(true);
     const [dialogOpen, setDialogOpen] = useState(false);
     const [saving, setSaving] = useState(false);
-    const [form, setForm] = useState({ amount: '', method: 'wire_transfer', date: '', referenceNotes: '' });
+    const [form, setForm] = useState({ amount: '', method: 'wire', date: '', referenceNotes: '' });
     const [receiptFiles, setReceiptFiles] = useState([]);
+    const [lightbox, setLightbox] = useState({ open: false, images: [], index: 0 });
+    const openLightbox = (images, index = 0) => setLightbox({ open: true, images, index });
+    const closeLightbox = () => setLightbox(prev => ({ ...prev, open: false }));
 
     const load = async () => {
         if (!reservationId) return;
@@ -85,11 +92,12 @@ const SupplierPayoutView = ({ reservationId, reservation }) => {
     const nights = Number(reservation?.nights ?? 0);
     const totalAmount = Number(reservation?.totalAmount ?? 0);
     const payoutPerNight = Number(assignment.payout_per_night ?? 0);
-    const owed = payoutPerNight * nights;
-    const paid = payments.reduce((s, p) => s + Number(p.amount ?? 0), 0);
-    const balance = owed - paid;
+    const cal = assignment.calculated || {};
+    const owed = Number(cal.total ?? payoutPerNight * nights);
+    const paid = Number(cal.paid ?? payments.reduce((s, p) => s + Number(p.amount ?? 0), 0));
+    const balance = Number(cal.balance ?? owed - paid);
     const pct = owed > 0 ? Math.min(100, Math.round((paid / owed) * 100)) : 0;
-    const netMargin = totalAmount - owed;
+    const netMargin = Number(cal.profit ?? totalAmount - owed);
     const marginPct = totalAmount > 0 ? Math.round((netMargin / totalAmount) * 100) : 0;
 
     // badge color — usa los mismos tonos que el resto del admin
@@ -98,7 +106,7 @@ const SupplierPayoutView = ({ reservationId, reservation }) => {
 
     // ── register payment handlers ─────────────────────────────────────────────
     const handleOpenDialog = () => {
-        setForm({ amount: '', method: 'wire_transfer', date: new Date().toISOString().slice(0, 10), referenceNotes: '' });
+        setForm({ amount: '', method: 'wire', date: new Date().toISOString().slice(0, 10), referenceNotes: '' });
         setReceiptFiles([]);
         setDialogOpen(true);
     };
@@ -125,6 +133,12 @@ const SupplierPayoutView = ({ reservationId, reservation }) => {
     return (
         <>
             <ToastNotification toast={toast} />
+            <ReceiptLightbox
+                open={lightbox.open}
+                onClose={closeLightbox}
+                images={lightbox.images}
+                initialIndex={lightbox.index}
+            />
 
             <Box sx={{ mt: 3, bgcolor: '#2a2a2a', borderRadius: 2, overflow: 'hidden', border: '1px solid #444' }}>
 
@@ -284,6 +298,17 @@ const SupplierPayoutView = ({ reservationId, reservation }) => {
                                     <Typography sx={{ color: '#4caf50', fontWeight: 700, fontSize: '0.88rem', flexShrink: 0 }}>
                                         {USD(p.amount)}
                                     </Typography>
+                                    {p.receiptImages && p.receiptImages.length > 0 && (
+                                        <Tooltip title={`${p.receiptImages.length} receipt${p.receiptImages.length > 1 ? 's' : ''}`}>
+                                            <IconButton
+                                                size="small"
+                                                onClick={() => openLightbox(p.receiptImages, 0)}
+                                                sx={{ color: '#90caf9', p: 0.3, flexShrink: 0 }}
+                                            >
+                                                <ImageIcon sx={{ fontSize: '1.3rem' }} />
+                                            </IconButton>
+                                        </Tooltip>
+                                    )}
                                 </Box>
                             ))}
 

@@ -27,16 +27,14 @@ const SupplierPayoutSummary = ({ reservationId, nights, totalAmount }) => {
     useEffect(() => {
         if (!reservationId) return;
         let cancelled = false;
-        Promise.all([
-            supplierService.getReservationSupplier(reservationId),
-            supplierService.getSupplierPayments(reservationId),
-        ]).then(([assignment, payments]) => {
+        supplierService.getReservationSupplier(reservationId).then((assignment) => {
             if (cancelled || !assignment) return;
-            const owed = (assignment.payout_per_night ?? 0) * (nights ?? 0);
-            const paid = payments.reduce((sum, p) => sum + (Number(p.amount) || 0), 0);
-            const balance = owed - paid;
+            const cal = assignment.calculated || {};
+            const owed = Number(cal.total ?? (assignment.payout_per_night ?? 0) * (nights ?? 0));
+            const paid = Number(cal.paid ?? 0);
+            const balance = Number(cal.balance ?? owed - paid);
+            const netMargin = Number(cal.profit ?? (Number(totalAmount) || 0) - owed);
             const clientTotal = Number(totalAmount) || 0;
-            const netMargin = clientTotal - owed;
             const marginPct = clientTotal > 0 ? (netMargin / clientTotal) * 100 : 0;
             setData({ owed, paid, balance, netMargin, marginPct });
         }).catch(() => {});

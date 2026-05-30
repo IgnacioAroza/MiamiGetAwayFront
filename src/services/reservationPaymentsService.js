@@ -70,20 +70,23 @@ const reservationPaymentService = {
         try {
             const { receiptImage, removeReceiptImage, ...rest } = paymentData;
 
-            if (receiptImage instanceof File || removeReceiptImage) {
+            if (receiptImage instanceof File) {
                 const form = new FormData();
                 if (rest.amount !== undefined) form.append('amount', parseFloat(rest.amount));
-                if (rest.paymentMethod) form.append('paymentMethod', rest.paymentMethod);
-                if (rest.paymentDate) form.append('paymentDate', rest.paymentDate);
-                if (rest.paymentReference) form.append('paymentReference', rest.paymentReference);
+                if (rest.payment_method) form.append('paymentMethod', rest.payment_method);
+                if (rest.payment_date) form.append('paymentDate', rest.payment_date);
+                if (rest.payment_reference) form.append('paymentReference', rest.payment_reference);
                 if (rest.notes) form.append('notes', rest.notes);
-                if (receiptImage instanceof File) form.append('receipt_image', receiptImage);
+                form.append('receipt_image', receiptImage);
                 if (removeReceiptImage) form.append('remove_receipt_image', 'true');
                 const response = await api.put(`/reservation-payments/${id}`, form);
                 return response.data;
             }
 
-            const response = await api.put(`/reservation-payments/${id}`, rest);
+            // Sin archivo nuevo: JSON (amount queda como number)
+            const body = { ...rest };
+            if (removeReceiptImage) body.remove_receipt_image = true;
+            const response = await api.put(`/reservation-payments/${id}`, body);
             return response.data;
         } catch (error) {
             throw error.response?.data?.message || 'Error updating payment';
