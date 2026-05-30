@@ -14,7 +14,6 @@ import {
     Close as CloseIcon,
     Edit as EditIcon,
     Image as ImageIcon,
-    LinkOff as UnassignIcon,
 } from '@mui/icons-material';
 import { format } from 'date-fns';
 import supplierService from '../../../services/supplierService';
@@ -338,11 +337,14 @@ const SupplierPayoutSection = ({ reservationId, nights = 0 }) => {
                 )}
 
                 {assignment && (
-                    <Tooltip title="Unassign supplier">
-                        <IconButton size="small" onClick={handleUnassign} sx={{ color: '#555', '&:hover': { color: '#f44' } }}>
-                            <UnassignIcon fontSize="small" />
-                        </IconButton>
-                    </Tooltip>
+                    <Button
+                        size="small"
+                        onClick={handleUnassign}
+                        sx={{ whiteSpace: 'nowrap', minWidth: 84, color: '#888', borderColor: '#444', textTransform: 'none', '&:hover': { color: '#f44336', borderColor: '#f44336' } }}
+                        variant="outlined"
+                    >
+                        Unassign
+                    </Button>
                 )}
             </Box>
 

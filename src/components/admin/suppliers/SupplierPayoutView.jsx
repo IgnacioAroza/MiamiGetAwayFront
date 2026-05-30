@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import {
     Avatar, Box, Button, Chip, CircularProgress, Dialog, DialogActions,
     DialogContent, DialogTitle, Divider, FormControl, IconButton, LinearProgress,
@@ -65,7 +65,7 @@ const SupplierPayoutView = ({ reservationId, reservation }) => {
     const openLightbox = (images, index = 0) => setLightbox({ open: true, images, index });
     const closeLightbox = () => setLightbox(prev => ({ ...prev, open: false }));
 
-    const load = async () => {
+    const load = useCallback(async () => {
         if (!reservationId) return;
         setLoading(true);
         try {
@@ -80,9 +80,9 @@ const SupplierPayoutView = ({ reservationId, reservation }) => {
         } finally {
             setLoading(false);
         }
-    };
+    }, [reservationId]);
 
-    useEffect(() => { load(); }, [reservationId]);
+    useEffect(() => { load(); }, [load]);
 
     if (loading) return null;
     if (!data) return null;
@@ -92,6 +92,7 @@ const SupplierPayoutView = ({ reservationId, reservation }) => {
     const nights = Number(reservation?.nights ?? 0);
     const totalAmount = Number(reservation?.totalAmount ?? 0);
     const payoutPerNight = Number(assignment.payout_per_night ?? 0);
+    const cleaningFee = Number(assignment.cleaning_fee ?? 0);
     const cal = assignment.calculated || {};
     const owed = Number(cal.total ?? payoutPerNight * nights);
     const paid = Number(cal.paid ?? payments.reduce((s, p) => s + Number(p.amount ?? 0), 0));
@@ -230,17 +231,30 @@ const SupplierPayoutView = ({ reservationId, reservation }) => {
 
                     {/* Middle — stats */}
                     <Box sx={{ flex: '1 1 260px', minWidth: 0, p: 3, borderRight: '1px solid #444' }}>
-                        <Box sx={{ mb: 2 }}>
-                            <StatLabel>Rate per night to provider</StatLabel>
-                            <StatValue color="#ff9800">{USD(payoutPerNight)}</StatValue>
-                            <Typography sx={{ fontSize: '0.75rem', color: '#888', mt: 0.3 }}>
-                                {nights} nights · {USD(owed)} total
-                            </Typography>
+                        <Box sx={{ display: 'flex', gap: 20, mb: 2 }}>
+                            <Box>
+                                <StatLabel>Rate per night</StatLabel>
+                                <StatValue color="#ff9800">{USD(payoutPerNight)}</StatValue>
+                                <Typography sx={{ fontSize: '0.75rem', color: '#888', mt: 0.3 }}>
+                                    × {nights} nights = {USD(payoutPerNight * nights)}
+                                </Typography>
+                            </Box>
+                            {cleaningFee > 0 && (
+                                <Box>
+                                    <StatLabel>Cleaning fee</StatLabel>
+                                    <StatValue color="#ff9800">{USD(cleaningFee)}</StatValue>
+                                </Box>
+                            )}
                         </Box>
 
                         <Box sx={{ mb: 2 }}>
-                            <StatLabel>Owed to provider</StatLabel>
+                            <StatLabel>Total owed to provider</StatLabel>
                             <StatValue color="#ff9800">{USD(owed)}</StatValue>
+                            {cleaningFee > 0 && (
+                                <Typography sx={{ fontSize: '0.72rem', color: '#666', mt: 0.3 }}>
+                                    {USD(payoutPerNight * nights)} + {USD(cleaningFee)} cleaning
+                                </Typography>
+                            )}
                         </Box>
 
                         <Box sx={{ mb: 2 }}>
