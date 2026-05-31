@@ -3,9 +3,9 @@ import supplierService from '../services/supplierService';
 
 export const fetchAllSuppliers = createAsyncThunk(
     'suppliers/fetchAll',
-    async (_, { rejectWithValue }) => {
+    async (params = {}, { rejectWithValue }) => {
         try {
-            return await supplierService.getAll();
+            return await supplierService.getAll(params);
         } catch (error) {
             return rejectWithValue(error);
         }
@@ -48,13 +48,23 @@ export const deleteSupplier = createAsyncThunk(
 
 const supplierSlice = createSlice({
     name: 'suppliers',
-    initialState: { suppliers: [], status: 'idle', error: null },
+    initialState: { suppliers: [], status: 'idle', error: null, pagination: null },
     reducers: {},
     extraReducers: (builder) => {
         builder
             .addCase(fetchAllSuppliers.fulfilled, (state, action) => {
-                state.suppliers = action.payload;
                 state.status = 'succeeded';
+                const raw = action.payload;
+                if (Array.isArray(raw)) {
+                    state.suppliers = raw;
+                    state.pagination = null;
+                } else if (raw?.data && raw?.pagination) {
+                    state.suppliers = raw.data;
+                    state.pagination = raw.pagination;
+                } else {
+                    state.suppliers = [];
+                    state.pagination = null;
+                }
             })
             .addCase(createSupplier.fulfilled, (state, action) => {
                 state.suppliers.push(action.payload);
@@ -71,5 +81,6 @@ const supplierSlice = createSlice({
 
 export const selectAllSuppliers = (state) => state.suppliers.suppliers;
 export const selectSuppliersStatus = (state) => state.suppliers.status;
+export const selectSuppliersPagination = (state) => state.suppliers.pagination;
 
 export default supplierSlice.reducer;

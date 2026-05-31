@@ -10,6 +10,7 @@ import {
   CardActions,
   Button,
   CircularProgress,
+  Pagination,
   useMediaQuery,
   useTheme,
   Chip,
@@ -37,10 +38,13 @@ const MotionCard = motion.create(Card);
 function ServiceList() {
   const { t } = useTranslation();
   const { type } = useParams();
+  const ITEMS_PER_PAGE = 12;
   const [services, setServices] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [filters, setFilters] = useState({});
+  const [page, setPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(0);
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
   const isTablet = useMediaQuery(theme.breakpoints.between("sm", "md"));
@@ -56,25 +60,35 @@ function ServiceList() {
       }
 
       try {
-        let data;
+        const params = { ...filters, page, limit: ITEMS_PER_PAGE };
+        let raw;
         switch (type) {
           case "cars":
-            data = await carService.getAllCars(filters);
+            raw = await carService.getAllCars(params);
             break;
           case "apartments":
-            data = await apartmentService.getAllApartments(filters);
+            raw = await apartmentService.getAllApartments(params);
             break;
           case "yachts":
-            data = await yachtService.getAllYachts(filters);
+            raw = await yachtService.getAllYachts(params);
             break;
           case "villas":
-            data = await villaService.getAllVillas(filters);
+            raw = await villaService.getAllVillas(params);
             break;
           default:
             throw new Error(t("errors.invalidServiceType", { type }));
         }
 
-        setServices(data);
+        if (Array.isArray(raw)) {
+          setServices(raw);
+          setTotalPages(0);
+        } else if (raw?.data && raw?.pagination) {
+          setServices(raw.data);
+          setTotalPages(raw.pagination.totalPages ?? 0);
+        } else {
+          setServices([]);
+          setTotalPages(0);
+        }
       } catch (err) {
         console.error(t("errors.fetchingServices"), err);
         setError(err.message);
@@ -84,7 +98,12 @@ function ServiceList() {
     };
 
     fetchServices();
-  }, [t, type, filters]);
+  }, [t, type, filters, page]);
+
+  const handleFiltersChange = (newFilters) => {
+    setPage(1);
+    setFilters(newFilters);
+  };
 
   const renderServiceDetails = (service) => {
     switch (type) {
@@ -250,7 +269,7 @@ function ServiceList() {
               </Box>
               <PublicServiceFilters 
                 type={type} 
-                onFiltersChange={setFilters} 
+                onFiltersChange={handleFiltersChange} 
               />
             </Grid>
           )}
@@ -287,9 +306,9 @@ function ServiceList() {
                   <Typography variant="body1" color="text.secondary" sx={{ mb: 3, textAlign: 'center' }}>
                     {t("services.tryAdjustingFilters") || "Intenta ajustar los filtros para encontrar más opciones"}
                   </Typography>
-                  <Button 
-                    variant="outlined" 
-                    onClick={() => setFilters({})}
+                  <Button
+                    variant="outlined"
+                    onClick={() => handleFiltersChange({})}
                     sx={{ mr: 2 }}
                   >
                     {t("filters.clearFilters") || "Limpiar Filtros"}
@@ -351,7 +370,7 @@ function ServiceList() {
             </Box>
             <PublicServiceFilters 
               type={type} 
-              onFiltersChange={setFilters} 
+              onFiltersChange={handleFiltersChange} 
             />
           </Grid>
         )}
@@ -460,6 +479,18 @@ function ServiceList() {
               </MotionGrid>
             ))}
           </Grid>
+
+          {totalPages > 1 && (
+            <Box sx={{ display: 'flex', justifyContent: 'center', mt: 4 }}>
+              <Pagination
+                count={totalPages}
+                page={page}
+                onChange={(_, value) => setPage(value)}
+                color="primary"
+                size={isMobile ? 'small' : 'medium'}
+              />
+            </Box>
+          )}
         </Grid>
       </Grid>
       <WhatsAppIcon />

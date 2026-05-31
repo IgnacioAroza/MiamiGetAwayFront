@@ -11,10 +11,18 @@ const userService = {
                     params[key] = value.trim();
                 }
             });
+            if (filters.page) params.page = filters.page;
+            if (filters.limit) params.limit = filters.limit;
 
             const response = await api.get('/users', { params });
-            const raw = response.data || [];
-            return Array.isArray(raw) ? raw.map(normalizeUserFromApi) : [];
+            const raw = response.data;
+            if (Array.isArray(raw)) {
+                return { items: raw.map(normalizeUserFromApi), pagination: null };
+            }
+            return {
+                items: (raw?.data || []).map(normalizeUserFromApi),
+                pagination: raw?.pagination || null,
+            };
         } catch (error) {
             console.error('Error fetching users:', error);
             throw error;

@@ -3,29 +3,8 @@ import api from '../utils/api'
 const carService = {
     getAllCars: async (filters = {}) => {
         try {
-            // Construir query params si hay filtros
-            const queryParams = new URLSearchParams();
-
-            if (filters.minPrice) {
-                queryParams.append('minPrice', filters.minPrice);
-            }
-            if (filters.maxPrice) {
-                queryParams.append('maxPrice', filters.maxPrice);
-            }
-            if (filters.passengers) {
-                queryParams.append('passengers', filters.passengers);
-            }
-
-            // Construir URL con o sin query params
-            const url = queryParams.toString() ? `/cars?${queryParams.toString()}` : '/cars';
-
-            const response = await api.get(url);
-
-            if (response.data && Array.isArray(response.data)) {
-                return response.data;
-            } else {
-                throw new Error('Received data is not in the expected format');
-            }
+            const response = await api.get('/cars', { params: filters });
+            return response.data;
         } catch (error) {
             console.error('Error fetching cars:', error)
             throw error

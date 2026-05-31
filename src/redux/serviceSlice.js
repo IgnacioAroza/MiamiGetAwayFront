@@ -21,9 +21,12 @@ const handleApiError = (error) => {
 
 export const fetchServices = createAsyncThunk(
     'services/fetchServices',
-    async (serviceType, { rejectWithValue }) => {
+    async (arg, { rejectWithValue }) => {
+        const serviceType = typeof arg === 'string' ? arg : arg.serviceType;
+        const params = typeof arg === 'object' ? { ...arg } : {};
+        delete params.serviceType;
         try {
-            const response = await api.get(`/${serviceType}`);
+            const response = await api.get(`/${serviceType}`, { params: Object.keys(params).length ? params : undefined });
             return { serviceType, data: response.data };
         } catch (error) {
             return rejectWithValue({ serviceType, error: handleApiError(error) });
@@ -100,6 +103,12 @@ const initialState = {
         apartments: null,
         villas: null
     },
+    pagination: {
+        cars: null,
+        yachts: null,
+        apartments: null,
+        villas: null,
+    },
     selectedService: null,
     currentItem: null,
 };
@@ -130,9 +139,17 @@ const servicesSlice = createSlice({
             .addCase(fetchServices.fulfilled, (state, action) => {
                 const { serviceType, data } = action.payload;
                 state.status[serviceType] = 'succeeded';
-                const list = Array.isArray(data) ? data.map((item) => normalizeServiceItemFromApi(serviceType, item)) : [];
-                state.items[serviceType] = list;
                 state.error[serviceType] = null;
+                if (Array.isArray(data)) {
+                    state.items[serviceType] = data.map((item) => normalizeServiceItemFromApi(serviceType, item));
+                    state.pagination[serviceType] = null;
+                } else if (data?.data && data?.pagination) {
+                    state.items[serviceType] = data.data.map((item) => normalizeServiceItemFromApi(serviceType, item));
+                    state.pagination[serviceType] = data.pagination;
+                } else {
+                    state.items[serviceType] = [];
+                    state.pagination[serviceType] = null;
+                }
             })
             .addCase(fetchServices.rejected, (state, action) => {
                 const { serviceType, error } = action.payload;

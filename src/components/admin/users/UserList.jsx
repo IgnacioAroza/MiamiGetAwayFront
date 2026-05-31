@@ -1,16 +1,17 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { 
-    Box, 
-    Typography, 
+import {
+    Box,
+    Typography,
     Button,
-    Paper, 
-    Table, 
-    TableBody, 
-    TableCell, 
-    TableContainer, 
-    TableHead, 
+    Paper,
+    Table,
+    TableBody,
+    TableCell,
+    TableContainer,
+    TableHead,
     TableRow,
+    TablePagination,
     IconButton,
     Tooltip,
     CircularProgress,
@@ -32,12 +33,13 @@ import EmailIcon from '@mui/icons-material/Email';
 import PhoneIcon from '@mui/icons-material/Phone';
 import LocationOnIcon from '@mui/icons-material/LocationOn';
 import useDeviceDetection from '../../../hooks/useDeviceDetection';
-import { 
+import {
     fetchUsers,
     deleteUser,
     selectAllUsers,
     selectUserStatus,
-    selectUserError
+    selectUserError,
+    selectUserPagination,
 } from '../../../redux/userSlice';
 import DeleteDialog from '../dialogs/DeleteDialog';
 import UserFilters from './UserFilters';
@@ -50,13 +52,16 @@ const UserList = () => {
     const users = useSelector(selectAllUsers);
     const status = useSelector(selectUserStatus);
     const error = useSelector(selectUserError);
+    const pagination = useSelector(selectUserPagination);
     const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
     const [userToDelete, setUserToDelete] = useState(null);
     const [activeFilters, setActiveFilters] = useState({});
+    const [page, setPage] = useState(0);
+    const [rowsPerPage, setRowsPerPage] = useState(20);
 
     useEffect(() => {
-        dispatch(fetchUsers(activeFilters));
-    }, [dispatch, activeFilters]);
+        dispatch(fetchUsers({ ...activeFilters, page: page + 1, limit: rowsPerPage }));
+    }, [dispatch, activeFilters, page, rowsPerPage]);
 
     const handleEdit = (userId) => {
         navigate(`/admin/users/edit/${userId}`);
@@ -90,10 +95,18 @@ const UserList = () => {
 
     const handleApplyFilters = (filters) => {
         setActiveFilters(filters);
+        setPage(0);
     };
 
     const handleClearFilters = () => {
         setActiveFilters({});
+        setPage(0);
+    };
+
+    const handleChangePage = (_, newPage) => setPage(newPage);
+    const handleChangeRowsPerPage = (e) => {
+        setRowsPerPage(parseInt(e.target.value, 10));
+        setPage(0);
     };
 
     // Función para renderizar las tarjetas en vista móvil
@@ -183,6 +196,18 @@ const UserList = () => {
                         </Card>
                     </Grid>
                 ))}
+                <Grid item xs={12}>
+                    <TablePagination
+                        component="div"
+                        count={pagination?.total ?? users.length}
+                        page={page}
+                        rowsPerPage={rowsPerPage}
+                        onPageChange={handleChangePage}
+                        onRowsPerPageChange={handleChangeRowsPerPage}
+                        rowsPerPageOptions={[10, 20, 50]}
+                        labelRowsPerPage="Per page:"
+                    />
+                </Grid>
             </Grid>
         );
     };
@@ -320,6 +345,16 @@ const UserList = () => {
                             ))}
                         </TableBody>
                     </Table>
+                    <TablePagination
+                        component="div"
+                        count={pagination?.total ?? users.length}
+                        page={page}
+                        rowsPerPage={rowsPerPage}
+                        onPageChange={handleChangePage}
+                        onRowsPerPageChange={handleChangeRowsPerPage}
+                        rowsPerPageOptions={[10, 20, 50]}
+                        labelRowsPerPage="Rows per page:"
+                    />
                 </TableContainer>
             )}
 

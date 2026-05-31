@@ -29,8 +29,8 @@ const normalizeSupplierPayment = (data) => {
 
 const supplierService = {
     // ── Supplier CRUD ──────────────────────────────────────────────────────────
-    getAll: async () => {
-        const res = await api.get('/suppliers');
+    getAll: async (params = {}) => {
+        const res = await api.get('/suppliers', { params });
         return res.data;
     },
 
