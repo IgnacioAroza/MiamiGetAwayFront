@@ -11,7 +11,8 @@ const initialState = {
     error: null,
     loading: false,
     lastSynced: null,
-    syncStatus: 'idle'
+    syncStatus: 'idle',
+    pagination: null,
 };
 
 // Thunks para operaciones principales
@@ -223,9 +224,18 @@ const reservationSlice = createSlice({
             })
             .addCase(fetchReservations.fulfilled, (state, action) => {
                 state.status = 'succeeded';
-                const raw = action.payload || [];
-                state.reservations = Array.isArray(raw) ? raw.map(normalizeReservationFromApi) : [];
                 state.loading = false;
+                const raw = action.payload;
+                if (Array.isArray(raw)) {
+                    state.reservations = raw.map(normalizeReservationFromApi);
+                    state.pagination = null;
+                } else if (raw?.data && raw?.pagination) {
+                    state.reservations = raw.data.map(normalizeReservationFromApi);
+                    state.pagination = raw.pagination;
+                } else {
+                    state.reservations = [];
+                    state.pagination = null;
+                }
             })
             .addCase(fetchReservations.rejected, (state, action) => {
                 state.status = 'failed';

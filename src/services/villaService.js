@@ -1,10 +1,10 @@
 import api from '../utils/api'
 
 const carService = {
-    getAllVillas: async () => {
+    getAllVillas: async (filters = {}) => {
         try {
-            const respose = await api.get('/villas')
-            return respose.data
+            const response = await api.get('/villas', { params: filters })
+            return response.data
         } catch (error) {
             console.error('Error fetching villas:', error)
             throw error

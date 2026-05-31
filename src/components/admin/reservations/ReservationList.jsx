@@ -57,7 +57,7 @@ const ReservationList = ({ filter = {} }) => {
     const dispatch = useDispatch();
     const navigate = useNavigate();
     const theme = useTheme();
-    const { reservations, loading, status, error } = useSelector((state) => state.reservations);
+    const { reservations, loading, status, error, pagination } = useSelector((state) => state.reservations);
     const { isMobile, isTablet } = useDeviceDetection();
     
     const [page, setPage] = useState(0);
@@ -164,19 +164,10 @@ const ReservationList = ({ filter = {} }) => {
     
     const combinedFilters = useMemo(() => ({ ...filter, ...activeFilters }), [filter, activeFilters]);
 
-    // Cargar reservas al montar el componente o cuando cambian los filtros
+    // Cargar reservas al montar el componente o cuando cambian los filtros, página o filas por página
     useEffect(() => {
-        dispatch(fetchReservations(combinedFilters));
-    }, [dispatch, combinedFilters]);
-
-    // Efecto adicional para forzar el re-render cuando cambia el ordenamiento
-    useEffect(() => {
-        // Este efecto se ejecuta cuando cambian orderBy u order
-        // Fuerza una actualización del componente para aplicar el ordenamiento
-        if (reservations && reservations.length > 0) {
-            // Solo necesitamos que se ejecute para trigger el re-render
-        }
-    }, [orderBy, order, reservations]);
+        dispatch(fetchReservations({ ...combinedFilters, page: page + 1, limit: rowsPerPage }));
+    }, [dispatch, combinedFilters, page, rowsPerPage]);
 
     // Si el filtro upcoming está activo, forzar el orden por check-in ascendente y persistirlo
     useEffect(() => {
@@ -567,7 +558,6 @@ const ReservationList = ({ filter = {} }) => {
         return (
             <Grid container spacing={2}>
                 {sortedReservations
-                    .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
                     .map((reservation) => (
                         <Grid item xs={12} key={reservation.id}>
                             <Card 
@@ -732,7 +722,7 @@ const ReservationList = ({ filter = {} }) => {
                 <Grid item xs={12}>
                     <TablePagination
                         component="div"
-                        count={sortedReservations.length}
+                        count={pagination?.total ?? sortedReservations.length}
                         page={page}
                         onPageChange={handleChangePage}
                         rowsPerPage={rowsPerPage}
@@ -904,7 +894,6 @@ const ReservationList = ({ filter = {} }) => {
                                 </TableRow>
                             ) : (
                                 sortedReservations
-                                    .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
                                     .map((reservation) => (
                                         <TableRow 
                                             key={reservation.id} 
@@ -1001,7 +990,7 @@ const ReservationList = ({ filter = {} }) => {
                     <TablePagination
                         rowsPerPageOptions={[5, 10, 25]}
                         component="div"
-                        count={sortedReservations ? sortedReservations.length : 0}
+                        count={pagination?.total ?? (sortedReservations ? sortedReservations.length : 0)}
                         rowsPerPage={rowsPerPage}
                         page={page}
                         onPageChange={handleChangePage}

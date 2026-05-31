@@ -3,7 +3,7 @@ import {
     Box, Button, Card, CardActions, CardContent, CircularProgress,
     Dialog, DialogActions, DialogContent, DialogTitle,
     Divider, Grid, IconButton, Paper, Skeleton,
-    Table, TableBody, TableCell, TableContainer, TableHead, TableRow,
+    Table, TableBody, TableCell, TableContainer, TableHead, TablePagination, TableRow,
     TextField, Tooltip, Typography,
 } from '@mui/material';
 import { useDispatch, useSelector } from 'react-redux';
@@ -15,7 +15,7 @@ import EmailIcon from '@mui/icons-material/Email';
 import PhoneIcon from '@mui/icons-material/Phone';
 import {
     fetchAllSuppliers, createSupplier, updateSupplier, deleteSupplier,
-    selectAllSuppliers, selectSuppliersStatus,
+    selectAllSuppliers, selectSuppliersStatus, selectSuppliersPagination,
 } from '../../../redux/supplierSlice';
 import DeleteDialog from '../dialogs/DeleteDialog';
 import useDeviceDetection from '../../../hooks/useDeviceDetection';
@@ -70,6 +70,7 @@ const SupplierList = () => {
     const { isMobile, isTablet } = useDeviceDetection();
     const suppliers = useSelector(selectAllSuppliers);
     const status = useSelector(selectSuppliersStatus);
+    const pagination = useSelector(selectSuppliersPagination);
 
     const [createOpen, setCreateOpen] = useState(false);
     const [editOpen, setEditOpen] = useState(false);
@@ -78,12 +79,18 @@ const SupplierList = () => {
     const [form, setForm] = useState(emptyForm);
     const [emailError, setEmailError] = useState('');
     const [saving, setSaving] = useState(false);
+    const [page, setPage] = useState(0);
+    const [rowsPerPage, setRowsPerPage] = useState(20);
 
     useEffect(() => {
-        if (status === 'idle' || status === 'failed') {
-            dispatch(fetchAllSuppliers());
-        }
-    }, [dispatch, status]);
+        dispatch(fetchAllSuppliers({ page: page + 1, limit: rowsPerPage }));
+    }, [dispatch, page, rowsPerPage]);
+
+    const handleChangePage = (_, newPage) => setPage(newPage);
+    const handleChangeRowsPerPage = (e) => {
+        setRowsPerPage(parseInt(e.target.value, 10));
+        setPage(0);
+    };
 
     const handleFormChange = (e) => {
         const { name, value } = e.target;
@@ -218,9 +225,10 @@ const SupplierList = () => {
                 <Box sx={{ textAlign: 'center', py: 8, color: '#666' }}>
                     <HandshakeIcon sx={{ fontSize: 48, mb: 1, color: '#333' }} />
                     <Typography variant="body1">No suppliers yet.</Typography>
-                    <Typography variant="body2" sx={{ mt: 0.5 }}>Click "+ New Supplier" to add the first one.</Typography>
+                    <Typography variant="body2" sx={{ mt: 0.5 }}>Click &quot;+ New Supplier&quot; to add the first one.</Typography>
                 </Box>
             ) : isMobile || isTablet ? (
+                <>
                 <Grid container spacing={2}>
                     {suppliers.map(s => (
                         <Grid item xs={12} key={s.id}>
@@ -268,6 +276,17 @@ const SupplierList = () => {
                         </Grid>
                     ))}
                 </Grid>
+                <TablePagination
+                    component="div"
+                    count={pagination?.total ?? suppliers.length}
+                    page={page}
+                    rowsPerPage={rowsPerPage}
+                    onPageChange={handleChangePage}
+                    onRowsPerPageChange={handleChangeRowsPerPage}
+                    rowsPerPageOptions={[10, 20, 50]}
+                    labelRowsPerPage="Per page:"
+                />
+                </>
             ) : (
                 <TableContainer component={Paper} sx={{ bgcolor: '#1e1e1e' }}>
                     <Table>
@@ -326,6 +345,16 @@ const SupplierList = () => {
                             ))}
                         </TableBody>
                     </Table>
+                    <TablePagination
+                        component="div"
+                        count={pagination?.total ?? suppliers.length}
+                        page={page}
+                        rowsPerPage={rowsPerPage}
+                        onPageChange={handleChangePage}
+                        onRowsPerPageChange={handleChangeRowsPerPage}
+                        rowsPerPageOptions={[10, 20, 50]}
+                        labelRowsPerPage="Rows per page:"
+                    />
                 </TableContainer>
             )}
 

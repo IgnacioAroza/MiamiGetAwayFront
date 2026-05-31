@@ -68,6 +68,7 @@ const userSlice = createSlice({
         selectedUser: null,
         status: 'idle',
         error: null,
+        pagination: null,
     },
     reducers: {
         clearError: (state) => {
@@ -88,8 +89,15 @@ const userSlice = createSlice({
             })
             .addCase(fetchUsers.fulfilled, (state, action) => {
                 state.status = 'succeeded';
-                state.users = action.payload;
                 state.error = null;
+                const payload = action.payload;
+                if (Array.isArray(payload)) {
+                    state.users = payload;
+                    state.pagination = null;
+                } else {
+                    state.users = payload.items ?? [];
+                    state.pagination = payload.pagination ?? null;
+                }
             })
             .addCase(fetchUsers.rejected, (state, action) => {
                 state.status = 'failed';
@@ -185,3 +193,5 @@ export const selectSelectedUser = createSelector(
     [selectUsersState],
     (users) => users.selectedUser
 );
+
+export const selectUserPagination = (state) => state.users.pagination;
