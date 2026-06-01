@@ -53,21 +53,75 @@ import ReservationFilters from './ReservationFilters';
 import { formatDateForDisplay, parseStringToDate } from '../../../utils/dateUtils';
 import useDeviceDetection from '../../../hooks/useDeviceDetection';
 
+const sortReservations = (reservations, orderBy, order) => {
+    return [...reservations].sort((a, b) => {
+        let aValue = a[orderBy];
+        let bValue = b[orderBy];
+
+        if (orderBy === 'check_in_date') {
+            aValue = a.check_in_date || a.checkInDate;
+            bValue = b.check_in_date || b.checkInDate;
+        } else if (orderBy === 'check_out_date') {
+            aValue = a.check_out_date || a.checkOutDate;
+            bValue = b.check_out_date || b.checkOutDate;
+        } else if (orderBy === 'total_amount') {
+            aValue = a.total_amount || a.totalAmount;
+            bValue = b.total_amount || b.totalAmount;
+        } else if (orderBy === 'created_at') {
+            aValue = a.created_at || a.createdAt;
+            bValue = b.created_at || b.createdAt;
+        } else if (orderBy === 'payment_status') {
+            aValue = a.payment_status || a.paymentStatus;
+            bValue = b.payment_status || b.paymentStatus;
+        }
+
+        if (orderBy === 'created_at' || orderBy === 'check_in_date' || orderBy === 'check_out_date') {
+            if (!aValue && !bValue) return 0;
+            if (!aValue) return order === 'asc' ? -1 : 1;
+            if (!bValue) return order === 'asc' ? 1 : -1;
+            aValue = new Date(aValue).getTime();
+            bValue = new Date(bValue).getTime();
+            if (isNaN(aValue) && isNaN(bValue)) return 0;
+            if (isNaN(aValue)) return order === 'asc' ? -1 : 1;
+            if (isNaN(bValue)) return order === 'asc' ? 1 : -1;
+        }
+
+        if (orderBy === 'total_amount' || orderBy === 'id') {
+            if (aValue === null || aValue === undefined) aValue = 0;
+            if (bValue === null || bValue === undefined) bValue = 0;
+            aValue = Number(aValue);
+            bValue = Number(bValue);
+            if (isNaN(aValue)) aValue = 0;
+            if (isNaN(bValue)) bValue = 0;
+        }
+
+        if (orderBy === 'status' || orderBy === 'payment_status' ||
+            (typeof aValue === 'string' || typeof bValue === 'string')) {
+            aValue = String(aValue || '').toLowerCase();
+            bValue = String(bValue || '').toLowerCase();
+        }
+
+        if (order === 'asc') {
+            return aValue > bValue ? 1 : aValue < bValue ? -1 : 0;
+        } else {
+            return aValue < bValue ? 1 : aValue > bValue ? -1 : 0;
+        }
+    });
+};
+
 const ReservationList = ({ filter = {} }) => {
     const dispatch = useDispatch();
     const navigate = useNavigate();
     const theme = useTheme();
     const { reservations, loading, status, error, pagination } = useSelector((state) => state.reservations);
     const { isMobile, isTablet } = useDeviceDetection();
-    
+
     const [page, setPage] = useState(0);
     const [rowsPerPage, setRowsPerPage] = useState(() => {
-        // Recuperar rowsPerPage desde localStorage
         const saved = localStorage.getItem('reservationList_rowsPerPage');
         return saved ? parseInt(saved, 10) : 10;
     });
     const [buildingNames, setBuildingNames] = useState({});
-    const [adminApartments, setAdminApartments] = useState([]);
     const [orderBy, setOrderBy] = useState(() => {
         // Recuperar orderBy desde localStorage (fall back a ordenar por check-in ascendente)
         return localStorage.getItem('reservationList_orderBy') || 'check_in_date';
@@ -92,82 +146,31 @@ const ReservationList = ({ filter = {} }) => {
     });
     const [filtersOpen, setFiltersOpen] = useState(() => !(isMobile || isTablet));
     
-    // Función para ordenar las reservas localmente
-    const sortReservations = (reservations, orderBy, order) => {
-        return [...reservations].sort((a, b) => {
-            let aValue = a[orderBy];
-            let bValue = b[orderBy];
-
-            // Manejar campos con nombres alternativos
-            if (orderBy === 'check_in_date') {
-                aValue = a.check_in_date || a.checkInDate;
-                bValue = b.check_in_date || b.checkInDate;
-            } else if (orderBy === 'check_out_date') {
-                aValue = a.check_out_date || a.checkOutDate;
-                bValue = b.check_out_date || b.checkOutDate;
-            } else if (orderBy === 'total_amount') {
-                aValue = a.total_amount || a.totalAmount;
-                bValue = b.total_amount || b.totalAmount;
-            } else if (orderBy === 'created_at') {
-                aValue = a.created_at || a.createdAt;
-                bValue = b.created_at || b.createdAt;
-            } else if (orderBy === 'payment_status') {
-                aValue = a.payment_status || a.paymentStatus;
-                bValue = b.payment_status || b.paymentStatus;
-            }
-
-            // Si es una fecha, convertir a timestamp
-            if (orderBy === 'created_at' || orderBy === 'check_in_date' || orderBy === 'check_out_date') {
-                // Manejar valores nulos/undefined
-                if (!aValue && !bValue) return 0;
-                if (!aValue) return order === 'asc' ? -1 : 1;
-                if (!bValue) return order === 'asc' ? 1 : -1;
-                
-                aValue = new Date(aValue).getTime();
-                bValue = new Date(bValue).getTime();
-                
-                // Verificar si las fechas son válidas
-                if (isNaN(aValue) && isNaN(bValue)) return 0;
-                if (isNaN(aValue)) return order === 'asc' ? -1 : 1;
-                if (isNaN(bValue)) return order === 'asc' ? 1 : -1;
-            }
-
-            // Si es un número, convertir a número
-            if (orderBy === 'total_amount' || orderBy === 'id') {
-                // Manejar valores nulos/undefined
-                if (aValue === null || aValue === undefined) aValue = 0;
-                if (bValue === null || bValue === undefined) bValue = 0;
-                
-                aValue = Number(aValue);
-                bValue = Number(bValue);
-                
-                // Verificar si son números válidos
-                if (isNaN(aValue)) aValue = 0;
-                if (isNaN(bValue)) bValue = 0;
-            }
-
-            // Para campos de texto (como status), convertir a string y comparar
-            if (orderBy === 'status' || orderBy === 'payment_status' || 
-                (typeof aValue === 'string' || typeof bValue === 'string')) {
-                aValue = String(aValue || '').toLowerCase();
-                bValue = String(bValue || '').toLowerCase();
-            }
-
-            // Realizar la comparación
-            if (order === 'asc') {
-                return aValue > bValue ? 1 : aValue < bValue ? -1 : 0;
-            } else {
-                return aValue < bValue ? 1 : aValue > bValue ? -1 : 0;
-            }
-        });
-    };
-    
     const combinedFilters = useMemo(() => ({ ...filter, ...activeFilters }), [filter, activeFilters]);
 
     // Cargar reservas al montar el componente o cuando cambian los filtros, página o filas por página
     useEffect(() => {
         dispatch(fetchReservations({ ...combinedFilters, page: page + 1, limit: rowsPerPage }));
     }, [dispatch, combinedFilters, page, rowsPerPage]);
+
+    useEffect(() => {
+        const loadApartments = async () => {
+            try {
+                const apartmentList = await adminApartmentService.getAllApartments();
+                const namesMap = {};
+                apartmentList.forEach(apt => {
+                    const idKey = String(apt.id);
+                    const buildingName = apt.building_name || apt.name || 'Sin nombre';
+                    const unitNumber = apt.unit_number ? ` - Unidad ${apt.unit_number}` : '';
+                    namesMap[idKey] = buildingName + unitNumber;
+                });
+                setBuildingNames(namesMap);
+            } catch (error) {
+                console.error('Error al cargar apartamentos:', error);
+            }
+        };
+        loadApartments();
+    }, []);
 
     // Si el filtro upcoming está activo, forzar el orden por check-in ascendente y persistirlo
     useEffect(() => {
@@ -187,29 +190,6 @@ const ReservationList = ({ filter = {} }) => {
         setFiltersOpen(!(isMobile || isTablet));
     }, [isMobile, isTablet]);
     
-    // Cargar todos los apartamentos al montar el componente
-    useEffect(() => {
-        const loadApartments = async () => {
-            try {
-                const apartmentList = await adminApartmentService.getAllApartments();
-                setAdminApartments(apartmentList);
-                
-                const namesMap = {};
-                apartmentList.forEach(apt => {
-                    const idKey = String(apt.id);
-                    const buildingName = apt.building_name || apt.name || 'Sin nombre';
-                    const unitNumber = apt.unit_number ? ` - Unidad ${apt.unit_number}` : '';
-                    namesMap[idKey] = buildingName + unitNumber;
-                });
-                setBuildingNames(namesMap);
-            } catch (error) {
-                console.error('Error al cargar apartamentos:', error);
-            }
-        };
-        
-        loadApartments();
-    }, []);
-
     // Cargar datos de clientes faltantes si la reserva no trae nombre/email
     useEffect(() => {
         const fetchMissingClients = async () => {
@@ -284,8 +264,10 @@ const ReservationList = ({ filter = {} }) => {
         return reservations;
     }, [reservations, combinedFilters]);
 
-    // Obtener las reservas ordenadas
-    const sortedReservations = sortReservations(baseReservations, orderBy, order);
+    const sortedReservations = useMemo(
+        () => sortReservations(baseReservations, orderBy, order),
+        [baseReservations, orderBy, order]
+    );
     
     // Función para cambiar la ordenación
     const handleRequestSort = (property) => {
@@ -316,8 +298,15 @@ const ReservationList = ({ filter = {} }) => {
     // Formatear fecha
     const formatDate = (dateString) => {
         if (!dateString) return 'N/A';
-        // Usar nuestra función de utilidad para mostrar fechas
-        return formatDateForDisplay(dateString, false); // false para no incluir la hora
+        return formatDateForDisplay(dateString, false);
+    };
+
+    // Formato corto para la columna Period: "Jul 25, 26"
+    const formatShortDate = (dateString) => {
+        if (!dateString) return 'N/A';
+        const parsed = parseStringToDate(dateString) || new Date(dateString);
+        if (!parsed || isNaN(parsed.getTime())) return 'N/A';
+        return parsed.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: '2-digit' });
     };
     
     // Formatear moneda
@@ -817,16 +806,7 @@ const ReservationList = ({ filter = {} }) => {
                                         direction={orderBy === 'check_in_date' ? order : 'asc'}
                                         onClick={() => handleRequestSort('check_in_date')}
                                     >
-                                        Check-in
-                                    </TableSortLabel>
-                                </TableCell>
-                                <TableCell>
-                                    <TableSortLabel
-                                        active={orderBy === 'check_out_date'}
-                                        direction={orderBy === 'check_out_date' ? order : 'asc'}
-                                        onClick={() => handleRequestSort('check_out_date')}
-                                    >
-                                        Check-out
+                                        Period
                                     </TableSortLabel>
                                 </TableCell>
                                 <TableCell>
@@ -857,15 +837,6 @@ const ReservationList = ({ filter = {} }) => {
                                     </TableSortLabel>
                                 </TableCell>
                                 <TableCell>Supplier</TableCell>
-                                <TableCell>
-                                    <TableSortLabel
-                                        active={orderBy === 'created_at'}
-                                        direction={orderBy === 'created_at' ? order : 'asc'}
-                                        onClick={() => handleRequestSort('created_at')}
-                                    >
-                                        Creation Date
-                                    </TableSortLabel>
-                                </TableCell>
                                 <TableCell align="right">Actions</TableCell>
                             </TableRow>
                         </TableHead>
@@ -873,9 +844,9 @@ const ReservationList = ({ filter = {} }) => {
                             {loading ? (
                                 [...Array(6)].map((_, idx) => (
                                     <TableRow key={idx}>
-                                        {[...Array(11)].map((__, cidx) => (
+                                        {[...Array(9)].map((__, cidx) => (
                                             <TableCell key={cidx}>
-                                                {cidx === 10 ? (
+                                                {cidx === 8 ? (
                                                     <>
                                                         <Skeleton variant="circular" width={28} height={28} />
                                                         <Skeleton variant="circular" width={28} height={28} sx={{ ml: 1 }} />
@@ -890,7 +861,7 @@ const ReservationList = ({ filter = {} }) => {
                                 ))
                             ) : !sortedReservations || sortedReservations.length === 0 ? (
                                 <TableRow>
-                                    <TableCell colSpan={11} align="center">No reservations found</TableCell>
+                                    <TableCell colSpan={9} align="center">No reservations found</TableCell>
                                 </TableRow>
                             ) : (
                                 sortedReservations
@@ -923,8 +894,9 @@ const ReservationList = ({ filter = {} }) => {
                                                     </Typography>
                                                 )}
                                             </TableCell>
-                                            <TableCell>{formatDate(reservation.check_in_date || reservation.checkInDate)}</TableCell>
-                                            <TableCell>{formatDate(reservation.check_out_date || reservation.checkOutDate)}</TableCell>
+                                            <TableCell sx={{ whiteSpace: 'nowrap' }}>
+                                                {formatShortDate(reservation.check_in_date || reservation.checkInDate)} → {formatShortDate(reservation.check_out_date || reservation.checkOutDate)}
+                                            </TableCell>
                                             <TableCell>{formatCurrency(reservation.total_amount || reservation.totalAmount)}</TableCell>
                                             <TableCell>
                                                 <Chip
@@ -952,7 +924,6 @@ const ReservationList = ({ filter = {} }) => {
                                                     );
                                                 })()}
                                             </TableCell>
-                                            <TableCell>{formatDate(reservation.created_at || reservation.createdAt)}</TableCell>
                                             <TableCell align="right" onClick={(e) => e.stopPropagation()}>
                                                 <Tooltip title="View details">
                                                     <IconButton 
