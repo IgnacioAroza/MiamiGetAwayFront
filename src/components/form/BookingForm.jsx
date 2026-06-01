@@ -99,7 +99,6 @@ function BookingForm({ service }) {
 
       setTimeout(() => {
         if (document.hidden) {
-          console.log(userData);
         } else {
           window.location.href = whatsappUrl
         }

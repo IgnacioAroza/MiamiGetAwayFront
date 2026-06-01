@@ -1,12 +1,13 @@
 import React, { useState } from 'react';
-import { 
-  Box, 
-  Container, 
-  TextField, 
-  Button, 
-  Typography, 
+import {
+  Box,
+  Container,
+  TextField,
+  Button,
+  Typography,
   Paper,
-  Alert
+  Alert,
+  CircularProgress
 } from '@mui/material';
 import { useNavigate, useLocation } from 'react-router-dom';
 import adminService from '../../../services/adminService';
@@ -15,24 +16,29 @@ const AdminLogin = () => {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
+  const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
   const location = useLocation();
 
   const handleLogin = async (e) => {
     e.preventDefault();
+    if (!username.trim() || !password.trim()) return;
+
     setError('');
+    setLoading(true);
 
     try {
       const response = await adminService.login(username, password);
       if (response) {
         localStorage.setItem('adminToken', response.token);
-        // Redirigir a la página anterior o al dashboard por defecto
         const from = location.state?.from || '/admin';
         navigate(from, { replace: true });
       }
     } catch (error) {
       setError(error.message || 'User or password incorrect');
-      localStorage.removeItem('adminToken'); // Limpiamos el token si hay error
+      localStorage.removeItem('adminToken');
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -63,6 +69,7 @@ const AdminLogin = () => {
               autoFocus
               value={username}
               onChange={(e) => setUsername(e.target.value)}
+              disabled={loading}
             />
             <TextField
               margin="normal"
@@ -75,14 +82,16 @@ const AdminLogin = () => {
               autoComplete="current-password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
+              disabled={loading}
             />
             <Button
               type="submit"
               fullWidth
               variant="contained"
+              disabled={loading || !username.trim() || !password.trim()}
               sx={{ mt: 3, mb: 2 }}
             >
-              Sign In
+              {loading ? <CircularProgress size={24} color="inherit" /> : 'Sign In'}
             </Button>
           </Box>
         </Paper>

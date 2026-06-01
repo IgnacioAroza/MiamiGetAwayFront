@@ -114,11 +114,6 @@ const ServicesPage = () => {
         serviceData = property;
       }
 
-      // Para depuración - verificar si tenemos unitNumber
-      if (selectedService === 'apartments') {
-        console.log("Saving apartment with unitNumber:", serviceData.unitNumber);
-      }
-      
       Object.entries(serviceData).forEach(([key, value]) => {
         if (key !== 'images') {
           // Convertir valores undefined a string vacío
