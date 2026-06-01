@@ -1,31 +1,16 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import { normalizeApartmentFromApi } from '../utils/normalizers';
-import axios from 'axios';
-import config from '../config';
+import api from '../utils/api';
 
-const getToken = () => localStorage.getItem('adminToken');
-
-const api = axios.create({
-    baseURL: config.API_URL,
-});
-
-api.interceptors.request.use(
-    (config) => {
-        const token = getToken();
-        if (token) {
-            config.headers['Authorization'] = `Bearer ${token}`;
-        }
-        return config;
-    },
-    (error) => Promise.reject(error)
-);
-
-// Thunks para operaciones CRUD
 export const fetchAdminApartments = createAsyncThunk(
     'adminApartments/fetchAll',
-    async () => {
-        const response = await api.get('/apartments');
-        return response.data;
+    async (_, { rejectWithValue }) => {
+        try {
+            const response = await api.get('/apartments');
+            return response.data;
+        } catch (error) {
+            return rejectWithValue(error.response?.data?.message || 'Error fetching apartments');
+        }
     }
 );
 
@@ -43,25 +28,37 @@ export const fetchAdminApartmentById = createAsyncThunk(
 
 export const createAdminApartment = createAsyncThunk(
     'adminApartments/create',
-    async (apartmentData) => {
-        const response = await api.post('/apartments', apartmentData);
-        return response.data;
+    async (apartmentData, { rejectWithValue }) => {
+        try {
+            const response = await api.post('/apartments', apartmentData);
+            return response.data;
+        } catch (error) {
+            return rejectWithValue(error.response?.data?.message || 'Error creating apartment');
+        }
     }
 );
 
 export const updateAdminApartment = createAsyncThunk(
     'adminApartments/update',
-    async ({ id, data }) => {
-        const response = await api.put(`/apartments/${id}`, data);
-        return response.data;
+    async ({ id, data }, { rejectWithValue }) => {
+        try {
+            const response = await api.put(`/apartments/${id}`, data);
+            return response.data;
+        } catch (error) {
+            return rejectWithValue(error.response?.data?.message || 'Error updating apartment');
+        }
     }
 );
 
 export const deleteAdminApartment = createAsyncThunk(
     'adminApartments/delete',
-    async (id) => {
-        await api.delete(`/apartments/${id}`);
-        return id;
+    async (id, { rejectWithValue }) => {
+        try {
+            await api.delete(`/apartments/${id}`);
+            return id;
+        } catch (error) {
+            return rejectWithValue(error.response?.data?.message || 'Error deleting apartment');
+        }
     }
 );
 
@@ -103,7 +100,7 @@ const adminApartmentSlice = createSlice({
             })
             .addCase(fetchAdminApartments.rejected, (state, action) => {
                 state.status = 'failed';
-                state.error = action.error.message;
+                state.error = action.payload ?? action.error.message;
                 state.loading = false;
             })
             // Fetch By Id
@@ -118,7 +115,7 @@ const adminApartmentSlice = createSlice({
             })
             .addCase(fetchAdminApartmentById.rejected, (state, action) => {
                 state.status = 'failed';
-                state.error = action.error.message;
+                state.error = action.payload ?? action.error.message;
                 state.loading = false;
             })
             // Create
@@ -127,7 +124,7 @@ const adminApartmentSlice = createSlice({
                 state.error = null;
             })
             .addCase(createAdminApartment.rejected, (state, action) => {
-                state.error = action.error.message;
+                state.error = action.payload ?? action.error.message;
             })
             // Update
             .addCase(updateAdminApartment.fulfilled, (state, action) => {
@@ -142,7 +139,7 @@ const adminApartmentSlice = createSlice({
                 state.error = null;
             })
             .addCase(updateAdminApartment.rejected, (state, action) => {
-                state.error = action.error.message;
+                state.error = action.payload ?? action.error.message;
             })
             // Delete
             .addCase(deleteAdminApartment.fulfilled, (state, action) => {
@@ -153,7 +150,7 @@ const adminApartmentSlice = createSlice({
                 state.error = null;
             })
             .addCase(deleteAdminApartment.rejected, (state, action) => {
-                state.error = action.error.message;
+                state.error = action.payload ?? action.error.message;
             });
     },
 });

@@ -1,14 +1,14 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, lazy, Suspense } from 'react';
 import { Container, Box, useTheme, useMediaQuery } from '@mui/material';
 import { motion, AnimatePresence } from 'framer-motion';
 
 import WhatsAppIcon from '../components/WhatsAppIcon';
 
-import Services from './Services';
-import About from './About';
-import GoogleReviews from '../components/admin/reviews/GoogleReviewsManager';
-import AboutFounder from '../components/about/AboutFounder';
-import ContactForm from '../components/form/ContactForm';
+const Services = lazy(() => import('./Services'));
+const About = lazy(() => import('./About'));
+const GoogleReviews = lazy(() => import('../components/admin/reviews/GoogleReviewsManager'));
+const AboutFounder = lazy(() => import('../components/about/AboutFounder'));
+const ContactForm = lazy(() => import('../components/form/ContactForm'));
 
 const Home = () => {
   const theme = useTheme();
@@ -129,48 +129,58 @@ const Home = () => {
       </Box>
       </motion.div>
 
-      <Box sx={{ 
-        py: { xs: 4, sm: 6, md: 8 }, 
+      <Box sx={{
+        py: { xs: 4, sm: 6, md: 8 },
         backgroundColor: '#1e1e1e',
       }}>
         <Container maxWidth="xl" sx={{ mt: -10 }}>
-          <Services />
+          <Suspense fallback={<Box sx={{ minHeight: 200, backgroundColor: '#1e1e1e' }} />}>
+            <Services />
+          </Suspense>
         </Container>
       </Box>
 
-      <Box sx={{ 
-        py: { xs: 4, sm: 6, md: 8 }, 
+      <Box sx={{
+        py: { xs: 4, sm: 6, md: 8 },
         backgroundColor: '#121212',
       }}>
         <Container maxWidth="lg" sx={{ mt: -10 }}>
-          <About />
+          <Suspense fallback={<Box sx={{ minHeight: 200, backgroundColor: '#121212' }} />}>
+            <About />
+          </Suspense>
         </Container>
       </Box>
 
-      <Box sx={{ 
-        py: { xs: 4, sm: 6, md: 8 }, 
+      <Box sx={{
+        py: { xs: 4, sm: 6, md: 8 },
         backgroundColor: '#1e1e1e',
       }}>
         <Container sx={{ mt: -10 }}>
-          <GoogleReviews />
+          <Suspense fallback={<Box sx={{ minHeight: 200, backgroundColor: '#1e1e1e' }} />}>
+            <GoogleReviews />
+          </Suspense>
         </Container>
       </Box>
 
-      <Box sx={{ 
-        py: { xs: 4, sm: 6, md: 8 }, 
+      <Box sx={{
+        py: { xs: 4, sm: 6, md: 8 },
         backgroundColor: '#121212',
       }}>
         <Container maxWidth="xl">
-          <AboutFounder />
+          <Suspense fallback={<Box sx={{ minHeight: 200, backgroundColor: '#121212' }} />}>
+            <AboutFounder />
+          </Suspense>
         </Container>
       </Box>
 
-      <Box sx={{ 
-        py: { xs: 4, sm: 6, md: 8 }, 
+      <Box sx={{
+        py: { xs: 4, sm: 6, md: 8 },
         backgroundColor: '#1e1e1e',
       }}>
         <Container sx={{ mt: -10 }}>
-          <ContactForm />
+          <Suspense fallback={<Box sx={{ minHeight: 200, backgroundColor: '#1e1e1e' }} />}>
+            <ContactForm />
+          </Suspense>
         </Container>
       </Box>
 
