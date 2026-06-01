@@ -249,4 +249,15 @@ const PricingSection = ({ formData, onChange }) => {
   );
 };
 
-export default PricingSection;
+export default React.memo(PricingSection, (prev, next) =>
+    prev.formData.price === next.formData.price &&
+    prev.formData.nights === next.formData.nights &&
+    prev.formData.cleaningFee === next.formData.cleaningFee &&
+    prev.formData.parkingFee === next.formData.parkingFee &&
+    prev.formData.otherExpenses === next.formData.otherExpenses &&
+    prev.formData.taxes === next.formData.taxes &&
+    prev.formData.cancellationFee === next.formData.cancellationFee &&
+    prev.formData.checkInDate === next.formData.checkInDate &&
+    prev.formData.checkOutDate === next.formData.checkOutDate &&
+    prev.onChange === next.onChange
+);

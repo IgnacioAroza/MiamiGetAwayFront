@@ -151,4 +151,9 @@ const ApartmentSection = ({ formData, apartments, selectedApartment, onChange })
     );
 };
 
-export default ApartmentSection;
+export default React.memo(ApartmentSection, (prev, next) =>
+    prev.formData.apartmentId === next.formData.apartmentId &&
+    prev.apartments === next.apartments &&
+    prev.selectedApartment === next.selectedApartment &&
+    prev.onChange === next.onChange
+);

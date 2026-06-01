@@ -143,4 +143,4 @@ const DateSection = ({ checkInDate, checkOutDate, onDateChange }) => {
     );
 };
 
-export default DateSection;
+export default React.memo(DateSection);

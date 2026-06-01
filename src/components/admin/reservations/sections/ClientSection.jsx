@@ -282,4 +282,15 @@ const ClientSection = ({
     );
 };
 
-export default ClientSection; 
+export default React.memo(ClientSection, (prev, next) =>
+    prev.formData.clientName === next.formData.clientName &&
+    prev.formData.clientEmail === next.formData.clientEmail &&
+    prev.formData.clientPhone === next.formData.clientPhone &&
+    prev.formData.clientCity === next.formData.clientCity &&
+    prev.clients === next.clients &&
+    prev.selectedClient === next.selectedClient &&
+    prev.onClientSelect === next.onClientSelect &&
+    prev.onChange === next.onChange &&
+    prev.onOpenNewClient === next.onOpenNewClient &&
+    prev.onOpenEditClient === next.onOpenEditClient
+);

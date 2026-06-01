@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { fetchAdminApartments, selectAllApartments } from '../redux/adminApartmentSlice';
 import { fetchUsers, selectAllUsers, selectUserStatus } from '../redux/userSlice';
@@ -166,7 +166,7 @@ export const useReservationForm = (initialData) => {
         formData.amountPaid
     ]);
 
-    const handleChange = (event) => {
+    const handleChange = useCallback((event) => {
         const { name, value } = event.target;
 
         if (name === 'apartmentId') {
@@ -193,35 +193,23 @@ export const useReservationForm = (initialData) => {
                 }));
             }
         } else {
-            setFormData(prev => ({
-                ...prev,
-                [name]: value
-            }));
+            setFormData(prev => ({ ...prev, [name]: value }));
         }
-    };
+    }, [apartments]);
 
-    const handleDateChange = (name) => (date) => {
+    const handleDateChange = useCallback((name) => (date) => {
         if (date) {
-            // Convertir la fecha seleccionada al formato MM-DD-YYYY HH:mm
             const formattedDate = formatDateToString(date);
-            setFormData(prev => ({
-                ...prev,
-                [name]: formattedDate
-            }));
+            setFormData(prev => ({ ...prev, [name]: formattedDate }));
         } else {
-            setFormData(prev => ({
-                ...prev,
-                [name]: null
-            }));
+            setFormData(prev => ({ ...prev, [name]: null }));
         }
-    };
+    }, []);
 
-    const handleClientSelect = (client) => {
+    const handleClientSelect = useCallback((client) => {
         setSelectedClient(client);
         if (client) {
-            // Manejar diferentes formatos de nombres (firstName/lastName o name/lastname)
             const fullName = `${client.firstName || client.name || ''} ${client.lastName || client.lastname || ''}`.trim();
-
             setFormData(prev => ({
                 ...prev,
                 clientId: client.id.toString(),
@@ -246,15 +234,11 @@ export const useReservationForm = (initialData) => {
                 clientNotes: ''
             }));
         }
-    };
+    }, []);
 
-    const handleNewClientCreated = (newClient) => {
-        // Seleccionar el nuevo cliente como cliente activo
+    const handleNewClientCreated = useCallback((newClient) => {
         setSelectedClient(newClient);
-
-        // Actualizar el formulario con los datos del nuevo cliente
         const fullName = `${newClient.name || newClient.firstName || ''} ${newClient.lastname || newClient.lastName || ''}`.trim();
-
         setFormData(prev => ({
             ...prev,
             clientId: newClient.id ? newClient.id.toString() : '',
@@ -266,19 +250,19 @@ export const useReservationForm = (initialData) => {
             clientCountry: newClient.country || '',
             clientNotes: newClient.notes || ''
         }));
-    };
+    }, []);
 
-    // Función para manejar cambios en el pago inicial
-    const handleInitialPaymentChange = (paymentData) => {
+    const handleInitialPaymentChange = useCallback((paymentData) => {
         setInitialPaymentData(paymentData);
-        // El efecto de precios recalcula amountDue y paymentStatus cuando amountPaid cambia
         setFormData(prev => ({
             ...prev,
             amountPaid: paymentData.amount && paymentData.amount > 0
                 ? parseFloat(paymentData.amount)
                 : 0
         }));
-    }; const resetForm = () => {
+    }, []);
+
+    const resetForm = useCallback(() => {
         setFormData({
             apartmentId: '',
             name: '',
@@ -309,12 +293,8 @@ export const useReservationForm = (initialData) => {
         });
         setSelectedApartment(null);
         setSelectedClient(null);
-        setInitialPaymentData({
-            amount: '',
-            paymentMethod: 'cash',
-            notes: ''
-        });
-    };
+        setInitialPaymentData({ amount: '', paymentMethod: 'cash', notes: '' });
+    }, []);
 
     return {
         formData,
