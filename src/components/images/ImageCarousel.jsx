@@ -5,7 +5,6 @@ import ChevronLeftIcon from '@mui/icons-material/ChevronLeft';
 import ChevronRightIcon from '@mui/icons-material/ChevronRight';
 import ImagePlaceholder from '../common/ImagePlaceholder';
 import LazyImage from '../common/LazyImage';
-import "slick-carousel/slick/slick.css"; 
 import useImageWithPlaceholder from '../../hooks/useImageWithPlaceholder';
 import useImagePreloader from '../../hooks/useImagePreloader';
 
