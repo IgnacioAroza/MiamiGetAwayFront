@@ -261,4 +261,16 @@ const PaymentSection = ({ formData, onChange, onPaymentRegistered, onInitialPaym
     );
 };
 
-export default PaymentSection; 
+export default React.memo(PaymentSection, (prev, next) =>
+    prev.formData.id === next.formData.id &&
+    prev.formData.amountPaid === next.formData.amountPaid &&
+    prev.formData.totalAmount === next.formData.totalAmount &&
+    prev.formData.amountDue === next.formData.amountDue &&
+    prev.formData.paymentStatus === next.formData.paymentStatus &&
+    prev.onChange === next.onChange &&
+    prev.onPaymentRegistered === next.onPaymentRegistered &&
+    prev.onInitialPaymentChange === next.onInitialPaymentChange &&
+    prev.initialPaymentData?.amount === next.initialPaymentData?.amount &&
+    prev.initialPaymentData?.paymentMethod === next.initialPaymentData?.paymentMethod &&
+    prev.initialPaymentData?.notes === next.initialPaymentData?.notes
+);

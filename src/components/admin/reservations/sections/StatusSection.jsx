@@ -99,4 +99,8 @@ const StatusSection = ({ formData, onChange }) => {
     );
 };
 
-export default StatusSection; 
+export default React.memo(StatusSection, (prev, next) =>
+    prev.formData.status === next.formData.status &&
+    prev.formData.paymentStatus === next.formData.paymentStatus &&
+    prev.onChange === next.onChange
+); 

@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useMemo } from "react";
+import React, { useEffect, useState, useMemo, Suspense } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import {
@@ -26,20 +26,17 @@ import {
   BarChart as BarChartIcon,
 } from "@mui/icons-material";
 
-// Componentes
-import MonthlySummary from "./dashboard/MonthlySummary";
-import BookingTrendsChart from "./dashboard/BookingTrendsChart";
-import SalesVolumeChart from "./dashboard/SalesVolumeChart";
+const MonthlySummary = React.lazy(() => import("./dashboard/MonthlySummary"));
+const BookingTrendsChart = React.lazy(() => import("./dashboard/BookingTrendsChart"));
+const SalesVolumeChart = React.lazy(() => import("./dashboard/SalesVolumeChart"));
 
 // Redux actions
 import { fetchUsers, selectUserCount } from "../../redux/userSlice";
-
 import { fetchReservations } from "../../redux/reservationSlice";
 import { fetchAllPayments } from "../../redux/reservationPaymentSlice";
 import { fetchReviews } from "../../redux/reviewSlice";
-import adminApartmentService from "../../services/adminApartmentService";
+import { fetchAdminApartments, selectAllApartments, selectApartmentStatus } from "../../redux/adminApartmentSlice";
 import useDeviceDetection from "../../hooks/useDeviceDetection";
-import { normalizeReservationFromApi, normalizeApartmentFromApi } from "../../utils/normalizers";
 
 const AdminDashboard = () => {
   const theme = useTheme();
@@ -50,23 +47,33 @@ const AdminDashboard = () => {
 
   // Estados locales
   const [openSnackbar, setOpenSnackbar] = useState(false);
-  const [apartments, setApartments] = useState([]);
-  const [buildingNames, setBuildingNames] = useState({});
 
-  // Selectores de Redux con normalización
+  // Selectores de Redux
   const userError = useSelector((state) => state.users.error);
   const reviewError = useSelector((state) => state.reviews.error);
-  const rawReservations = useSelector((state) => state.reservations.reservations);
-  const reservations = useMemo(() => {
-    if (!rawReservations || rawReservations.length === 0) return [];
-    return rawReservations.map(reservation => normalizeReservationFromApi(reservation));
-  }, [rawReservations]);
+  const reservations = useSelector((state) => state.reservations.reservations);
   const payments = useSelector((state) => state.reservationPayments.payments);
   const reservationsLoading = useSelector((state) => state.reservations.loading);
   const usersStatus = useSelector((state) => state.users.status);
+  const reservationsStatus = useSelector((state) => state.reservations.status);
+  const paymentsStatus = useSelector((state) => state.reservationPayments.status);
+  const reviewsStatus = useSelector((state) => state.reviews.status);
+  const apartmentsStatus = useSelector(selectApartmentStatus);
   const paymentsLoading = useSelector((state) => state.reservationPayments.loading);
   const totalUsers = useSelector(selectUserCount);
   const reviews = useSelector((state) => state.reviews.items);
+  const apartments = useSelector(selectAllApartments);
+
+  // buildingNames derivado de los apartamentos del store
+  const buildingNames = useMemo(() => {
+    const namesMap = {};
+    apartments.forEach((apt) => {
+      const buildingName = apt.name || "Sin nombre";
+      const unitNumber = apt.unitNumber ? ` - Unidad ${apt.unitNumber}` : "";
+      namesMap[String(apt.id)] = buildingName + unitNumber;
+    });
+    return namesMap;
+  }, [apartments]);
 
   // Cálculos memorizados
   const latestReservations = useMemo(() => {
@@ -95,38 +102,14 @@ const AdminDashboard = () => {
       .slice(0, 3);
   }, [reservations]);
 
-  // Cargar datos al montar el componente
+  // Cargar datos solo si no están ya en el store
   useEffect(() => {
-    dispatch(fetchUsers());
-    dispatch(fetchReservations({}));
-    dispatch(fetchAllPayments());
-    dispatch(fetchReviews());
-    loadApartments();
-  }, [dispatch]);
-
-  // Cargar apartamentos para obtener los nombres
-  const loadApartments = async () => {
-    try {
-      const apartmentList = await adminApartmentService.getAllApartments();
-      // Normalizar los apartamentos también
-      const normalizedApartments = apartmentList.map(apt => normalizeApartmentFromApi(apt));
-      setApartments(normalizedApartments);
-
-      const namesMap = {};
-      normalizedApartments.forEach((apt) => {
-        const idKey = String(apt.id);
-        const buildingName = apt.name || "Sin nombre";
-        const unitNumber = apt.unitNumber
-          ? ` - Unidad ${apt.unitNumber}`
-          : "";
-        namesMap[idKey] = buildingName + unitNumber;
-      });
-      setBuildingNames(namesMap);
-    } catch (error) {
-      console.error("Error al cargar apartamentos:", error);
-      setOpenSnackbar(true);
-    }
-  };
+    if (usersStatus === 'idle') dispatch(fetchUsers());
+    if (reservationsStatus === 'idle') dispatch(fetchReservations({}));
+    if (paymentsStatus === 'idle') dispatch(fetchAllPayments());
+    if (reviewsStatus === 'idle') dispatch(fetchReviews());
+    if (apartmentsStatus === 'idle') dispatch(fetchAdminApartments());
+  }, [dispatch, usersStatus, reservationsStatus, paymentsStatus, reviewsStatus, apartmentsStatus]);
 
   // Effects
   useEffect(() => {
@@ -180,7 +163,9 @@ const AdminDashboard = () => {
                     <Skeleton variant="rectangular" height={300} sx={{ mt: 2 }} />
                   </Paper>
                 ) : (
-                  <BookingTrendsChart reservations={reservations} />
+                  <Suspense fallback={<Skeleton variant="rectangular" height={300} sx={{ mt: 2 }} />}>
+                    <BookingTrendsChart reservations={reservations} />
+                  </Suspense>
                 )}
               </Grid>
             )}
@@ -334,9 +319,13 @@ const AdminDashboard = () => {
           </Grid>
         </>
       ) : activeTab === 1 ? (
-        <SalesVolumeChart />
+        <Suspense fallback={<Skeleton variant="rectangular" height={400} />}>
+          <SalesVolumeChart />
+        </Suspense>
       ) : !isMobile ? (
-        <MonthlySummary />
+        <Suspense fallback={<Skeleton variant="rectangular" height={400} />}>
+          <MonthlySummary />
+        </Suspense>
       ) : (
         <Paper sx={{ p: 3, textAlign: "center" }}>
           <Typography variant="body1" color="text.secondary">

@@ -1,12 +1,6 @@
 import api from './api'
 
 export const downloadReservationPdf = async (id) => {
-    const token = localStorage.getItem('adminToken');
-
-    if (!token) {
-        throw new Error('No authentication token available. Please log in again.');
-    }
-
     const reservationResponse = await api.get(`/reservations/${id}`);
     const reservationData = reservationResponse.data;
 
@@ -25,7 +19,6 @@ export const downloadReservationPdf = async (id) => {
     const response = await api.get(`/reservations/${id}/pdf/download?${queryParams.toString()}`, {
         responseType: 'blob',
         headers: {
-            'Authorization': `Bearer ${token}`,
             'Accept': 'application/pdf'
         }
     });

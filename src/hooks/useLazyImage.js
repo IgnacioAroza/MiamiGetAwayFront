@@ -1,11 +1,5 @@
 import { useState, useEffect, useRef, useMemo } from 'react';
 
-/**
- * Hook personalizado para implementar lazy loading de imágenes con Intersection Observer
- * @param {string} src - URL de la imagen
- * @param {Object} options - Opciones para el Intersection Observer
- * @returns {Object} - Estado y referencia para el lazy loading
- */
 const useLazyImage = (src, options = {}) => {
     const [imageSrc, setImageSrc] = useState(null);
     const [isLoaded, setIsLoaded] = useState(false);
@@ -13,12 +7,13 @@ const useLazyImage = (src, options = {}) => {
     const [hasError, setHasError] = useState(false);
     const imgRef = useRef();
 
+    const { root = null, rootMargin = '50px', threshold = 0.1 } = options;
+
     const observerOptions = useMemo(() => ({
-        root: null,
-        rootMargin: '50px', // Cargar imagen cuando esté a 50px de ser visible
-        threshold: 0.1,
-        ...options
-    }), [options]);
+        root,
+        rootMargin,
+        threshold,
+    }), [root, rootMargin, threshold]);
 
     useEffect(() => {
         const observer = new IntersectionObserver(

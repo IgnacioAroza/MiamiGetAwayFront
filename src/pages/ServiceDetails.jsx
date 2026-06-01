@@ -4,9 +4,6 @@ import { Container, Typography, Grid2, Card, CardContent, Button, Box, useTheme,
 import { useTranslation } from 'react-i18next';
 import { motion } from 'framer-motion';
 
-import "slick-carousel/slick/slick.css"; 
-import "slick-carousel/slick/slick-theme.css";
-
 import ImageCarousel from '../components/images/ImageCarousel';
 import BookingForm from '../components/form/BookingForm';
 import WhatsAppButton from '../components/WhatsAppIcon';

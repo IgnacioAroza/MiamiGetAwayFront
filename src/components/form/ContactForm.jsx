@@ -79,7 +79,7 @@ export default function ContactForm() {
         {
           from_name: `${formData.firstName} ${formData.lastName}`,
           from_email: formData.email,
-          phone: `${formData.phonePrefix} ${formData.phoneNumber}`,
+          phone: `${formData.phonePrefix} ${formData.phone}`,
           message: formData.message,
         },
         publicKey
@@ -187,10 +187,10 @@ export default function ContactForm() {
                 <Grid item xs={8}>
                   <TextField
                     fullWidth
-                    name="phoneNumber"
+                    name="phone"
                     type="tel"
                     label={t('contactUs.phone')}
-                    value={formData.phoneNumber}
+                    value={formData.phone}
                     onChange={handleChange}
                     variant="outlined"
                   />

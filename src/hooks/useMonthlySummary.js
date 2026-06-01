@@ -2,7 +2,6 @@ import { useState, useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import {
     generateSummary,
-    fetchSummaryDetails,
     downloadSummaryPDF,
     sendSummaryEmail,
     clearError,
@@ -17,26 +16,10 @@ export const useMonthlySummary = () => {
 
     const [selectedMonth, setSelectedMonth] = useState(new Date().getMonth() + 1);
     const [selectedYear, setSelectedYear] = useState(new Date().getFullYear());
-    const [isInitialLoad, setIsInitialLoad] = useState(true);
 
-    // Efecto para cargar los datos iniciales
     useEffect(() => {
-        if (selectedMonth && selectedYear) {
-            if (isInitialLoad) {
-                dispatch(generateSummary({ month: selectedMonth, year: selectedYear }));
-                setIsInitialLoad(false);
-            } else {
-                dispatch(fetchSummaryDetails({ year: selectedYear, month: selectedMonth }));
-            }
-        }
-    }, [dispatch, selectedMonth, selectedYear, isInitialLoad]);
-
-    // Efecto para recargar cuando cambian mes o año
-    useEffect(() => {
-        if (!isInitialLoad) {
-            dispatch(generateSummary({ month: selectedMonth, year: selectedYear }));
-        }
-    }, [dispatch, isInitialLoad, selectedMonth, selectedYear]);
+        dispatch(generateSummary({ month: selectedMonth, year: selectedYear }));
+    }, [dispatch, selectedMonth, selectedYear]);
 
     const handleMonthChange = (newMonth) => {
         setSelectedMonth(newMonth);

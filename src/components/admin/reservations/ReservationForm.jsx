@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
     Grid,
@@ -69,16 +69,12 @@ const ReservationForm = ({ initialData, onSubmit }) => {
     const [openEditClientDialog, setOpenEditClientDialog] = useState(false);
     const { toast, warning, error, hideToast } = useToast();
 
-    // Manejadores de diálogos
-    const handleOpenNewClientDialog = () => setOpenNewClientDialog(true);
-    const handleCloseNewClientDialog = () => setOpenNewClientDialog(false);
-    const handleOpenEditClientDialog = () => setOpenEditClientDialog(true);
-    const handleCloseEditClientDialog = () => setOpenEditClientDialog(false);
-
-    // Manejar cancelar - navegar de vuelta
-    const handleCancel = () => {
-        navigate(-1); // Volver a la página anterior
-    };
+    const handleOpenNewClientDialog = useCallback(() => setOpenNewClientDialog(true), []);
+    const handleCloseNewClientDialog = useCallback(() => setOpenNewClientDialog(false), []);
+    const handleOpenEditClientDialog = useCallback(() => setOpenEditClientDialog(true), []);
+    const handleCloseEditClientDialog = useCallback(() => setOpenEditClientDialog(false), []);
+    const handleCancel = useCallback(() => navigate(-1), [navigate]);
+    const handlePaymentRegistered = useCallback(() => {}, []);
 
     // Función para obtener el estilo y texto del estado de pago
     const getPaymentStatusDisplay = (paymentStatus) => {
@@ -427,9 +423,7 @@ const ReservationForm = ({ initialData, onSubmit }) => {
                                     <PaymentSection
                                         formData={formData}
                                         onChange={handleChange}
-                                        onPaymentRegistered={(paymentResponse) => {
-                                            // Payment successfully registered
-                                        }}
+                                        onPaymentRegistered={handlePaymentRegistered}
                                         onInitialPaymentChange={handleInitialPaymentChange}
                                         initialPaymentData={initialPaymentData}
                                     />

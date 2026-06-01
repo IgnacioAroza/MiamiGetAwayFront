@@ -52,6 +52,10 @@ const supplierSlice = createSlice({
     reducers: {},
     extraReducers: (builder) => {
         builder
+            .addCase(fetchAllSuppliers.pending, (state) => {
+                state.status = 'loading';
+                state.error = null;
+            })
             .addCase(fetchAllSuppliers.fulfilled, (state, action) => {
                 state.status = 'succeeded';
                 const raw = action.payload;
@@ -66,15 +70,37 @@ const supplierSlice = createSlice({
                     state.pagination = null;
                 }
             })
+            .addCase(fetchAllSuppliers.rejected, (state, action) => {
+                state.status = 'failed';
+                state.error = action.payload ?? action.error.message;
+            })
+            .addCase(createSupplier.pending, (state) => {
+                state.error = null;
+            })
             .addCase(createSupplier.fulfilled, (state, action) => {
                 state.suppliers.push(action.payload);
+            })
+            .addCase(createSupplier.rejected, (state, action) => {
+                state.error = action.payload ?? action.error.message;
+            })
+            .addCase(updateSupplier.pending, (state) => {
+                state.error = null;
             })
             .addCase(updateSupplier.fulfilled, (state, action) => {
                 const i = state.suppliers.findIndex(s => s.id === action.payload.id);
                 if (i !== -1) state.suppliers[i] = action.payload;
             })
+            .addCase(updateSupplier.rejected, (state, action) => {
+                state.error = action.payload ?? action.error.message;
+            })
+            .addCase(deleteSupplier.pending, (state) => {
+                state.error = null;
+            })
             .addCase(deleteSupplier.fulfilled, (state, action) => {
                 state.suppliers = state.suppliers.filter(s => s.id !== action.payload);
+            })
+            .addCase(deleteSupplier.rejected, (state, action) => {
+                state.error = action.payload ?? action.error.message;
             });
     },
 });

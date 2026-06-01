@@ -156,4 +156,15 @@ const ReservationPaymentSummary = ({ formData }) => {
   );
 };
 
-export default ReservationPaymentSummary;
+export default React.memo(ReservationPaymentSummary, (prev, next) =>
+    prev.formData.nights === next.formData.nights &&
+    prev.formData.price === next.formData.price &&
+    prev.formData.cleaningFee === next.formData.cleaningFee &&
+    prev.formData.parkingFee === next.formData.parkingFee &&
+    prev.formData.otherExpenses === next.formData.otherExpenses &&
+    prev.formData.taxes === next.formData.taxes &&
+    prev.formData.cancellationFee === next.formData.cancellationFee &&
+    prev.formData.totalAmount === next.formData.totalAmount &&
+    prev.formData.amountPaid === next.formData.amountPaid &&
+    prev.formData.amountDue === next.formData.amountDue
+);

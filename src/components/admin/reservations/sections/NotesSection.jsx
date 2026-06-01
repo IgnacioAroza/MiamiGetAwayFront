@@ -51,4 +51,7 @@ const NotesSection = ({ formData, onChange }) => {
     );
 };
 
-export default NotesSection;
+export default React.memo(NotesSection, (prev, next) =>
+    prev.formData.notes === next.formData.notes &&
+    prev.onChange === next.onChange
+);

@@ -311,9 +311,9 @@ const reservationSlice = createSlice({
             })
             .addCase(generateReservationPdf.fulfilled, (state, action) => {
                 state.loading = false;
-                const { id, pdfUrl, email } = action.payload;
+                const { id, downloadUrl, email } = action.payload;
                 if (state.selectedReservation?.id === id) {
-                    state.selectedReservation.pdfUrl = pdfUrl;
+                    state.selectedReservation.pdfUrl = downloadUrl;
                 }
             })
             .addCase(generateReservationPdf.rejected, (state, action) => {
