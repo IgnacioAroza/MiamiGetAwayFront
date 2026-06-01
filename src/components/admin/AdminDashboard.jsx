@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useMemo } from "react";
+import React, { useEffect, useState, useMemo, Suspense } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import {
@@ -26,10 +26,9 @@ import {
   BarChart as BarChartIcon,
 } from "@mui/icons-material";
 
-// Componentes
-import MonthlySummary from "./dashboard/MonthlySummary";
-import BookingTrendsChart from "./dashboard/BookingTrendsChart";
-import SalesVolumeChart from "./dashboard/SalesVolumeChart";
+const MonthlySummary = React.lazy(() => import("./dashboard/MonthlySummary"));
+const BookingTrendsChart = React.lazy(() => import("./dashboard/BookingTrendsChart"));
+const SalesVolumeChart = React.lazy(() => import("./dashboard/SalesVolumeChart"));
 
 // Redux actions
 import { fetchUsers, selectUserCount } from "../../redux/userSlice";
@@ -164,7 +163,9 @@ const AdminDashboard = () => {
                     <Skeleton variant="rectangular" height={300} sx={{ mt: 2 }} />
                   </Paper>
                 ) : (
-                  <BookingTrendsChart reservations={reservations} />
+                  <Suspense fallback={<Skeleton variant="rectangular" height={300} sx={{ mt: 2 }} />}>
+                    <BookingTrendsChart reservations={reservations} />
+                  </Suspense>
                 )}
               </Grid>
             )}
@@ -318,9 +319,13 @@ const AdminDashboard = () => {
           </Grid>
         </>
       ) : activeTab === 1 ? (
-        <SalesVolumeChart />
+        <Suspense fallback={<Skeleton variant="rectangular" height={400} />}>
+          <SalesVolumeChart />
+        </Suspense>
       ) : !isMobile ? (
-        <MonthlySummary />
+        <Suspense fallback={<Skeleton variant="rectangular" height={400} />}>
+          <MonthlySummary />
+        </Suspense>
       ) : (
         <Paper sx={{ p: 3, textAlign: "center" }}>
           <Typography variant="body1" color="text.secondary">
