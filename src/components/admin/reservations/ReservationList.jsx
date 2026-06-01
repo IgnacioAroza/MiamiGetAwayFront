@@ -47,7 +47,7 @@ import {
     FilterAlt as FilterIcon
 } from '@mui/icons-material';
 import { fetchReservations, deleteReservation, setSelectedReservation } from '../../../redux/reservationSlice';
-import adminApartmentService from '../../../services/adminApartmentService';
+import { fetchAdminApartments, selectAllApartments, selectApartmentStatus } from '../../../redux/adminApartmentSlice';
 import userService from '../../../services/userService';
 import ReservationFilters from './ReservationFilters';
 import { formatDateForDisplay, parseStringToDate } from '../../../utils/dateUtils';
@@ -114,6 +114,8 @@ const ReservationList = ({ filter = {} }) => {
     const navigate = useNavigate();
     const theme = useTheme();
     const { reservations, loading, status, error, pagination } = useSelector((state) => state.reservations);
+    const reduxApartments = useSelector(selectAllApartments);
+    const apartmentsStatus = useSelector(selectApartmentStatus);
     const { isMobile, isTablet } = useDeviceDetection();
 
     const [page, setPage] = useState(0);
@@ -153,24 +155,25 @@ const ReservationList = ({ filter = {} }) => {
         dispatch(fetchReservations({ ...combinedFilters, page: page + 1, limit: rowsPerPage }));
     }, [dispatch, combinedFilters, page, rowsPerPage]);
 
+    // Fetch apartments via Redux — solo si no están ya cargados (evita 429 por mounts repetidos)
     useEffect(() => {
-        const loadApartments = async () => {
-            try {
-                const apartmentList = await adminApartmentService.getAllApartments();
-                const namesMap = {};
-                apartmentList.forEach(apt => {
-                    const idKey = String(apt.id);
-                    const buildingName = apt.building_name || apt.name || 'Sin nombre';
-                    const unitNumber = apt.unit_number ? ` - Unidad ${apt.unit_number}` : '';
-                    namesMap[idKey] = buildingName + unitNumber;
-                });
-                setBuildingNames(namesMap);
-            } catch (error) {
-                console.error('Error al cargar apartamentos:', error);
-            }
-        };
-        loadApartments();
-    }, []);
+        if (apartmentsStatus === 'idle') {
+            dispatch(fetchAdminApartments());
+        }
+    }, [dispatch, apartmentsStatus]);
+
+    // Construir buildingNames cuando los datos de Redux estén disponibles
+    useEffect(() => {
+        if (reduxApartments.length === 0) return;
+        const namesMap = {};
+        reduxApartments.forEach(apt => {
+            const idKey = String(apt.id);
+            const buildingName = apt.building_name || apt.name || 'Sin nombre';
+            const unitNumber = apt.unit_number ? ` - Unidad ${apt.unit_number}` : '';
+            namesMap[idKey] = buildingName + unitNumber;
+        });
+        setBuildingNames(namesMap);
+    }, [reduxApartments]);
 
     // Si el filtro upcoming está activo, forzar el orden por check-in ascendente y persistirlo
     useEffect(() => {
