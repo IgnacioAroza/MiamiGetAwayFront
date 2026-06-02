@@ -2,7 +2,7 @@ import React, { useEffect, useRef, useState } from 'react';
 import {
     Box, Button, Card, CardActions, CardContent, CardMedia, Chip,
     CircularProgress, Dialog, DialogActions, DialogContent, DialogTitle,
-    Divider, Grid, IconButton, Paper, Skeleton,
+    Divider, Grid, IconButton, Paper, Skeleton, Tab, Tabs,
     Table, TableBody, TableCell, TableContainer, TableHead, TableRow,
     TextField, Tooltip, Typography,
 } from '@mui/material';
@@ -13,12 +13,15 @@ import DeleteIcon from '@mui/icons-material/Delete';
 import ExploreIcon from '@mui/icons-material/Explore';
 import GroupIcon from '@mui/icons-material/Group';
 import ImageIcon from '@mui/icons-material/Image';
+import MailOutlineIcon from '@mui/icons-material/MailOutline';
 import {
     fetchAllExperiences, createExperience, updateExperience, deleteExperience,
     selectAllExperiences, selectExperiencesStatus,
 } from '../../../redux/experienceSlice';
+import { selectAllInquiries, selectInquiriesStatus } from '../../../redux/experienceInquirySlice';
 import DeleteDialog from '../dialogs/DeleteDialog';
 import useDeviceDetection from '../../../hooks/useDeviceDetection';
+import InquiryList from './InquiryList';
 
 const fieldSx = {
     '& .MuiOutlinedInput-root': {
@@ -95,7 +98,10 @@ const ExperienceList = () => {
     const { isMobile, isTablet } = useDeviceDetection();
     const experiences = useSelector(selectAllExperiences);
     const status = useSelector(selectExperiencesStatus);
+    const inquiries = useSelector(selectAllInquiries);
+    const pendingCount = inquiries.filter(i => i.status === 'pending').length;
 
+    const [activeTab, setActiveTab] = useState(0);
     const [createOpen, setCreateOpen] = useState(false);
     const [editOpen, setEditOpen] = useState(false);
     const [deleteOpen, setDeleteOpen] = useState(false);
@@ -224,7 +230,30 @@ const ExperienceList = () => {
     }
 
     return (
-        <Box sx={{ p: 3 }}>
+        <Box>
+            {/* Tabs */}
+            <Box sx={{ borderBottom: '1px solid #2a2a2a', px: 3, pt: 2 }}>
+                <Tabs
+                    value={activeTab}
+                    onChange={(_, v) => setActiveTab(v)}
+                    sx={{
+                        '& .MuiTab-root': { color: '#888', textTransform: 'none', fontWeight: 600 },
+                        '& .Mui-selected': { color: '#4fc3f7' },
+                        '& .MuiTabs-indicator': { bgcolor: '#4fc3f7' },
+                    }}
+                >
+                    <Tab icon={<ExploreIcon />} iconPosition="start" label="Experiences" />
+                    <Tab
+                        icon={<MailOutlineIcon />}
+                        iconPosition="start"
+                        label={pendingCount > 0 ? `Inquiries (${pendingCount} pending)` : 'Inquiries'}
+                    />
+                </Tabs>
+            </Box>
+
+            {activeTab === 1 && <InquiryList />}
+
+            {activeTab === 0 && <Box sx={{ p: 3 }}>
             {/* Header */}
             <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
                 <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
@@ -437,6 +466,7 @@ const ExperienceList = () => {
                 onClose={() => { setDeleteOpen(false); setSelected(null); }}
                 onConfirm={handleDelete}
             />
+        </Box>}
         </Box>
     );
 };
