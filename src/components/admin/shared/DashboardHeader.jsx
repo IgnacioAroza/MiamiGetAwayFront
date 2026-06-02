@@ -26,6 +26,7 @@ import {
   LogoutIcon,
   DesignServicesIcon,
   HandshakeIcon,
+  TrendingUpIcon,
 } from './icons';
 import MenuIcon from '@mui/icons-material/Menu';
 import useDeviceDetection from '../../../hooks/useDeviceDetection';
@@ -58,6 +59,7 @@ const DashboardHeader = () => {
     { text: 'Payments', icon: <PaymentIcon />, path: '/admin/payments' },
     { text: 'Clients', icon: <PeopleIcon />, path: '/admin/users' },
     { text: 'Suppliers', icon: <HandshakeIcon />, path: '/admin/suppliers' },
+    { text: 'Investments', icon: <TrendingUpIcon />, path: '/admin/investments' },
   ];
 
   // Contenido del drawer para móviles
