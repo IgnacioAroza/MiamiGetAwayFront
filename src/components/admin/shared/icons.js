@@ -9,6 +9,7 @@ import LogoutIcon from '@mui/icons-material/Logout';
 import HomeIcon from '@mui/icons-material/Home';
 import DesignServicesIcon from '@mui/icons-material/DesignServices';
 import HandshakeIcon from '@mui/icons-material/Handshake';
+import TrendingUpIcon from '@mui/icons-material/TrendingUp';
 
 export {
     DashboardIcon,
@@ -22,4 +23,5 @@ export {
     HomeIcon,
     DesignServicesIcon,
     HandshakeIcon,
-}; 
+    TrendingUpIcon,
+};
