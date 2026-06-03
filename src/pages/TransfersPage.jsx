@@ -1,8 +1,8 @@
 import React, { useEffect, useRef, useState } from 'react';
 import {
     Box, Button, Card, CardContent, CardMedia, Chip,
-    CircularProgress, Container, FormControl, Grid, InputLabel,
-    MenuItem, Select, TextField, Typography,
+    CircularProgress, Container, Divider, Grid,
+    InputAdornment, MenuItem, Select, TextField, Typography,
 } from '@mui/material';
 import { useDispatch, useSelector } from 'react-redux';
 import { useTranslation } from 'react-i18next';
@@ -422,53 +422,56 @@ const TransfersPage = () => {
                                     required
                                     sx={fieldSx}
                                 />
-                                <Box sx={{ display: 'flex', gap: 1, flex: 1 }}>
-                                    <FormControl
-                                        sx={{
-                                            minWidth: 100,
-                                            '& .MuiOutlinedInput-root': {
-                                                bgcolor: '#1a1a1a',
-                                                color: '#fff',
-                                                '& fieldset': { borderColor: '#3a3a3a' },
-                                                '&:hover fieldset': { borderColor: '#666' },
-                                                '&.Mui-focused fieldset': { borderColor: '#4fc3f7' },
-                                            },
-                                            '& .MuiInputLabel-root': { color: '#777' },
-                                            '& .MuiInputLabel-root.Mui-focused': { color: '#4fc3f7' },
-                                            '& .MuiSvgIcon-root': { color: '#777' },
-                                        }}
-                                    >
-                                        <InputLabel>{t('contactUs.prefix')}</InputLabel>
-                                        <Select
-                                            value={phonePrefix}
-                                            onChange={(e) => setPhonePrefix(e.target.value)}
-                                            label={t('contactUs.prefix')}
-                                            MenuProps={{
-                                                PaperProps: {
-                                                    sx: { bgcolor: '#1a1a1a', color: '#fff', maxHeight: 280 },
-                                                },
-                                            }}
-                                            renderValue={(val) => val}
-                                        >
-                                            {countries.map((c) => (
-                                                <MenuItem key={c.code + c.name} value={c.code}>
-                                                    <img src={c.flag} alt={c.name} style={{ width: 20, marginRight: 8, verticalAlign: 'middle' }} />
-                                                    {c.code} — {c.name}
-                                                </MenuItem>
-                                            ))}
-                                        </Select>
-                                    </FormControl>
-                                    <TextField
-                                        label={t('transfers.form.phone')}
-                                        name="client_phone"
-                                        type="tel"
-                                        value={form.client_phone}
-                                        onChange={handleChange}
-                                        fullWidth
-                                        required
-                                        sx={fieldSx}
-                                    />
-                                </Box>
+                                <TextField
+                                    label={t('transfers.form.phone')}
+                                    name="client_phone"
+                                    type="tel"
+                                    value={form.client_phone}
+                                    onChange={handleChange}
+                                    fullWidth
+                                    required
+                                    sx={fieldSx}
+                                    InputProps={{
+                                        startAdornment: (
+                                            <InputAdornment position="start" sx={{ mr: 0 }}>
+                                                <Select
+                                                    value={phonePrefix}
+                                                    onChange={(e) => setPhonePrefix(e.target.value)}
+                                                    variant="standard"
+                                                    disableUnderline
+                                                    sx={{
+                                                        color: '#fff',
+                                                        fontSize: '0.875rem',
+                                                        '& .MuiSelect-select': { pr: '24px !important', py: 0 },
+                                                        '& .MuiSvgIcon-root': { color: '#777', right: 0 },
+                                                    }}
+                                                    MenuProps={{
+                                                        PaperProps: {
+                                                            sx: { bgcolor: '#1a1a1a', color: '#fff', maxHeight: 280 },
+                                                        },
+                                                    }}
+                                                    renderValue={(val) => {
+                                                        const c = countries.find(x => x.code === val);
+                                                        return (
+                                                            <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+                                                                {c && <img src={c.flag} alt={c.name} style={{ width: 18, display: 'block' }} />}
+                                                                <span>{val}</span>
+                                                            </Box>
+                                                        );
+                                                    }}
+                                                >
+                                                    {countries.map((c) => (
+                                                        <MenuItem key={c.code + c.name} value={c.code}>
+                                                            <img src={c.flag} alt={c.name} style={{ width: 20, marginRight: 8, verticalAlign: 'middle' }} />
+                                                            {c.code} — {c.name}
+                                                        </MenuItem>
+                                                    ))}
+                                                </Select>
+                                                <Divider orientation="vertical" flexItem sx={{ mx: 1, borderColor: '#3a3a3a', height: 20, alignSelf: 'center' }} />
+                                            </InputAdornment>
+                                        ),
+                                    }}
+                                />
                             </Box>
 
                             <TextField
