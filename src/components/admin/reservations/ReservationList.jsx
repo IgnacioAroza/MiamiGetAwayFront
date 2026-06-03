@@ -120,8 +120,8 @@ const ReservationList = ({ filter = {} }) => {
 
     const [page, setPage] = useState(0);
     const [rowsPerPage, setRowsPerPage] = useState(() => {
-        const saved = localStorage.getItem('reservationList_rowsPerPage');
-        return saved ? parseInt(saved, 10) : 10;
+        const saved = parseInt(localStorage.getItem('reservationList_rowsPerPage'), 10);
+        return [5, 10, 20].includes(saved) ? saved : 10;
     });
     const [buildingNames, setBuildingNames] = useState({});
     const [orderBy, setOrderBy] = useState(() => {
@@ -719,7 +719,7 @@ const ReservationList = ({ filter = {} }) => {
                         onPageChange={handleChangePage}
                         rowsPerPage={rowsPerPage}
                         onRowsPerPageChange={handleChangeRowsPerPage}
-                        rowsPerPageOptions={[5, 10, 25]}
+                        rowsPerPageOptions={[5, 10, 20]}
                         labelRowsPerPage={isMobile ? "Per page:" : "Rows per page:"}
                     />
                 </Grid>
@@ -962,7 +962,7 @@ const ReservationList = ({ filter = {} }) => {
                         </TableBody>
                     </Table>
                     <TablePagination
-                        rowsPerPageOptions={[5, 10, 25]}
+                        rowsPerPageOptions={[5, 10, 20]}
                         component="div"
                         count={pagination?.total ?? (sortedReservations ? sortedReservations.length : 0)}
                         rowsPerPage={rowsPerPage}
