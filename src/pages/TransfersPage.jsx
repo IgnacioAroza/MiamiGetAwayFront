@@ -1,8 +1,8 @@
 import React, { useEffect, useRef, useState } from 'react';
 import {
     Box, Button, Card, CardContent, CardMedia, Chip,
-    CircularProgress, Container, Grid, MenuItem,
-    TextField, Typography,
+    CircularProgress, Container, FormControl, Grid, InputLabel,
+    MenuItem, Select, TextField, Typography,
 } from '@mui/material';
 import { useDispatch, useSelector } from 'react-redux';
 import { useTranslation } from 'react-i18next';
@@ -98,9 +98,31 @@ const TransfersPage = () => {
     const [success, setSuccess] = useState(false);
     const [formError, setFormError] = useState(null);
 
+    const [countries, setCountries] = useState([]);
+    const [phonePrefix, setPhonePrefix] = useState('');
+
     useEffect(() => {
         dispatch(fetchAllVehicles());
     }, [dispatch]);
+
+    useEffect(() => {
+        fetch('https://restcountries.com/v3.1/all?fields=name,flags,idd')
+            .then(r => r.json())
+            .then(data => {
+                const sorted = data
+                    .filter(c => c.idd.root)
+                    .map(c => ({
+                        name: c.name.common,
+                        code: `${c.idd.root}${c.idd.suffixes ? c.idd.suffixes[0] : ''}`,
+                        flag: c.flags.svg,
+                    }))
+                    .sort((a, b) => a.name.localeCompare(b.name));
+                setCountries(sorted);
+                const argentina = sorted.find(c => c.code === '+54');
+                setPhonePrefix(argentina ? argentina.code : sorted[0]?.code || '');
+            })
+            .catch(() => {});
+    }, []);
 
     const scrollToForm = () => {
         formRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
@@ -143,7 +165,7 @@ const TransfersPage = () => {
                 service_type: form.service_type,
                 client_name: form.client_name.trim(),
                 client_email: form.client_email.trim(),
-                client_phone: form.client_phone.trim(),
+                client_phone: `${phonePrefix} ${form.client_phone.trim()}`,
                 notes: form.notes.trim() || undefined,
             });
             setSuccess(true);
@@ -400,15 +422,53 @@ const TransfersPage = () => {
                                     required
                                     sx={fieldSx}
                                 />
-                                <TextField
-                                    label={t('transfers.form.phone')}
-                                    name="client_phone"
-                                    value={form.client_phone}
-                                    onChange={handleChange}
-                                    fullWidth
-                                    required
-                                    sx={fieldSx}
-                                />
+                                <Box sx={{ display: 'flex', gap: 1, flex: 1 }}>
+                                    <FormControl
+                                        sx={{
+                                            minWidth: 100,
+                                            '& .MuiOutlinedInput-root': {
+                                                bgcolor: '#1a1a1a',
+                                                color: '#fff',
+                                                '& fieldset': { borderColor: '#3a3a3a' },
+                                                '&:hover fieldset': { borderColor: '#666' },
+                                                '&.Mui-focused fieldset': { borderColor: '#4fc3f7' },
+                                            },
+                                            '& .MuiInputLabel-root': { color: '#777' },
+                                            '& .MuiInputLabel-root.Mui-focused': { color: '#4fc3f7' },
+                                            '& .MuiSvgIcon-root': { color: '#777' },
+                                        }}
+                                    >
+                                        <InputLabel>{t('contactUs.prefix')}</InputLabel>
+                                        <Select
+                                            value={phonePrefix}
+                                            onChange={(e) => setPhonePrefix(e.target.value)}
+                                            label={t('contactUs.prefix')}
+                                            MenuProps={{
+                                                PaperProps: {
+                                                    sx: { bgcolor: '#1a1a1a', color: '#fff', maxHeight: 280 },
+                                                },
+                                            }}
+                                            renderValue={(val) => val}
+                                        >
+                                            {countries.map((c) => (
+                                                <MenuItem key={c.code + c.name} value={c.code}>
+                                                    <img src={c.flag} alt={c.name} style={{ width: 20, marginRight: 8, verticalAlign: 'middle' }} />
+                                                    {c.code} — {c.name}
+                                                </MenuItem>
+                                            ))}
+                                        </Select>
+                                    </FormControl>
+                                    <TextField
+                                        label={t('transfers.form.phone')}
+                                        name="client_phone"
+                                        type="tel"
+                                        value={form.client_phone}
+                                        onChange={handleChange}
+                                        fullWidth
+                                        required
+                                        sx={fieldSx}
+                                    />
+                                </Box>
                             </Box>
 
                             <TextField
