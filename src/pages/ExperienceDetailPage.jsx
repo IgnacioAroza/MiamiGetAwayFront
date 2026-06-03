@@ -2,7 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import {
     Box, Button, Card, CardContent, Chip, CircularProgress,
-    Container, Divider, TextField, Typography, useMediaQuery, useTheme,
+    Container, Divider, InputAdornment, MenuItem, Select,
+    TextField, Typography, useMediaQuery, useTheme,
 } from '@mui/material';
 import { useTranslation } from 'react-i18next';
 import { motion } from 'framer-motion';
@@ -43,6 +44,28 @@ const ExperienceDetailPage = () => {
     const [inquirySuccess, setInquirySuccess] = useState(false);
     const [inquiryError, setInquiryError] = useState(null);
 
+    const [countries, setCountries] = useState([]);
+    const [phonePrefix, setPhonePrefix] = useState('');
+
+    useEffect(() => {
+        fetch('https://restcountries.com/v3.1/all?fields=name,flags,idd')
+            .then(r => r.json())
+            .then(data => {
+                const sorted = data
+                    .filter(c => c.idd.root)
+                    .map(c => ({
+                        name: c.name.common,
+                        code: `${c.idd.root}${c.idd.suffixes ? c.idd.suffixes[0] : ''}`,
+                        flag: c.flags.svg,
+                    }))
+                    .sort((a, b) => a.name.localeCompare(b.name));
+                setCountries(sorted);
+                const argentina = sorted.find(c => c.code === '+54');
+                setPhonePrefix(argentina ? argentina.code : sorted[0]?.code || '');
+            })
+            .catch(() => {});
+    }, []);
+
     useEffect(() => {
         const load = async () => {
             try {
@@ -79,7 +102,7 @@ const ExperienceDetailPage = () => {
                 name: inquiry.name.trim(),
                 lastname: inquiry.lastname.trim(),
                 email: inquiry.email.trim(),
-                phone: inquiry.phone.trim() || undefined,
+                phone: inquiry.phone.trim() ? `${phonePrefix} ${inquiry.phone.trim()}` : undefined,
             });
             setInquirySuccess(true);
             setInquiry(emptyInquiry);
@@ -227,10 +250,51 @@ const ExperienceDetailPage = () => {
                                         <TextField
                                             label={t('experiences.form.phone')}
                                             name="phone"
+                                            type="tel"
                                             value={inquiry.phone}
                                             onChange={handleInquiryChange}
                                             fullWidth
                                             sx={fieldSx}
+                                            InputProps={{
+                                                startAdornment: (
+                                                    <InputAdornment position="start" sx={{ mr: 0 }}>
+                                                        <Select
+                                                            value={phonePrefix}
+                                                            onChange={(e) => setPhonePrefix(e.target.value)}
+                                                            variant="standard"
+                                                            disableUnderline
+                                                            sx={{
+                                                                color: '#fff',
+                                                                fontSize: '0.875rem',
+                                                                '& .MuiSelect-select': { pr: '24px !important', py: 0 },
+                                                                '& .MuiSvgIcon-root': { color: '#777', right: 0 },
+                                                            }}
+                                                            MenuProps={{
+                                                                PaperProps: {
+                                                                    sx: { bgcolor: '#1a1a1a', color: '#fff', maxHeight: 280 },
+                                                                },
+                                                            }}
+                                                            renderValue={(val) => {
+                                                                const c = countries.find(x => x.code === val);
+                                                                return (
+                                                                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+                                                                        {c && <img src={c.flag} alt={c.name} style={{ width: 18, display: 'block' }} />}
+                                                                        <span>{val}</span>
+                                                                    </Box>
+                                                                );
+                                                            }}
+                                                        >
+                                                            {countries.map((c) => (
+                                                                <MenuItem key={c.code + c.name} value={c.code}>
+                                                                    <img src={c.flag} alt={c.name} style={{ width: 20, marginRight: 8, verticalAlign: 'middle' }} />
+                                                                    {c.code} — {c.name}
+                                                                </MenuItem>
+                                                            ))}
+                                                        </Select>
+                                                        <Divider orientation="vertical" flexItem sx={{ mx: 1, borderColor: '#3a3a3a', height: 20, alignSelf: 'center' }} />
+                                                    </InputAdornment>
+                                                ),
+                                            }}
                                         />
 
                                         {inquiryError && (
