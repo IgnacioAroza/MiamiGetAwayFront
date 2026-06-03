@@ -37,8 +37,8 @@ const TransfersPage = () => {
     const error = useSelector(selectVehiclesError);
 
     useEffect(() => {
-        if (vehicles.length === 0) dispatch(fetchAllVehicles());
-    }, [dispatch, vehicles.length]);
+        dispatch(fetchAllVehicles());
+    }, [dispatch]);
 
     return (
         <Box sx={{ minHeight: '100vh', bgcolor: '#0e0e0e', pb: 8 }}>

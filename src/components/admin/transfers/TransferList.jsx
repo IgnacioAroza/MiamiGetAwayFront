@@ -121,8 +121,8 @@ const TransferList = () => {
     const [saving, setSaving] = useState(false);
 
     useEffect(() => {
-        if (vehicles.length === 0 && !loading) dispatch(fetchAllVehicles());
-    }, [dispatch, vehicles.length, loading]);
+        dispatch(fetchAllVehicles());
+    }, [dispatch]);
 
     const handleFormChange = (e) => {
         const { name, value } = e.target;

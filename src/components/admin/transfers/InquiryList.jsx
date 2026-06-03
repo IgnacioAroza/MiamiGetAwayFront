@@ -43,8 +43,8 @@ const TransferInquiryList = () => {
     const [updating, setUpdating] = useState(null);
 
     useEffect(() => {
-        if (inquiries.length === 0) dispatch(fetchAllTransferInquiries());
-    }, [dispatch, inquiries.length]);
+        dispatch(fetchAllTransferInquiries());
+    }, [dispatch]);
 
     const handleStatusChange = async (id, newStatus) => {
         setUpdating(id);
