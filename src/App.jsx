@@ -39,6 +39,9 @@ const ExperiencesPage = lazy(() => import('./pages/ExperiencesPage'));
 const ExperienceDetailPage = lazy(() => import('./pages/ExperienceDetailPage'));
 const ExperienceList = lazy(() => import('./components/admin/experiences/ExperienceList'));
 const InquiryList = lazy(() => import('./components/admin/experiences/InquiryList'));
+const TransfersPage = lazy(() => import('./pages/TransfersPage'));
+const TransferDetailPage = lazy(() => import('./pages/TransferDetailPage'));
+const TransferList = lazy(() => import('./components/admin/transfers/TransferList'));
 
 const theme = createTheme({
   palette: {
@@ -117,11 +120,14 @@ function AppContent() {
               <Route path="investments" element={<InvestmentList />} />
               <Route path="experiences" element={<ExperienceList />} />
               <Route path="experiences/inquiries" element={<InquiryList />} />
+              <Route path="transfers" element={<TransferList />} />
             </Route>
             <Route path="/investments" element={<InvestmentsPage />} />
             <Route path="/investments/:id" element={<InvestmentDetailPage />} />
             <Route path="/experiences" element={<ExperiencesPage />} />
             <Route path="/experiences/:id" element={<ExperienceDetailPage />} />
+            <Route path="/transfers" element={<TransfersPage />} />
+            <Route path="/transfers/:id" element={<TransferDetailPage />} />
             <Route path="/reservations" element={<ReservationsPage />} />
             <Route path="/reservations/:id" element={<ReservationDetailsPage />} />
           </Routes>

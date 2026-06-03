@@ -39,7 +39,8 @@
       "apartments": "Apartments",
       "villas": "Villas",
       "investments": "Investments",
-      "experiences": "Experiences"
+      "experiences": "Experiences",
+      "transfers": "Transfers"
     },
     "brand": "Brand",
     "model": "Model",
@@ -208,6 +209,52 @@
         "phone": "Phone (optional)",
         "submit": "Send inquiry",
         "sending": "Sending..."
+      }
+    },
+    "transfers": {
+      "title": "Transfers",
+      "subtitle": "Premium transportation in Miami",
+      "fleet": "Fleet",
+      "noVehicles": "No vehicles available at this time.",
+      "error": "Error loading vehicles. Please try again.",
+      "notFound": "Vehicle not found.",
+      "backToTransfers": "Back to Transfers",
+      "viewDetails": "View Details",
+      "passengers": "{{count}} passenger",
+      "passengers_other": "{{count}} passengers",
+      "luggage": "{{count}} bag",
+      "luggage_other": "{{count}} bags",
+      "category": {
+        "sedan": "Sedan",
+        "suv": "SUV",
+        "van": "Van / Sprinter"
+      },
+      "inquireTitle": "Request a transfer",
+      "inquireSuccess": "Request sent! We'll contact you soon.",
+      "inquireError": "Error sending request. Please try again.",
+      "noVehicleSelected": "No specific vehicle",
+      "form": {
+        "pickUp": "Pick up",
+        "dropOff": "Drop off",
+        "date": "Date",
+        "time": "Time",
+        "passengers": "Passengers",
+        "serviceType": "Service type",
+        "name": "Full name",
+        "email": "Email",
+        "phone": "Phone",
+        "notes": "Additional notes (optional)",
+        "submit": "Send request",
+        "sending": "Sending..."
+      },
+      "serviceTypes": {
+        "airport_transfer": "Airport Transfer",
+        "business_travel": "Business Travel",
+        "sports_events": "Sports & Events",
+        "private_events": "Private Events",
+        "yacht_transfer": "Yacht Transfer",
+        "video_film_production": "Video / Film Production",
+        "hourly": "Hourly Service"
       }
     }
 }

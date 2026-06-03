@@ -39,7 +39,8 @@
       "apartments": "Departamentos",
       "villas": "Villas",
       "investments": "Inversiones",
-      "experiences": "Experiencias"
+      "experiences": "Experiencias",
+      "transfers": "Transfers"
     },
     "brand": "Marca",
     "model": "Modelo",
@@ -208,6 +209,52 @@
         "phone": "Teléfono (opcional)",
         "submit": "Enviar consulta",
         "sending": "Enviando..."
+      }
+    },
+    "transfers": {
+      "title": "Transfers",
+      "subtitle": "Traslados premium en Miami",
+      "fleet": "Flota",
+      "noVehicles": "No hay vehículos disponibles en este momento.",
+      "error": "Error al cargar los vehículos. Por favor, intentá de nuevo.",
+      "notFound": "Vehículo no encontrado.",
+      "backToTransfers": "Volver a Transfers",
+      "viewDetails": "Ver Detalles",
+      "passengers": "{{count}} pasajero",
+      "passengers_other": "{{count}} pasajeros",
+      "luggage": "{{count}} maleta",
+      "luggage_other": "{{count}} maletas",
+      "category": {
+        "sedan": "Sedan",
+        "suv": "SUV",
+        "van": "Van / Sprinter"
+      },
+      "inquireTitle": "Solicitar traslado",
+      "inquireSuccess": "¡Solicitud enviada! Te contactaremos a la brevedad.",
+      "inquireError": "Error al enviar la solicitud. Por favor, intentá de nuevo.",
+      "noVehicleSelected": "Sin vehículo específico",
+      "form": {
+        "pickUp": "Origen",
+        "dropOff": "Destino",
+        "date": "Fecha",
+        "time": "Hora",
+        "passengers": "Pasajeros",
+        "serviceType": "Tipo de servicio",
+        "name": "Nombre completo",
+        "email": "Email",
+        "phone": "Teléfono",
+        "notes": "Notas adicionales (opcional)",
+        "submit": "Enviar solicitud",
+        "sending": "Enviando..."
+      },
+      "serviceTypes": {
+        "airport_transfer": "Airport Transfer",
+        "business_travel": "Business Travel",
+        "sports_events": "Sports & Events",
+        "private_events": "Private Events",
+        "yacht_transfer": "Yacht Transfer",
+        "video_film_production": "Video / Film Production",
+        "hourly": "Hourly Service"
       }
     }
 }
