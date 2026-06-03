@@ -64,6 +64,20 @@ const fieldSx = {
     '& .MuiSvgIcon-root': { color: '#777' },
 };
 
+const TIME_OPTIONS = (() => {
+    const options = [];
+    for (let h = 0; h < 24; h++) {
+        for (let m = 0; m < 60; m += 15) {
+            const hh = String(h).padStart(2, '0');
+            const mm = String(m).padStart(2, '0');
+            const period = h < 12 ? 'AM' : 'PM';
+            const displayH = h === 0 ? 12 : h > 12 ? h - 12 : h;
+            options.push({ value: `${hh}:${mm}`, label: `${displayH}:${mm} ${period}` });
+        }
+    }
+    return options;
+})();
+
 const CATEGORY_COLORS = {
     sedan: { bgcolor: '#1a2a3a', color: '#4fc3f7' },
     suv: { bgcolor: '#1a3a1a', color: '#66bb6a' },
@@ -305,16 +319,30 @@ const TransfersPage = () => {
                                     sx={fieldSx}
                                 />
                                 <TextField
+                                    select
                                     label={t('transfers.form.time')}
                                     name="time"
-                                    type="time"
                                     value={form.time}
                                     onChange={handleChange}
                                     fullWidth
                                     required
-                                    InputLabelProps={{ shrink: true }}
                                     sx={fieldSx}
-                                />
+                                    SelectProps={{
+                                        MenuProps: {
+                                            PaperProps: {
+                                                sx: {
+                                                    bgcolor: '#1a1a1a',
+                                                    color: '#fff',
+                                                    maxHeight: 280,
+                                                },
+                                            },
+                                        },
+                                    }}
+                                >
+                                    {TIME_OPTIONS.map(({ value, label }) => (
+                                        <MenuItem key={value} value={value}>{label}</MenuItem>
+                                    ))}
+                                </TextField>
                             </Box>
 
                             {/* Pasajeros / Tipo de servicio */}
