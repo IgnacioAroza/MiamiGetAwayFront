@@ -1,15 +1,18 @@
 import React, { useEffect, useRef, useState } from 'react';
 import {
     Box, Button, Card, CardContent, CardMedia, Chip,
-    CircularProgress, Container, Divider, Grid,
+    CircularProgress, Container, Divider, Grid, IconButton,
     InputAdornment, MenuItem, Select, TextField, Typography,
 } from '@mui/material';
 import { useDispatch, useSelector } from 'react-redux';
 import { useTranslation } from 'react-i18next';
 import { motion } from 'framer-motion';
+import AddIcon from '@mui/icons-material/Add';
+import BackpackIcon from '@mui/icons-material/Backpack';
 import DirectionsCarIcon from '@mui/icons-material/DirectionsCar';
-import PersonIcon from '@mui/icons-material/Person';
 import LuggageIcon from '@mui/icons-material/Luggage';
+import PersonIcon from '@mui/icons-material/Person';
+import RemoveIcon from '@mui/icons-material/Remove';
 import SendIcon from '@mui/icons-material/Send';
 import CloseIcon from '@mui/icons-material/Close';
 import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown';
@@ -39,6 +42,9 @@ const emptyForm = {
     time: '',
     passengers: '',
     service_type: '',
+    luggage_large: 0,
+    luggage_medium: 0,
+    luggage_carry_on: 0,
     client_name: '',
     client_email: '',
     client_phone: '',
@@ -138,6 +144,10 @@ const TransfersPage = () => {
         setForm(prev => ({ ...prev, [name]: value }));
     };
 
+    const handleLuggage = (field, delta) => {
+        setForm(prev => ({ ...prev, [field]: Math.max(0, prev[field] + delta) }));
+    };
+
     const isValid = () =>
         form.pick_up.trim() &&
         form.drop_off.trim() &&
@@ -163,6 +173,9 @@ const TransfersPage = () => {
                 time: form.time,
                 passengers: Number(form.passengers),
                 service_type: form.service_type,
+                luggage_large: form.luggage_large,
+                luggage_medium: form.luggage_medium,
+                luggage_carry_on: form.luggage_carry_on,
                 client_name: form.client_name.trim(),
                 client_email: form.client_email.trim(),
                 client_phone: `${phonePrefix} ${form.client_phone.trim()}`,
@@ -399,6 +412,76 @@ const TransfersPage = () => {
                                         </MenuItem>
                                     ))}
                                 </TextField>
+                            </Box>
+
+                            {/* Equipaje */}
+                            <Box
+                                sx={{
+                                    bgcolor: '#141414',
+                                    border: '1px solid #2a2a2a',
+                                    borderRadius: 2,
+                                    px: 2.5,
+                                    py: 2,
+                                }}
+                            >
+                                <Typography variant="overline" sx={{ color: '#4fc3f7', letterSpacing: 3, fontSize: '0.65rem', display: 'block', mb: 1.5 }}>
+                                    {t('transfers.form.luggage')}
+                                </Typography>
+                                <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1.5 }}>
+                                    {[
+                                        { field: 'luggage_large', label: t('transfers.form.luggageLarge'), icon: <LuggageIcon sx={{ color: '#4fc3f7', fontSize: 22 }} /> },
+                                        { field: 'luggage_medium', label: t('transfers.form.luggageMedium'), icon: <LuggageIcon sx={{ color: '#90a4ae', fontSize: 18 }} /> },
+                                        { field: 'luggage_carry_on', label: t('transfers.form.luggageCarryOn'), icon: <BackpackIcon sx={{ color: '#90a4ae', fontSize: 20 }} /> },
+                                    ].map(({ field, label, icon }) => (
+                                        <Box key={field} sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
+                                            {icon}
+                                            <Typography sx={{ color: '#aaa', fontSize: '0.875rem', flex: 1 }}>
+                                                {label}
+                                            </Typography>
+                                            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                                                <IconButton
+                                                    size="small"
+                                                    onClick={() => handleLuggage(field, -1)}
+                                                    disabled={form[field] === 0}
+                                                    sx={{
+                                                        color: '#777',
+                                                        border: '1px solid #2a2a2a',
+                                                        borderRadius: 1,
+                                                        p: '4px',
+                                                        '&:hover': { borderColor: '#555', color: '#aaa' },
+                                                        '&.Mui-disabled': { opacity: 0.3 },
+                                                    }}
+                                                >
+                                                    <RemoveIcon sx={{ fontSize: 16 }} />
+                                                </IconButton>
+                                                <Typography
+                                                    sx={{
+                                                        color: form[field] > 0 ? '#fff' : '#555',
+                                                        fontWeight: 600,
+                                                        minWidth: 28,
+                                                        textAlign: 'center',
+                                                        fontSize: '1rem',
+                                                    }}
+                                                >
+                                                    {form[field]}
+                                                </Typography>
+                                                <IconButton
+                                                    size="small"
+                                                    onClick={() => handleLuggage(field, 1)}
+                                                    sx={{
+                                                        color: '#4fc3f7',
+                                                        border: '1px solid #1e3a5f',
+                                                        borderRadius: 1,
+                                                        p: '4px',
+                                                        '&:hover': { bgcolor: '#0d2137', borderColor: '#4fc3f7' },
+                                                    }}
+                                                >
+                                                    <AddIcon sx={{ fontSize: 16 }} />
+                                                </IconButton>
+                                            </Box>
+                                        </Box>
+                                    ))}
+                                </Box>
                             </Box>
 
                             {/* Datos del cliente */}

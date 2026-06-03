@@ -112,6 +112,7 @@ const TransferInquiryList = () => {
                                 <TableCell>Route</TableCell>
                                 <TableCell>Date & Time</TableCell>
                                 <TableCell>Service</TableCell>
+                                <TableCell>Pax / Luggage</TableCell>
                                 <TableCell>Status</TableCell>
                             </TableRow>
                         </TableHead>
@@ -160,6 +161,14 @@ const TransferInquiryList = () => {
                                     <TableCell>
                                         <Typography variant="body2" sx={{ color: '#aaa', textTransform: 'capitalize' }}>
                                             {inq.service_type.replace(/_/g, ' ')}
+                                        </Typography>
+                                    </TableCell>
+                                    <TableCell>
+                                        <Typography variant="body2" sx={{ color: '#ddd', whiteSpace: 'nowrap' }}>
+                                            {inq.passengers} pax
+                                        </Typography>
+                                        <Typography variant="caption" sx={{ color: '#666', whiteSpace: 'nowrap' }}>
+                                            L:{inq.luggage_large ?? 0} M:{inq.luggage_medium ?? 0} CO:{inq.luggage_carry_on ?? 0}
                                         </Typography>
                                     </TableCell>
                                     <TableCell>
