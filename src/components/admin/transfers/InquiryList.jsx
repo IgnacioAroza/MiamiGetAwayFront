@@ -164,10 +164,10 @@ const TransferInquiryList = () => {
                                         </Typography>
                                     </TableCell>
                                     <TableCell>
-                                        <Typography variant="body2" sx={{ color: '#ddd', whiteSpace: 'nowrap' }}>
+                                        <Typography variant="body1" sx={{ color: '#ddd', whiteSpace: 'nowrap', fontWeight: 500 }}>
                                             {inq.passengers} pax
                                         </Typography>
-                                        <Typography variant="caption" sx={{ color: '#666', whiteSpace: 'nowrap' }}>
+                                        <Typography variant="body2" sx={{ color: '#888', whiteSpace: 'nowrap' }}>
                                             L:{inq.luggage_large ?? 0} M:{inq.luggage_medium ?? 0} CO:{inq.luggage_carry_on ?? 0}
                                         </Typography>
                                     </TableCell>

@@ -1,10 +1,10 @@
 import React, { useState } from 'react';
-import { 
-  AppBar, 
-  Box, 
-  Toolbar, 
-  Typography, 
-  Button, 
+import {
+  AppBar,
+  Box,
+  Toolbar,
+  Typography,
+  Button,
   Tooltip,
   useTheme,
   Drawer,
@@ -14,7 +14,9 @@ import {
   ListItemButton,
   ListItemIcon,
   ListItemText,
-  Divider
+  Divider,
+  Menu,
+  MenuItem,
 } from '@mui/material';
 import { useNavigate, useLocation } from 'react-router-dom';
 import {
@@ -30,6 +32,7 @@ import {
   ExploreIcon,
   DirectionsCarIcon,
 } from './icons';
+import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown';
 import MenuIcon from '@mui/icons-material/Menu';
 import useDeviceDetection from '../../../hooks/useDeviceDetection';
 
@@ -52,19 +55,30 @@ const DashboardHeader = () => {
     setDrawerOpen(open);
   };
 
-  // Navegación compartida para escritorio y móvil
-  const navigationItems = [
+  const [listingsAnchor, setListingsAnchor] = useState(null);
+
+  const mainNavItems = [
     { text: 'Home', icon: <HomeIcon />, path: '/admin' },
     { text: 'Services', icon: <DesignServicesIcon />, path: '/admin/services' },
     { text: 'Reservations', icon: <ReservationsIcon />, path: '/admin/reservations' },
-    { text: 'Apartments', icon: <ApartmentIcon />, path: '/admin/apartments' },
     { text: 'Payments', icon: <PaymentIcon />, path: '/admin/payments' },
     { text: 'Clients', icon: <PeopleIcon />, path: '/admin/users' },
     { text: 'Suppliers', icon: <HandshakeIcon />, path: '/admin/suppliers' },
+  ];
+
+  const listingsItems = [
+    { text: 'Apartments', icon: <ApartmentIcon />, path: '/admin/apartments' },
     { text: 'Investments', icon: <TrendingUpIcon />, path: '/admin/investments' },
     { text: 'Experiences', icon: <ExploreIcon />, path: '/admin/experiences' },
     { text: 'Transfers', icon: <DirectionsCarIcon />, path: '/admin/transfers' },
   ];
+
+  // Para el drawer móvil, todos los ítems juntos
+  const navigationItems = [...mainNavItems, ...listingsItems];
+
+  const isListingsActive = listingsItems.some(item =>
+    location.pathname.includes(item.path)
+  );
 
   // Contenido del drawer para móviles
   const drawerContent = (
@@ -159,15 +173,15 @@ const DashboardHeader = () => {
               </Typography>
               
               <Box sx={{ flexGrow: 1, display: 'flex' }}>
-                {navigationItems.map((item) => (
-                  <Button 
+                {mainNavItems.map((item) => (
+                  <Button
                     key={item.text}
-                    color="inherit" 
+                    color="inherit"
                     startIcon={item.icon}
                     onClick={() => navigate(item.path)}
-                    sx={{ 
+                    sx={{
                       mr: 1,
-                      borderBottom: item.path === '/admin' 
+                      borderBottom: item.path === '/admin'
                         ? location.pathname === '/admin' ? '2px solid white' : 'none'
                         : location.pathname.includes(item.path) ? '2px solid white' : 'none',
                     }}
@@ -175,6 +189,41 @@ const DashboardHeader = () => {
                     {item.text}
                   </Button>
                 ))}
+
+                {/* Listings dropdown */}
+                <Button
+                  color="inherit"
+                  endIcon={<KeyboardArrowDownIcon />}
+                  onClick={(e) => setListingsAnchor(e.currentTarget)}
+                  sx={{
+                    mr: 1,
+                    borderBottom: isListingsActive ? '2px solid white' : 'none',
+                  }}
+                >
+                  Listings
+                </Button>
+                <Menu
+                  anchorEl={listingsAnchor}
+                  open={Boolean(listingsAnchor)}
+                  onClose={() => setListingsAnchor(null)}
+                  PaperProps={{ sx: { bgcolor: '#1e1e1e', color: '#fff', mt: 0.5 } }}
+                >
+                  {listingsItems.map((item) => (
+                    <MenuItem
+                      key={item.text}
+                      onClick={() => { navigate(item.path); setListingsAnchor(null); }}
+                      selected={location.pathname.includes(item.path)}
+                      sx={{
+                        gap: 1.5,
+                        '&.Mui-selected': { bgcolor: '#2a2a2a' },
+                        '&:hover': { bgcolor: '#2a2a2a' },
+                      }}
+                    >
+                      {item.icon}
+                      {item.text}
+                    </MenuItem>
+                  ))}
+                </Menu>
               </Box>
               
               <Box>
