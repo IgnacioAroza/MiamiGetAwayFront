@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import {
     Box, Button, Card, CardActions, CardContent, CardMedia, Chip,
     CircularProgress, Dialog, DialogActions, DialogContent, DialogTitle,
-    Divider, Grid, IconButton, MenuItem, Paper, Skeleton, Tab, Tabs,
+    Divider, Grid, IconButton, MenuItem, Paper, Skeleton, Tab, TablePagination, Tabs,
     Table, TableBody, TableCell, TableContainer, TableHead, TableRow,
     TextField, Tooltip, Typography,
 } from '@mui/material';
@@ -17,7 +17,7 @@ import ImageIcon from '@mui/icons-material/Image';
 import MailOutlineIcon from '@mui/icons-material/MailOutline';
 import {
     fetchAllVehicles, createVehicle, updateVehicle, deleteVehicle,
-    selectAllVehicles, selectVehiclesLoading,
+    selectAllVehicles, selectVehiclesLoading, selectVehiclesPagination,
 } from '../../../redux/transferVehicleSlice';
 import {
     selectAllTransferInquiries,
@@ -108,6 +108,7 @@ const TransferList = () => {
     const { isMobile, isTablet } = useDeviceDetection();
     const vehicles = useSelector(selectAllVehicles);
     const loading = useSelector(selectVehiclesLoading);
+    const pagination = useSelector(selectVehiclesPagination);
     const inquiries = useSelector(selectAllTransferInquiries);
     const pendingCount = inquiries.filter(i => i.status === 'pending').length;
 
@@ -119,10 +120,18 @@ const TransferList = () => {
     const [form, setForm] = useState(emptyForm);
     const [imageFiles, setImageFiles] = useState([]);
     const [saving, setSaving] = useState(false);
+    const [page, setPage] = useState(0);
+    const [rowsPerPage, setRowsPerPage] = useState(10);
 
     useEffect(() => {
-        dispatch(fetchAllVehicles());
-    }, [dispatch]);
+        dispatch(fetchAllVehicles({ page: page + 1, limit: rowsPerPage }));
+    }, [dispatch, page, rowsPerPage]);
+
+    const handleChangePage = (_, newPage) => setPage(newPage);
+    const handleChangeRowsPerPage = (e) => {
+        setRowsPerPage(parseInt(e.target.value, 10));
+        setPage(0);
+    };
 
     const handleFormChange = (e) => {
         const { name, value } = e.target;
@@ -418,7 +427,30 @@ const TransferList = () => {
                                     ))}
                                 </TableBody>
                             </Table>
+                            <TablePagination
+                                component="div"
+                                count={pagination?.total ?? vehicles.length}
+                                page={page}
+                                onPageChange={handleChangePage}
+                                rowsPerPage={rowsPerPage}
+                                onRowsPerPageChange={handleChangeRowsPerPage}
+                                rowsPerPageOptions={[10, 25, 50]}
+                                labelRowsPerPage="Rows per page:"
+                            />
                         </TableContainer>
+                    )}
+
+                    {(isMobile || isTablet) && vehicles.length > 0 && (
+                        <TablePagination
+                            component="div"
+                            count={pagination?.total ?? vehicles.length}
+                            page={page}
+                            onPageChange={handleChangePage}
+                            rowsPerPage={rowsPerPage}
+                            onRowsPerPageChange={handleChangeRowsPerPage}
+                            rowsPerPageOptions={[10, 25, 50]}
+                            labelRowsPerPage="Per page:"
+                        />
                     )}
 
                     {/* Create dialog */}

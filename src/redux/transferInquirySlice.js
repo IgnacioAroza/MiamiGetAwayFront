@@ -3,9 +3,9 @@ import transferService from '../services/transferService';
 
 export const fetchAllTransferInquiries = createAsyncThunk(
     'transferInquiries/fetchAll',
-    async (_, { rejectWithValue }) => {
+    async (params = {}, { rejectWithValue }) => {
         try {
-            const res = await transferService.getAllInquiries();
+            const res = await transferService.getAllInquiries(params);
             return res.data;
         } catch (err) {
             return rejectWithValue(err.response?.data?.error || err.response?.data?.message || 'Error fetching inquiries');
@@ -31,6 +31,7 @@ const transferInquirySlice = createSlice({
         inquiries: [],
         loading: false,
         error: null,
+        pagination: null,
     },
     reducers: {},
     extraReducers: (builder) => {
@@ -41,7 +42,17 @@ const transferInquirySlice = createSlice({
             })
             .addCase(fetchAllTransferInquiries.fulfilled, (state, action) => {
                 state.loading = false;
-                state.inquiries = action.payload;
+                const raw = action.payload;
+                if (Array.isArray(raw)) {
+                    state.inquiries = raw;
+                    state.pagination = null;
+                } else if (raw?.data && raw?.pagination) {
+                    state.inquiries = raw.data;
+                    state.pagination = raw.pagination;
+                } else {
+                    state.inquiries = [];
+                    state.pagination = null;
+                }
             })
             .addCase(fetchAllTransferInquiries.rejected, (state, action) => {
                 state.loading = false;
@@ -65,3 +76,4 @@ export default transferInquirySlice.reducer;
 export const selectAllTransferInquiries = (state) => state.transferInquiries.inquiries;
 export const selectTransferInquiriesLoading = (state) => state.transferInquiries.loading;
 export const selectTransferInquiriesError = (state) => state.transferInquiries.error;
+export const selectTransferInquiriesPagination = (state) => state.transferInquiries.pagination;

@@ -6,6 +6,7 @@ import {
     TableCell,
     TableContainer,
     TableHead,
+    TablePagination,
     TableRow,
     Paper,
     IconButton,
@@ -36,11 +37,12 @@ import DateRangeIcon from '@mui/icons-material/DateRange';
 import PersonIcon from '@mui/icons-material/Person';
 import NoteIcon from '@mui/icons-material/Note';
 import useDeviceDetection from '../../../hooks/useDeviceDetection';
-import { 
-    fetchAllPayments, 
+import {
+    fetchAllPayments,
     deletePayment,
     setSelectedPayment,
-    clearSelectedPayment 
+    clearSelectedPayment,
+    selectPaymentsPagination,
 } from '../../../redux/reservationPaymentSlice';
 import PaymentForm from './PaymentsForm';
 import PaymentDetails from './PaymentDetails';
@@ -54,12 +56,15 @@ const PaymentsList = () => {
     const theme = useTheme();
     const { isMobile, isTablet } = useDeviceDetection();
     const { payments, status, error, loading } = useSelector(state => state.reservationPayments);
-    
+    const pagination = useSelector(selectPaymentsPagination);
+
     // Estados locales
     const [openForm, setOpenForm] = useState(false);
     const [openDeleteDialog, setOpenDeleteDialog] = useState(false);
     const [paymentToDelete, setPaymentToDelete] = useState(null);
     const [activeFilters, setActiveFilters] = useState({});
+    const [page, setPage] = useState(0);
+    const [rowsPerPage, setRowsPerPage] = useState(10);
     const [snackbar, setSnackbar] = useState({
         open: false,
         message: '',
@@ -69,10 +74,16 @@ const PaymentsList = () => {
     const [reservationsData, setReservationsData] = useState({});
     const [clientsData, setClientsData] = useState({});
 
-    // Cargar pagos al montar el componente o cuando cambian los filtros
+    // Cargar pagos al montar el componente o cuando cambian los filtros / página
     useEffect(() => {
-        dispatch(fetchAllPayments(activeFilters));
-    }, [dispatch, activeFilters]);
+        dispatch(fetchAllPayments({ ...activeFilters, page: page + 1, limit: rowsPerPage }));
+    }, [dispatch, activeFilters, page, rowsPerPage]);
+
+    const handleChangePage = (_, newPage) => setPage(newPage);
+    const handleChangeRowsPerPage = (e) => {
+        setRowsPerPage(parseInt(e.target.value, 10));
+        setPage(0);
+    };
 
     // Cargar datos de reservas y clientes cuando cambian los pagos
     useEffect(() => {
@@ -259,11 +270,13 @@ const PaymentsList = () => {
     // Función para aplicar filtros
     const handleApplyFilters = (filters) => {
         setActiveFilters(filters);
+        setPage(0);
     };
 
     // Función para limpiar filtros
     const handleClearFilters = () => {
         setActiveFilters({});
+        setPage(0);
     };
 
     // Función para renderizar tarjetas en vista móvil
@@ -480,13 +493,13 @@ const PaymentsList = () => {
                                         <TableCell>Client: {getClientName(payment)}</TableCell>
                                         <TableCell>{payment.notes || '-'}</TableCell>
                                         <TableCell align="center">
-                                            <IconButton 
+                                            <IconButton
                                                 color="primary"
                                                 onClick={() => handleEdit(payment)}
                                             >
                                                 <EditIcon />
                                             </IconButton>
-                                            <IconButton 
+                                            <IconButton
                                                 color="error"
                                                 onClick={() => handleDeleteClick(payment)}
                                             >
@@ -498,8 +511,30 @@ const PaymentsList = () => {
                             )}
                         </TableBody>
                     </Table>
+                    <TablePagination
+                        component="div"
+                        count={pagination?.total ?? payments.length}
+                        page={page}
+                        onPageChange={handleChangePage}
+                        rowsPerPage={rowsPerPage}
+                        onRowsPerPageChange={handleChangeRowsPerPage}
+                        rowsPerPageOptions={[10, 25, 50]}
+                        labelRowsPerPage="Rows per page:"
+                    />
                 </TableContainer>
             )}
+
+            <TablePagination
+                component="div"
+                count={pagination?.total ?? payments.length}
+                page={page}
+                onPageChange={handleChangePage}
+                rowsPerPage={rowsPerPage}
+                onRowsPerPageChange={handleChangeRowsPerPage}
+                rowsPerPageOptions={[10, 25, 50]}
+                labelRowsPerPage="Per page:"
+                sx={{ display: isMobile || isTablet ? 'block' : 'none' }}
+            />
 
             {/* Modal de Formulario */}
             <PaymentForm 

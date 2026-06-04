@@ -3,9 +3,9 @@ import experienceService from '../services/experienceService';
 
 export const fetchAllExperiences = createAsyncThunk(
     'experiences/fetchAll',
-    async (_, { rejectWithValue }) => {
+    async (params = {}, { rejectWithValue }) => {
         try {
-            return await experienceService.getAll();
+            return await experienceService.getAll(params);
         } catch (error) {
             return rejectWithValue(error?.response?.data?.error || error?.response?.data?.message || 'Error fetching experiences');
         }
@@ -48,7 +48,7 @@ export const deleteExperience = createAsyncThunk(
 
 const experienceSlice = createSlice({
     name: 'experiences',
-    initialState: { experiences: [], status: 'idle', error: null },
+    initialState: { experiences: [], status: 'idle', error: null, pagination: null },
     reducers: {
         clearError: (state) => { state.error = null; },
     },
@@ -60,7 +60,17 @@ const experienceSlice = createSlice({
             })
             .addCase(fetchAllExperiences.fulfilled, (state, action) => {
                 state.status = 'succeeded';
-                state.experiences = action.payload;
+                const raw = action.payload;
+                if (Array.isArray(raw)) {
+                    state.experiences = raw;
+                    state.pagination = null;
+                } else if (raw?.data && raw?.pagination) {
+                    state.experiences = raw.data;
+                    state.pagination = raw.pagination;
+                } else {
+                    state.experiences = [];
+                    state.pagination = null;
+                }
             })
             .addCase(fetchAllExperiences.rejected, (state, action) => {
                 state.status = 'failed';
@@ -93,5 +103,6 @@ export const { clearError } = experienceSlice.actions;
 export const selectAllExperiences = (state) => state.experiences.experiences;
 export const selectExperiencesStatus = (state) => state.experiences.status;
 export const selectExperiencesError = (state) => state.experiences.error;
+export const selectExperiencesPagination = (state) => state.experiences.pagination;
 
 export default experienceSlice.reducer;

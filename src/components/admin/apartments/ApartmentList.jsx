@@ -1,13 +1,14 @@
 import React, { useEffect, useState } from 'react';
-import { 
-    Box, 
-    Typography, 
+import {
+    Box,
+    Typography,
     Button,
     Table,
     TableBody,
     TableCell,
     TableContainer,
     TableHead,
+    TablePagination,
     TableRow,
     Paper,
     IconButton,
@@ -32,13 +33,14 @@ import BathtubIcon from '@mui/icons-material/Bathtub';
 import AttachMoneyIcon from '@mui/icons-material/AttachMoney';
 import LocationOnIcon from '@mui/icons-material/LocationOn';
 import PhotoLibraryIcon from '@mui/icons-material/PhotoLibrary';
-import { 
+import {
     fetchAdminApartments,
     deleteAdminApartment,
     setSelectedApartment,
     selectAllApartments,
     selectApartmentStatus,
-    selectApartmentError
+    selectApartmentError,
+    selectApartmentPagination,
 } from '../../../redux/adminApartmentSlice';
 import ApartmentForm from './ApartmentForm';
 import DeleteConfirmDialog from '../../common/DeleteConfirmDialog';
@@ -51,15 +53,22 @@ const ApartmentList = () => {
     const apartments = useSelector(selectAllApartments);
     const status = useSelector(selectApartmentStatus);
     const error = useSelector(selectApartmentError);
+    const pagination = useSelector(selectApartmentPagination);
     const [dialogOpen, setDialogOpen] = useState(false);
     const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
     const [apartmentToDelete, setApartmentToDelete] = useState(null);
+    const [page, setPage] = useState(0);
+    const [rowsPerPage, setRowsPerPage] = useState(10);
 
     useEffect(() => {
-        if (status === 'idle') {
-            dispatch(fetchAdminApartments());
-        }
-    }, [status, dispatch]);
+        dispatch(fetchAdminApartments({ page: page + 1, limit: rowsPerPage }));
+    }, [dispatch, page, rowsPerPage]);
+
+    const handleChangePage = (_, newPage) => setPage(newPage);
+    const handleChangeRowsPerPage = (e) => {
+        setRowsPerPage(parseInt(e.target.value, 10));
+        setPage(0);
+    };
 
     const handleEdit = (item) => {
         dispatch(setSelectedApartment(item));
@@ -344,8 +353,30 @@ const ApartmentList = () => {
                             )}
                         </TableBody>
                     </Table>
+                    <TablePagination
+                        component="div"
+                        count={pagination?.total ?? apartments.length}
+                        page={page}
+                        onPageChange={handleChangePage}
+                        rowsPerPage={rowsPerPage}
+                        onRowsPerPageChange={handleChangeRowsPerPage}
+                        rowsPerPageOptions={[10, 25, 50]}
+                        labelRowsPerPage="Rows per page:"
+                    />
                 </TableContainer>
             )}
+
+            <TablePagination
+                component="div"
+                count={pagination?.total ?? apartments.length}
+                page={page}
+                onPageChange={handleChangePage}
+                rowsPerPage={rowsPerPage}
+                onRowsPerPageChange={handleChangeRowsPerPage}
+                rowsPerPageOptions={[10, 25, 50]}
+                labelRowsPerPage="Per page:"
+                sx={{ display: isMobile || isTablet ? 'block' : 'none' }}
+            />
 
             <ApartmentForm
                 open={dialogOpen}

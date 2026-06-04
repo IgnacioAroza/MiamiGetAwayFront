@@ -3,9 +3,9 @@ import experienceService from '../services/experienceService';
 
 export const fetchAllInquiries = createAsyncThunk(
     'experienceInquiries/fetchAll',
-    async (_, { rejectWithValue }) => {
+    async (params = {}, { rejectWithValue }) => {
         try {
-            return await experienceService.getAllInquiries();
+            return await experienceService.getAllInquiries(params);
         } catch (error) {
             return rejectWithValue(error?.response?.data?.error || error?.response?.data?.message || 'Error fetching inquiries');
         }
@@ -25,7 +25,7 @@ export const updateInquiryStatus = createAsyncThunk(
 
 const experienceInquirySlice = createSlice({
     name: 'experienceInquiries',
-    initialState: { inquiries: [], status: 'idle', error: null },
+    initialState: { inquiries: [], status: 'idle', error: null, pagination: null },
     reducers: {
         clearError: (state) => { state.error = null; },
     },
@@ -37,7 +37,17 @@ const experienceInquirySlice = createSlice({
             })
             .addCase(fetchAllInquiries.fulfilled, (state, action) => {
                 state.status = 'succeeded';
-                state.inquiries = action.payload;
+                const raw = action.payload;
+                if (Array.isArray(raw)) {
+                    state.inquiries = raw;
+                    state.pagination = null;
+                } else if (raw?.data && raw?.pagination) {
+                    state.inquiries = raw.data;
+                    state.pagination = raw.pagination;
+                } else {
+                    state.inquiries = [];
+                    state.pagination = null;
+                }
             })
             .addCase(fetchAllInquiries.rejected, (state, action) => {
                 state.status = 'failed';
@@ -58,5 +68,6 @@ export const { clearError: clearInquiryError } = experienceInquirySlice.actions;
 export const selectAllInquiries = (state) => state.experienceInquiries.inquiries;
 export const selectInquiriesStatus = (state) => state.experienceInquiries.status;
 export const selectInquiriesError = (state) => state.experienceInquiries.error;
+export const selectInquiriesPagination = (state) => state.experienceInquiries.pagination;
 
 export default experienceInquirySlice.reducer;

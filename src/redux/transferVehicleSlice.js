@@ -3,9 +3,9 @@ import transferService from '../services/transferService';
 
 export const fetchAllVehicles = createAsyncThunk(
     'transferVehicles/fetchAll',
-    async (_, { rejectWithValue }) => {
+    async (params = {}, { rejectWithValue }) => {
         try {
-            const res = await transferService.getAllVehicles();
+            const res = await transferService.getAllVehicles(params);
             return res.data;
         } catch (err) {
             return rejectWithValue(err.response?.data?.error || err.response?.data?.message || 'Error fetching vehicles');
@@ -68,6 +68,7 @@ const transferVehicleSlice = createSlice({
         selectedVehicle: null,
         loading: false,
         error: null,
+        pagination: null,
     },
     reducers: {
         clearSelectedVehicle: (state) => {
@@ -82,7 +83,17 @@ const transferVehicleSlice = createSlice({
             })
             .addCase(fetchAllVehicles.fulfilled, (state, action) => {
                 state.loading = false;
-                state.vehicles = action.payload;
+                const raw = action.payload;
+                if (Array.isArray(raw)) {
+                    state.vehicles = raw;
+                    state.pagination = null;
+                } else if (raw?.data && raw?.pagination) {
+                    state.vehicles = raw.data;
+                    state.pagination = raw.pagination;
+                } else {
+                    state.vehicles = [];
+                    state.pagination = null;
+                }
             })
             .addCase(fetchAllVehicles.rejected, (state, action) => {
                 state.loading = false;
@@ -150,3 +161,4 @@ export const selectAllVehicles = (state) => state.transferVehicles.vehicles;
 export const selectSelectedVehicle = (state) => state.transferVehicles.selectedVehicle;
 export const selectVehiclesLoading = (state) => state.transferVehicles.loading;
 export const selectVehiclesError = (state) => state.transferVehicles.error;
+export const selectVehiclesPagination = (state) => state.transferVehicles.pagination;

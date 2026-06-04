@@ -1,14 +1,14 @@
 import React, { useEffect, useState } from 'react';
 import {
     Box, Chip, CircularProgress, MenuItem, Paper, Select, Skeleton,
-    Table, TableBody, TableCell, TableContainer, TableHead, TableRow,
+    Table, TableBody, TableCell, TableContainer, TableHead, TablePagination, TableRow,
     Typography,
 } from '@mui/material';
 import { useDispatch, useSelector } from 'react-redux';
 import MailOutlineIcon from '@mui/icons-material/MailOutline';
 import {
     fetchAllInquiries, updateInquiryStatus,
-    selectAllInquiries, selectInquiriesStatus,
+    selectAllInquiries, selectInquiriesStatus, selectInquiriesPagination,
 } from '../../../redux/experienceInquirySlice';
 
 const STATUS_COLORS = {
@@ -38,11 +38,20 @@ const InquiryList = () => {
     const dispatch = useDispatch();
     const inquiries = useSelector(selectAllInquiries);
     const status = useSelector(selectInquiriesStatus);
+    const pagination = useSelector(selectInquiriesPagination);
     const [updating, setUpdating] = useState(null);
+    const [page, setPage] = useState(0);
+    const [rowsPerPage, setRowsPerPage] = useState(10);
 
     useEffect(() => {
-        if (status === 'idle') dispatch(fetchAllInquiries());
-    }, [dispatch, status]);
+        dispatch(fetchAllInquiries({ page: page + 1, limit: rowsPerPage }));
+    }, [dispatch, page, rowsPerPage]);
+
+    const handleChangePage = (_, newPage) => setPage(newPage);
+    const handleChangeRowsPerPage = (e) => {
+        setRowsPerPage(parseInt(e.target.value, 10));
+        setPage(0);
+    };
 
     const handleStatusChange = async (id, newStatus) => {
         setUpdating(id);
@@ -176,6 +185,16 @@ const InquiryList = () => {
                             ))}
                         </TableBody>
                     </Table>
+                    <TablePagination
+                        component="div"
+                        count={pagination?.total ?? inquiries.length}
+                        page={page}
+                        onPageChange={handleChangePage}
+                        rowsPerPage={rowsPerPage}
+                        onRowsPerPageChange={handleChangeRowsPerPage}
+                        rowsPerPageOptions={[10, 25, 50]}
+                        labelRowsPerPage="Rows per page:"
+                    />
                 </TableContainer>
             )}
         </Box>

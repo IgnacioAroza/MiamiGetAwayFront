@@ -134,7 +134,8 @@ const servicesSlice = createSlice({
     extraReducers: (builder) => {
         builder
             .addCase(fetchServices.pending, (state, action) => {
-                state.status[action.meta.arg] = 'loading';
+                const serviceType = typeof action.meta.arg === 'string' ? action.meta.arg : action.meta.arg?.serviceType;
+                if (serviceType) state.status[serviceType] = 'loading';
             })
             .addCase(fetchServices.fulfilled, (state, action) => {
                 const { serviceType, data } = action.payload;
