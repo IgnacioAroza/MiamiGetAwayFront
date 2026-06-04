@@ -7,7 +7,7 @@ export const fetchAllExperiences = createAsyncThunk(
         try {
             return await experienceService.getAll();
         } catch (error) {
-            return rejectWithValue(error?.response?.data?.message || 'Error fetching experiences');
+            return rejectWithValue(error?.response?.data?.error || error?.response?.data?.message || 'Error fetching experiences');
         }
     }
 );
@@ -18,7 +18,7 @@ export const createExperience = createAsyncThunk(
         try {
             return await experienceService.create(formData);
         } catch (error) {
-            return rejectWithValue(error?.response?.data?.message || 'Error creating experience');
+            return rejectWithValue(error?.response?.data?.error || error?.response?.data?.message || 'Error creating experience');
         }
     }
 );
@@ -29,7 +29,7 @@ export const updateExperience = createAsyncThunk(
         try {
             return await experienceService.update(id, formData);
         } catch (error) {
-            return rejectWithValue(error?.response?.data?.message || 'Error updating experience');
+            return rejectWithValue(error?.response?.data?.error || error?.response?.data?.message || 'Error updating experience');
         }
     }
 );
@@ -41,7 +41,7 @@ export const deleteExperience = createAsyncThunk(
             await experienceService.delete(id);
             return id;
         } catch (error) {
-            return rejectWithValue(error?.response?.data?.message || 'Error deleting experience');
+            return rejectWithValue(error?.response?.data?.error || error?.response?.data?.message || 'Error deleting experience');
         }
     }
 );

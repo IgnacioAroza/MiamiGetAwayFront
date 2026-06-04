@@ -8,7 +8,7 @@ export const fetchAllTransferInquiries = createAsyncThunk(
             const res = await transferService.getAllInquiries();
             return res.data;
         } catch (err) {
-            return rejectWithValue(err.response?.data?.message || 'Error fetching inquiries');
+            return rejectWithValue(err.response?.data?.error || err.response?.data?.message || 'Error fetching inquiries');
         }
     }
 );
@@ -20,7 +20,7 @@ export const updateTransferInquiryStatus = createAsyncThunk(
             const res = await transferService.updateInquiryStatus(id, status);
             return res.data;
         } catch (err) {
-            return rejectWithValue(err.response?.data?.message || 'Error updating inquiry status');
+            return rejectWithValue(err.response?.data?.error || err.response?.data?.message || 'Error updating inquiry status');
         }
     }
 );

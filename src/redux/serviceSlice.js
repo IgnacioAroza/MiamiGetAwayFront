@@ -10,7 +10,7 @@ const handleApiError = (error) => {
             // El interceptor global ya maneja limpieza/redirección
             throw new Error('Unauthorized: Please log in again.');
         }
-        const message = error.response.data?.message || error.response.data?.error || 'An error occurred';
+        const message = error.response.data?.error || error.response.data?.message || 'An error occurred';
         throw new Error(message);
     } else if (error.request) {
         throw new Error('No response received from server');

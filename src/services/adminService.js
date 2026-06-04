@@ -9,7 +9,7 @@ const adminService = {
             }
             return null;
         } catch (error) {
-            throw error.response?.data?.message || 'Error de autenticación';
+            throw error.response?.data?.error || error.response?.data?.message || 'Error de autenticación';
         }
     },
 
@@ -27,7 +27,7 @@ const adminService = {
             const response = await api.get('/admins');
             return response.data;
         } catch (error) {
-            throw error.response?.data?.message || 'Error al obtener el perfil';
+            throw error.response?.data?.error || error.response?.data?.message || 'Error al obtener el perfil';
         }
     }
 };

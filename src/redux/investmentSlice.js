@@ -7,7 +7,7 @@ export const fetchAllInvestments = createAsyncThunk(
         try {
             return await investmentService.getAll();
         } catch (error) {
-            return rejectWithValue(error?.response?.data?.message || 'Error fetching investments');
+            return rejectWithValue(error?.response?.data?.error || error?.response?.data?.message || 'Error fetching investments');
         }
     }
 );
@@ -18,7 +18,7 @@ export const createInvestment = createAsyncThunk(
         try {
             return await investmentService.create(formData);
         } catch (error) {
-            return rejectWithValue(error?.response?.data?.message || 'Error creating investment');
+            return rejectWithValue(error?.response?.data?.error || error?.response?.data?.message || 'Error creating investment');
         }
     }
 );
@@ -29,7 +29,7 @@ export const updateInvestment = createAsyncThunk(
         try {
             return await investmentService.update(id, formData);
         } catch (error) {
-            return rejectWithValue(error?.response?.data?.message || 'Error updating investment');
+            return rejectWithValue(error?.response?.data?.error || error?.response?.data?.message || 'Error updating investment');
         }
     }
 );
@@ -41,7 +41,7 @@ export const deleteInvestment = createAsyncThunk(
             await investmentService.delete(id);
             return id;
         } catch (error) {
-            return rejectWithValue(error?.response?.data?.message || 'Error deleting investment');
+            return rejectWithValue(error?.response?.data?.error || error?.response?.data?.message || 'Error deleting investment');
         }
     }
 );

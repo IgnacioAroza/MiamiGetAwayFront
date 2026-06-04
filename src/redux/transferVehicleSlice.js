@@ -8,7 +8,7 @@ export const fetchAllVehicles = createAsyncThunk(
             const res = await transferService.getAllVehicles();
             return res.data;
         } catch (err) {
-            return rejectWithValue(err.response?.data?.message || 'Error fetching vehicles');
+            return rejectWithValue(err.response?.data?.error || err.response?.data?.message || 'Error fetching vehicles');
         }
     }
 );
@@ -20,7 +20,7 @@ export const fetchVehicleById = createAsyncThunk(
             const res = await transferService.getVehicleById(id);
             return res.data;
         } catch (err) {
-            return rejectWithValue(err.response?.data?.message || 'Error fetching vehicle');
+            return rejectWithValue(err.response?.data?.error || err.response?.data?.message || 'Error fetching vehicle');
         }
     }
 );
@@ -32,7 +32,7 @@ export const createVehicle = createAsyncThunk(
             const res = await transferService.createVehicle(data);
             return res.data;
         } catch (err) {
-            return rejectWithValue(err.response?.data?.message || 'Error creating vehicle');
+            return rejectWithValue(err.response?.data?.error || err.response?.data?.message || 'Error creating vehicle');
         }
     }
 );
@@ -44,7 +44,7 @@ export const updateVehicle = createAsyncThunk(
             const res = await transferService.updateVehicle(id, data);
             return res.data;
         } catch (err) {
-            return rejectWithValue(err.response?.data?.message || 'Error updating vehicle');
+            return rejectWithValue(err.response?.data?.error || err.response?.data?.message || 'Error updating vehicle');
         }
     }
 );
@@ -56,7 +56,7 @@ export const deleteVehicle = createAsyncThunk(
             await transferService.deleteVehicle(id);
             return id;
         } catch (err) {
-            return rejectWithValue(err.response?.data?.message || 'Error deleting vehicle');
+            return rejectWithValue(err.response?.data?.error || err.response?.data?.message || 'Error deleting vehicle');
         }
     }
 );

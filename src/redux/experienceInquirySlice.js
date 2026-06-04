@@ -7,7 +7,7 @@ export const fetchAllInquiries = createAsyncThunk(
         try {
             return await experienceService.getAllInquiries();
         } catch (error) {
-            return rejectWithValue(error?.response?.data?.message || 'Error fetching inquiries');
+            return rejectWithValue(error?.response?.data?.error || error?.response?.data?.message || 'Error fetching inquiries');
         }
     }
 );
@@ -18,7 +18,7 @@ export const updateInquiryStatus = createAsyncThunk(
         try {
             return await experienceService.updateInquiryStatus(id, status);
         } catch (error) {
-            return rejectWithValue(error?.response?.data?.message || 'Error updating inquiry status');
+            return rejectWithValue(error?.response?.data?.error || error?.response?.data?.message || 'Error updating inquiry status');
         }
     }
 );

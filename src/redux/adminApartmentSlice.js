@@ -9,7 +9,7 @@ export const fetchAdminApartments = createAsyncThunk(
             const response = await api.get('/apartments');
             return response.data;
         } catch (error) {
-            return rejectWithValue(error.response?.data?.message || 'Error fetching apartments');
+            return rejectWithValue(error.response?.data?.error || error.response?.data?.message || 'Error fetching apartments');
         }
     }
 );
@@ -21,7 +21,7 @@ export const fetchAdminApartmentById = createAsyncThunk(
             const response = await api.get(`/apartments/${id}`);
             return response.data;
         } catch (error) {
-            return rejectWithValue(error.response?.data?.message || 'Error fetching apartment by id');
+            return rejectWithValue(error.response?.data?.error || error.response?.data?.message || 'Error fetching apartment by id');
         }
     }
 );
@@ -33,7 +33,7 @@ export const createAdminApartment = createAsyncThunk(
             const response = await api.post('/apartments', apartmentData);
             return response.data;
         } catch (error) {
-            return rejectWithValue(error.response?.data?.message || 'Error creating apartment');
+            return rejectWithValue(error.response?.data?.error || error.response?.data?.message || 'Error creating apartment');
         }
     }
 );
@@ -45,7 +45,7 @@ export const updateAdminApartment = createAsyncThunk(
             const response = await api.put(`/apartments/${id}`, data);
             return response.data;
         } catch (error) {
-            return rejectWithValue(error.response?.data?.message || 'Error updating apartment');
+            return rejectWithValue(error.response?.data?.error || error.response?.data?.message || 'Error updating apartment');
         }
     }
 );
@@ -57,7 +57,7 @@ export const deleteAdminApartment = createAsyncThunk(
             await api.delete(`/apartments/${id}`);
             return id;
         } catch (error) {
-            return rejectWithValue(error.response?.data?.message || 'Error deleting apartment');
+            return rejectWithValue(error.response?.data?.error || error.response?.data?.message || 'Error deleting apartment');
         }
     }
 );

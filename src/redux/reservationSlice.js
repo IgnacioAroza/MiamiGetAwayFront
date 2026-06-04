@@ -23,7 +23,7 @@ export const fetchReservations = createAsyncThunk(
             const data = await reservationService.getAll(filters);
             return data;
         } catch (error) {
-            return rejectWithValue(error.response?.data?.message || 'Error fetching reservations');
+            return rejectWithValue(error.response?.data?.error || error.response?.data?.message || 'Error fetching reservations');
         }
     }
 );
@@ -35,7 +35,7 @@ export const fetchReservationById = createAsyncThunk(
             const data = await reservationService.getById(id);
             return data;
         } catch (error) {
-            return rejectWithValue(error.response?.data?.message || 'Error fetching reservation');
+            return rejectWithValue(error.response?.data?.error || error.response?.data?.message || 'Error fetching reservation');
         }
     }
 );
@@ -47,7 +47,7 @@ export const createReservation = createAsyncThunk(
             const data = await reservationService.create(reservationData);
             return data;
         } catch (error) {
-            return rejectWithValue(error.response?.data?.message || 'Error creating reservation');
+            return rejectWithValue(error.response?.data?.error || error.response?.data?.message || 'Error creating reservation');
         }
     }
 );
@@ -67,7 +67,7 @@ export const updateReservation = createAsyncThunk(
             const data = await reservationService.update(id, reservationData);
             return data;
         } catch (error) {
-            return rejectWithValue(error.response?.data?.message || 'Error updating reservation');
+            return rejectWithValue(error.response?.data?.error || error.response?.data?.message || 'Error updating reservation');
         }
     }
 );
@@ -90,7 +90,7 @@ export const deleteReservation = createAsyncThunk(
             }
 
             // Para otros errores, usar el mensaje original
-            const message = error.message || error.response?.data?.message || 'Error deleting reservation';
+            const message = error.message || error.response?.data?.error || error.response?.data?.message || 'Error deleting reservation';
             return rejectWithValue({ message, isRelatedDataError: false });
         }
     }
@@ -104,7 +104,7 @@ export const registerPayment = createAsyncThunk(
             const response = await reservationService.registerPayment(id, paymentData);
             return response.data;
         } catch (error) {
-            return rejectWithValue(error.response?.data?.message || 'Error registering payment');
+            return rejectWithValue(error.response?.data?.error || error.response?.data?.message || 'Error registering payment');
         }
     }
 );
@@ -116,7 +116,7 @@ export const fetchReservationPayments = createAsyncThunk(
             const data = await reservationService.getReservationPayments(id);
             return { id, payments: data };
         } catch (error) {
-            return rejectWithValue(error.response?.data?.message || 'Error fetching payments');
+            return rejectWithValue(error.response?.data?.error || error.response?.data?.message || 'Error fetching payments');
         }
     }
 );
@@ -147,7 +147,7 @@ export const generateReservationPdf = createAsyncThunk(
                 };
             }
         } catch (error) {
-            return rejectWithValue(error.response?.data?.message || 'Error generating PDF');
+            return rejectWithValue(error.response?.data?.error || error.response?.data?.message || 'Error generating PDF');
         }
     }
 );
@@ -157,18 +157,6 @@ export const sendReservationConfirmation = createAsyncThunk(
     async ({ id, notificationType = 'confirmation' }) => {
         const data = await reservationService.sendConfirmation(id, notificationType);
         return { id, notificationType, confirmation: data };
-    }
-);
-
-export const updateReservationPaymentStatus = createAsyncThunk(
-    'reservations/updatePaymentStatus',
-    async ({ id, paymentData }, { rejectWithValue }) => {
-        try {
-            const data = await reservationService.updatePaymentStatus(id, paymentData);
-            return { id, data };
-        } catch (error) {
-            return rejectWithValue(error);
-        }
     }
 );
 
@@ -187,21 +175,6 @@ const reservationSlice = createSlice({
         },
         clearReservationPayments: (state) => {
             state.reservationPayments = [];
-        },
-        // Actualiza el estado de pago de una reserva
-        updatePaymentStatus: (state, action) => {
-            const { id, paymentStatus, amountPaid, amountDue } = action.payload;
-            const reservation = state.reservations.find(res => res.id === id);
-            if (reservation) {
-                reservation.paymentStatus = paymentStatus;
-                reservation.amountPaid = amountPaid;
-                reservation.amountDue = amountDue;
-            }
-            if (state.selectedReservation?.id === id) {
-                state.selectedReservation.paymentStatus = paymentStatus;
-                state.selectedReservation.amountPaid = amountPaid;
-                state.selectedReservation.amountDue = amountDue;
-            }
         },
         // Actualiza el estado de una reserva
         updateReservationStatus: (state, action) => {
@@ -341,45 +314,6 @@ const reservationSlice = createSlice({
                 state.loading = false;
                 // No establecer el error en el estado global
             })
-            // update payment status
-            .addCase(updateReservationPaymentStatus.pending, (state) => {
-                state.status = 'loading';
-                state.loading = true;
-            })
-            .addCase(updateReservationPaymentStatus.fulfilled, (state, action) => {
-                state.status = 'succeeded';
-                state.loading = false;
-
-                const { id, data } = action.payload || {};
-                const normalized = data ? normalizeReservationFromApi(data) : {};
-
-                // Campos de pago a actualizar si vienen del backend
-                const paymentPatch = {
-                    ...(normalized.paymentStatus !== undefined ? { paymentStatus: normalized.paymentStatus } : {}),
-                    ...(normalized.amountPaid !== undefined ? { amountPaid: normalized.amountPaid } : {}),
-                    ...(normalized.amountDue !== undefined ? { amountDue: normalized.amountDue } : {}),
-                };
-
-                const index = state.reservations.findIndex(res => res.id === id);
-                if (index !== -1 && (data || Object.keys(paymentPatch).length)) {
-                    state.reservations[index] = {
-                        ...state.reservations[index],
-                        ...paymentPatch
-                    };
-                }
-
-                if (state.selectedReservation?.id === id && (data || Object.keys(paymentPatch).length)) {
-                    state.selectedReservation = {
-                        ...state.selectedReservation,
-                        ...paymentPatch
-                    };
-                }
-            })
-            .addCase(updateReservationPaymentStatus.rejected, (state, action) => {
-                state.status = 'failed';
-                state.error = action.payload;
-                state.loading = false;
-            });
     }
 });
 
@@ -388,7 +322,6 @@ export const {
     clearSelectedReservation,
     clearError,
     clearReservationPayments,
-    updatePaymentStatus,
     updateReservationStatus
 } = reservationSlice.actions;
 
