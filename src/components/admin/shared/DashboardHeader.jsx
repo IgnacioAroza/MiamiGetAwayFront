@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import {
   AppBar,
   Box,
@@ -56,6 +56,11 @@ const DashboardHeader = () => {
   };
 
   const [listingsAnchor, setListingsAnchor] = useState(null);
+  const listingsButtonRef = useRef(null);
+
+  useEffect(() => {
+    setListingsAnchor(null);
+  }, [location.pathname]);
 
   const mainNavItems = [
     { text: 'Home', icon: <HomeIcon />, path: '/admin' },
@@ -192,9 +197,10 @@ const DashboardHeader = () => {
 
                 {/* Listings dropdown */}
                 <Button
+                  ref={listingsButtonRef}
                   color="inherit"
                   endIcon={<KeyboardArrowDownIcon />}
-                  onClick={(e) => setListingsAnchor(e.currentTarget)}
+                  onClick={() => setListingsAnchor(listingsButtonRef.current)}
                   sx={{
                     mr: 1,
                     borderBottom: isListingsActive ? '2px solid white' : 'none',
@@ -206,6 +212,9 @@ const DashboardHeader = () => {
                   anchorEl={listingsAnchor}
                   open={Boolean(listingsAnchor)}
                   onClose={() => setListingsAnchor(null)}
+                  anchorOrigin={{ vertical: 'bottom', horizontal: 'left' }}
+                  transformOrigin={{ vertical: 'top', horizontal: 'left' }}
+                  disableScrollLock
                   PaperProps={{ sx: { bgcolor: '#1e1e1e', color: '#fff', mt: 0.5 } }}
                 >
                   {listingsItems.map((item) => (
