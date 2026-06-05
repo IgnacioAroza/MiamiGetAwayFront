@@ -37,7 +37,8 @@
       "cars": "Cars",
       "yachts": "Yachts",
       "apartments": "Apartments",
-      "villas": "Villas"
+      "villas": "Villas",
+      "investments": "Investments"
     },
     "brand": "Brand",
     "model": "Model",
@@ -169,5 +170,21 @@
       "title": "Contact us",
       "sending": "Sending...",
       "prefix": "Area"
+    },
+    "investments": {
+      "title": "Miami Investments",
+      "subtitle": "Exclusive properties selected to maximize your return on investment",
+      "priceOnRequest": "Price on request",
+      "rooms": "bedrooms",
+      "bathrooms": "bathrooms",
+      "unit": "Unit",
+      "inquire": "Inquire",
+      "whatsappMessage": "Hello, I would like to get more information about the investment in property {{name}}{{unit}} located at {{address}}.",
+      "backToInvestments": "Back to Investments",
+      "notFound": "Investment not found.",
+      "viewDetails": "View Details",
+      "noInvestments": "No investments available at this time.",
+      "loading": "Loading investments...",
+      "error": "Error loading investments. Please try again."
     }
 }

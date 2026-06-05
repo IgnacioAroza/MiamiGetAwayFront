@@ -37,7 +37,8 @@
       "cars": "Autos",
       "yachts": "Yates",
       "apartments": "Departamentos",
-      "villas": "Villas"
+      "villas": "Villas",
+      "investments": "Inversiones"
     },
     "brand": "Marca",
     "model": "Modelo",
@@ -169,5 +170,21 @@
       "title": "Contactanos",
       "sending": "Enviando...",
       "prefix": "Area"
+    },
+    "investments": {
+      "title": "Inversiones en Miami",
+      "subtitle": "Propiedades exclusivas seleccionadas para maximizar tu retorno de inversión",
+      "priceOnRequest": "A consultar",
+      "rooms": "habitaciones",
+      "bathrooms": "baños",
+      "unit": "Unidad",
+      "inquire": "Consultar",
+      "whatsappMessage": "Hola, me gustaría obtener más información sobre la inversión en la propiedad {{name}}{{unit}} ubicada en {{address}}.",
+      "backToInvestments": "Volver a Inversiones",
+      "notFound": "Inversión no encontrada.",
+      "viewDetails": "Ver Detalles",
+      "noInvestments": "No hay inversiones disponibles en este momento.",
+      "loading": "Cargando inversiones...",
+      "error": "Error al cargar las inversiones. Por favor, intentá de nuevo."
     }
 }
