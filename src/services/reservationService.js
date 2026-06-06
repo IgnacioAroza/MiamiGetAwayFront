@@ -9,7 +9,7 @@ const reservationService = {
             return response.data;
         } catch (error) {
             console.error('Error in getAll:', error);
-            throw error.response?.data?.message || 'Error fetching reservations';
+            throw error.response?.data?.error || error.response?.data?.message || 'Error fetching reservations';
         }
     },
 
@@ -22,7 +22,7 @@ const reservationService = {
             if (error.response) {
                 console.error("Error in getById:", error.response.data);
             }
-            throw error.response?.data?.message || 'Error fetching reservation by id';
+            throw error.response?.data?.error || error.response?.data?.message || 'Error fetching reservation by id';
         }
     },
 
@@ -50,7 +50,7 @@ const reservationService = {
             if (error.response && error.response.data) {
                 console.error('Server response:', error.response.data);
             }
-            throw error.response?.data?.message || error.message || 'Error creating reservation';
+            throw error.response?.data?.error || error.response?.data?.message || error.message || 'Error creating reservation';
         }
     },
 
@@ -76,7 +76,7 @@ const reservationService = {
                 console.error("Status:", error.response.status);
                 console.error("Error in update:", error.response.data);
             }
-            throw error.response?.data?.message || error.message || 'Error updating reservation';
+            throw error.response?.data?.error || error.response?.data?.message || error.message || 'Error updating reservation';
         }
     },
 
@@ -91,7 +91,7 @@ const reservationService = {
 
                 // Si es el error específico de datos relacionados
                 if (errorData.error === 'Cannot delete reservation due to related data') {
-                    const detailedError = new Error(errorData.message || 'Cannot delete reservation with related data');
+                    const detailedError = new Error(errorData.error || errorData.message || 'Cannot delete reservation with related data');
                     detailedError.details = errorData.details;
                     detailedError.suggestedAction = errorData.suggestedAction;
                     detailedError.isRelatedDataError = true;
@@ -99,12 +99,12 @@ const reservationService = {
                 }
 
                 // Otros errores 400
-                throw new Error(errorData.message || 'Bad request when deleting reservation');
+                throw new Error(errorData.error || errorData.message || 'Bad request when deleting reservation');
             }
 
             // Para otros códigos de error, usar mensaje genérico mejorado
             const statusCode = error.response?.status;
-            const serverMessage = error.response?.data?.message;
+            const serverMessage = error.response?.data?.error || error.response?.data?.message;
 
             switch (statusCode) {
                 case 404:
@@ -156,7 +156,7 @@ const reservationService = {
             const response = await api.post(`/reservations/${id}/payments`, body);
             return response.data;
         } catch (error) {
-            throw error.response?.data?.message || error.message || 'Error registering payment';
+            throw error.response?.data?.error || error.response?.data?.message || error.message || 'Error registering payment';
         }
     },
 
@@ -165,7 +165,7 @@ const reservationService = {
             const response = await api.get(`/reservations/${id}/payments`);
             return response.data;
         } catch (error) {
-            throw error.response?.data?.message || 'Error fetching reservation payments';
+            throw error.response?.data?.error || error.response?.data?.message || 'Error fetching reservation payments';
         }
     },
 
@@ -176,7 +176,7 @@ const reservationService = {
             });
             return response.data;
         } catch (error) {
-            throw error.response?.data?.message || 'Error generating PDF';
+            throw error.response?.data?.error || error.response?.data?.message || 'Error generating PDF';
         }
     },
 
@@ -239,7 +239,7 @@ const reservationService = {
                 id: id
             };
         } catch (error) {
-            throw error.response?.data?.message || 'Error sending PDF by email';
+            throw error.response?.data?.error || error.response?.data?.message || 'Error sending PDF by email';
         }
     },
 
@@ -248,26 +248,7 @@ const reservationService = {
             const response = await api.get('/reservations/search', { params: searchParams });
             return response.data;
         } catch (error) {
-            throw error.response?.data?.message || 'Error searching reservations';
-        }
-    },
-
-    updatePaymentStatus: async (id, paymentData) => {
-        try {
-            if (!id) {
-                throw new Error('The reservation ID is required');
-            }
-
-            const data = {
-                paymentStatus: paymentData.paymentStatus,
-                amountPaid: Number(paymentData.amountPaid),
-                amountDue: Number(paymentData.amountDue)
-            };
-
-            const response = await api.patch(`/reservations/${id}/payment-status`, data);
-            return response.data;
-        } catch (error) {
-            throw error.response?.data?.message || 'Error updating payment status';
+            throw error.response?.data?.error || error.response?.data?.message || 'Error searching reservations';
         }
     },
 
@@ -292,7 +273,7 @@ const reservationService = {
             const response = await api.post(`/payments/register/${id}`, data);
             return response.data;
         } catch (error) {
-            throw error.response?.data?.message || error.message || 'Error registering simple payment';
+            throw error.response?.data?.error || error.response?.data?.message || error.message || 'Error registering simple payment';
         }
     },
 
@@ -316,7 +297,7 @@ const reservationService = {
             return response.data;
         } catch (error) {
 
-            throw error.response?.data?.message || error.message || 'Error updating parking fee';
+            throw error.response?.data?.error || error.response?.data?.message || error.message || 'Error updating parking fee';
         }
     },
 
@@ -343,7 +324,7 @@ const reservationService = {
                 console.error("Detalles del error:", error.response.data);
             }
 
-            throw error.response?.data?.message || error.message || 'Error updating cleaning fee';
+            throw error.response?.data?.error || error.response?.data?.message || error.message || 'Error updating cleaning fee';
         }
     },
 
@@ -370,7 +351,7 @@ const reservationService = {
                 console.error("Detalles del error:", error.response.data);
             }
 
-            throw error.response?.data?.message || error.message || 'Error updating other expenses';
+            throw error.response?.data?.error || error.response?.data?.message || error.message || 'Error updating other expenses';
         }
     },
 
@@ -428,7 +409,7 @@ const reservationService = {
                 console.error("Detalles del error:", error.response.data);
             }
 
-            throw error.response?.data?.message || error.message || 'Error updating fees';
+            throw error.response?.data?.error || error.response?.data?.message || error.message || 'Error updating fees';
         }
     },
 

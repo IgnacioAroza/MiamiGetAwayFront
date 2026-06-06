@@ -7,6 +7,13 @@ export const numberOrUndefined = (value) => {
   return isNaN(n) ? undefined : n;
 };
 
+// Convierte a número si es posible; si no, devuelve 0
+export const numberOrZero = (value) => {
+  if (value === undefined || value === null || value === '') return 0;
+  const n = Number(value);
+  return isNaN(n) ? 0 : n;
+};
+
 // Quita las propiedades con valor undefined (conserva 0 y false)
 export const stripUndefined = (obj) => Object.fromEntries(
   Object.entries(obj).filter(([, v]) => v !== undefined)
@@ -33,13 +40,13 @@ export const normalizeReservationInput = (reservationData = {}, { partial = fals
 
     nights: numberOrUndefined(reservationData.nights),
     pricePerNight: numberOrUndefined(reservationData.price ?? reservationData.pricePerNight),
-    cleaningFee: numberOrUndefined(reservationData.cleaningFee),
+    cleaningFee: numberOrZero(reservationData.cleaningFee),
     cancellationFee: numberOrUndefined(reservationData.cancellationFee),
-    parkingFee: numberOrUndefined(reservationData.parkingFee),
-    otherExpenses: numberOrUndefined(reservationData.otherExpenses),
-    taxes: numberOrUndefined(reservationData.taxes),
+    parkingFee: numberOrZero(reservationData.parkingFee),
+    otherExpenses: numberOrZero(reservationData.otherExpenses),
+    taxes: numberOrZero(reservationData.taxes),
     totalAmount: numberOrUndefined(reservationData.totalAmount),
-    amountPaid: numberOrUndefined(reservationData.amountPaid),
+    amountPaid: numberOrZero(reservationData.amountPaid),
     amountDue: numberOrUndefined(reservationData.amountDue),
 
     notes: reservationData.notes,

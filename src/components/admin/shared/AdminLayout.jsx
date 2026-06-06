@@ -1,5 +1,5 @@
-import React from 'react';
-import { Box, useMediaQuery, useTheme } from '@mui/material';
+import React, { Suspense } from 'react';
+import { Box, CircularProgress, useMediaQuery, useTheme } from '@mui/material';
 import { Outlet } from 'react-router-dom';
 import DashboardHeader from './DashboardHeader';
 import { ListItemLink } from './ListItemLink';
@@ -10,22 +10,21 @@ const AdminLayout = () => {
     const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
 
     return (
-        <Box sx={{ 
+        <Box sx={{
             display: 'flex',
             flexDirection: 'column',
-            minHeight: '100vh', 
+            height: '100vh',
             backgroundColor: theme.palette.background.default,
-            overflow: 'hidden'
         }}>
             <DashboardHeader />
-            <Box 
-                component="main" 
-                sx={{ 
+            <Box
+                component="main"
+                sx={{
                     flexGrow: 1,
+                    minHeight: 0,
                     backgroundColor: theme.palette.background.default,
                     color: theme.palette.primary.main,
                     p: 3,
-                    height: 'calc(100vh - 130px)',
                     overflow: 'auto',
                     '&::-webkit-scrollbar': {
                         width: '8px'
@@ -39,7 +38,13 @@ const AdminLayout = () => {
                     }
                 }}
             >
-                <Outlet />
+                <Suspense fallback={
+                    <Box display="flex" justifyContent="center" alignItems="center" height="100%">
+                        <CircularProgress />
+                    </Box>
+                }>
+                    <Outlet />
+                </Suspense>
             </Box>
         </Box>
     );

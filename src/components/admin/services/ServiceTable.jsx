@@ -8,6 +8,7 @@ import {
   TableBody,
   TableRow,
   TableCell,
+  TablePagination,
   Paper,
   Button,
   CircularProgress,
@@ -24,11 +25,16 @@ import EditIcon from '@mui/icons-material/Edit';
 import DeleteIcon from '@mui/icons-material/Delete';
 import useDeviceDetection from '../../../hooks/useDeviceDetection';
 
-const ServiceTable = ({ 
+const ServiceTable = ({
   selectedService,
   services = [],
   status,
   error,
+  pagination,
+  page = 0,
+  rowsPerPage = 10,
+  onPageChange,
+  onRowsPerPageChange,
   onEdit,
   onDelete
 }) => {
@@ -320,10 +326,22 @@ const ServiceTable = ({
   return (
     <Box sx={{ mt: 4 }}>
       {isMobile ? (
-        // Vista móvil: Tarjetas
-        renderMobileCards()
+        <>
+          {renderMobileCards()}
+          {services.length > 0 && (
+            <TablePagination
+              component="div"
+              count={pagination?.total ?? services.length}
+              page={page}
+              onPageChange={onPageChange}
+              rowsPerPage={rowsPerPage}
+              onRowsPerPageChange={onRowsPerPageChange}
+              rowsPerPageOptions={[10, 25, 50]}
+              labelRowsPerPage="Per page:"
+            />
+          )}
+        </>
       ) : (
-        // Vista desktop: Tabla completa
         <TableContainer component={Paper} sx={{ bgcolor: '#1e1e1e' }}>
           <Table size="small">
             <TableHead>
@@ -333,6 +351,16 @@ const ServiceTable = ({
               {services.map(renderRow)}
             </TableBody>
           </Table>
+          <TablePagination
+            component="div"
+            count={pagination?.total ?? services.length}
+            page={page}
+            onPageChange={onPageChange}
+            rowsPerPage={rowsPerPage}
+            onRowsPerPageChange={onRowsPerPageChange}
+            rowsPerPageOptions={[10, 25, 50]}
+            labelRowsPerPage="Rows per page:"
+          />
         </TableContainer>
       )}
     </Box>

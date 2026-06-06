@@ -1,8 +1,8 @@
 import api from '../utils/api';
 
 const investmentService = {
-    getAll: async () => {
-        const res = await api.get('/investments');
+    getAll: async (params = {}) => {
+        const res = await api.get('/investments', { params });
         return res.data;
     },
 

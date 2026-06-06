@@ -12,7 +12,7 @@ import ApartmentForm from '../apartments/ApartmentForm';
 import ImageUploader from '../../images/ImageUploader';
 import AddIcon from '@mui/icons-material/Add';
 
-import { 
+import {
   setSelectedService,
   fetchServices,
   createService,
@@ -22,20 +22,28 @@ import {
 } from '../../../redux/serviceSlice';
 import {
   fetchAdminApartments,
-  setSelectedApartment
+  setSelectedApartment,
+  selectApartmentPagination,
 } from '../../../redux/adminApartmentSlice';
 
 const ServicesPage = () => {
   const dispatch = useDispatch();
   const [selectedService, setSelectedServiceLocal] = useState('apartments');
-  const { items, status, error, currentItem } = useSelector((state) => state.services);
+  const { items, status, error, currentItem, pagination: servicesPagination } = useSelector((state) => state.services);
   const adminApartments = useSelector((state) => state.adminApartments);
+  const apartmentPagination = useSelector(selectApartmentPagination);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [itemToDelete, setItemToDelete] = useState(null);
   const [newImages, setNewImages] = useState([]);
   const [openSnackbar, setOpenSnackbar] = useState(false);
-  
+  const [page, setPage] = useState(0);
+  const [rowsPerPage, setRowsPerPage] = useState(10);
+
+  const currentPagination = selectedService === 'apartments'
+    ? apartmentPagination
+    : (servicesPagination?.[selectedService] ?? null);
+
   // Estados locales para cada tipo de formulario
   const [car, setCar] = useState(null);
   const [yacht, setYacht] = useState(null);
@@ -43,11 +51,14 @@ const ServicesPage = () => {
 
   const handleServiceSelect = (serviceType) => {
     setSelectedServiceLocal(serviceType);
-    if (serviceType === 'apartments') {
-      dispatch(fetchAdminApartments());
-    } else {
-      dispatch(setSelectedService(serviceType));
-    }
+    setPage(0);
+    dispatch(setSelectedService(serviceType));
+  };
+
+  const handleChangePage = (_, newPage) => setPage(newPage);
+  const handleChangeRowsPerPage = (e) => {
+    setRowsPerPage(parseInt(e.target.value, 10));
+    setPage(0);
   };
 
   const handleEdit = (item) => {
@@ -294,12 +305,12 @@ const ServicesPage = () => {
   useEffect(() => {
     if (selectedService) {
       if (selectedService === 'apartments') {
-        dispatch(fetchAdminApartments());
+        dispatch(fetchAdminApartments({ page: page + 1, limit: rowsPerPage }));
       } else {
-        dispatch(fetchServices(selectedService));
+        dispatch(fetchServices({ serviceType: selectedService, page: page + 1, limit: rowsPerPage }));
       }
     }
-  }, [selectedService, dispatch]);
+  }, [selectedService, dispatch, page, rowsPerPage]);
 
   useEffect(() => {
     const hasError = selectedService === 'apartments' 
@@ -337,11 +348,16 @@ const ServicesPage = () => {
       </Box>
       
       <ServiceButtons onServiceSelect={handleServiceSelect} />
-      <ServiceTable 
+      <ServiceTable
         selectedService={selectedService}
         services={selectedService === 'apartments' ? (adminApartments.apartments || []) : (items[selectedService] || [])}
         status={selectedService === 'apartments' ? adminApartments.status : status[selectedService]}
         error={selectedService === 'apartments' ? adminApartments.error : error[selectedService]}
+        pagination={currentPagination}
+        page={page}
+        rowsPerPage={rowsPerPage}
+        onPageChange={handleChangePage}
+        onRowsPerPageChange={handleChangeRowsPerPage}
         onEdit={handleEdit}
         onDelete={handleDelete}
       />

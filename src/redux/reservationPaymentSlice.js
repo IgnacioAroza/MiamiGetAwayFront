@@ -7,7 +7,8 @@ const initialState = {
     selectedPayment: null,
     status: 'idle',
     error: null,
-    loading: false
+    loading: false,
+    pagination: null,
 };
 
 // Thunks
@@ -94,9 +95,18 @@ const reservationPaymentSlice = createSlice({
             })
             .addCase(fetchAllPayments.fulfilled, (state, action) => {
                 state.status = 'succeeded';
-                const raw = action.payload || [];
-                state.payments = Array.isArray(raw) ? raw.map(normalizePaymentFromApi) : [];
                 state.loading = false;
+                const raw = action.payload;
+                if (Array.isArray(raw)) {
+                    state.payments = raw.map(normalizePaymentFromApi);
+                    state.pagination = null;
+                } else if (raw?.data && raw?.pagination) {
+                    state.payments = raw.data.map(normalizePaymentFromApi);
+                    state.pagination = raw.pagination;
+                } else {
+                    state.payments = [];
+                    state.pagination = null;
+                }
             })
             .addCase(fetchAllPayments.rejected, (state, action) => {
                 state.status = 'failed';
@@ -137,5 +147,7 @@ export const {
     clearSelectedPayment,
     clearError
 } = reservationPaymentSlice.actions;
+
+export const selectPaymentsPagination = (state) => state.reservationPayments.pagination;
 
 export default reservationPaymentSlice.reducer;

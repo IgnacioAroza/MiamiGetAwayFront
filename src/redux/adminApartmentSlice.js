@@ -4,12 +4,12 @@ import api from '../utils/api';
 
 export const fetchAdminApartments = createAsyncThunk(
     'adminApartments/fetchAll',
-    async (_, { rejectWithValue }) => {
+    async (params = {}, { rejectWithValue }) => {
         try {
-            const response = await api.get('/apartments');
+            const response = await api.get('/apartments', { params });
             return response.data;
         } catch (error) {
-            return rejectWithValue(error.response?.data?.message || 'Error fetching apartments');
+            return rejectWithValue(error.response?.data?.error || error.response?.data?.message || 'Error fetching apartments');
         }
     }
 );
@@ -21,7 +21,7 @@ export const fetchAdminApartmentById = createAsyncThunk(
             const response = await api.get(`/apartments/${id}`);
             return response.data;
         } catch (error) {
-            return rejectWithValue(error.response?.data?.message || 'Error fetching apartment by id');
+            return rejectWithValue(error.response?.data?.error || error.response?.data?.message || 'Error fetching apartment by id');
         }
     }
 );
@@ -33,7 +33,7 @@ export const createAdminApartment = createAsyncThunk(
             const response = await api.post('/apartments', apartmentData);
             return response.data;
         } catch (error) {
-            return rejectWithValue(error.response?.data?.message || 'Error creating apartment');
+            return rejectWithValue(error.response?.data?.error || error.response?.data?.message || 'Error creating apartment');
         }
     }
 );
@@ -45,7 +45,7 @@ export const updateAdminApartment = createAsyncThunk(
             const response = await api.put(`/apartments/${id}`, data);
             return response.data;
         } catch (error) {
-            return rejectWithValue(error.response?.data?.message || 'Error updating apartment');
+            return rejectWithValue(error.response?.data?.error || error.response?.data?.message || 'Error updating apartment');
         }
     }
 );
@@ -57,7 +57,7 @@ export const deleteAdminApartment = createAsyncThunk(
             await api.delete(`/apartments/${id}`);
             return id;
         } catch (error) {
-            return rejectWithValue(error.response?.data?.message || 'Error deleting apartment');
+            return rejectWithValue(error.response?.data?.error || error.response?.data?.message || 'Error deleting apartment');
         }
     }
 );
@@ -68,6 +68,7 @@ const initialState = {
     status: 'idle',
     error: null,
     loading: false,
+    pagination: null,
 };
 
 const adminApartmentSlice = createSlice({
@@ -93,10 +94,19 @@ const adminApartmentSlice = createSlice({
             })
             .addCase(fetchAdminApartments.fulfilled, (state, action) => {
                 state.status = 'succeeded';
-                const raw = action.payload || [];
-                state.apartments = Array.isArray(raw) ? raw.map(normalizeApartmentFromApi) : [];
                 state.loading = false;
                 state.error = null;
+                const raw = action.payload;
+                if (Array.isArray(raw)) {
+                    state.apartments = raw.map(normalizeApartmentFromApi);
+                    state.pagination = null;
+                } else if (raw?.data && raw?.pagination) {
+                    state.apartments = raw.data.map(normalizeApartmentFromApi);
+                    state.pagination = raw.pagination;
+                } else {
+                    state.apartments = [];
+                    state.pagination = null;
+                }
             })
             .addCase(fetchAdminApartments.rejected, (state, action) => {
                 state.status = 'failed';
@@ -162,5 +172,6 @@ export const selectAllApartments = (state) => state.adminApartments.apartments;
 export const selectApartmentStatus = (state) => state.adminApartments.status;
 export const selectApartmentError = (state) => state.adminApartments.error;
 export const selectSelectedApartment = (state) => state.adminApartments.selectedApartment;
+export const selectApartmentPagination = (state) => state.adminApartments.pagination;
 
 export default adminApartmentSlice.reducer;
