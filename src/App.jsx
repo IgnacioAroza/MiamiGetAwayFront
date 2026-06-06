@@ -35,6 +35,10 @@ const SupplierList = lazy(() => import('./components/admin/suppliers/SupplierLis
 const InvestmentsPage = lazy(() => import('./pages/InvestmentsPage'));
 const InvestmentDetailPage = lazy(() => import('./pages/InvestmentDetailPage'));
 const InvestmentList = lazy(() => import('./components/admin/investments/InvestmentList'));
+const ExperiencesPage = lazy(() => import('./pages/ExperiencesPage'));
+const ExperienceDetailPage = lazy(() => import('./pages/ExperienceDetailPage'));
+const ExperienceList = lazy(() => import('./components/admin/experiences/ExperienceList'));
+const InquiryList = lazy(() => import('./components/admin/experiences/InquiryList'));
 
 const theme = createTheme({
   palette: {
@@ -111,9 +115,13 @@ function AppContent() {
               <Route path="apartments" element={<ApartmentList />} />
               <Route path="suppliers" element={<SupplierList />} />
               <Route path="investments" element={<InvestmentList />} />
+              <Route path="experiences" element={<ExperienceList />} />
+              <Route path="experiences/inquiries" element={<InquiryList />} />
             </Route>
             <Route path="/investments" element={<InvestmentsPage />} />
             <Route path="/investments/:id" element={<InvestmentDetailPage />} />
+            <Route path="/experiences" element={<ExperiencesPage />} />
+            <Route path="/experiences/:id" element={<ExperienceDetailPage />} />
             <Route path="/reservations" element={<ReservationsPage />} />
             <Route path="/reservations/:id" element={<ReservationDetailsPage />} />
           </Routes>

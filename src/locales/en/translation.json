@@ -38,7 +38,8 @@
       "yachts": "Yachts",
       "apartments": "Apartments",
       "villas": "Villas",
-      "investments": "Investments"
+      "investments": "Investments",
+      "experiences": "Experiences"
     },
     "brand": "Brand",
     "model": "Model",
@@ -186,5 +187,27 @@
       "noInvestments": "No investments available at this time.",
       "loading": "Loading investments...",
       "error": "Error loading investments. Please try again."
+    },
+    "experiences": {
+      "title": "Experiences",
+      "subtitle": "Live unique moments in Miami",
+      "noExperiences": "No experiences available at this time.",
+      "error": "Error loading experiences. Please try again.",
+      "notFound": "Experience not found.",
+      "backToExperiences": "Back to Experiences",
+      "priceOnRequest": "Price on request",
+      "viewDetails": "View Details",
+      "capacityPeople": "{{capacity}} people",
+      "inquireTitle": "Check availability",
+      "inquireSuccess": "Inquiry sent! We'll contact you soon.",
+      "inquireError": "Error sending inquiry. Please try again.",
+      "form": {
+        "name": "First name",
+        "lastname": "Last name",
+        "email": "Email",
+        "phone": "Phone (optional)",
+        "submit": "Send inquiry",
+        "sending": "Sending..."
+      }
     }
 }

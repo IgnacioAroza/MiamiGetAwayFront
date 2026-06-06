@@ -38,7 +38,8 @@
       "yachts": "Yates",
       "apartments": "Departamentos",
       "villas": "Villas",
-      "investments": "Inversiones"
+      "investments": "Inversiones",
+      "experiences": "Experiencias"
     },
     "brand": "Marca",
     "model": "Modelo",
@@ -186,5 +187,27 @@
       "noInvestments": "No hay inversiones disponibles en este momento.",
       "loading": "Cargando inversiones...",
       "error": "Error al cargar las inversiones. Por favor, intentá de nuevo."
+    },
+    "experiences": {
+      "title": "Experiencias",
+      "subtitle": "Viví momentos únicos en Miami",
+      "noExperiences": "No hay experiencias disponibles en este momento.",
+      "error": "Error al cargar las experiencias. Por favor, intentá de nuevo.",
+      "notFound": "Experiencia no encontrada.",
+      "backToExperiences": "Volver a Experiencias",
+      "priceOnRequest": "A consultar",
+      "viewDetails": "Ver Detalles",
+      "capacityPeople": "{{capacity}} personas",
+      "inquireTitle": "Consultar disponibilidad",
+      "inquireSuccess": "¡Consulta enviada! Te contactaremos a la brevedad.",
+      "inquireError": "Error al enviar la consulta. Por favor, intentá de nuevo.",
+      "form": {
+        "name": "Nombre",
+        "lastname": "Apellido",
+        "email": "Email",
+        "phone": "Teléfono (opcional)",
+        "submit": "Enviar consulta",
+        "sending": "Enviando..."
+      }
     }
 }
