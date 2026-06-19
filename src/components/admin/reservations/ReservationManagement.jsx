@@ -34,6 +34,7 @@ const ReservationManagement = () => {
                     if (reservation) {
                         setInitialData({
                             id: reservation.id || id,
+                            clientId: reservation.clientId || '',
                             checkInDate: reservation.checkInDate || '',
                             checkOutDate: reservation.checkOutDate || '',
                             nights: reservation.nights || 1,

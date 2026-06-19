@@ -7,14 +7,17 @@ import {
 import { useDispatch, useSelector } from 'react-redux';
 import MailOutlineIcon from '@mui/icons-material/MailOutline';
 import {
-    fetchAllInquiries, updateInquiryStatus,
-    selectAllInquiries, selectInquiriesStatus, selectInquiriesPagination,
-} from '../../../redux/experienceInquirySlice';
+    fetchAllTransferInquiries,
+    updateTransferInquiryStatus,
+    selectAllTransferInquiries,
+    selectTransferInquiriesLoading,
+    selectTransferInquiriesPagination,
+} from '../../../redux/transferInquirySlice';
 
 const STATUS_COLORS = {
-    pending: { bgcolor: '#1a3a1a', color: '#66bb6a', border: '#2a5a2a' },
-    contacted: { bgcolor: '#1a2a3a', color: '#4fc3f7', border: '#2a4a6a' },
-    closed: { bgcolor: '#2a2a2a', color: '#888', border: '#3a3a3a' },
+    pending: { bgcolor: '#3a2a0a', color: '#ffb74d', border: '#5a4a1a' },
+    confirmed: { bgcolor: '#1a3a1a', color: '#66bb6a', border: '#2a5a2a' },
+    cancelled: { bgcolor: '#3a1a1a', color: '#ef5350', border: '#5a2a2a' },
 };
 
 const StatusChip = ({ status }) => {
@@ -34,17 +37,17 @@ const StatusChip = ({ status }) => {
     );
 };
 
-const InquiryList = () => {
+const TransferInquiryList = () => {
     const dispatch = useDispatch();
-    const inquiries = useSelector(selectAllInquiries);
-    const status = useSelector(selectInquiriesStatus);
-    const pagination = useSelector(selectInquiriesPagination);
+    const inquiries = useSelector(selectAllTransferInquiries);
+    const loading = useSelector(selectTransferInquiriesLoading);
+    const pagination = useSelector(selectTransferInquiriesPagination);
     const [updating, setUpdating] = useState(null);
     const [page, setPage] = useState(0);
     const [rowsPerPage, setRowsPerPage] = useState(10);
 
     useEffect(() => {
-        dispatch(fetchAllInquiries({ page: page + 1, limit: rowsPerPage }));
+        dispatch(fetchAllTransferInquiries({ page: page + 1, limit: rowsPerPage }));
     }, [dispatch, page, rowsPerPage]);
 
     const handleChangePage = (_, newPage) => setPage(newPage);
@@ -56,13 +59,13 @@ const InquiryList = () => {
     const handleStatusChange = async (id, newStatus) => {
         setUpdating(id);
         try {
-            await dispatch(updateInquiryStatus({ id, status: newStatus })).unwrap();
+            await dispatch(updateTransferInquiryStatus({ id, status: newStatus })).unwrap();
         } finally {
             setUpdating(null);
         }
     };
 
-    if (status === 'loading') {
+    if (loading) {
         return (
             <Box sx={{ p: 3 }}>
                 <Skeleton variant="text" width={200} height={40} sx={{ mb: 3 }} />
@@ -70,7 +73,7 @@ const InquiryList = () => {
                     <Table>
                         <TableHead>
                             <TableRow>
-                                {['Contact', 'Experience', 'Phone', 'Status', 'Date'].map(h => (
+                                {['Contact', 'Vehicle', 'Route', 'Date', 'Service', 'Status'].map(h => (
                                     <TableCell key={h}>{h}</TableCell>
                                 ))}
                             </TableRow>
@@ -78,7 +81,7 @@ const InquiryList = () => {
                         <TableBody>
                             {[...Array(5)].map((_, i) => (
                                 <TableRow key={i}>
-                                    {[180, 160, 120, 100, 120].map((w, j) => (
+                                    {[180, 140, 160, 100, 120, 100].map((w, j) => (
                                         <TableCell key={j}><Skeleton variant="text" width={w} /></TableCell>
                                     ))}
                                 </TableRow>
@@ -94,12 +97,12 @@ const InquiryList = () => {
         <Box sx={{ p: 3 }}>
             <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 3 }}>
                 <MailOutlineIcon sx={{ color: '#4fc3f7' }} />
-                <Typography variant="h4">Inquiries</Typography>
+                <Typography variant="h4">Transfer Inquiries</Typography>
                 {inquiries.length > 0 && (
                     <Chip
                         label={inquiries.filter(i => i.status === 'pending').length + ' pending'}
                         size="small"
-                        sx={{ bgcolor: '#1a3a1a', color: '#66bb6a', border: '1px solid #2a5a2a', ml: 1 }}
+                        sx={{ bgcolor: '#3a2a0a', color: '#ffb74d', border: '1px solid #5a4a1a', ml: 1 }}
                     />
                 )}
             </Box>
@@ -115,10 +118,12 @@ const InquiryList = () => {
                         <TableHead>
                             <TableRow sx={{ '& th': { color: '#aaa', fontWeight: 600, borderColor: '#333' } }}>
                                 <TableCell>Contact</TableCell>
-                                <TableCell>Experience</TableCell>
-                                <TableCell>Phone</TableCell>
+                                <TableCell>Vehicle</TableCell>
+                                <TableCell>Route</TableCell>
+                                <TableCell>Date & Time</TableCell>
+                                <TableCell>Service</TableCell>
+                                <TableCell>Pax / Luggage</TableCell>
                                 <TableCell>Status</TableCell>
-                                <TableCell>Date</TableCell>
                             </TableRow>
                         </TableHead>
                         <TableBody>
@@ -129,24 +134,51 @@ const InquiryList = () => {
                                 >
                                     <TableCell>
                                         <Typography variant="body2" sx={{ color: '#fff', fontWeight: 500 }}>
-                                            {inq.name} {inq.lastname}
+                                            {inq.client_name}
                                         </Typography>
                                         <Typography variant="caption" sx={{ color: '#777' }}>
-                                            {inq.email}
+                                            {inq.client_email}
+                                        </Typography>
+                                        <Typography variant="caption" sx={{ color: '#666', display: 'block' }}>
+                                            {inq.client_phone}
                                         </Typography>
                                     </TableCell>
                                     <TableCell>
-                                        {inq.experience_title ? (
-                                            <Typography variant="body2">{inq.experience_title}</Typography>
+                                        {inq.vehicle_name ? (
+                                            <Typography variant="body2">{inq.vehicle_name}</Typography>
                                         ) : (
                                             <Typography variant="caption" sx={{ color: '#555', fontStyle: 'italic' }}>
-                                                General inquiry
+                                                Not specified
                                             </Typography>
                                         )}
                                     </TableCell>
                                     <TableCell>
-                                        <Typography variant="body2" sx={{ color: inq.phone ? '#ddd' : '#555' }}>
-                                            {inq.phone || '—'}
+                                        <Typography variant="body2" sx={{ color: '#ddd' }}>
+                                            {inq.pick_up}
+                                        </Typography>
+                                        <Typography variant="caption" sx={{ color: '#777' }}>
+                                            → {inq.drop_off}
+                                        </Typography>
+                                    </TableCell>
+                                    <TableCell>
+                                        <Typography variant="body2" sx={{ whiteSpace: 'nowrap' }}>
+                                            {inq.date}
+                                        </Typography>
+                                        <Typography variant="caption" sx={{ color: '#777' }}>
+                                            {inq.time}
+                                        </Typography>
+                                    </TableCell>
+                                    <TableCell>
+                                        <Typography variant="body2" sx={{ color: '#aaa', textTransform: 'capitalize' }}>
+                                            {inq.service_type.replace(/_/g, ' ')}
+                                        </Typography>
+                                    </TableCell>
+                                    <TableCell>
+                                        <Typography variant="body1" sx={{ color: '#ddd', whiteSpace: 'nowrap', fontWeight: 500 }}>
+                                            {inq.passengers} pax
+                                        </Typography>
+                                        <Typography variant="body2" sx={{ color: '#888', whiteSpace: 'nowrap' }}>
+                                            L:{inq.luggage_large ?? 0} M:{inq.luggage_medium ?? 0} CO:{inq.luggage_carry_on ?? 0}
                                         </Typography>
                                     </TableCell>
                                     <TableCell>
@@ -168,18 +200,11 @@ const InquiryList = () => {
                                                 }}
                                                 MenuProps={{ PaperProps: { sx: { bgcolor: '#1e1e1e' } } }}
                                             >
-                                                <MenuItem value="pending" sx={{ color: '#66bb6a' }}>pending</MenuItem>
-                                                <MenuItem value="contacted" sx={{ color: '#4fc3f7' }}>contacted</MenuItem>
-                                                <MenuItem value="closed" sx={{ color: '#888' }}>closed</MenuItem>
+                                                <MenuItem value="pending" sx={{ color: '#ffb74d' }}>pending</MenuItem>
+                                                <MenuItem value="confirmed" sx={{ color: '#66bb6a' }}>confirmed</MenuItem>
+                                                <MenuItem value="cancelled" sx={{ color: '#ef5350' }}>cancelled</MenuItem>
                                             </Select>
                                         )}
-                                    </TableCell>
-                                    <TableCell>
-                                        <Typography variant="caption" sx={{ color: '#777', whiteSpace: 'nowrap' }}>
-                                            {new Date(inq.created_at).toLocaleDateString('en-US', {
-                                                month: 'short', day: 'numeric', year: 'numeric',
-                                            })}
-                                        </Typography>
                                     </TableCell>
                                 </TableRow>
                             ))}
@@ -201,4 +226,4 @@ const InquiryList = () => {
     );
 };
 
-export default InquiryList;
+export default TransferInquiryList;

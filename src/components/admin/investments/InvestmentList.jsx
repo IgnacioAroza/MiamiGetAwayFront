@@ -2,7 +2,7 @@ import React, { useEffect, useRef, useState } from 'react';
 import {
     Box, Button, Card, CardActions, CardContent, CardMedia, Chip,
     CircularProgress, Dialog, DialogActions, DialogContent, DialogTitle,
-    Divider, Grid, IconButton, Paper, Skeleton,
+    Divider, Grid, IconButton, Paper, Skeleton, TablePagination,
     Table, TableBody, TableCell, TableContainer, TableHead, TableRow,
     TextField, Tooltip, Typography,
 } from '@mui/material';
@@ -16,7 +16,7 @@ import BedOutlinedIcon from '@mui/icons-material/BedOutlined';
 import ImageIcon from '@mui/icons-material/Image';
 import {
     fetchAllInvestments, createInvestment, updateInvestment, deleteInvestment,
-    selectAllInvestments, selectInvestmentsStatus,
+    selectAllInvestments, selectInvestmentsStatus, selectInvestmentsPagination,
 } from '../../../redux/investmentSlice';
 import DeleteDialog from '../dialogs/DeleteDialog';
 import useDeviceDetection from '../../../hooks/useDeviceDetection';
@@ -118,6 +118,7 @@ const InvestmentList = () => {
     const { isMobile, isTablet } = useDeviceDetection();
     const investments = useSelector(selectAllInvestments);
     const status = useSelector(selectInvestmentsStatus);
+    const pagination = useSelector(selectInvestmentsPagination);
 
     const [createOpen, setCreateOpen] = useState(false);
     const [editOpen, setEditOpen] = useState(false);
@@ -126,10 +127,18 @@ const InvestmentList = () => {
     const [form, setForm] = useState(emptyForm);
     const [imageFiles, setImageFiles] = useState([]);
     const [saving, setSaving] = useState(false);
+    const [page, setPage] = useState(0);
+    const [rowsPerPage, setRowsPerPage] = useState(10);
 
     useEffect(() => {
-        if (status === 'idle') dispatch(fetchAllInvestments());
-    }, [dispatch, status]);
+        dispatch(fetchAllInvestments({ page: page + 1, limit: rowsPerPage }));
+    }, [dispatch, page, rowsPerPage]);
+
+    const handleChangePage = (_, newPage) => setPage(newPage);
+    const handleChangeRowsPerPage = (e) => {
+        setRowsPerPage(parseInt(e.target.value, 10));
+        setPage(0);
+    };
 
     const handleFormChange = (e) => {
         const { name, value } = e.target;
@@ -400,7 +409,30 @@ const InvestmentList = () => {
                             ))}
                         </TableBody>
                     </Table>
+                    <TablePagination
+                        component="div"
+                        count={pagination?.total ?? investments.length}
+                        page={page}
+                        onPageChange={handleChangePage}
+                        rowsPerPage={rowsPerPage}
+                        onRowsPerPageChange={handleChangeRowsPerPage}
+                        rowsPerPageOptions={[10, 25, 50]}
+                        labelRowsPerPage="Rows per page:"
+                    />
                 </TableContainer>
+            )}
+
+            {(isMobile || isTablet) && investments.length > 0 && (
+                <TablePagination
+                    component="div"
+                    count={pagination?.total ?? investments.length}
+                    page={page}
+                    onPageChange={handleChangePage}
+                    rowsPerPage={rowsPerPage}
+                    onRowsPerPageChange={handleChangeRowsPerPage}
+                    rowsPerPageOptions={[10, 25, 50]}
+                    labelRowsPerPage="Per page:"
+                />
             )}
 
             {/* Create dialog */}

@@ -18,7 +18,7 @@ const reservationPaymentService = {
             const response = await api.get(url);
             return response.data;
         } catch (error) {
-            throw error.response?.data?.message || 'Error fetching all payments';
+            throw error.response?.data?.error || error.response?.data?.message || 'Error fetching all payments';
         }
     },
 
@@ -27,7 +27,7 @@ const reservationPaymentService = {
             const response = await api.get(`/reservation-payments/${id}`);
             return response.data;
         } catch (error) {
-            throw error.response?.data?.message || 'Error fetching payment by id';
+            throw error.response?.data?.error || error.response?.data?.message || 'Error fetching payment by id';
         }
     },
 
@@ -62,7 +62,7 @@ const reservationPaymentService = {
             const response = await api.post(`/reservations/${reservationId}/payments`, body);
             return response.data;
         } catch (error) {
-            throw error.response?.data?.message || 'Error creating payment';
+            throw error.response?.data?.error || error.response?.data?.message || 'Error creating payment';
         }
     },
 
@@ -89,7 +89,7 @@ const reservationPaymentService = {
             const response = await api.put(`/reservation-payments/${id}`, body);
             return response.data;
         } catch (error) {
-            throw error.response?.data?.message || 'Error updating payment';
+            throw error.response?.data?.error || error.response?.data?.message || 'Error updating payment';
         }
     },
 
@@ -98,7 +98,7 @@ const reservationPaymentService = {
             const response = await api.delete(`/reservation-payments/${id}`);
             return response.data;
         } catch (error) {
-            throw error.response?.data?.message || 'Error deleting payment';
+            throw error.response?.data?.error || error.response?.data?.message || 'Error deleting payment';
         }
     }
 };

@@ -22,6 +22,7 @@ const services = [
   { id: 4, nameKey: 'services.types.villas', image: 'https://res.cloudinary.com/dbvpwfh07/image/upload/v1732024225/utils/Services/villa.png', path: '/services/villas' },
   { id: 5, nameKey: 'services.types.investments', image: 'https://res.cloudinary.com/dbvpwfh07/image/upload/v1780519480/utils/Services/investments.jpg', path: '/investments' },
   { id: 6, nameKey: 'services.types.experiences', image: 'https://res.cloudinary.com/dbvpwfh07/image/upload/v1780519480/utils/Services/experiences.jpg', path: '/experiences' },
+  { id: 7, nameKey: 'services.types.transfers', image: 'https://res.cloudinary.com/dbvpwfh07/image/upload/v1780519480/utils/Services/transfers.jpg', path: '/transfers' },
 ];
 
 const MotionGrid = motion.create(Grid);

@@ -11,6 +11,8 @@ import supplierReducer from './supplierSlice';
 import investmentReducer from './investmentSlice';
 import experienceReducer from './experienceSlice';
 import experienceInquiryReducer from './experienceInquirySlice';
+import transferVehicleReducer from './transferVehicleSlice';
+import transferInquiryReducer from './transferInquirySlice';
 
 export const store = configureStore({
     reducer: {
@@ -26,6 +28,8 @@ export const store = configureStore({
         investments: investmentReducer,
         experiences: experienceReducer,
         experienceInquiries: experienceInquiryReducer,
+        transferVehicles: transferVehicleReducer,
+        transferInquiries: transferInquiryReducer,
     },
 });
 

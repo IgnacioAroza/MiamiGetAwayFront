@@ -18,7 +18,7 @@ const summaryService = {
             };
         } catch (error) {
             console.error('Error generating summary:', error);
-            throw error.response?.data?.message || 'Error generating summary';
+            throw error.response?.data?.error || error.response?.data?.message || 'Error generating summary';
         }
     },
 
@@ -34,7 +34,7 @@ const summaryService = {
             };
         } catch (error) {
             console.error('Error fetching summary details:', error);
-            throw error.response?.data?.message || 'Error fetching summary details';
+            throw error.response?.data?.error || error.response?.data?.message || 'Error fetching summary details';
         }
     },
 
@@ -57,7 +57,7 @@ const summaryService = {
             return true;
         } catch (error) {
             console.error('Error downloading summary PDF:', error);
-            throw error.response?.data?.message || 'Error at downloading summary PDF';
+            throw error.response?.data?.error || error.response?.data?.message || 'Error at downloading summary PDF';
         }
     },
 
@@ -68,7 +68,7 @@ const summaryService = {
             return response.data;
         } catch (error) {
             console.error('Error sending summary email:', error);
-            throw error.response?.data?.message || 'Error at sending summary email';
+            throw error.response?.data?.error || error.response?.data?.message || 'Error at sending summary email';
         }
     }
 };

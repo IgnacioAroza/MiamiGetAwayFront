@@ -1,8 +1,8 @@
 import api from '../utils/api';
 
 const experienceService = {
-    getAll: async () => {
-        const res = await api.get('/experiences');
+    getAll: async (params = {}) => {
+        const res = await api.get('/experiences', { params });
         return res.data;
     },
 
@@ -31,8 +31,8 @@ const experienceService = {
         return res.data;
     },
 
-    getAllInquiries: async () => {
-        const res = await api.get('/experiences/inquiries');
+    getAllInquiries: async (params = {}) => {
+        const res = await api.get('/experiences/inquiries', { params });
         return res.data;
     },
 

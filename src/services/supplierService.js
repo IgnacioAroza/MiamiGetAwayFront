@@ -56,7 +56,7 @@ const supplierService = {
             return normalizeAssignment(res.data);
         } catch (error) {
             if (error.response?.status === 404) return null;
-            throw error.response?.data?.message || 'Error fetching supplier';
+            throw error.response?.data?.error || error.response?.data?.message || 'Error fetching supplier';
         }
     },
 
@@ -87,7 +87,7 @@ const supplierService = {
             return Array.isArray(res.data) ? res.data.map(normalizeSupplierPayment) : [];
         } catch (error) {
             if (error.response?.status === 404) return [];
-            throw error.response?.data?.message || 'Error fetching supplier payments';
+            throw error.response?.data?.error || error.response?.data?.message || 'Error fetching supplier payments';
         }
     },
 
