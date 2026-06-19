@@ -4,30 +4,29 @@ Estado actual del proyecto. Leer al inicio de cada sesión antes de tocar códig
 
 ---
 
-## Estado de ramas (al 2026-06-04)
+## Estado de ramas (al 2026-06-05)
 
 | Rama | Estado |
 |------|--------|
-| `main` | Producción — tiene features hasta paginación server-side (PR #32) + suppliers (PR #31) |
-| `development` | 24 commits adelante de `main` — tiene investments + todos los perf fixes (PR #33) |
-| `feature/investments` | Mergeada a `development` (PR #34). Pendiente de pasar a `main` cuando el cliente pague |
-| `feature/experiences` | Feature completa, pendiente de mergear a `development` cuando corresponda |
-| `feature/transfers` | Feature completa con paginación server-side + fix Listings dropdown (`4154632`, bug fix), pendiente de mergear cuando el backend esté en producción |
+| `main` | Producción — tiene hasta Investments (PR #35) + Experiences (PR #36) |
+| `development` | Adelanta a `main` con Transfers — pendiente de PR a `main` hasta próximo pago del cliente |
+| `feature/investments` | Eliminada — mergeada a `main` (PR #35) |
+| `feature/experiences` | Eliminada — mergeada a `main` (PR #36) |
+| `feature/transfers` | Eliminada — mergeada a `development` (2026-06-05) |
 
 ---
 
-## Features en ramas de feature (no productivas)
+## Features en producción (`main`)
 
-### Investments (`feature/investments` → ya en `development`)
+### Investments — en `main` (PR #35)
 - Rutas públicas: `/investments`, `/investments/:id`
 - Admin: `/admin/investments`
 - `price === null` → "A consultar"; `unit_number === null` → no mostrar
 - POST/PUT: `multipart/form-data`, campo `images` (máx 30). PUT con imágenes reemplaza todas
 - WhatsApp en idioma activo del sitio
 - Imagen en Services.jsx: `v1780519480/utils/Services/investments.jpg`
-- **No mergear a `main` hasta que el cliente pague**
 
-### Experiences (`feature/experiences`)
+### Experiences — en `main` (PR #36)
 - Rutas públicas: `/experiences`, `/experiences/:id`
 - Admin: `/admin/experiences` (tabs: Experiences | Inquiries)
 - `price === null` → "A consultar"; `capacity === null` → no mostrar
@@ -38,7 +37,10 @@ Estado actual del proyecto. Leer al inicio de cada sesión antes de tocar códig
 - `experience_title === null` en inquiry → consulta general (experience_id fue null)
 - Imagen en Services.jsx: `v1780519480/utils/Services/experiences.jpg`
 
-### Transfers (`feature/transfers`)
+## Features en `development` (pendiente de `main`)
+
+### Transfers — en `development`, **no en `main`**
+- Se despliega cuando el cliente haga el próximo pago
 - Rutas públicas: `/transfers` (form-first), `/transfers/:id` (redirige a `/transfers`)
 - Admin: `/admin/transfers` (tabs: Fleet | Inquiries)
 - Página pública: hero → formulario de inquiry → fleet como referencia secundaria
