@@ -4,15 +4,15 @@ Estado actual del proyecto. Leer al inicio de cada sesión antes de tocar códig
 
 ---
 
-## Estado de ramas (al 2026-06-05)
+## Estado de ramas (al 2026-06-19)
 
 | Rama | Estado |
 |------|--------|
-| `main` | Producción — tiene hasta Investments (PR #35) + Experiences (PR #36) |
-| `development` | Adelanta a `main` con Transfers — pendiente de PR a `main` hasta próximo pago del cliente |
+| `main` | Producción — tiene hasta Transfers (PR #37). Todo el scope entregado |
+| `development` | Al día con `main` |
 | `feature/investments` | Eliminada — mergeada a `main` (PR #35) |
 | `feature/experiences` | Eliminada — mergeada a `main` (PR #36) |
-| `feature/transfers` | Eliminada — mergeada a `development` (2026-06-05) |
+| `feature/transfers` | Eliminada — mergeada a `main` (PR #37, 2026-06-19) |
 
 ---
 
@@ -37,10 +37,10 @@ Estado actual del proyecto. Leer al inicio de cada sesión antes de tocar códig
 - `experience_title === null` en inquiry → consulta general (experience_id fue null)
 - Imagen en Services.jsx: `v1780519480/utils/Services/experiences.jpg`
 
-## Features en `development` (pendiente de `main`)
+## Features en producción (`main`) — scope completo entregado
 
-### Transfers — en `development`, **no en `main`**
-- Se despliega cuando el cliente haga el próximo pago
+### Transfers — en `main` (PR #37, 2026-06-19)
+- Mergeado tras pago del cliente. Pendiente: último pago para cierre del proyecto.
 - Rutas públicas: `/transfers` (form-first), `/transfers/:id` (redirige a `/transfers`)
 - Admin: `/admin/transfers` (tabs: Fleet | Inquiries)
 - Página pública: hero → formulario de inquiry → fleet como referencia secundaria
