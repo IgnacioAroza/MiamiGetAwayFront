@@ -32,9 +32,12 @@ const USD = (n) => `$${Number(n ?? 0).toFixed(2)}`;
 
 const METHOD_LABELS = {
     cash: 'Cash',
-    wire: 'Wire',
     card: 'Card',
     transfer: 'Transfer',
+    paypal: 'PayPal',
+    zelle: 'Zelle',
+    stripe: 'Stripe',
+    other: 'Other',
 };
 
 // ─── sub-components ───────────────────────────────────────────────────────────

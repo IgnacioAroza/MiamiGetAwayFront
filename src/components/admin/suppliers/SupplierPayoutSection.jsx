@@ -30,7 +30,7 @@ const PAYMENT_TERMS_OPTIONS = [
     'Within 1 week after check-out',
     'Upon check-in',
 ];
-const PAYMENT_METHODS = ['wire', 'cash', 'card', 'transfer'];
+const PAYMENT_METHODS = ['cash', 'card', 'transfer', 'paypal', 'zelle', 'stripe', 'other'];
 
 // ─── shared sx helpers ────────────────────────────────────────────────────────
 const sectionLabel = {
