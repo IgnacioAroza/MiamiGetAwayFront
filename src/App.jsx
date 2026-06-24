@@ -32,6 +32,7 @@ const ServicesPage = lazy(() => import('./components/admin/services/ServicesPage
 const CreateUser = lazy(() => import('./components/admin/users/CreateUser'));
 const EditUser = lazy(() => import('./components/admin/users/EditUser'));
 const SupplierList = lazy(() => import('./components/admin/suppliers/SupplierList'));
+const SupplierDetail = lazy(() => import('./components/admin/suppliers/SupplierDetail'));
 const InvestmentsPage = lazy(() => import('./pages/InvestmentsPage'));
 const InvestmentDetailPage = lazy(() => import('./pages/InvestmentDetailPage'));
 const InvestmentList = lazy(() => import('./components/admin/investments/InvestmentList'));
@@ -117,6 +118,7 @@ function AppContent() {
               <Route path="reviews" element={<AdminReviews />} />
               <Route path="apartments" element={<ApartmentList />} />
               <Route path="suppliers" element={<SupplierList />} />
+              <Route path="suppliers/:id" element={<SupplierDetail />} />
               <Route path="investments" element={<InvestmentList />} />
               <Route path="experiences" element={<ExperienceList />} />
               <Route path="experiences/inquiries" element={<InquiryList />} />

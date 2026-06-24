@@ -152,6 +152,30 @@ export const normalizePaymentFromApi = (data = {}) => {
   };
 };
 
+// Normaliza pago a supplier desde API a camelCase
+export const normalizeSupplierPaymentFromApi = (data = {}) => {
+  if (!data || typeof data !== 'object') return {};
+  const pick = (camel, snake, fallback = undefined) => data[camel] ?? data[snake] ?? fallback;
+  return {
+    id: pick('id', 'id'),
+    amount: Number(pick('amount', 'amount')) || 0,
+    method: pick('method', 'method') || 'other',
+    date: pick('date', 'date') || '',
+    referenceNotes: pick('referenceNotes', 'reference_notes') || '',
+    receiptImages: pick('receiptImages', 'receipt_images') || [],
+    createdAt: pick('createdAt', 'created_at'),
+    supplierId: pick('supplierId', 'supplier_id'),
+    supplierName: pick('supplierName', 'supplier_name') || '',
+    supplierEmail: pick('supplierEmail', 'supplier_email') || '',
+    supplierPhone: pick('supplierPhone', 'supplier_phone') || '',
+    reservationId: pick('reservationId', 'reservation_id'),
+    apartmentName: pick('apartmentName', 'apartment_name') || '',
+    checkInDate: pick('checkInDate', 'check_in_date') || '',
+    checkOutDate: pick('checkOutDate', 'check_out_date') || '',
+    nights: Number(pick('nights', 'nights')) || 0,
+  };
+};
+
 // Normaliza apartment desde API a camelCase
 export const normalizeApartmentFromApi = (data = {}) => {
   if (!data || typeof data !== 'object') return {};

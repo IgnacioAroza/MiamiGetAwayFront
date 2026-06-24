@@ -124,7 +124,7 @@ const SupplierPayoutSection = ({ reservationId, nights = 0 }) => {
 
     // payment form
     const [paymentForm, setPaymentForm] = useState({
-        amount: '', method: 'wire',
+        amount: '', method: 'cash',
         date: format(new Date(), 'yyyy-MM-dd'), reference_notes: '',
     });
     const [receiptFiles, setReceiptFiles] = useState([]);
@@ -267,7 +267,7 @@ const SupplierPayoutSection = ({ reservationId, nights = 0 }) => {
             setPayments(prev => [...prev, newPayment]);
             const updated = await supplierService.getReservationSupplier(reservationId);
             setAssignment(updated);
-            setPaymentForm({ amount: '', method: 'wire', date: format(new Date(), 'yyyy-MM-dd'), reference_notes: '' });
+            setPaymentForm({ amount: '', method: 'cash', date: format(new Date(), 'yyyy-MM-dd'), reference_notes: '' });
             setReceiptFiles([]);
             if (fileInputRef.current) fileInputRef.current.value = '';
             success('Payment registered');

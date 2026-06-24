@@ -7,9 +7,11 @@ import {
     TextField, Tooltip, Typography,
 } from '@mui/material';
 import { useDispatch, useSelector } from 'react-redux';
+import { useNavigate } from 'react-router-dom';
 import AddIcon from '@mui/icons-material/Add';
 import EditIcon from '@mui/icons-material/Edit';
 import DeleteIcon from '@mui/icons-material/Delete';
+import HistoryIcon from '@mui/icons-material/History';
 import HandshakeIcon from '@mui/icons-material/Handshake';
 import EmailIcon from '@mui/icons-material/Email';
 import PhoneIcon from '@mui/icons-material/Phone';
@@ -67,6 +69,7 @@ const SupplierForm = ({ form, onChange, onEmailBlur, emailError }) => (
 
 const SupplierList = () => {
     const dispatch = useDispatch();
+    const navigate = useNavigate();
     const { isMobile, isTablet } = useDeviceDetection();
     const suppliers = useSelector(selectAllSuppliers);
     const status = useSelector(selectSuppliersStatus);
@@ -264,13 +267,20 @@ const SupplierList = () => {
                                     )}
                                 </CardContent>
                                 <Divider sx={{ borderColor: '#333' }} />
-                                <CardActions sx={{ justifyContent: 'flex-end', p: 1 }}>
-                                    <IconButton size="small" onClick={() => openEdit(s)} sx={{ color: '#6c5dd3' }}>
-                                        <EditIcon />
-                                    </IconButton>
-                                    <IconButton size="small" onClick={() => openDelete(s)} color="error">
-                                        <DeleteIcon />
-                                    </IconButton>
+                                <CardActions sx={{ justifyContent: 'space-between', p: 1 }}>
+                                    <Tooltip title="Payment history">
+                                        <IconButton size="small" onClick={() => navigate(`/admin/suppliers/${s.id}`)} sx={{ color: '#4caf50' }}>
+                                            <HistoryIcon />
+                                        </IconButton>
+                                    </Tooltip>
+                                    <Box>
+                                        <IconButton size="small" onClick={() => openEdit(s)} sx={{ color: '#6c5dd3' }}>
+                                            <EditIcon />
+                                        </IconButton>
+                                        <IconButton size="small" onClick={() => openDelete(s)} color="error">
+                                            <DeleteIcon />
+                                        </IconButton>
+                                    </Box>
                                 </CardActions>
                             </Card>
                         </Grid>
@@ -330,6 +340,11 @@ const SupplierList = () => {
                                         </Typography>
                                     </TableCell>
                                     <TableCell>
+                                        <Tooltip title="Payment history">
+                                            <IconButton size="small" onClick={() => navigate(`/admin/suppliers/${s.id}`)} sx={{ color: '#4caf50' }}>
+                                                <HistoryIcon />
+                                            </IconButton>
+                                        </Tooltip>
                                         <Tooltip title="Edit">
                                             <IconButton size="small" onClick={() => openEdit(s)} sx={{ color: '#6c5dd3' }}>
                                                 <EditIcon />

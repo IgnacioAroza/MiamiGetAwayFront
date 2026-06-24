@@ -1,4 +1,5 @@
 import api from '../utils/api';
+import { normalizeSupplierPaymentFromApi } from '../utils/normalizers';
 
 const normalizeAssignment = (data) => {
     if (!data || typeof data !== 'object') return null;
@@ -105,6 +106,21 @@ const supplierService = {
     deleteSupplierPayment: async (id) => {
         const res = await api.delete(`/supplier-payments/${id}`);
         return res.data;
+    },
+
+    // ── Global supplier payments list ──────────────────────────────────────────
+    getAllSupplierPayments: async (filters = {}) => {
+        const params = {};
+        Object.entries(filters).forEach(([k, v]) => {
+            if (v !== null && v !== undefined && v !== '') params[k] = v;
+        });
+        const res = await api.get('/supplier-payments', { params });
+        const raw = res.data;
+        return {
+            data: (raw.data || []).map(normalizeSupplierPaymentFromApi),
+            pagination: raw.pagination || null,
+            summary: raw.summary || null,
+        };
     },
 };
 

@@ -62,7 +62,7 @@ const SupplierPayoutView = ({ reservationId, reservation }) => {
     const [loading, setLoading] = useState(true);
     const [dialogOpen, setDialogOpen] = useState(false);
     const [saving, setSaving] = useState(false);
-    const [form, setForm] = useState({ amount: '', method: 'wire', date: '', referenceNotes: '' });
+    const [form, setForm] = useState({ amount: '', method: 'cash', date: '', referenceNotes: '' });
     const [receiptFiles, setReceiptFiles] = useState([]);
     const [lightbox, setLightbox] = useState({ open: false, images: [], index: 0 });
     const openLightbox = (images, index = 0) => setLightbox({ open: true, images, index });
@@ -110,7 +110,7 @@ const SupplierPayoutView = ({ reservationId, reservation }) => {
 
     // ── register payment handlers ─────────────────────────────────────────────
     const handleOpenDialog = () => {
-        setForm({ amount: '', method: 'wire', date: new Date().toISOString().slice(0, 10), referenceNotes: '' });
+        setForm({ amount: '', method: 'cash', date: new Date().toISOString().slice(0, 10), referenceNotes: '' });
         setReceiptFiles([]);
         setDialogOpen(true);
     };
