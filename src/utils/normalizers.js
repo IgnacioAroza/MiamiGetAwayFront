@@ -85,6 +85,8 @@ export const normalizeReservationFromApi = (data = {}) => {
   return {
     id: pick('id', 'id'),
     apartmentId: pick('apartmentId', 'apartment_id'),
+    apartmentName: pick('apartmentName', 'apartment_name') || '',
+    apartmentAddress: pick('apartmentAddress', 'apartment_address') || '',
     clientId: pick('clientId', 'client_id'),
 
     clientName: pick('clientName', 'client_name', ''),
