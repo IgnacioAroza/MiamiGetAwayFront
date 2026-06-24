@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 import {
     Table,
@@ -51,6 +52,7 @@ import PaymentFilters from './PaymentFilters';
 // Componente para mostrar y gestionar la lista de pagos
 const PaymentsList = () => {
     const dispatch = useDispatch();
+    const navigate = useNavigate();
     const theme = useTheme();
     const { isMobile, isTablet } = useDeviceDetection();
     const { payments, status, error, loading } = useSelector(state => state.reservationPayments);
@@ -396,7 +398,7 @@ const PaymentsList = () => {
                                                 <Button
                                                     size="small"
                                                     variant="outlined"
-                                                    href={`/admin/reservations/${payment.reservationId}`}
+                                                    onClick={() => navigate(`/admin/reservations/view/${payment.reservationId}`)}
                                                     sx={{ textTransform: 'none', minWidth: 'auto', px: 1 }}
                                                 >
                                                     #{payment.reservationId}

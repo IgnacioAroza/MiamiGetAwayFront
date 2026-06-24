@@ -263,7 +263,7 @@ const SupplierDetail = () => {
                                         <Button
                                             size="small"
                                             variant="outlined"
-                                            href={`/admin/reservations/${p.reservationId}`}
+                                            onClick={() => navigate(`/admin/reservations/view/${p.reservationId}`)}
                                             sx={{ textTransform: 'none', minWidth: 'auto', px: 1, borderColor: '#444', color: '#9b8fef' }}
                                         >
                                             #{p.reservationId}
