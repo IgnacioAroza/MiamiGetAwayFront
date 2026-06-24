@@ -85,6 +85,8 @@ export const normalizeReservationFromApi = (data = {}) => {
   return {
     id: pick('id', 'id'),
     apartmentId: pick('apartmentId', 'apartment_id'),
+    apartmentName: pick('apartmentName', 'apartment_name') || '',
+    apartmentAddress: pick('apartmentAddress', 'apartment_address') || '',
     clientId: pick('clientId', 'client_id'),
 
     clientName: pick('clientName', 'client_name', ''),
@@ -138,12 +140,39 @@ export const normalizePaymentFromApi = (data = {}) => {
     id: pick('id', 'id'),
     reservationId: pick('reservationId', 'reservation_id'),
     clientId: pick('clientId', 'client_id'),
+    clientName: pick('clientName', 'client_name') || '',
+    clientLastname: pick('clientLastname', 'client_lastname') || '',
+    clientEmail: pick('clientEmail', 'client_email') || '',
     amount: numberOrUndefined(pick('amount', 'amount')) ?? 0,
     paymentMethod: pick('paymentMethod', 'payment_method') || 'other',
     paymentDate: pick('paymentDate', 'payment_date'),
     paymentReference: pick('paymentReference', 'payment_reference') || '',
     notes: pick('notes', 'notes') || '',
     receiptImage: pick('receiptImage', 'receipt_image') || null,
+  };
+};
+
+// Normaliza pago a supplier desde API a camelCase
+export const normalizeSupplierPaymentFromApi = (data = {}) => {
+  if (!data || typeof data !== 'object') return {};
+  const pick = (camel, snake, fallback = undefined) => data[camel] ?? data[snake] ?? fallback;
+  return {
+    id: pick('id', 'id'),
+    amount: Number(pick('amount', 'amount')) || 0,
+    method: pick('method', 'method') || 'other',
+    date: pick('date', 'date') || '',
+    referenceNotes: pick('referenceNotes', 'reference_notes') || '',
+    receiptImages: pick('receiptImages', 'receipt_images') || [],
+    createdAt: pick('createdAt', 'created_at'),
+    supplierId: pick('supplierId', 'supplier_id'),
+    supplierName: pick('supplierName', 'supplier_name') || '',
+    supplierEmail: pick('supplierEmail', 'supplier_email') || '',
+    supplierPhone: pick('supplierPhone', 'supplier_phone') || '',
+    reservationId: pick('reservationId', 'reservation_id'),
+    apartmentName: pick('apartmentName', 'apartment_name') || '',
+    checkInDate: pick('checkInDate', 'check_in_date') || '',
+    checkOutDate: pick('checkOutDate', 'check_out_date') || '',
+    nights: Number(pick('nights', 'nights')) || 0,
   };
 };
 

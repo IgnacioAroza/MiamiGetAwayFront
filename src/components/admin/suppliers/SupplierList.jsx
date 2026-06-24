@@ -7,6 +7,7 @@ import {
     TextField, Tooltip, Typography,
 } from '@mui/material';
 import { useDispatch, useSelector } from 'react-redux';
+import { useNavigate } from 'react-router-dom';
 import AddIcon from '@mui/icons-material/Add';
 import EditIcon from '@mui/icons-material/Edit';
 import DeleteIcon from '@mui/icons-material/Delete';
@@ -67,6 +68,7 @@ const SupplierForm = ({ form, onChange, onEmailBlur, emailError }) => (
 
 const SupplierList = () => {
     const dispatch = useDispatch();
+    const navigate = useNavigate();
     const { isMobile, isTablet } = useDeviceDetection();
     const suppliers = useSelector(selectAllSuppliers);
     const status = useSelector(selectSuppliersStatus);
@@ -232,7 +234,10 @@ const SupplierList = () => {
                 <Grid container spacing={2}>
                     {suppliers.map(s => (
                         <Grid item xs={12} key={s.id}>
-                            <Card sx={{ bgcolor: '#2a2a2a', border: '1px solid #333' }}>
+                            <Card
+                                onClick={() => navigate(`/admin/suppliers/${s.id}`)}
+                                sx={{ bgcolor: '#2a2a2a', border: '1px solid #333', cursor: 'pointer' }}
+                            >
                                 <CardContent>
                                     <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, mb: 1.5 }}>
                                         <Box sx={{
@@ -264,7 +269,7 @@ const SupplierList = () => {
                                     )}
                                 </CardContent>
                                 <Divider sx={{ borderColor: '#333' }} />
-                                <CardActions sx={{ justifyContent: 'flex-end', p: 1 }}>
+                                <CardActions sx={{ justifyContent: 'flex-end', p: 1 }} onClick={e => e.stopPropagation()}>
                                     <IconButton size="small" onClick={() => openEdit(s)} sx={{ color: '#6c5dd3' }}>
                                         <EditIcon />
                                     </IconButton>
@@ -303,7 +308,8 @@ const SupplierList = () => {
                             {suppliers.map(s => (
                                 <TableRow
                                     key={s.id}
-                                    sx={{ '&:hover': { bgcolor: '#2a2a2a' }, '& td': { borderColor: '#2a2a2a', color: '#ddd' } }}
+                                    onClick={() => navigate(`/admin/suppliers/${s.id}`)}
+                                    sx={{ cursor: 'pointer', '&:hover': { bgcolor: '#2a2a2a' }, '& td': { borderColor: '#2a2a2a', color: '#ddd' } }}
                                 >
                                     <TableCell>
                                         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
@@ -329,7 +335,7 @@ const SupplierList = () => {
                                             {s.notes || '—'}
                                         </Typography>
                                     </TableCell>
-                                    <TableCell>
+                                    <TableCell onClick={e => e.stopPropagation()}>
                                         <Tooltip title="Edit">
                                             <IconButton size="small" onClick={() => openEdit(s)} sx={{ color: '#6c5dd3' }}>
                                                 <EditIcon />

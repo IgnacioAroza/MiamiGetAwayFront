@@ -47,7 +47,6 @@ import {
     FilterAlt as FilterIcon
 } from '@mui/icons-material';
 import { fetchReservations, deleteReservation, setSelectedReservation } from '../../../redux/reservationSlice';
-import { fetchAdminApartments, selectAllApartments, selectApartmentStatus } from '../../../redux/adminApartmentSlice';
 import userService from '../../../services/userService';
 import ReservationFilters from './ReservationFilters';
 import { formatDateForDisplay, parseStringToDate } from '../../../utils/dateUtils';
@@ -114,8 +113,6 @@ const ReservationList = ({ filter = {} }) => {
     const navigate = useNavigate();
     const theme = useTheme();
     const { reservations, loading, status, error, pagination } = useSelector((state) => state.reservations);
-    const reduxApartments = useSelector(selectAllApartments);
-    const apartmentsStatus = useSelector(selectApartmentStatus);
     const { isMobile, isTablet } = useDeviceDetection();
 
     const [page, setPage] = useState(0);
@@ -123,7 +120,6 @@ const ReservationList = ({ filter = {} }) => {
         const saved = parseInt(localStorage.getItem('reservationList_rowsPerPage'), 10);
         return [5, 10, 20].includes(saved) ? saved : 10;
     });
-    const [buildingNames, setBuildingNames] = useState({});
     const [orderBy, setOrderBy] = useState(() => {
         // Recuperar orderBy desde localStorage (fall back a ordenar por check-in ascendente)
         return localStorage.getItem('reservationList_orderBy') || 'check_in_date';
@@ -154,26 +150,6 @@ const ReservationList = ({ filter = {} }) => {
     useEffect(() => {
         dispatch(fetchReservations({ ...combinedFilters, page: page + 1, limit: rowsPerPage }));
     }, [dispatch, combinedFilters, page, rowsPerPage]);
-
-    // Fetch apartments via Redux — solo si no están ya cargados (evita 429 por mounts repetidos)
-    useEffect(() => {
-        if (apartmentsStatus === 'idle') {
-            dispatch(fetchAdminApartments());
-        }
-    }, [dispatch, apartmentsStatus]);
-
-    // Construir buildingNames cuando los datos de Redux estén disponibles
-    useEffect(() => {
-        if (reduxApartments.length === 0) return;
-        const namesMap = {};
-        reduxApartments.forEach(apt => {
-            const idKey = String(apt.id);
-            const buildingName = apt.building_name || apt.name || 'Sin nombre';
-            const unitNumber = apt.unit_number ? ` - Unidad ${apt.unit_number}` : '';
-            namesMap[idKey] = buildingName + unitNumber;
-        });
-        setBuildingNames(namesMap);
-    }, [reduxApartments]);
 
     // Si el filtro upcoming está activo, forzar el orden por check-in ascendente y persistirlo
     useEffect(() => {
@@ -475,24 +451,7 @@ const ReservationList = ({ filter = {} }) => {
         navigate('/admin/reservations/new');
     };
     
-    // Función para obtener el nombre del edificio
-    const getBuildingName = (reservation) => {
-        const possibleIdFields = ['building_id', 'buildingId', 'apartment_id', 'apartmentId', 'location_id', 'locationId'];
-        let buildingIdValue = null;
-        
-        for (const field of possibleIdFields) {
-            if (reservation[field] !== undefined) {
-                buildingIdValue = reservation[field];
-                break;
-            }
-        }
-        
-        if (buildingIdValue) {
-            return buildingNames[String(buildingIdValue)] || 'N/A';
-        }
-        
-        return 'N/A';
-    };
+    const getBuildingName = (reservation) => reservation.apartmentName || 'N/A';
     
     const getClientDisplay = (reservation) => {
         const name = reservation.client_name || reservation.clientName;
