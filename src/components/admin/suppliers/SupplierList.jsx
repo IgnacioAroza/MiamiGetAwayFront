@@ -11,7 +11,6 @@ import { useNavigate } from 'react-router-dom';
 import AddIcon from '@mui/icons-material/Add';
 import EditIcon from '@mui/icons-material/Edit';
 import DeleteIcon from '@mui/icons-material/Delete';
-import HistoryIcon from '@mui/icons-material/History';
 import HandshakeIcon from '@mui/icons-material/Handshake';
 import EmailIcon from '@mui/icons-material/Email';
 import PhoneIcon from '@mui/icons-material/Phone';
@@ -235,7 +234,10 @@ const SupplierList = () => {
                 <Grid container spacing={2}>
                     {suppliers.map(s => (
                         <Grid item xs={12} key={s.id}>
-                            <Card sx={{ bgcolor: '#2a2a2a', border: '1px solid #333' }}>
+                            <Card
+                                onClick={() => navigate(`/admin/suppliers/${s.id}`)}
+                                sx={{ bgcolor: '#2a2a2a', border: '1px solid #333', cursor: 'pointer' }}
+                            >
                                 <CardContent>
                                     <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, mb: 1.5 }}>
                                         <Box sx={{
@@ -267,20 +269,13 @@ const SupplierList = () => {
                                     )}
                                 </CardContent>
                                 <Divider sx={{ borderColor: '#333' }} />
-                                <CardActions sx={{ justifyContent: 'space-between', p: 1 }}>
-                                    <Tooltip title="Payment history">
-                                        <IconButton size="small" onClick={() => navigate(`/admin/suppliers/${s.id}`)} sx={{ color: '#4caf50' }}>
-                                            <HistoryIcon />
-                                        </IconButton>
-                                    </Tooltip>
-                                    <Box>
-                                        <IconButton size="small" onClick={() => openEdit(s)} sx={{ color: '#6c5dd3' }}>
-                                            <EditIcon />
-                                        </IconButton>
-                                        <IconButton size="small" onClick={() => openDelete(s)} color="error">
-                                            <DeleteIcon />
-                                        </IconButton>
-                                    </Box>
+                                <CardActions sx={{ justifyContent: 'flex-end', p: 1 }} onClick={e => e.stopPropagation()}>
+                                    <IconButton size="small" onClick={() => openEdit(s)} sx={{ color: '#6c5dd3' }}>
+                                        <EditIcon />
+                                    </IconButton>
+                                    <IconButton size="small" onClick={() => openDelete(s)} color="error">
+                                        <DeleteIcon />
+                                    </IconButton>
                                 </CardActions>
                             </Card>
                         </Grid>
@@ -313,7 +308,8 @@ const SupplierList = () => {
                             {suppliers.map(s => (
                                 <TableRow
                                     key={s.id}
-                                    sx={{ '&:hover': { bgcolor: '#2a2a2a' }, '& td': { borderColor: '#2a2a2a', color: '#ddd' } }}
+                                    onClick={() => navigate(`/admin/suppliers/${s.id}`)}
+                                    sx={{ cursor: 'pointer', '&:hover': { bgcolor: '#2a2a2a' }, '& td': { borderColor: '#2a2a2a', color: '#ddd' } }}
                                 >
                                     <TableCell>
                                         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
@@ -339,12 +335,7 @@ const SupplierList = () => {
                                             {s.notes || '—'}
                                         </Typography>
                                     </TableCell>
-                                    <TableCell>
-                                        <Tooltip title="Payment history">
-                                            <IconButton size="small" onClick={() => navigate(`/admin/suppliers/${s.id}`)} sx={{ color: '#4caf50' }}>
-                                                <HistoryIcon />
-                                            </IconButton>
-                                        </Tooltip>
+                                    <TableCell onClick={e => e.stopPropagation()}>
                                         <Tooltip title="Edit">
                                             <IconButton size="small" onClick={() => openEdit(s)} sx={{ color: '#6c5dd3' }}>
                                                 <EditIcon />
