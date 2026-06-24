@@ -47,8 +47,6 @@ import {
 import PaymentForm from './PaymentsForm';
 import PaymentDetails from './PaymentDetails';
 import PaymentFilters from './PaymentFilters';
-import userService from '../../../services/userService';
-import reservationService from '../../../services/reservationService';
 
 // Componente para mostrar y gestionar la lista de pagos
 const PaymentsList = () => {
@@ -71,8 +69,6 @@ const PaymentsList = () => {
         severity: 'success'
     });
     const [selectedPaymentForDetails, setSelectedPaymentForDetails] = useState(null);
-    const [reservationsData, setReservationsData] = useState({});
-    const [clientsData, setClientsData] = useState({});
 
     // Cargar pagos al montar el componente o cuando cambian los filtros / página
     useEffect(() => {
@@ -83,97 +79,6 @@ const PaymentsList = () => {
     const handleChangeRowsPerPage = (e) => {
         setRowsPerPage(parseInt(e.target.value, 10));
         setPage(0);
-    };
-
-    // Cargar datos de reservas y clientes cuando cambian los pagos
-    useEffect(() => {
-        const fetchData = async () => {
-            const reservationIds = payments
-                .map(payment => payment.reservation_id || payment.reservationId)
-                .filter(id => id && !reservationsData[id]);
-
-            if (reservationIds.length === 0) return;
-
-            try {
-                const reservationPromises = reservationIds.map(async id => {
-                    try {
-                        const reservationData = await reservationService.getById(id);
-                        return { id, data: reservationData };
-                    } catch (error) {
-                        console.error(`Error fetching reservation ${id}:`, error);
-                        return { id, data: null };
-                    }
-                });
-
-                const reservationResults = await Promise.all(reservationPromises);
-                const newReservationsData = { ...reservationsData };
-                
-                const clientIds = new Set();
-                reservationResults.forEach(({ id, data }) => {
-                    if (data) {
-                        newReservationsData[id] = data;
-                        const clientId = data.client_id || data.clientId;
-                        if (clientId) {
-                            clientIds.add(clientId);
-                        }
-                    }
-                });
-
-                setReservationsData(newReservationsData);
-
-                const clientPromises = Array.from(clientIds).map(async id => {
-                    try {
-                        const userData = await userService.getUserById(id);
-                        if (!userData || !userData.id) {
-                            return { id, data: null };
-                        }
-                        return { id, data: userData };
-                    } catch (error) {
-                        console.error(`Error fetching user ${id}:`, error);
-                        return { id, data: null };
-                    }
-                });
-
-                const clientResults = await Promise.all(clientPromises);
-                const newClientsData = { ...clientsData };
-                
-                clientResults.forEach(({ id, data }) => {
-                    if (data) {
-                        const formattedClientData = {
-                            id: data.id,
-                            name: data.name || data.firstName || data.first_name || '',
-                            lastname: data.lastname || data.lastName || data.last_name || '',
-                            email: data.email || '',
-                            phone: data.phone || ''
-                        };
-                        newClientsData[id] = formattedClientData;
-                    }
-                });
-
-                setClientsData(newClientsData);
-            } catch (error) {
-                console.error('Error fetching data:', error);
-            }
-        };
-
-        fetchData();
-    }, [payments, reservationsData, clientsData]);
-
-    // Función para obtener el nombre del cliente
-    const getClientName = (payment) => {
-        const reservationId = payment.reservation_id || payment.reservationId;
-        if (!reservationId) return '-';
-        
-        const reservation = reservationsData[reservationId];
-        if (!reservation) return 'Loading...';
-
-        const clientId = reservation.client_id || reservation.clientId;
-        if (!clientId) return '-';
-
-        const client = clientsData[clientId];
-        if (!client) return 'Loading...';
-
-        return `${client.name || ''} ${client.lastname || ''}`.trim() || '-';
     };
 
     // Manejadores de eventos
@@ -323,7 +228,7 @@ const PaymentsList = () => {
                                         <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
                                             <PersonIcon sx={{ mr: 1, color: 'primary.main' }} />
                                             <Typography variant="body2">
-                                                Client: {getClientName(payment)}
+                                                Client: {`${payment.clientName} ${payment.clientLastname}`.trim() || '-'}
                                             </Typography>
                                         </Box>
                                     </Grid>
@@ -403,7 +308,7 @@ const PaymentsList = () => {
                         <Table>
                             <TableHead>
                                 <TableRow>
-                                    {['Date','Amount','Method','Client','Notes','Actions'].map((h) => (
+                                    {['Reservation','Date','Amount','Method','Client','Notes','Actions'].map((h) => (
                                         <TableCell key={h}>{h}</TableCell>
                                     ))}
                                 </TableRow>
@@ -467,10 +372,11 @@ const PaymentsList = () => {
                     <Table sx={{ minWidth: 650 }} aria-label="payments table">
                         <TableHead>
                             <TableRow>
+                                <TableCell>Reservation</TableCell>
                                 <TableCell>Date</TableCell>
                                 <TableCell>Amount</TableCell>
                                 <TableCell>Payment Method</TableCell>
-                                <TableCell>Reference</TableCell>
+                                <TableCell>Client</TableCell>
                                 <TableCell>Notes</TableCell>
                                 <TableCell align="center">Actions</TableCell>
                             </TableRow>
@@ -478,19 +384,31 @@ const PaymentsList = () => {
                         <TableBody>
                             {payments.length === 0 ? (
                                 <TableRow>
-                                    <TableCell colSpan={6} align="center">
+                                    <TableCell colSpan={7} align="center">
                                         No payments registered
                                     </TableCell>
                                 </TableRow>
                             ) : (
                                 payments.map((payment) => (
                                     <TableRow key={payment.id}>
+                                        <TableCell>
+                                            {payment.reservationId ? (
+                                                <Button
+                                                    size="small"
+                                                    variant="outlined"
+                                                    href={`/admin/reservations/${payment.reservationId}`}
+                                                    sx={{ textTransform: 'none', minWidth: 'auto', px: 1 }}
+                                                >
+                                                    #{payment.reservationId}
+                                                </Button>
+                                            ) : '-'}
+                                        </TableCell>
                                         <TableCell>{formatDate(payment.paymentDate)}</TableCell>
                                         <TableCell>{formatAmount(payment.amount)}</TableCell>
                                         <TableCell>
                                             {normalizePaymentMethod(payment.paymentMethod)}
                                         </TableCell>
-                                        <TableCell>Client: {getClientName(payment)}</TableCell>
+                                        <TableCell>{`${payment.clientName} ${payment.clientLastname}`.trim() || '-'}</TableCell>
                                         <TableCell>{payment.notes || '-'}</TableCell>
                                         <TableCell align="center">
                                             <IconButton
