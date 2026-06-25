@@ -8,7 +8,7 @@ export const fetchUsers = createAsyncThunk(
             const data = await userService.getAllUsers(filters);
             return data;
         } catch (error) {
-            return rejectWithValue(error.response?.data || 'Error fetching users');
+            return rejectWithValue(error.response?.data?.error || error.response?.data?.message || error?.message || 'Error fetching users');
         }
     }
 );
@@ -20,7 +20,7 @@ export const fetchUserById = createAsyncThunk(
             const data = await userService.getUserById(id);
             return data;
         } catch (error) {
-            return rejectWithValue(error.response?.data || 'Error fetching user by id');
+            return rejectWithValue(error.response?.data?.error || error.response?.data?.message || error?.message || 'Error fetching user by id');
         }
     }
 );
@@ -32,7 +32,7 @@ export const createUser = createAsyncThunk(
             const data = await userService.createUser(userData);
             return data;
         } catch (error) {
-            return rejectWithValue(error.response?.data || 'Error creating user');
+            return rejectWithValue(error.response?.data?.error || error.response?.data?.message || error?.message || 'Error creating user');
         }
     }
 );
@@ -44,7 +44,7 @@ export const updateUser = createAsyncThunk(
             const response = await userService.updateUser(id, data);
             return response;
         } catch (error) {
-            return rejectWithValue(error.response?.data || 'Error updating user');
+            return rejectWithValue(error.response?.data?.error || error.response?.data?.message || error?.message || 'Error updating user');
         }
     }
 );
@@ -56,7 +56,7 @@ export const deleteUser = createAsyncThunk(
             await userService.deleteUser(id);
             return id;
         } catch (error) {
-            return rejectWithValue(error.response?.data || 'Error deleting user');
+            return rejectWithValue(error.response?.data?.error || error.response?.data?.message || error?.message || 'Error deleting user');
         }
     }
 );

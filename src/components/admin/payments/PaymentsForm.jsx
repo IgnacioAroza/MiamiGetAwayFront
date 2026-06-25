@@ -189,7 +189,7 @@ const PaymentForm = ({ open, onClose }) => {
         } catch (error) {
             setErrors(prev => ({
                 ...prev,
-                submit: error.message || 'Error processing payment'
+                submit: typeof error === 'string' ? error : (error?.message || 'Error processing payment')
             }));
         }
     };

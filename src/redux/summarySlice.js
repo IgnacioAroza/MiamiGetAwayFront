@@ -9,7 +9,7 @@ export const generateSummary = createAsyncThunk(
             const response = await summaryService.generateSummary(month, year);
             return response;
         } catch (error) {
-            return rejectWithValue(error.message);
+            return rejectWithValue(typeof error === 'string' ? error : (error?.message || 'Error'));
         }
     }
 );
@@ -21,7 +21,7 @@ export const fetchSummaryDetails = createAsyncThunk(
             const response = await summaryService.getSummaryDetails(year, month);
             return response;
         } catch (error) {
-            return rejectWithValue(error.message);
+            return rejectWithValue(typeof error === 'string' ? error : (error?.message || 'Error'));
         }
     }
 );
@@ -33,7 +33,7 @@ export const downloadSummaryPDF = createAsyncThunk(
             await summaryService.downloadSummaryPDF(year, month);
             return { year, month };
         } catch (error) {
-            return rejectWithValue(error.message);
+            return rejectWithValue(typeof error === 'string' ? error : (error?.message || 'Error'));
         }
     }
 );
@@ -45,7 +45,7 @@ export const sendSummaryEmail = createAsyncThunk(
             const response = await summaryService.sendSummaryEmail(year, month);
             return response;
         } catch (error) {
-            return rejectWithValue(error.message);
+            return rejectWithValue(typeof error === 'string' ? error : (error?.message || 'Error'));
         }
     }
 );

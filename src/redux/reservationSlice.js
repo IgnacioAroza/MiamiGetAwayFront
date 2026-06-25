@@ -15,6 +15,9 @@ const initialState = {
     pagination: null,
 };
 
+const extractMsg = (error, fallback) =>
+    typeof error === 'string' ? error : (error?.response?.data?.error || error?.response?.data?.message || error?.message || fallback);
+
 // Thunks para operaciones principales
 export const fetchReservations = createAsyncThunk(
     'reservations/fetchAll',
@@ -23,7 +26,7 @@ export const fetchReservations = createAsyncThunk(
             const data = await reservationService.getAll(filters);
             return data;
         } catch (error) {
-            return rejectWithValue(error.response?.data?.error || error.response?.data?.message || 'Error fetching reservations');
+            return rejectWithValue(extractMsg(error, 'Error fetching reservations'));
         }
     }
 );
@@ -35,7 +38,7 @@ export const fetchReservationById = createAsyncThunk(
             const data = await reservationService.getById(id);
             return data;
         } catch (error) {
-            return rejectWithValue(error.response?.data?.error || error.response?.data?.message || 'Error fetching reservation');
+            return rejectWithValue(extractMsg(error, 'Error fetching reservation'));
         }
     }
 );
@@ -47,7 +50,7 @@ export const createReservation = createAsyncThunk(
             const data = await reservationService.create(reservationData);
             return data;
         } catch (error) {
-            return rejectWithValue(error.response?.data?.error || error.response?.data?.message || 'Error creating reservation');
+            return rejectWithValue(extractMsg(error, 'Error creating reservation'));
         }
     }
 );
@@ -84,7 +87,7 @@ export const registerPayment = createAsyncThunk(
             const response = await reservationService.registerPayment(id, paymentData);
             return response.data;
         } catch (error) {
-            return rejectWithValue(error.response?.data?.error || error.response?.data?.message || 'Error registering payment');
+            return rejectWithValue(extractMsg(error, 'Error registering payment'));
         }
     }
 );
@@ -96,7 +99,7 @@ export const fetchReservationPayments = createAsyncThunk(
             const data = await reservationService.getReservationPayments(id);
             return { id, payments: data };
         } catch (error) {
-            return rejectWithValue(error.response?.data?.error || error.response?.data?.message || 'Error fetching payments');
+            return rejectWithValue(extractMsg(error, 'Error fetching payments'));
         }
     }
 );
@@ -127,7 +130,7 @@ export const generateReservationPdf = createAsyncThunk(
                 };
             }
         } catch (error) {
-            return rejectWithValue(error.response?.data?.error || error.response?.data?.message || 'Error generating PDF');
+            return rejectWithValue(extractMsg(error, 'Error generating PDF'));
         }
     }
 );

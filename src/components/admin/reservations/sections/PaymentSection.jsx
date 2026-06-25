@@ -120,9 +120,10 @@ const PaymentSection = ({ formData, onChange, onPaymentRegistered, onInitialPaym
             }
 
             success('Payment registered successfully!');
-        } catch (error) {
-            console.error('Error registering payment:', error);
-            error('Error registering payment. Please try again.');
+        } catch (err) {
+            console.error('Error registering payment:', err);
+            const msg = typeof err === 'string' ? err : (err?.message || 'Error registering payment');
+            error(msg);
         } finally {
             setIsLoading(false);
         }
