@@ -4,12 +4,12 @@ Estado actual del proyecto. Leer al inicio de cada sesión antes de tocar códig
 
 ---
 
-## Estado de ramas (al 2026-06-24)
+## Estado de ramas (al 2026-06-25)
 
 | Rama | Estado |
 |------|--------|
-| `main` | Producción — PR #38 mergeado (fix métodos de pago suppliers) |
-| `development` | PR #39 abierto — N+1 fix en payments/reservations, historial de pagos a suppliers, columna Reservation en PaymentsList |
+| `main` | Producción — PR #41 mergeado (error handling global). Alineada con `development` |
+| `development` | Alineada con `main` (mismo commit `75b903e`) |
 | `feature/investments` | Eliminada — mergeada a `main` (PR #35) |
 | `feature/experiences` | Eliminada — mergeada a `main` (PR #36) |
 | `feature/transfers` | Eliminada — mergeada a `main` (PR #37, 2026-06-19) |
@@ -88,7 +88,9 @@ Estado actual del proyecto. Leer al inicio de cada sesión antes de tocar códig
 - **useEffect fetch on-mount:** Nunca poner `array.length` en el dep array para guardar un fetch. Usar siempre `[dispatch]` como dep array.
 - **Paginación de reservas:** `rowsPerPageOptions` es `[5, 10, 20]` — máximo 20 por limitación del API. El localStorage se valida contra este array al inicializar.
 - **Prefijo de teléfono:** Se usa restcountries.com (`/v3.1/all?fields=name,flags,idd`) para obtener países. Default Argentina (+54). En campos opcionales, solo se adjunta el prefijo si el usuario ingresa un número.
-- **Errores de API:** Leer siempre `?.data?.error || ?.data?.message` — el back estandarizó a `error` desde 2026-06-04 pero se mantiene fallback a `message` para compatibilidad.
+- **Errores de API — servicios lanzan strings:** Los servicios hacen `throw error.response?.data?.error || ... || 'fallback'` (string, no Error object). En thunks usar `extractMsg`: `typeof error === 'string' ? error : (error?.response?.data?.error || error?.message || fallback)`. En componentes: `typeof error === 'string' ? error : (error?.message || fallback)`. Nunca acceder a `error.message` directamente sobre el valor atrapado.
+- **Variable shadowing en catch:** Si el componente usa `const { error } = useToast()`, NO nombrar `catch (error)` — pisa la función. Usar `catch (err)`.
+- **PATCH vs PUT en reservas:** `reservationService.update` usa `api.patch` (actualización parcial). `api.put` solo para endpoints que requieren reemplazo completo.
 - **PUT reserva — campos numéricos opcionales:** `cleaningFee`, `parkingFee`, `otherExpenses`, `taxes`, `amountPaid` usan `numberOrZero` en el normalizer (default `0` en vez de `undefined`). El back recalcula `totalAmount`, `amountDue` y `paymentStatus` internamente.
 - **Flujo de pago:** El estado de pago se actualiza como efecto secundario de `registerPayment` (POST `/reservations/:id/payments` con `reservation_update`). No existe endpoint separado `PATCH /payment-status` — fue eliminado del back.
 
@@ -96,6 +98,7 @@ Estado actual del proyecto. Leer al inicio de cada sesión antes de tocar códig
 
 ## Sesiones anteriores (detalle)
 
+- [2026-06-25](memory/2026-06-25.md) — PUT→PATCH en reservationService, dead code cleanup (updateReservation thunk), error handling global en todos los slices y componentes (PR #40, PR #41)
 - [2026-06-24](memory/2026-06-24.md) — N+1 fix en PaymentsList y ReservationList, columna Reservation en pagos, historial de pagos a suppliers (`/admin/suppliers/:id`), filas clickeables en SupplierList (PR #39)
 - [2026-06-23](memory/2026-06-23.md) — Fix métodos de pago de suppliers: `wire` → `paypal`, `zelle`, `stripe`, `other` (PR #38)
 
