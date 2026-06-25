@@ -1,7 +1,6 @@
 import { useDispatch, useSelector } from 'react-redux';
 import {
     createReservation,
-    updateReservation,
     registerPayment,
     generateReservationPdf,
     sendReservationConfirmation
@@ -18,10 +17,6 @@ export const useReservation = () => {
 
     const handleCreateReservation = (data) => {
         return dispatch(createReservation(data));
-    };
-
-    const handleUpdateReservation = (id, data) => {
-        return dispatch(updateReservation({ id, reservationData: data }));
     };
 
     const handleRegisterPayment = (reservationId, paymentData) => {
@@ -51,7 +46,6 @@ export const useReservation = () => {
         loading,
         error,
         handleCreateReservation,
-        handleUpdateReservation,
         handleRegisterPayment,
         handleGeneratePdf,
         handleSendConfirmation

@@ -68,7 +68,7 @@ const reservationService = {
             const formattedData = normalizeReservationInput(reservationData, { partial: true });
             const dataToSend = stripUndefined(formattedData);
 
-            const response = await api.put(`/reservations/${id}`, dataToSend);
+            const response = await api.patch(`/reservations/${id}`, dataToSend);
             return response.data;
         } catch (error) {
             console.error("Error in update:", error);
