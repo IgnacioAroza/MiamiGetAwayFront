@@ -4,12 +4,12 @@ Estado actual del proyecto. Leer al inicio de cada sesión antes de tocar códig
 
 ---
 
-## Estado de ramas (al 2026-06-19)
+## Estado de ramas (al 2026-06-24)
 
 | Rama | Estado |
 |------|--------|
-| `main` | Producción — tiene hasta Transfers (PR #37). Todo el scope entregado |
-| `development` | Al día con `main` |
+| `main` | Producción — PR #38 mergeado (fix métodos de pago suppliers) |
+| `development` | PR #39 abierto — N+1 fix en payments/reservations, historial de pagos a suppliers, columna Reservation en PaymentsList |
 | `feature/investments` | Eliminada — mergeada a `main` (PR #35) |
 | `feature/experiences` | Eliminada — mergeada a `main` (PR #36) |
 | `feature/transfers` | Eliminada — mergeada a `main` (PR #37, 2026-06-19) |
@@ -82,8 +82,9 @@ Estado actual del proyecto. Leer al inicio de cada sesión antes de tocar códig
 - **FormData + números:** Si no hay file upload, usar JSON. `FormData.append` convierte a string y Zod rechaza `z.number()`
 - **Imágenes:** Campo `images` en `multipart/form-data`, máx 30 archivos. No setear `Content-Type` manualmente
 - **Auth admin:** JWT en `localStorage.adminToken`. Interceptor de `api.js` inyecta el header y maneja 401
-- **Suppliers:** Totales en `assignment.calculated.*` — nunca calcular localmente. `supplier_status` viene del objeto reserva
-- **buildingNames en ReservationList:** Usa service call local (no Redux) — el fetch asíncrono de Redux llega tarde al primer render
+- **Suppliers:** Totales en `assignment.calculated.*` — nunca calcular localmente. `supplier_status` viene del objeto reserva. Métodos de pago válidos: `cash`, `card`, `transfer`, `paypal`, `zelle`, `stripe`, `other` (`wire` eliminado desde 2026-06-23)
+- **Datos de JOIN en normalizers:** Antes de hacer fetches secundarios, verificar si el backend ya incluye el campo en la respuesta principal vía JOIN. `clientName/clientLastname/clientEmail` en `/reservation-payments`, `apartmentName/apartmentAddress` en `/reservations` — todos ya venían del back. Fix: agregar al normalizer y eliminar los fetches secundarios.
+- **buildingNames en ReservationList:** `reservation.apartmentName` viene del JOIN del backend — ya no hace falta fetch secundario de apartments (eliminado en 2026-06-24)
 - **useEffect fetch on-mount:** Nunca poner `array.length` en el dep array para guardar un fetch. Usar siempre `[dispatch]` como dep array.
 - **Paginación de reservas:** `rowsPerPageOptions` es `[5, 10, 20]` — máximo 20 por limitación del API. El localStorage se valida contra este array al inicializar.
 - **Prefijo de teléfono:** Se usa restcountries.com (`/v3.1/all?fields=name,flags,idd`) para obtener países. Default Argentina (+54). En campos opcionales, solo se adjunta el prefijo si el usuario ingresa un número.
@@ -94,6 +95,9 @@ Estado actual del proyecto. Leer al inicio de cada sesión antes de tocar códig
 ---
 
 ## Sesiones anteriores (detalle)
+
+- [2026-06-24](memory/2026-06-24.md) — N+1 fix en PaymentsList y ReservationList, columna Reservation en pagos, historial de pagos a suppliers (`/admin/suppliers/:id`), filas clickeables en SupplierList (PR #39)
+- [2026-06-23](memory/2026-06-23.md) — Fix métodos de pago de suppliers: `wire` → `paypal`, `zelle`, `stripe`, `other` (PR #38)
 
 - [2026-06-04c](memory/2026-06-04c.md) — Paginación server-side en todos los listados admin + fix Listings dropdown (Suspense boundary + DashboardHeader)
 - [2026-06-04b](memory/2026-06-04b.md) — Dead code cleanup (PaymentSummary, updatePaymentStatus), fix PUT reserva (clientId + numberOrZero), estandarización errores API (.error)

@@ -52,26 +52,6 @@ export const createReservation = createAsyncThunk(
     }
 );
 
-export const updateReservation = createAsyncThunk(
-    'reservations/update',
-    async ({ id, reservationData }, { rejectWithValue }) => {
-        try {
-            // Asegurarse de que parkingFee sea un número
-            if (reservationData.parkingFee !== undefined) {
-                // Asegurar que sea un número
-                if (typeof reservationData.parkingFee === 'string') {
-                    reservationData.parkingFee = parseFloat(reservationData.parkingFee);
-                }
-            }
-
-            const data = await reservationService.update(id, reservationData);
-            return data;
-        } catch (error) {
-            return rejectWithValue(error.response?.data?.error || error.response?.data?.message || 'Error updating reservation');
-        }
-    }
-);
-
 export const deleteReservation = createAsyncThunk(
     'reservations/delete',
     async (id, { rejectWithValue }) => {
@@ -232,22 +212,6 @@ const reservationSlice = createSlice({
             .addCase(createReservation.fulfilled, (state, action) => {
                 const normalized = normalizeReservationFromApi(action.payload);
                 state.reservations.push(normalized);
-            })
-            // Update
-            .addCase(updateReservation.fulfilled, (state, action) => {
-                const updated = normalizeReservationFromApi(action.payload);
-                const index = state.reservations.findIndex(res => res.id === updated.id);
-                if (index !== -1) {
-                    state.reservations[index] = updated;
-                }
-                if (state.selectedReservation?.id === updated.id) {
-                    state.selectedReservation = updated;
-                }
-            })
-            .addCase(updateReservation.rejected, (state, action) => {
-                state.status = 'failed';
-                state.error = action.payload;
-                state.loading = false;
             })
             // Delete
             .addCase(deleteReservation.fulfilled, (state, action) => {
