@@ -12,6 +12,9 @@ const initialState = {
 };
 
 // Thunks
+const extractMsg = (error, fallback) =>
+    typeof error === 'string' ? error : (error?.message || fallback);
+
 export const fetchAllPayments = createAsyncThunk(
     'reservationPayments/fetchAll',
     async (filters = {}, { rejectWithValue }) => {
@@ -19,7 +22,7 @@ export const fetchAllPayments = createAsyncThunk(
             const data = await reservationPaymentService.getAllPayments(filters);
             return data;
         } catch (error) {
-            return rejectWithValue(error.message);
+            return rejectWithValue(extractMsg(error, 'Error fetching payments'));
         }
     }
 );
@@ -31,7 +34,7 @@ export const fetchPaymentById = createAsyncThunk(
             const data = await reservationPaymentService.getPaymentById(id);
             return data;
         } catch (error) {
-            return rejectWithValue(error.message);
+            return rejectWithValue(extractMsg(error, 'Error fetching payment'));
         }
     }
 );
@@ -43,7 +46,7 @@ export const createPayment = createAsyncThunk(
             const data = await reservationPaymentService.createPayment(paymentData);
             return data;
         } catch (error) {
-            return rejectWithValue(error.message);
+            return rejectWithValue(extractMsg(error, 'Error creating payment'));
         }
     }
 );
@@ -55,7 +58,7 @@ export const updatePayment = createAsyncThunk(
             const data = await reservationPaymentService.updatePayment(id, paymentData);
             return data;
         } catch (error) {
-            return rejectWithValue(error.message);
+            return rejectWithValue(extractMsg(error, 'Error updating payment'));
         }
     }
 );
@@ -67,7 +70,7 @@ export const deletePayment = createAsyncThunk(
             await reservationPaymentService.deletePayment(id);
             return id;
         } catch (error) {
-            return rejectWithValue(error.message);
+            return rejectWithValue(extractMsg(error, 'Error deleting payment'));
         }
     }
 );

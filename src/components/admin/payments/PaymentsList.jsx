@@ -115,7 +115,7 @@ const PaymentsList = () => {
         } catch (error) {
             setSnackbar({
                 open: true,
-                message: error.message || 'Error deleting payment',
+                message: typeof error === 'string' ? error : (error?.message || 'Error deleting payment'),
                 severity: 'error'
             });
         } finally {

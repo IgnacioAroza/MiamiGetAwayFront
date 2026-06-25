@@ -35,7 +35,7 @@ const AdminLogin = () => {
         navigate(from, { replace: true });
       }
     } catch (error) {
-      setError(error.message || 'User or password incorrect');
+      setError(typeof error === 'string' ? error : (error?.message || 'User or password incorrect'));
       localStorage.removeItem('adminToken');
     } finally {
       setLoading(false);

@@ -68,7 +68,7 @@ const ReservationManagement = () => {
                 } catch (error) {
                     setNotification({
                         open: true,
-                        message: 'Error loading reservation data',
+                        message: typeof error === 'string' ? error : (error?.message || 'Error loading reservation data'),
                         type: 'error'
                     });
                 } finally {
@@ -112,7 +112,7 @@ const ReservationManagement = () => {
             console.error('Error al procesar el formulario:', error);
             setNotification({
                 open: true,
-                message: `Error: ${error.message || 'Failed to save reservation'}`,
+                message: typeof error === 'string' ? error : (error?.message || 'Failed to save reservation'),
                 type: 'error'
             });
         }
