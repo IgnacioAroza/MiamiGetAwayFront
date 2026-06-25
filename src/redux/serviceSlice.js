@@ -6,17 +6,11 @@ import { normalizeServiceItemFromApi } from '../utils/normalizers';
 
 const handleApiError = (error) => {
     if (error.response) {
-        if (error.response.status === 401) {
-            // El interceptor global ya maneja limpieza/redirección
-            throw new Error('Unauthorized: Please log in again.');
-        }
-        const message = error.response.data?.error || error.response.data?.message || 'An error occurred';
-        throw new Error(message);
+        return error.response.data?.error || error.response.data?.message || 'An error occurred';
     } else if (error.request) {
-        throw new Error('No response received from server');
-    } else {
-        throw new Error('Error setting up the request');
+        return 'No response received from server';
     }
+    return error.message || 'Error setting up the request';
 };
 
 export const fetchServices = createAsyncThunk(
@@ -155,7 +149,7 @@ const servicesSlice = createSlice({
             .addCase(fetchServices.rejected, (state, action) => {
                 const { serviceType, error } = action.payload;
                 state.status[serviceType] = 'failed';
-                state.error[serviceType] = error.message;
+                state.error[serviceType] = error;
             })
             .addCase(createService.fulfilled, (state, action) => {
                 const { serviceType, data } = action.payload;
@@ -180,17 +174,17 @@ const servicesSlice = createSlice({
             .addCase(createService.rejected, (state, action) => {
                 const { serviceType, error } = action.payload;
                 state.status[serviceType] = 'failed';
-                state.error[serviceType] = error.message;
+                state.error[serviceType] = error;
             })
             .addCase(updateService.rejected, (state, action) => {
                 const { serviceType, error } = action.payload;
                 state.status[serviceType] = 'failed';
-                state.error[serviceType] = error.message;
+                state.error[serviceType] = error;
             })
             .addCase(deleteService.rejected, (state, action) => {
                 const { serviceType, error } = action.payload;
                 state.status[serviceType] = 'failed';
-                state.error[serviceType] = error.message;
+                state.error[serviceType] = error;
             });
     },
 });
