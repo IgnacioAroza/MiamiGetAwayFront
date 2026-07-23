@@ -81,6 +81,11 @@ const ApartmentForm = ({ open, onClose }) => {
         }
     };
 
+    const handleReorderImages = (reorderedImages, reorderedNewImages) => {
+        setExistingImages(reorderedImages);
+        setNewImages(reorderedNewImages);
+    };
+
     const handleSubmit = async (e) => {
         e.preventDefault();
         try {
@@ -210,6 +215,7 @@ const ApartmentForm = ({ open, onClose }) => {
                                 newImages={newImages}
                                 onImageUpload={handleImageUpload}
                                 onRemoveImage={handleRemoveImage}
+                                onReorder={handleReorderImages}
                             />
                         </Grid>
                     </Grid>

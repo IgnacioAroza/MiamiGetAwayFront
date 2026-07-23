@@ -237,6 +237,17 @@ const ServicesPage = () => {
     }
   };
 
+  const handleReorderImages = (reorderedImages, reorderedNewImages) => {
+    if (selectedService === 'cars') {
+      setCar({ ...car, images: reorderedImages });
+    } else if (selectedService === 'yachts') {
+      setYacht({ ...yacht, images: reorderedImages });
+    } else {
+      setProperty({ ...property, images: reorderedImages });
+    }
+    setNewImages(reorderedNewImages);
+  };
+
   const getCurrentImages = () => {
     if (selectedService === 'cars') {
       return car?.images || [];
@@ -255,11 +266,12 @@ const ServicesPage = () => {
         <Divider sx={{ my: 3 }} />
         <Box sx={{ mt: 3 }}>
           <Typography variant="h6" gutterBottom>Images</Typography>
-          <ImageUploader 
+          <ImageUploader
             images={currentImages}
             newImages={newImages}
             onImageUpload={handleImageUpload}
             onRemoveImage={handleRemoveImage}
+            onReorder={handleReorderImages}
           />
         </Box>
       </>
