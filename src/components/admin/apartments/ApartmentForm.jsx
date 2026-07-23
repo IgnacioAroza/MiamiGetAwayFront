@@ -8,11 +8,11 @@ import {
     Button,
     TextField,
     Grid,
-    Box,
-    Input,
-    Typography
+    Typography,
+    Divider
 } from '@mui/material';
 import { createAdminApartment, updateAdminApartment, selectSelectedApartment } from '../../../redux/adminApartmentSlice';
+import ImageUploader from '../../images/ImageUploader';
 
 const ApartmentForm = ({ open, onClose }) => {
     const dispatch = useDispatch();
@@ -25,9 +25,10 @@ const ApartmentForm = ({ open, onClose }) => {
         description: '',
         address: '',
         capacity: 0,
-        price: 0,
-        images: []
+        price: 0
     });
+    const [existingImages, setExistingImages] = React.useState([]);
+    const [newImages, setNewImages] = React.useState([]);
 
     useEffect(() => {
         if (selectedApartment) {
@@ -39,9 +40,9 @@ const ApartmentForm = ({ open, onClose }) => {
                 description: selectedApartment.description || '',
                 address: selectedApartment.address || '',
                 capacity: Number(selectedApartment.capacity) || 0,
-                price: Number(selectedApartment.price) || 0,
-                images: selectedApartment.images || []
+                price: Number(selectedApartment.price) || 0
             });
+            setExistingImages(selectedApartment.images || []);
         } else {
             // Resetear el formulario cuando se crea uno nuevo
             setFormData({
@@ -52,10 +53,11 @@ const ApartmentForm = ({ open, onClose }) => {
                 description: '',
                 address: '',
                 capacity: 0,
-                price: 0,
-                images: []
+                price: 0
             });
+            setExistingImages([]);
         }
+        setNewImages([]);
     }, [selectedApartment]);
 
     const handleChange = (e) => {
@@ -66,12 +68,22 @@ const ApartmentForm = ({ open, onClose }) => {
         }));
     };
 
-    const handleImageChange = (e) => {
+    const handleImageUpload = (e) => {
         const files = Array.from(e.target.files);
-        setFormData(prev => ({
-            ...prev,
-            images: files
-        }));
+        setNewImages(prev => [...prev, ...files]);
+    };
+
+    const handleRemoveImage = (index, isNewImage) => {
+        if (isNewImage) {
+            setNewImages(prev => prev.filter((_, i) => i !== index - existingImages.length));
+        } else {
+            setExistingImages(prev => prev.filter((_, i) => i !== index));
+        }
+    };
+
+    const handleReorderImages = (reorderedImages, reorderedNewImages) => {
+        setExistingImages(reorderedImages);
+        setNewImages(reorderedNewImages);
     };
 
     const handleSubmit = async (e) => {
@@ -79,13 +91,12 @@ const ApartmentForm = ({ open, onClose }) => {
         try {
             const formDataToSend = new FormData();
             Object.keys(formData).forEach(key => {
-                if (key === 'images') {
-                    formData.images.forEach(image => {
-                        formDataToSend.append('images', image);
-                    });
-                } else {
-                    formDataToSend.append(key, formData[key]);
-                }
+                formDataToSend.append(key, formData[key]);
+            });
+
+            formDataToSend.append('existingImages', JSON.stringify(existingImages));
+            newImages.forEach(image => {
+                formDataToSend.append('images', image);
             });
 
             if (selectedApartment) {
@@ -197,17 +208,15 @@ const ApartmentForm = ({ open, onClose }) => {
                             />
                         </Grid>
                         <Grid item xs={12}>
-                            <Input
-                                type="file"
-                                inputProps={{
-                                    multiple: true,
-                                    accept: 'image/*'
-                                }}
-                                onChange={handleImageChange}
+                            <Divider sx={{ my: 2 }} />
+                            <Typography variant="h6" gutterBottom>Images</Typography>
+                            <ImageUploader
+                                images={existingImages}
+                                newImages={newImages}
+                                onImageUpload={handleImageUpload}
+                                onRemoveImage={handleRemoveImage}
+                                onReorder={handleReorderImages}
                             />
-                            <Typography variant="caption" display="block">
-                                {formData.images.length} images selected
-                            </Typography>
                         </Grid>
                     </Grid>
                 </DialogContent>

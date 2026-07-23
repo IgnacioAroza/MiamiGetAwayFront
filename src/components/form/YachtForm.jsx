@@ -2,6 +2,10 @@ import React from 'react';
 import { TextField, Grid2 } from '@mui/material';
 
 const YachtForm = ({ yacht, setYacht }) => {
+  if (!yacht) {
+    return null;
+  }
+
   return (
     <Grid2 container spacing={2} sx={{ mt: 2 }}>
       <Grid2 item xs={12}>
