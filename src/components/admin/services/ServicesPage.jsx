@@ -133,13 +133,8 @@ const ServicesPage = () => {
         }
       });
 
-      if (serviceData.images) {
-        serviceData.images.forEach(image => {
-          if (typeof image === 'string') {
-            formData.append('existingImages', image);
-          }
-        });
-      }
+      const existingImageUrls = (serviceData.images || []).filter(image => typeof image === 'string');
+      formData.append('existingImages', JSON.stringify(existingImageUrls));
 
       newImages.forEach(image => {
         formData.append('images', image);

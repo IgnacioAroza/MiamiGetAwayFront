@@ -89,9 +89,7 @@ const ApartmentForm = ({ open, onClose }) => {
                 formDataToSend.append(key, formData[key]);
             });
 
-            existingImages.forEach(image => {
-                formDataToSend.append('existingImages', image);
-            });
+            formDataToSend.append('existingImages', JSON.stringify(existingImages));
             newImages.forEach(image => {
                 formDataToSend.append('images', image);
             });
