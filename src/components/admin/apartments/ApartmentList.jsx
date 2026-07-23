@@ -61,7 +61,7 @@ const ApartmentList = () => {
     const [rowsPerPage, setRowsPerPage] = useState(10);
 
     useEffect(() => {
-        dispatch(fetchAdminApartments({ page: page + 1, limit: rowsPerPage }));
+        dispatch(fetchAdminApartments({ page: page + 1, limit: rowsPerPage, sort: 'recent' }));
     }, [dispatch, page, rowsPerPage]);
 
     const handleChangePage = (_, newPage) => setPage(newPage);
