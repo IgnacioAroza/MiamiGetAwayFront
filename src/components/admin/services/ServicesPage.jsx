@@ -312,7 +312,7 @@ const ServicesPage = () => {
   useEffect(() => {
     if (selectedService) {
       if (selectedService === 'apartments') {
-        dispatch(fetchAdminApartments({ page: page + 1, limit: rowsPerPage }));
+        dispatch(fetchAdminApartments({ page: page + 1, limit: rowsPerPage, sort: 'recent' }));
       } else {
         dispatch(fetchServices({ serviceType: selectedService, page: page + 1, limit: rowsPerPage }));
       }

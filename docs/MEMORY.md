@@ -4,12 +4,12 @@ Estado actual del proyecto. Leer al inicio de cada sesión antes de tocar códig
 
 ---
 
-## Estado de ramas (al 2026-06-25)
+## Estado de ramas (al 2026-07-23)
 
 | Rama | Estado |
 |------|--------|
-| `main` | Producción — PR #41 mergeado (error handling global). Alineada con `development` |
-| `development` | Alineada con `main` (mismo commit `75b903e`) |
+| `main` | Producción — PR #42 mergeado (imágenes apartamentos + drag reorder). Alineada con `development` |
+| `development` | Alineada con `main` (mismo commit `7358855`) |
 | `feature/investments` | Eliminada — mergeada a `main` (PR #35) |
 | `feature/experiences` | Eliminada — mergeada a `main` (PR #36) |
 | `feature/transfers` | Eliminada — mergeada a `main` (PR #37, 2026-06-19) |
@@ -93,11 +93,16 @@ Estado actual del proyecto. Leer al inicio de cada sesión antes de tocar códig
 - **PATCH vs PUT en reservas:** `reservationService.update` usa `api.patch` (actualización parcial). `api.put` solo para endpoints que requieren reemplazo completo.
 - **PUT reserva — campos numéricos opcionales:** `cleaningFee`, `parkingFee`, `otherExpenses`, `taxes`, `amountPaid` usan `numberOrZero` en el normalizer (default `0` en vez de `undefined`). El back recalcula `totalAmount`, `amountDue` y `paymentStatus` internamente.
 - **Flujo de pago:** El estado de pago se actualiza como efecto secundario de `registerPayment` (POST `/reservations/:id/payments` con `reservation_update`). No existe endpoint separado `PATCH /payment-status` — fue eliminado del back.
+- **⚠️ Dev local apunta a producción:** el backend local (`localhost:3001`) usa la `DATABASE_URL` y las credenciales de Cloudinary de **producción** (no hay ambiente aislado). Probar borrados/creaciones solo con datos de prueba propios y limpiar después — ver detalle en `memory/2026-07-23.md`.
+- **existingImages (apartments/cars/yachts/villas):** al actualizar, se manda como **un único campo JSON** (`JSON.stringify(array)`) con las URLs a conservar en el orden final deseado — no como campos `FormData` repetidos (era ambiguo con 0 o 1 imagen). El backend mergea eso con las imágenes nuevas subidas (que van siempre al final) y borra de Cloudinary lo que quede afuera.
+- **Reorder de imágenes:** `ImageUploader.jsx` soporta drag and drop (`@dnd-kit`) pero solo permite reordenar dentro de cada grupo (existentes entre sí, nuevas entre sí) — ver `memory/2026-07-23.md`.
+- **Orden de apartamentos en admin:** `/admin/apartments` y la pestaña Apartments de `/admin/services` piden `sort: 'recent'` al backend — los últimos cargados aparecen primero. El listado público (`/services/apartments`) no se tocó, sigue en orden `id ASC` (ya tiene filtros propios). No confundir: `ImageCarousel.jsx` NO tiene un ratio uniforme aplicado — se probó y se revirtió (ver `memory/2026-07-23.md` punto 5).
 
 ---
 
 ## Sesiones anteriores (detalle)
 
+- [2026-07-23](memory/2026-07-23.md) — Fix imágenes de apartamentos (no se mostraban/borraban), contrato `existingImages` como JSON, fix blank screen al crear/editar yates, drag and drop para reordenar imágenes (PR #42, requiere PR #46 del backend); más tarde: investigación de aspect ratio en `ImageCarousel` (revertida) y orden "más recientes primero" en el admin de apartamentos (sin PR aún)
 - [2026-06-25](memory/2026-06-25.md) — PUT→PATCH en reservationService, dead code cleanup (updateReservation thunk), error handling global en todos los slices y componentes (PR #40, PR #41)
 - [2026-06-24](memory/2026-06-24.md) — N+1 fix en PaymentsList y ReservationList, columna Reservation en pagos, historial de pagos a suppliers (`/admin/suppliers/:id`), filas clickeables en SupplierList (PR #39)
 - [2026-06-23](memory/2026-06-23.md) — Fix métodos de pago de suppliers: `wire` → `paypal`, `zelle`, `stripe`, `other` (PR #38)
