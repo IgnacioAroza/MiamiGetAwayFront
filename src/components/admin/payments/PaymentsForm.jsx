@@ -414,7 +414,7 @@ const PaymentForm = ({ open, onClose }) => {
                         {loading ? (
                             <>
                                 <CircularProgress size={20} sx={{ mr: submitting ? 1 : 0 }} />
-                                {submitting && t('imageUpload.saving')}
+                                {submitting && t('imageUpload.saving', { lng: 'en' })}
                             </>
                         ) : (
                             selectedPayment ? 'Update' : 'Create'

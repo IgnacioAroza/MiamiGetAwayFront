@@ -472,7 +472,7 @@ const ExperienceList = () => {
                         sx={{ bgcolor: '#4fc3f7', color: '#000', '&:hover': { bgcolor: '#0288d1', color: '#fff' } }}
                         startIcon={saving ? <CircularProgress size={14} color="inherit" /> : null}
                     >
-                        {saving ? t('imageUpload.saving') : 'Create'}
+                        {saving ? t('imageUpload.saving', { lng: 'en' }) : 'Create'}
                     </Button>
                 </DialogActions>
             </Dialog>
@@ -500,7 +500,7 @@ const ExperienceList = () => {
                         sx={{ bgcolor: '#4fc3f7', color: '#000', '&:hover': { bgcolor: '#0288d1', color: '#fff' } }}
                         startIcon={saving ? <CircularProgress size={14} color="inherit" /> : null}
                     >
-                        {saving ? t('imageUpload.saving') : 'Save Changes'}
+                        {saving ? t('imageUpload.saving', { lng: 'en' }) : 'Save Changes'}
                     </Button>
                 </DialogActions>
             </Dialog>

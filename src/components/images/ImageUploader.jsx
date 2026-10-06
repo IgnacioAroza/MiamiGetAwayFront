@@ -63,7 +63,7 @@ const SortableThumbnail = ({ id, src, file, onRemove }) => {
 };
 
 const ImageUploader = ({ images, newImages, onImageUpload, onRemoveImage, onReorder, processing, done, total, issues = [], clearIssues }) => {
-  const { t } = useTranslation();
+  const { t } = useTranslation(undefined, { lng: 'en' });
   const inputId = useId();
   const sensors = useSensors(useSensor(PointerSensor, { activationConstraint: { distance: 5 } }));
 
