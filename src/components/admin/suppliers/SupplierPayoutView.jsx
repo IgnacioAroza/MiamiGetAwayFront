@@ -17,6 +17,8 @@ import supplierService from '../../../services/supplierService';
 import { useToast } from '../../../hooks/useToast';
 import ToastNotification from '../../common/ToastNotification';
 import ReceiptLightbox from '../../common/ReceiptLightbox';
+import useImageFiles from '../../../hooks/useImageFiles';
+import ImageUploadFeedback from '../../images/ImageUploadFeedback';
 
 // ─── helpers ──────────────────────────────────────────────────────────────────
 const initials = (name = '') =>
@@ -63,7 +65,8 @@ const SupplierPayoutView = ({ reservationId, reservation }) => {
     const [dialogOpen, setDialogOpen] = useState(false);
     const [saving, setSaving] = useState(false);
     const [form, setForm] = useState({ amount: '', method: 'cash', date: '', referenceNotes: '' });
-    const [receiptFiles, setReceiptFiles] = useState([]);
+    const imageQueue = useImageFiles({ limit: 5, allowPdf: true });
+    const receiptFiles = imageQueue.files;
     const [lightbox, setLightbox] = useState({ open: false, images: [], index: 0 });
     const openLightbox = (images, index = 0) => setLightbox({ open: true, images, index });
     const closeLightbox = () => setLightbox(prev => ({ ...prev, open: false }));
@@ -111,12 +114,12 @@ const SupplierPayoutView = ({ reservationId, reservation }) => {
     // ── register payment handlers ─────────────────────────────────────────────
     const handleOpenDialog = () => {
         setForm({ amount: '', method: 'cash', date: new Date().toISOString().slice(0, 10), referenceNotes: '' });
-        setReceiptFiles([]);
+        imageQueue.resetFiles();
         setDialogOpen(true);
     };
 
     const handleRegister = async () => {
-        if (!form.amount || isNaN(Number(form.amount))) return;
+        if (!form.amount || isNaN(Number(form.amount)) || !imageQueue.canSubmit()) return;
         setSaving(true);
         try {
             await supplierService.createSupplierPayment(
@@ -432,8 +435,9 @@ const SupplierPayoutView = ({ reservationId, reservation }) => {
                             multiple
                             accept="image/*,application/pdf"
                             style={{ display: 'none' }}
-                            onChange={e => setReceiptFiles(Array.from(e.target.files))}
+                            onChange={e => { imageQueue.addFiles(e.target.files); e.target.value = ''; }}
                         />
+                        <ImageUploadFeedback {...imageQueue} />
                     </Box>
                 </DialogContent>
                 <DialogActions sx={{ px: 3, pb: 2 }}>
@@ -441,7 +445,7 @@ const SupplierPayoutView = ({ reservationId, reservation }) => {
                     <Button
                         variant="contained"
                         onClick={handleRegister}
-                        disabled={saving || !form.amount}
+                        disabled={saving || !form.amount || imageQueue.processing || imageQueue.issues.length > 0}
                         sx={{ bgcolor: '#6c5dd3', '&:hover': { bgcolor: '#5a4dc0' } }}
                     >
                         {saving ? <CircularProgress size={18} sx={{ color: '#fff' }} /> : 'Register'}

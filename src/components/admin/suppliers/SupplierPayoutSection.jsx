@@ -21,6 +21,8 @@ import { createSupplier, fetchAllSuppliers, selectAllSuppliers } from '../../../
 import { useToast } from '../../../hooks/useToast';
 import ToastNotification from '../../common/ToastNotification';
 import ReceiptLightbox from '../../common/ReceiptLightbox';
+import useImageFiles from '../../../hooks/useImageFiles';
+import ImageUploadFeedback from '../../images/ImageUploadFeedback';
 
 // ─── constants ────────────────────────────────────────────────────────────────
 const PAYMENT_TERMS_OPTIONS = [
@@ -127,7 +129,8 @@ const SupplierPayoutSection = ({ reservationId, nights = 0 }) => {
         amount: '', method: 'cash',
         date: format(new Date(), 'yyyy-MM-dd'), reference_notes: '',
     });
-    const [receiptFiles, setReceiptFiles] = useState([]);
+    const imageQueue = useImageFiles({ limit: 5, allowPdf: true });
+    const receiptFiles = imageQueue.files;
     const [registeringPayment, setRegisteringPayment] = useState(false);
     const [isDragOver, setIsDragOver] = useState(false);
     const [deletingPaymentId, setDeletingPaymentId] = useState(null);
@@ -246,19 +249,18 @@ const SupplierPayoutSection = ({ reservationId, nights = 0 }) => {
 
     // ── handlers: files ────────────────────────────────────────────────────────
     const addFiles = (files) => {
-        const valid = Array.from(files).filter(f => f.size <= 10 * 1024 * 1024);
-        setReceiptFiles(prev => [...prev, ...valid].slice(0, 10));
+        imageQueue.addFiles(files);
     };
 
     const handleDrop = useCallback((e) => {
         e.preventDefault();
         setIsDragOver(false);
         addFiles(e.dataTransfer.files);
-    }, []);
+    }, [imageQueue]);
 
     // ── handlers: payment ──────────────────────────────────────────────────────
     const handleRegisterPayment = async () => {
-        if (!paymentForm.amount || !paymentForm.date) return;
+        if (!paymentForm.amount || !paymentForm.date || !imageQueue.canSubmit()) return;
         setRegisteringPayment(true);
         try {
             const newPayment = await supplierService.createSupplierPayment(
@@ -268,7 +270,7 @@ const SupplierPayoutSection = ({ reservationId, nights = 0 }) => {
             const updated = await supplierService.getReservationSupplier(reservationId);
             setAssignment(updated);
             setPaymentForm({ amount: '', method: 'cash', date: format(new Date(), 'yyyy-MM-dd'), reference_notes: '' });
-            setReceiptFiles([]);
+            imageQueue.resetFiles();
             if (fileInputRef.current) fileInputRef.current.value = '';
             success('Payment registered');
         } catch (e) {
@@ -618,13 +620,13 @@ const SupplierPayoutSection = ({ reservationId, nights = 0 }) => {
                                     ref={fileInputRef} type="file"
                                     accept="image/*,application/pdf" multiple
                                     style={{ display: 'none' }}
-                                    onChange={e => addFiles(e.target.files)}
+                                    onChange={e => { addFiles(e.target.files); e.target.value = ''; }}
                                 />
                                 <input
                                     ref={cameraInputRef} type="file"
                                     accept="image/*" capture="environment"
                                     style={{ display: 'none' }}
-                                    onChange={e => addFiles(e.target.files)}
+                                    onChange={e => { addFiles(e.target.files); e.target.value = ''; }}
                                 />
                                 <Button
                                     size="small" variant="outlined" startIcon={<AttachFileIcon sx={{ fontSize: '0.85rem' }} />}
@@ -674,19 +676,20 @@ const SupplierPayoutSection = ({ reservationId, nights = 0 }) => {
                                     {receiptFiles.map((f, i) => (
                                         <Chip
                                             key={i} label={f.name} size="small"
-                                            onDelete={() => setReceiptFiles(prev => prev.filter((_, j) => j !== i))}
+                                            onDelete={() => imageQueue.removeFile(i)}
                                             sx={{ bgcolor: '#252535', color: '#ccc', fontSize: '0.7rem', '& .MuiChip-deleteIcon': { color: '#777' } }}
                                         />
                                     ))}
                                 </Box>
                             )}
                         </Box>
+                        <ImageUploadFeedback {...imageQueue} />
                     </Box>
 
                     <Button
                         fullWidth variant="contained"
                         onClick={handleRegisterPayment}
-                        disabled={registeringPayment || !paymentForm.amount || !paymentForm.date}
+                        disabled={registeringPayment || !paymentForm.amount || !paymentForm.date || imageQueue.processing || imageQueue.issues.length > 0}
                         startIcon={registeringPayment
                             ? <CircularProgress size={16} sx={{ color: '#fff' }} />
                             : <AddIcon />}
