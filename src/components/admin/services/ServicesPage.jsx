@@ -11,6 +11,7 @@ import PropertyForm from '../../form/PropertyForm';
 import ApartmentForm from '../apartments/ApartmentForm';
 import ImageUploader from '../../images/ImageUploader';
 import AddIcon from '@mui/icons-material/Add';
+import useImageFiles from '../../../hooks/useImageFiles';
 
 import {
   setSelectedService,
@@ -35,7 +36,8 @@ const ServicesPage = () => {
   const [dialogOpen, setDialogOpen] = useState(false);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [itemToDelete, setItemToDelete] = useState(null);
-  const [newImages, setNewImages] = useState([]);
+  const imageQueue = useImageFiles({ limit: 30 });
+  const newImages = imageQueue.files;
   const [openSnackbar, setOpenSnackbar] = useState(false);
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(10);
@@ -84,7 +86,7 @@ const ServicesPage = () => {
         setProperty(itemWithDefaults);
       }
       
-      setNewImages([]);
+      imageQueue.resetFiles();
     }
     
     setDialogOpen(true);
@@ -112,6 +114,7 @@ const ServicesPage = () => {
 
   const handleDialogSave = async (event) => {
     event.preventDefault();
+    if (!imageQueue.canSubmit()) return;
     try {
       // Obtener los datos del formulario según el tipo de servicio
       let formData = new FormData();
@@ -158,7 +161,7 @@ const ServicesPage = () => {
       setCar(null);
       setYacht(null);
       setProperty(null);
-      setNewImages([]);
+      imageQueue.resetFiles();
     } catch (error) {
       console.error('Error al guardar:', error);
       setOpenSnackbar(true);
@@ -206,21 +209,20 @@ const ServicesPage = () => {
         setProperty(emptyService);
       }
       
-      setNewImages([]);
+      imageQueue.resetFiles();
     }
     
     setDialogOpen(true);
   };
 
   const handleImageUpload = (event) => {
-    const files = Array.from(event.target.files);
-    setNewImages(prevImages => [...prevImages, ...files]);
+    imageQueue.addFiles(event.target.files, getCurrentImages().length);
   };
 
   const handleRemoveImage = (index, isNewImage) => {
     if (isNewImage) {
       // Eliminar una imagen nueva
-      setNewImages(prevImages => prevImages.filter((_, i) => i !== index - (getCurrentImages().length)));
+      imageQueue.removeFile(index - getCurrentImages().length);
     } else {
       // Eliminar una imagen existente
       const updatedServiceImages = [...getCurrentImages()];
@@ -245,7 +247,7 @@ const ServicesPage = () => {
     } else {
       setProperty({ ...property, images: reorderedImages });
     }
-    setNewImages(reorderedNewImages);
+    imageQueue.setFiles(reorderedNewImages);
   };
 
   const getCurrentImages = () => {
@@ -272,6 +274,10 @@ const ServicesPage = () => {
             onImageUpload={handleImageUpload}
             onRemoveImage={handleRemoveImage}
             onReorder={handleReorderImages}
+            processing={imageQueue.processing}
+            done={imageQueue.done}
+            total={imageQueue.total}
+            issues={imageQueue.issues}
           />
         </Box>
       </>
@@ -377,8 +383,9 @@ const ServicesPage = () => {
       ) : (
         <FormDialog
           open={dialogOpen}
-          onClose={() => setDialogOpen(false)}
+          onClose={() => { imageQueue.resetFiles(); setDialogOpen(false); }}
           onSave={handleDialogSave}
+          saveDisabled={imageQueue.processing || imageQueue.issues.length > 0}
           title={currentItem?.id ? 'Edit' : 'Create New'}
         >
           {renderForm()}
