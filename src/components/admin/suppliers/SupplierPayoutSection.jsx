@@ -22,6 +22,8 @@ import { useToast } from '../../../hooks/useToast';
 import ToastNotification from '../../common/ToastNotification';
 import ReceiptLightbox from '../../common/ReceiptLightbox';
 import useImageFiles from '../../../hooks/useImageFiles';
+import useSubmitLock from '../../../hooks/useSubmitLock';
+import { useTranslation } from 'react-i18next';
 import ImageUploadFeedback from '../../images/ImageUploadFeedback';
 
 // ─── constants ────────────────────────────────────────────────────────────────
@@ -131,7 +133,8 @@ const SupplierPayoutSection = ({ reservationId, nights = 0 }) => {
     });
     const imageQueue = useImageFiles({ limit: 5, allowPdf: true });
     const receiptFiles = imageQueue.files;
-    const [registeringPayment, setRegisteringPayment] = useState(false);
+    const { t } = useTranslation();
+    const { submitting: registeringPayment, run } = useSubmitLock('supplierPayment');
     const [isDragOver, setIsDragOver] = useState(false);
     const [deletingPaymentId, setDeletingPaymentId] = useState(null);
 
@@ -259,9 +262,9 @@ const SupplierPayoutSection = ({ reservationId, nights = 0 }) => {
     };
 
     // ── handlers: payment ──────────────────────────────────────────────────────
-    const handleRegisterPayment = async () => {
+    const handleRegisterPayment = () => {
         if (!paymentForm.amount || !paymentForm.date || !imageQueue.canSubmit()) return;
-        setRegisteringPayment(true);
+        return run(async () => {
         try {
             const newPayment = await supplierService.createSupplierPayment(
                 reservationId, paymentForm, receiptFiles,
@@ -275,9 +278,8 @@ const SupplierPayoutSection = ({ reservationId, nights = 0 }) => {
             success('Payment registered');
         } catch (e) {
             error(typeof e === 'string' ? e : 'Error registering payment');
-        } finally {
-            setRegisteringPayment(false);
         }
+        });
     };
 
     const handleDeletePayment = async (paymentId) => {
@@ -699,7 +701,7 @@ const SupplierPayoutSection = ({ reservationId, nights = 0 }) => {
                             textTransform: 'none', py: 1.2, fontWeight: 600,
                         }}
                     >
-                        {registeringPayment ? 'Registering...' : '+ Register Payout'}
+                        {registeringPayment ? t('imageUpload.saving') : '+ Register Payout'}
                     </Button>
                 </>
             )}

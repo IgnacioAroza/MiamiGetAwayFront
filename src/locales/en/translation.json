@@ -2,6 +2,7 @@
   "imageUpload": {
     "select": "Select images",
     "reorder": "Drag images to change their order",
+    "saving": "Saving…",
     "processing": "Processing images {{done}}/{{total}}…",
     "dismiss": "Dismiss",
     "errors": {
