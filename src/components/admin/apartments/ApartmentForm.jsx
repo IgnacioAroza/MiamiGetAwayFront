@@ -9,7 +9,8 @@ import {
     TextField,
     Grid,
     Typography,
-    Divider
+    Divider,
+    Alert
 } from '@mui/material';
 import { createAdminApartment, updateAdminApartment, selectSelectedApartment } from '../../../redux/adminApartmentSlice';
 import ImageUploader from '../../images/ImageUploader';
@@ -29,6 +30,7 @@ const ApartmentForm = ({ open, onClose }) => {
         price: 0
     });
     const [existingImages, setExistingImages] = React.useState([]);
+    const [uploadError, setUploadError] = React.useState('');
     const imageQueue = useImageFiles({ limit: 30 });
     const newImages = imageQueue.files;
 
@@ -60,6 +62,7 @@ const ApartmentForm = ({ open, onClose }) => {
             setExistingImages([]);
         }
         imageQueue.resetFiles();
+        setUploadError('');
     }, [selectedApartment]);
 
     const handleChange = (e) => {
@@ -90,6 +93,7 @@ const ApartmentForm = ({ open, onClose }) => {
     const handleSubmit = async (e) => {
         e.preventDefault();
         if (!imageQueue.canSubmit()) return;
+        setUploadError('');
         try {
             const formDataToSend = new FormData();
             Object.keys(formData).forEach(key => {
@@ -111,7 +115,7 @@ const ApartmentForm = ({ open, onClose }) => {
             }
             onClose();
         } catch (error) {
-            console.error('Error al guardar:', error);
+            setUploadError(typeof error === 'string' ? error : error?.message || '');
         }
     };
 
@@ -122,6 +126,7 @@ const ApartmentForm = ({ open, onClose }) => {
             </DialogTitle>
             <form onSubmit={handleSubmit}>
                 <DialogContent>
+                    {uploadError && <Alert severity="error" sx={{ mb: 2 }}>{uploadError}</Alert>}
                     <Grid container spacing={2}>
                         <Grid item xs={6}>
                             <TextField

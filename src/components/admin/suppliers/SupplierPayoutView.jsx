@@ -130,8 +130,8 @@ const SupplierPayoutView = ({ reservationId, reservation }) => {
             showToast('Payment registered', 'success');
             setDialogOpen(false);
             await load();
-        } catch {
-            showToast('Error registering payment', 'error');
+        } catch (error) {
+            showToast(typeof error === 'string' ? error : error?.message || 'Error registering payment', 'error');
         } finally {
             setSaving(false);
         }

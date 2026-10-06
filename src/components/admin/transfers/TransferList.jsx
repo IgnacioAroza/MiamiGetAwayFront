@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import {
-    Box, Button, Card, CardActions, CardContent, CardMedia, Chip,
+    Alert, Box, Button, Card, CardActions, CardContent, CardMedia, Chip,
     CircularProgress, Dialog, DialogActions, DialogContent, DialogTitle,
     Divider, Grid, IconButton, MenuItem, Paper, Skeleton, Tab, TablePagination, Tabs,
     Table, TableBody, TableCell, TableContainer, TableHead, TableRow,
@@ -124,6 +124,7 @@ const TransferList = () => {
     const imageQueue = useImageFiles({ limit: 20 });
     const imageFiles = imageQueue.files;
     const [saving, setSaving] = useState(false);
+    const [uploadError, setUploadError] = useState('');
     const [page, setPage] = useState(0);
     const [rowsPerPage, setRowsPerPage] = useState(10);
 
@@ -163,6 +164,7 @@ const TransferList = () => {
     const openCreate = () => {
         setForm(emptyForm);
         imageQueue.resetFiles();
+        setUploadError('');
         setCreateOpen(true);
     };
 
@@ -176,6 +178,7 @@ const TransferList = () => {
             description: vehicle.description || '',
         });
         imageQueue.resetFiles();
+        setUploadError('');
         setEditOpen(true);
     };
 
@@ -190,6 +193,8 @@ const TransferList = () => {
         try {
             await dispatch(createVehicle(buildFormData())).unwrap();
             setCreateOpen(false);
+        } catch (error) {
+            setUploadError(typeof error === 'string' ? error : error?.message || '');
         } finally {
             setSaving(false);
         }
@@ -201,6 +206,8 @@ const TransferList = () => {
         try {
             await dispatch(updateVehicle({ id: selected.id, data: buildFormData() })).unwrap();
             setEditOpen(false);
+        } catch (error) {
+            setUploadError(typeof error === 'string' ? error : error?.message || '');
         } finally {
             setSaving(false);
         }
@@ -462,8 +469,9 @@ const TransferList = () => {
                             <DirectionsCarIcon sx={{ color: '#4fc3f7' }} />
                             New Vehicle
                         </DialogTitle>
-                        <DialogContent sx={{ pt: 2 }}>
-                            <VehicleForm
+                <DialogContent sx={{ pt: 2 }}>
+                    {uploadError && <Alert severity="error" sx={{ mb: 2 }}>{uploadError}</Alert>}
+                    <VehicleForm
                                 form={form} onChange={handleFormChange}
                                 imageFiles={imageFiles} onImageChange={handleImageChange}
                         isEdit={false} imageQueue={imageQueue}
@@ -489,8 +497,9 @@ const TransferList = () => {
                             <EditIcon sx={{ color: '#4fc3f7' }} />
                             Edit Vehicle
                         </DialogTitle>
-                        <DialogContent sx={{ pt: 2 }}>
-                            <VehicleForm
+                <DialogContent sx={{ pt: 2 }}>
+                    {uploadError && <Alert severity="error" sx={{ mb: 2 }}>{uploadError}</Alert>}
+                    <VehicleForm
                                 form={form} onChange={handleFormChange}
                                 imageFiles={imageFiles} onImageChange={handleImageChange}
                         isEdit imageQueue={imageQueue}

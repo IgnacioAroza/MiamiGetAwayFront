@@ -1,5 +1,6 @@
 import api from '../utils/api';
 import { normalizeSupplierPaymentFromApi } from '../utils/normalizers';
+import { formatUploadError } from '../utils/imageUploadErrors';
 
 const normalizeAssignment = (data) => {
     if (!data || typeof data !== 'object') return null;
@@ -99,8 +100,12 @@ const supplierService = {
         form.append('date', paymentData.date);
         if (paymentData.reference_notes) form.append('reference_notes', paymentData.reference_notes);
         files.forEach(file => form.append('receipt_images', file));
-        const res = await api.post(`/reservations/${reservationId}/supplier/payments`, form);
-        return normalizeSupplierPayment(res.data);
+        try {
+            const res = await api.post(`/reservations/${reservationId}/supplier/payments`, form);
+            return normalizeSupplierPayment(res.data);
+        } catch (error) {
+            throw formatUploadError(error, files);
+        }
     },
 
     deleteSupplierPayment: async (id) => {

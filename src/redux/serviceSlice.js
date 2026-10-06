@@ -1,6 +1,7 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import api from '../utils/api';
 import { normalizeServiceItemFromApi } from '../utils/normalizers';
+import { formatUploadError } from '../utils/imageUploadErrors';
 
 // Usamos el cliente API centralizado con interceptores compartidos
 
@@ -42,7 +43,7 @@ export const createService = createAsyncThunk(
             const response = await api.post(`/${serviceType}`, data);
             return { serviceType, data: response.data };
         } catch (error) {
-            return rejectWithValue({ serviceType, error: handleApiError(error) });
+            return rejectWithValue({ serviceType, error: formatUploadError(error, data.getAll('images')) });
         }
     }
 );
@@ -61,7 +62,7 @@ export const updateService = createAsyncThunk(
             const response = await api.put(`/${serviceType}/${id}`, data);
             return { serviceType, data: response.data };
         } catch (error) {
-            return rejectWithValue({ serviceType, error: handleApiError(error) });
+            return rejectWithValue({ serviceType, error: formatUploadError(error, data.getAll('images')) });
         }
     }
 );

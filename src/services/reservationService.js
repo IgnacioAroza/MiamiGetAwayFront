@@ -1,4 +1,5 @@
 import api from '../utils/api'
+import { formatUploadError } from '../utils/imageUploadErrors'
 import { formatDateToString, parseStringToDate } from '../utils/dateUtils'
 import { normalizeReservationInput, stripUndefined, normalizePaymentInput } from '../utils/normalizers'
 
@@ -156,7 +157,7 @@ const reservationService = {
             const response = await api.post(`/reservations/${id}/payments`, body);
             return response.data;
         } catch (error) {
-            throw error.response?.data?.error || error.response?.data?.message || error.message || 'Error registering payment';
+            throw formatUploadError(error, paymentData.receipt_image ? [paymentData.receipt_image] : []);
         }
     },
 

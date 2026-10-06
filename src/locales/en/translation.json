@@ -10,7 +10,8 @@
       "decode": "Could not open the image",
       "encode": "Could not compress the image",
       "animatedGif": "Cannot compress an animated GIF without losing animation",
-      "unsupported": "Unsupported format"
+      "unsupported": "Unsupported format",
+      "uploadGroup": "Upload failed for {{names}}: {{reason}}"
     }
   },
   "general": {

@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
 import {
-    Box, Button, Card, CardActions, CardContent, CardMedia, Chip,
+    Alert, Box, Button, Card, CardActions, CardContent, CardMedia, Chip,
     CircularProgress, Dialog, DialogActions, DialogContent, DialogTitle,
     Divider, Grid, IconButton, Paper, Skeleton, Tab, TablePagination, Tabs,
     Table, TableBody, TableCell, TableContainer, TableHead, TableRow,
@@ -114,6 +114,7 @@ const ExperienceList = () => {
     const imageQueue = useImageFiles({ limit: 30 });
     const imageFiles = imageQueue.files;
     const [saving, setSaving] = useState(false);
+    const [uploadError, setUploadError] = useState('');
     const [page, setPage] = useState(0);
     const [rowsPerPage, setRowsPerPage] = useState(10);
 
@@ -151,6 +152,7 @@ const ExperienceList = () => {
     const openCreate = () => {
         setForm(emptyForm);
         imageQueue.resetFiles();
+        setUploadError('');
         setCreateOpen(true);
     };
 
@@ -163,6 +165,7 @@ const ExperienceList = () => {
             price: exp.price ?? '',
         });
         imageQueue.resetFiles();
+        setUploadError('');
         setEditOpen(true);
     };
 
@@ -177,6 +180,8 @@ const ExperienceList = () => {
         try {
             await dispatch(createExperience(buildFormData())).unwrap();
             setCreateOpen(false);
+        } catch (error) {
+            setUploadError(typeof error === 'string' ? error : error?.message || '');
         } finally {
             setSaving(false);
         }
@@ -188,6 +193,8 @@ const ExperienceList = () => {
         try {
             await dispatch(updateExperience({ id: selected.id, formData: buildFormData() })).unwrap();
             setEditOpen(false);
+        } catch (error) {
+            setUploadError(typeof error === 'string' ? error : error?.message || '');
         } finally {
             setSaving(false);
         }
@@ -448,6 +455,7 @@ const ExperienceList = () => {
                     New Experience
                 </DialogTitle>
                 <DialogContent sx={{ pt: 2 }}>
+                    {uploadError && <Alert severity="error" sx={{ mb: 2 }}>{uploadError}</Alert>}
                     <ExperienceForm
                         form={form} onChange={handleFormChange}
                         imageFiles={imageFiles} onImageChange={handleImageChange}
@@ -475,6 +483,7 @@ const ExperienceList = () => {
                     Edit Experience
                 </DialogTitle>
                 <DialogContent sx={{ pt: 2 }}>
+                    {uploadError && <Alert severity="error" sx={{ mb: 2 }}>{uploadError}</Alert>}
                     <ExperienceForm
                         form={form} onChange={handleFormChange}
                         imageFiles={imageFiles} onImageChange={handleImageChange}

@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
 import {
-    Box, Button, Card, CardActions, CardContent, CardMedia, Chip,
+    Alert, Box, Button, Card, CardActions, CardContent, CardMedia, Chip,
     CircularProgress, Dialog, DialogActions, DialogContent, DialogTitle,
     Divider, Grid, IconButton, Paper, Skeleton, TablePagination,
     Table, TableBody, TableCell, TableContainer, TableHead, TableRow,
@@ -131,6 +131,7 @@ const InvestmentList = () => {
     const imageQueue = useImageFiles({ limit: 30 });
     const imageFiles = imageQueue.files;
     const [saving, setSaving] = useState(false);
+    const [uploadError, setUploadError] = useState('');
     const [page, setPage] = useState(0);
     const [rowsPerPage, setRowsPerPage] = useState(10);
 
@@ -174,6 +175,7 @@ const InvestmentList = () => {
     const openCreate = () => {
         setForm(emptyForm);
         imageQueue.resetFiles();
+        setUploadError('');
         setCreateOpen(true);
     };
 
@@ -189,6 +191,7 @@ const InvestmentList = () => {
             price: inv.price ?? '',
         });
         imageQueue.resetFiles();
+        setUploadError('');
         setEditOpen(true);
     };
 
@@ -203,6 +206,8 @@ const InvestmentList = () => {
         try {
             await dispatch(createInvestment(buildFormData())).unwrap();
             setCreateOpen(false);
+        } catch (error) {
+            setUploadError(typeof error === 'string' ? error : error?.message || '');
         } finally {
             setSaving(false);
         }
@@ -214,6 +219,8 @@ const InvestmentList = () => {
         try {
             await dispatch(updateInvestment({ id: selected.id, formData: buildFormData() })).unwrap();
             setEditOpen(false);
+        } catch (error) {
+            setUploadError(typeof error === 'string' ? error : error?.message || '');
         } finally {
             setSaving(false);
         }
@@ -445,6 +452,7 @@ const InvestmentList = () => {
                     New Investment
                 </DialogTitle>
                 <DialogContent sx={{ pt: 2 }}>
+                    {uploadError && <Alert severity="error" sx={{ mb: 2 }}>{uploadError}</Alert>}
                     <InvestmentForm
                         form={form} onChange={handleFormChange}
                         imageFiles={imageFiles} onImageChange={handleImageChange}
@@ -472,6 +480,7 @@ const InvestmentList = () => {
                     Edit Investment
                 </DialogTitle>
                 <DialogContent sx={{ pt: 2 }}>
+                    {uploadError && <Alert severity="error" sx={{ mb: 2 }}>{uploadError}</Alert>}
                     <InvestmentForm
                         form={form} onChange={handleFormChange}
                         imageFiles={imageFiles} onImageChange={handleImageChange}
