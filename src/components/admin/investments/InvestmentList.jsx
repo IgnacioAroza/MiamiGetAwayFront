@@ -20,6 +20,8 @@ import {
 } from '../../../redux/investmentSlice';
 import DeleteDialog from '../dialogs/DeleteDialog';
 import useDeviceDetection from '../../../hooks/useDeviceDetection';
+import useImageFiles from '../../../hooks/useImageFiles';
+import ImageUploadFeedback from '../../images/ImageUploadFeedback';
 
 const fieldSx = {
     '& .MuiOutlinedInput-root': {
@@ -47,7 +49,7 @@ const formatPrice = (price) =>
         ? 'Price on request'
         : `$${Number(price).toLocaleString('en-US')}`;
 
-const InvestmentForm = ({ form, onChange, imageFiles, onImageChange, isEdit }) => (
+const InvestmentForm = ({ form, onChange, imageFiles, onImageChange, isEdit, imageQueue }) => (
     <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2, pt: 1 }}>
         <TextField
             label="Name *" name="name" value={form.name}
@@ -96,7 +98,7 @@ const InvestmentForm = ({ form, onChange, imageFiles, onImageChange, isEdit }) =
                     accept="image/*"
                     multiple
                     hidden
-                    onChange={onImageChange}
+                    onChange={e => { onImageChange(e); e.target.value = ''; }}
                 />
             </Button>
             {isEdit && imageFiles.length === 0 && (
@@ -109,6 +111,7 @@ const InvestmentForm = ({ form, onChange, imageFiles, onImageChange, isEdit }) =
                     {imageFiles.map(f => f.name).join(', ')}
                 </Typography>
             )}
+            <ImageUploadFeedback {...imageQueue} />
         </Box>
     </Box>
 );
@@ -125,7 +128,8 @@ const InvestmentList = () => {
     const [deleteOpen, setDeleteOpen] = useState(false);
     const [selected, setSelected] = useState(null);
     const [form, setForm] = useState(emptyForm);
-    const [imageFiles, setImageFiles] = useState([]);
+    const imageQueue = useImageFiles({ limit: 30 });
+    const imageFiles = imageQueue.files;
     const [saving, setSaving] = useState(false);
     const [page, setPage] = useState(0);
     const [rowsPerPage, setRowsPerPage] = useState(10);
@@ -146,8 +150,7 @@ const InvestmentList = () => {
     };
 
     const handleImageChange = (e) => {
-        const files = Array.from(e.target.files).slice(0, 30);
-        setImageFiles(files);
+        imageQueue.addFiles(e.target.files);
     };
 
     const buildFormData = () => {
@@ -170,7 +173,7 @@ const InvestmentList = () => {
 
     const openCreate = () => {
         setForm(emptyForm);
-        setImageFiles([]);
+        imageQueue.resetFiles();
         setCreateOpen(true);
     };
 
@@ -185,7 +188,7 @@ const InvestmentList = () => {
             rooms: inv.rooms ?? '',
             price: inv.price ?? '',
         });
-        setImageFiles([]);
+        imageQueue.resetFiles();
         setEditOpen(true);
     };
 
@@ -195,7 +198,7 @@ const InvestmentList = () => {
     };
 
     const handleCreate = async () => {
-        if (!isFormValid()) return;
+        if (!isFormValid() || !imageQueue.canSubmit()) return;
         setSaving(true);
         try {
             await dispatch(createInvestment(buildFormData())).unwrap();
@@ -206,7 +209,7 @@ const InvestmentList = () => {
     };
 
     const handleEdit = async () => {
-        if (!isFormValid() || !selected) return;
+        if (!isFormValid() || !selected || !imageQueue.canSubmit()) return;
         setSaving(true);
         try {
             await dispatch(updateInvestment({ id: selected.id, formData: buildFormData() })).unwrap();
@@ -445,14 +448,14 @@ const InvestmentList = () => {
                     <InvestmentForm
                         form={form} onChange={handleFormChange}
                         imageFiles={imageFiles} onImageChange={handleImageChange}
-                        isEdit={false}
+                        isEdit={false} imageQueue={imageQueue}
                     />
                 </DialogContent>
                 <DialogActions sx={{ borderTop: '1px solid #333', px: 3, py: 2 }}>
                     <Button onClick={() => setCreateOpen(false)} sx={{ color: '#aaa' }}>Cancel</Button>
                     <Button
                         onClick={handleCreate}
-                        disabled={saving || !isFormValid()}
+                        disabled={saving || !isFormValid() || imageQueue.processing || imageQueue.issues.length > 0}
                         variant="contained"
                         sx={{ bgcolor: '#6c5dd3', '&:hover': { bgcolor: '#7c5cbf' } }}
                         startIcon={saving ? <CircularProgress size={14} color="inherit" /> : null}
@@ -472,14 +475,14 @@ const InvestmentList = () => {
                     <InvestmentForm
                         form={form} onChange={handleFormChange}
                         imageFiles={imageFiles} onImageChange={handleImageChange}
-                        isEdit
+                        isEdit imageQueue={imageQueue}
                     />
                 </DialogContent>
                 <DialogActions sx={{ borderTop: '1px solid #333', px: 3, py: 2 }}>
                     <Button onClick={() => setEditOpen(false)} sx={{ color: '#aaa' }}>Cancel</Button>
                     <Button
                         onClick={handleEdit}
-                        disabled={saving || !isFormValid()}
+                        disabled={saving || !isFormValid() || imageQueue.processing || imageQueue.issues.length > 0}
                         variant="contained"
                         sx={{ bgcolor: '#6c5dd3', '&:hover': { bgcolor: '#7c5cbf' } }}
                         startIcon={saving ? <CircularProgress size={14} color="inherit" /> : null}
