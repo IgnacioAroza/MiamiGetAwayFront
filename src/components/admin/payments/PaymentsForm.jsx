@@ -26,6 +26,8 @@ import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 import { enUS } from 'date-fns/locale';
 import { createPayment, updatePayment, fetchAllPayments } from '../../../redux/reservationPaymentSlice';
+import useImageFiles from '../../../hooks/useImageFiles';
+import ImageUploadFeedback from '../../images/ImageUploadFeedback';
 
 const PAYMENT_METHODS = [
     { value: 'cash', label: 'Cash' },
@@ -52,7 +54,8 @@ const PaymentForm = ({ open, onClose }) => {
         reservation_id: '',
         client_id: ''
     });
-    const [receiptImage, setReceiptImage] = useState(null);
+    const imageQueue = useImageFiles({ limit: 1 });
+    const receiptImage = imageQueue.files[0] || null;
     const [removeReceiptImage, setRemoveReceiptImage] = useState(false);
 
     const [errors, setErrors] = useState({});
@@ -82,7 +85,7 @@ const PaymentForm = ({ open, onClose }) => {
                 client_id: ''
             });
         }
-        setReceiptImage(null);
+        imageQueue.resetFiles();
         setRemoveReceiptImage(false);
         if (fileInputRef.current) fileInputRef.current.value = '';
     }, [selectedPayment]);
@@ -146,6 +149,7 @@ const PaymentForm = ({ open, onClose }) => {
 
     const handleSubmit = async (event) => {
         event.preventDefault();
+        if (!imageQueue.canSubmit()) return;
         
         if (!validateForm()) {
             return;
@@ -183,7 +187,7 @@ const PaymentForm = ({ open, onClose }) => {
                 reservation_id: '',
                 client_id: ''
             });
-            setReceiptImage(null);
+            imageQueue.resetFiles();
             setRemoveReceiptImage(false);
             if (fileInputRef.current) fileInputRef.current.value = '';
         } catch (error) {
@@ -204,7 +208,7 @@ const PaymentForm = ({ open, onClose }) => {
             reservation_id: '',
             client_id: ''
         });
-        setReceiptImage(null);
+        imageQueue.resetFiles();
         setRemoveReceiptImage(false);
         if (fileInputRef.current) fileInputRef.current.value = '';
         setErrors({});
@@ -346,8 +350,10 @@ const PaymentForm = ({ open, onClose }) => {
                                 accept="image/*"
                                 style={{ display: 'none' }}
                                 onChange={(e) => {
-                                    setReceiptImage(e.target.files[0] || null);
+                                    imageQueue.resetFiles();
+                                    imageQueue.addFiles(e.target.files);
                                     setRemoveReceiptImage(false);
+                                    e.target.value = '';
                                 }}
                             />
                             <Button
@@ -361,6 +367,7 @@ const PaymentForm = ({ open, onClose }) => {
                             >
                                 {receiptImage ? receiptImage.name : 'Attach receipt image (optional)'}
                             </Button>
+                            <ImageUploadFeedback {...imageQueue} />
                             {selectedPayment?.receiptImage && !receiptImage && (
                                 <Box sx={{ mt: 1 }}>
                                     <Typography variant="caption" sx={{ color: '#aaa', display: 'block', mb: 0.5 }}>
@@ -394,7 +401,7 @@ const PaymentForm = ({ open, onClose }) => {
                     <Button 
                         type="submit"
                         variant="contained"
-                        disabled={loading}
+                        disabled={loading || imageQueue.processing || imageQueue.issues.length > 0}
                     >
                         {loading ? (
                             <CircularProgress size={24} />
