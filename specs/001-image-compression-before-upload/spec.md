@@ -2,7 +2,7 @@
 spec_number: 001
 spec_slug: image-compression-before-upload
 spec_created_at: 2026-10-06T00:00:00Z
-spec_status: draft
+spec_status: implemented
 ---
 
 # Spec 001 — Compresión de imágenes antes de subirlas
@@ -62,7 +62,8 @@ primero.**
   almacenamiento de producción (el backend local apunta a producción).
 
 ## Casos límite
-- Formatos que el navegador no puede decodificar para comprimir (p. ej. HEIC de iPhone).
+- Formatos que el navegador no puede decodificar para comprimir (p. ej. HEIC de iPhone):
+  se rechazan con mensaje claro (RF-12). Decisión de Ignacio, 06/10/2026.
 - Fotos con orientación EXIF (giradas): se ven derechas después de comprimir.
 - PNG con transparencia.
 - GIF animado.
@@ -85,7 +86,11 @@ primero.**
 - Desplegado en producción antes que la spec 001 del Back.
 
 ## Dudas abiertas
-- [NECESITA ACLARACIÓN] ¿El cliente sube fotos HEIC desde iPhone? Si sí: ¿convertir en
-  el navegador, aceptarlas sin comprimir, o rechazarlas con mensaje?
-- [NECESITA ACLARACIÓN] ¿El panel hoy muestra el detalle de errores por imagen que
-  devuelve el back, o solo un error genérico? (define el alcance de RF-10)
+Ninguna.
+
+Resueltas:
+- HEIC: si el navegador no puede decodificarlo, se rechaza con mensaje claro (RF-12).
+- Errores por imagen: antes el panel no mostraba detalle por imagen. `ImageUploader` no
+  manejaba errores, apartamentos solo registraban el fallo en consola, los demás
+  formularios mostraban un mensaje general, y los thunks y servicios descartaban
+  `response.data.details`. RF-10 cubre el comportamiento nuevo.

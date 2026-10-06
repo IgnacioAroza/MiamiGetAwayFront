@@ -1,5 +1,6 @@
 import { createAsyncThunk, createSlice } from '@reduxjs/toolkit';
 import experienceService from '../services/experienceService';
+import { formatUploadError } from '../utils/imageUploadErrors';
 
 export const fetchAllExperiences = createAsyncThunk(
     'experiences/fetchAll',
@@ -18,7 +19,7 @@ export const createExperience = createAsyncThunk(
         try {
             return await experienceService.create(formData);
         } catch (error) {
-            return rejectWithValue(error?.response?.data?.error || error?.response?.data?.message || 'Error creating experience');
+            return rejectWithValue(formatUploadError(error, formData.getAll('images')));
         }
     }
 );
@@ -29,7 +30,7 @@ export const updateExperience = createAsyncThunk(
         try {
             return await experienceService.update(id, formData);
         } catch (error) {
-            return rejectWithValue(error?.response?.data?.error || error?.response?.data?.message || 'Error updating experience');
+            return rejectWithValue(formatUploadError(error, formData.getAll('images')));
         }
     }
 );

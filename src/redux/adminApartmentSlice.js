@@ -1,6 +1,7 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import { normalizeApartmentFromApi } from '../utils/normalizers';
 import api from '../utils/api';
+import { formatUploadError } from '../utils/imageUploadErrors';
 
 export const fetchAdminApartments = createAsyncThunk(
     'adminApartments/fetchAll',
@@ -33,7 +34,7 @@ export const createAdminApartment = createAsyncThunk(
             const response = await api.post('/apartments', apartmentData);
             return response.data;
         } catch (error) {
-            return rejectWithValue(error.response?.data?.error || error.response?.data?.message || 'Error creating apartment');
+            return rejectWithValue(formatUploadError(error, apartmentData.getAll('images')));
         }
     }
 );
@@ -45,7 +46,7 @@ export const updateAdminApartment = createAsyncThunk(
             const response = await api.put(`/apartments/${id}`, data);
             return response.data;
         } catch (error) {
-            return rejectWithValue(error.response?.data?.error || error.response?.data?.message || 'Error updating apartment');
+            return rejectWithValue(formatUploadError(error, data.getAll('images')));
         }
     }
 );

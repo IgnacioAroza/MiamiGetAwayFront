@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useId, useState } from 'react';
 import { Box, Button, IconButton, Typography } from '@mui/material';
 import DeleteIcon from '@mui/icons-material/Delete';
 import DragIndicatorIcon from '@mui/icons-material/DragIndicator';
@@ -16,12 +16,21 @@ import {
   arrayMove,
 } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
+import { useTranslation } from 'react-i18next';
+import ImageUploadFeedback from './ImageUploadFeedback';
 
 const buildItemId = (image, index, isNewImage) =>
   isNewImage ? `new-${image.name}-${image.size}-${image.lastModified}-${index}` : `existing-${image}`;
 
-const SortableThumbnail = ({ id, src, onRemove }) => {
+const SortableThumbnail = ({ id, src, file, onRemove }) => {
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({ id });
+  const [preview, setPreview] = useState(src);
+  useEffect(() => {
+    if (!file) { setPreview(src); return; }
+    const url = URL.createObjectURL(file);
+    setPreview(url);
+    return () => URL.revokeObjectURL(url);
+  }, [file, src]);
 
   const style = {
     transform: CSS.Transform.toString(transform),
@@ -36,7 +45,7 @@ const SortableThumbnail = ({ id, src, onRemove }) => {
         {...listeners}
         sx={{ cursor: 'grab', '&:active': { cursor: 'grabbing' } }}
       >
-        <img src={src} alt="" style={{ width: '100px', height: '100px', objectFit: 'cover', display: 'block', borderRadius: 4 }} />
+        <img src={preview} alt="" style={{ width: '100px', height: '100px', objectFit: 'cover', display: 'block', borderRadius: 4 }} />
       </Box>
       <IconButton
         size="small"
@@ -53,12 +62,14 @@ const SortableThumbnail = ({ id, src, onRemove }) => {
   );
 };
 
-const ImageUploader = ({ images, newImages, onImageUpload, onRemoveImage, onReorder }) => {
+const ImageUploader = ({ images, newImages, onImageUpload, onRemoveImage, onReorder, processing, done, total, issues = [], clearIssues }) => {
+  const { t } = useTranslation();
+  const inputId = useId();
   const sensors = useSensors(useSensor(PointerSensor, { activationConstraint: { distance: 5 } }));
 
   const items = [
     ...images.map((image, index) => ({ id: buildItemId(image, index, false), src: image, isNewImage: false })),
-    ...newImages.map((image, index) => ({ id: buildItemId(image, index, true), src: URL.createObjectURL(image), isNewImage: true, file: image })),
+    ...newImages.map((image, index) => ({ id: buildItemId(image, index, true), isNewImage: true, file: image })),
   ];
 
   const handleDragEnd = (event) => {
@@ -83,19 +94,19 @@ const ImageUploader = ({ images, newImages, onImageUpload, onRemoveImage, onReor
       <input
         accept="image/*"
         style={{ display: 'none' }}
-        id="raised-button-file"
+        id={inputId}
         multiple
         type="file"
-        onChange={onImageUpload}
+        onChange={event => { onImageUpload(event); event.target.value = ''; }}
       />
-      <label htmlFor="raised-button-file">
+      <label htmlFor={inputId}>
         <Button variant="contained" component="span" sx={{ mt: 2 }}>
-          Upload Images
+          {t('imageUpload.select')}
         </Button>
       </label>
       {items.length > 0 && (
         <Typography variant="caption" display="block" sx={{ mt: 1, color: 'text.secondary' }}>
-          Arrastrá las imágenes para cambiar el orden
+          {t('imageUpload.reorder')}
         </Typography>
       )}
       <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
@@ -106,12 +117,14 @@ const ImageUploader = ({ images, newImages, onImageUpload, onRemoveImage, onReor
                 key={item.id}
                 id={item.id}
                 src={item.src}
+                file={item.file}
                 onRemove={() => onRemoveImage(index, item.isNewImage)}
               />
             ))}
           </Box>
         </SortableContext>
       </DndContext>
+      <ImageUploadFeedback processing={processing} done={done} total={total} issues={issues} clearIssues={clearIssues} />
     </Box>
   );
 };

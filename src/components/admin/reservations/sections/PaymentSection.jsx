@@ -4,6 +4,8 @@ import AttachFileIcon from '@mui/icons-material/AttachFile';
 import reservationService from '../../../../services/reservationService';
 import { useToast } from '../../../../hooks/useToast';
 import ToastNotification from '../../../common/ToastNotification';
+import useImageFiles from '../../../../hooks/useImageFiles';
+import ImageUploadFeedback from '../../../images/ImageUploadFeedback';
 
 const PaymentSection = ({ formData, onChange, onPaymentRegistered, onInitialPaymentChange, initialPaymentData }) => {
     // Usar datos del prop o estado local con valores por defecto
@@ -13,7 +15,8 @@ const PaymentSection = ({ formData, onChange, onPaymentRegistered, onInitialPaym
         paymentNotes: initialPaymentData?.notes || ''
     });
     const [isLoading, setIsLoading] = useState(false);
-    const [receiptImage, setReceiptImage] = useState(null);
+    const imageQueue = useImageFiles({ limit: 1 });
+    const receiptImage = imageQueue.files[0] || null;
     const fileInputRef = useRef(null);
     const { toast, success, error, warning, hideToast } = useToast();
 
@@ -51,6 +54,7 @@ const PaymentSection = ({ formData, onChange, onPaymentRegistered, onInitialPaym
     };
 
     const handleRegisterPayment = async () => {
+        if (!imageQueue.canSubmit()) return;
         if (!paymentData.paymentAmount || paymentData.paymentAmount <= 0) {
             warning('Please enter a valid payment amount');
             return;
@@ -111,7 +115,7 @@ const PaymentSection = ({ formData, onChange, onPaymentRegistered, onInitialPaym
                 paymentMethod: 'cash',
                 paymentNotes: ''
             });
-            setReceiptImage(null);
+            imageQueue.resetFiles();
             if (fileInputRef.current) fileInputRef.current.value = '';
 
             // Notificar al componente padre si hay callback
@@ -212,7 +216,7 @@ const PaymentSection = ({ formData, onChange, onPaymentRegistered, onInitialPaym
                             type="file"
                             accept="image/*"
                             style={{ display: 'none' }}
-                            onChange={(e) => setReceiptImage(e.target.files[0] || null)}
+                            onChange={(e) => { imageQueue.resetFiles(); imageQueue.addFiles(e.target.files); e.target.value = ''; }}
                         />
                         <Button
                             fullWidth
@@ -230,6 +234,7 @@ const PaymentSection = ({ formData, onChange, onPaymentRegistered, onInitialPaym
                         >
                             {receiptImage ? receiptImage.name : 'Attach receipt (optional)'}
                         </Button>
+                        <ImageUploadFeedback {...imageQueue} />
                     </Grid>
                 )}
 
@@ -240,7 +245,7 @@ const PaymentSection = ({ formData, onChange, onPaymentRegistered, onInitialPaym
                         color="success"
                         size="medium"
                         onClick={handleRegisterPayment}
-                        disabled={isLoading || !paymentData.paymentAmount}
+                        disabled={isLoading || !paymentData.paymentAmount || imageQueue.processing || imageQueue.issues.length > 0}
                         sx={{
                             bgcolor: '#4caf50',
                             '&:hover': { bgcolor: '#45a049' },

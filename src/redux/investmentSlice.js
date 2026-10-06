@@ -1,5 +1,6 @@
 import { createAsyncThunk, createSlice } from '@reduxjs/toolkit';
 import investmentService from '../services/investmentService';
+import { formatUploadError } from '../utils/imageUploadErrors';
 
 export const fetchAllInvestments = createAsyncThunk(
     'investments/fetchAll',
@@ -18,7 +19,7 @@ export const createInvestment = createAsyncThunk(
         try {
             return await investmentService.create(formData);
         } catch (error) {
-            return rejectWithValue(error?.response?.data?.error || error?.response?.data?.message || 'Error creating investment');
+            return rejectWithValue(formatUploadError(error, formData.getAll('images')));
         }
     }
 );
@@ -29,7 +30,7 @@ export const updateInvestment = createAsyncThunk(
         try {
             return await investmentService.update(id, formData);
         } catch (error) {
-            return rejectWithValue(error?.response?.data?.error || error?.response?.data?.message || 'Error updating investment');
+            return rejectWithValue(formatUploadError(error, formData.getAll('images')));
         }
     }
 );

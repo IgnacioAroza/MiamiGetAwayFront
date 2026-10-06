@@ -1,5 +1,6 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import transferService from '../services/transferService';
+import { formatUploadError } from '../utils/imageUploadErrors';
 
 export const fetchAllVehicles = createAsyncThunk(
     'transferVehicles/fetchAll',
@@ -32,7 +33,7 @@ export const createVehicle = createAsyncThunk(
             const res = await transferService.createVehicle(data);
             return res.data;
         } catch (err) {
-            return rejectWithValue(err.response?.data?.error || err.response?.data?.message || 'Error creating vehicle');
+            return rejectWithValue(formatUploadError(err, data.getAll('images')));
         }
     }
 );
@@ -44,7 +45,7 @@ export const updateVehicle = createAsyncThunk(
             const res = await transferService.updateVehicle(id, data);
             return res.data;
         } catch (err) {
-            return rejectWithValue(err.response?.data?.error || err.response?.data?.message || 'Error updating vehicle');
+            return rejectWithValue(formatUploadError(err, data.getAll('images')));
         }
     }
 );

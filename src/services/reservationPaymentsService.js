@@ -1,4 +1,5 @@
 import api from '../utils/api';
+import { formatUploadError } from '../utils/imageUploadErrors';
 
 const reservationPaymentService = {
     getAllPayments: async (filters = {}) => {
@@ -62,7 +63,7 @@ const reservationPaymentService = {
             const response = await api.post(`/reservations/${reservationId}/payments`, body);
             return response.data;
         } catch (error) {
-            throw error.response?.data?.error || error.response?.data?.message || 'Error creating payment';
+            throw formatUploadError(error, paymentData.receiptImage ? [paymentData.receiptImage] : []);
         }
     },
 
@@ -89,7 +90,7 @@ const reservationPaymentService = {
             const response = await api.put(`/reservation-payments/${id}`, body);
             return response.data;
         } catch (error) {
-            throw error.response?.data?.error || error.response?.data?.message || 'Error updating payment';
+            throw formatUploadError(error, paymentData.receiptImage ? [paymentData.receiptImage] : []);
         }
     },
 
