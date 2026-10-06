@@ -242,7 +242,7 @@ const ApartmentForm = ({ open, onClose }) => {
                 <DialogActions>
                     <Button onClick={onClose} disabled={submitting}>Cancel</Button>
                     <Button type="submit" variant="contained" color="primary" disabled={submitting || imageQueue.processing || imageQueue.issues.length > 0}>
-                        {submitting ? t('imageUpload.saving') : selectedApartment ? 'Update' : 'Create'}
+                        {submitting ? t('imageUpload.saving', { lng: 'en' }) : selectedApartment ? 'Update' : 'Create'}
                     </Button>
                 </DialogActions>
             </form>

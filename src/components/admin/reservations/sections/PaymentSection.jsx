@@ -256,7 +256,7 @@ const PaymentSection = ({ formData, onChange, onPaymentRegistered, onInitialPaym
                             py: 1.5
                         }}
                     >
-                        {isLoading ? t('imageUpload.saving') : 
+                        {isLoading ? t('imageUpload.saving', { lng: 'en' }) : 
                          isNewReservation ? 'Add Initial Payment' : 
                          'Register Payment'}
                     </Button>

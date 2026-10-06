@@ -1,6 +1,6 @@
 import i18next from 'i18next';
 
-export function formatUploadError(error, files = [], t = i18next.t.bind(i18next)) {
+export function formatUploadError(error, files = [], t = i18next.getFixedT('en')) {
   const data = error?.response?.data;
   const reason = data?.error || data?.message || (typeof error === 'string' ? error : error?.message) || t('general.error');
   if (!files.length) return reason;
