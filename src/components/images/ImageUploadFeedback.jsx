@@ -1,0 +1,16 @@
+import { Alert, Box, LinearProgress, Typography } from '@mui/material';
+import { useTranslation } from 'react-i18next';
+
+export default function ImageUploadFeedback({ processing, done = 0, total = 0, issues = [] }) {
+  const { t } = useTranslation();
+  if (!processing && !issues.length) return null;
+  return <Box sx={{ mt: 1 }}>
+    {processing && <>
+      <Typography variant="caption">{t('imageUpload.processing', { done, total })}</Typography>
+      <LinearProgress variant="determinate" value={total ? 100 * done / total : 0} />
+    </>}
+    {issues.map((issue, index) => <Alert key={`${issue.name}-${index}`} severity="error" sx={{ mt: 1 }}>
+      {issue.name}: {t(`imageUpload.errors.${issue.code}`, { limit: issue.limit, defaultValue: t('imageUpload.errors.decode') })}
+    </Alert>)}
+  </Box>;
+}

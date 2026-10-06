@@ -13,6 +13,7 @@ import {
 } from '@mui/material';
 import { createAdminApartment, updateAdminApartment, selectSelectedApartment } from '../../../redux/adminApartmentSlice';
 import ImageUploader from '../../images/ImageUploader';
+import useImageFiles from '../../../hooks/useImageFiles';
 
 const ApartmentForm = ({ open, onClose }) => {
     const dispatch = useDispatch();
@@ -28,7 +29,8 @@ const ApartmentForm = ({ open, onClose }) => {
         price: 0
     });
     const [existingImages, setExistingImages] = React.useState([]);
-    const [newImages, setNewImages] = React.useState([]);
+    const imageQueue = useImageFiles({ limit: 30 });
+    const newImages = imageQueue.files;
 
     useEffect(() => {
         if (selectedApartment) {
@@ -57,7 +59,7 @@ const ApartmentForm = ({ open, onClose }) => {
             });
             setExistingImages([]);
         }
-        setNewImages([]);
+        imageQueue.resetFiles();
     }, [selectedApartment]);
 
     const handleChange = (e) => {
@@ -69,13 +71,12 @@ const ApartmentForm = ({ open, onClose }) => {
     };
 
     const handleImageUpload = (e) => {
-        const files = Array.from(e.target.files);
-        setNewImages(prev => [...prev, ...files]);
+        imageQueue.addFiles(e.target.files, existingImages.length);
     };
 
     const handleRemoveImage = (index, isNewImage) => {
         if (isNewImage) {
-            setNewImages(prev => prev.filter((_, i) => i !== index - existingImages.length));
+            imageQueue.removeFile(index - existingImages.length);
         } else {
             setExistingImages(prev => prev.filter((_, i) => i !== index));
         }
@@ -83,11 +84,12 @@ const ApartmentForm = ({ open, onClose }) => {
 
     const handleReorderImages = (reorderedImages, reorderedNewImages) => {
         setExistingImages(reorderedImages);
-        setNewImages(reorderedNewImages);
+        imageQueue.setFiles(reorderedNewImages);
     };
 
     const handleSubmit = async (e) => {
         e.preventDefault();
+        if (!imageQueue.canSubmit()) return;
         try {
             const formDataToSend = new FormData();
             Object.keys(formData).forEach(key => {
@@ -216,13 +218,17 @@ const ApartmentForm = ({ open, onClose }) => {
                                 onImageUpload={handleImageUpload}
                                 onRemoveImage={handleRemoveImage}
                                 onReorder={handleReorderImages}
+                                processing={imageQueue.processing}
+                                done={imageQueue.done}
+                                total={imageQueue.total}
+                                issues={imageQueue.issues}
                             />
                         </Grid>
                     </Grid>
                 </DialogContent>
                 <DialogActions>
                     <Button onClick={onClose}>Cancel</Button>
-                    <Button type="submit" variant="contained" color="primary">
+                    <Button type="submit" variant="contained" color="primary" disabled={imageQueue.processing || imageQueue.issues.length > 0}>
                         {selectedApartment ? 'Update' : 'Create'}
                     </Button>
                 </DialogActions>
