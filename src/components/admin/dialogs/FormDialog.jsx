@@ -12,13 +12,15 @@ const FormDialog = ({
   onClose, 
   onSave,
   saveDisabled = false,
+  saving = false,
+  savingLabel = 'Saving…',
   children, 
   title = 'Edit' 
 }) => {
   return (
     <Dialog 
       open={open} 
-      onClose={onClose}
+      onClose={saving ? undefined : onClose}
       maxWidth="md"
       fullWidth
       PaperProps={{
@@ -33,11 +35,11 @@ const FormDialog = ({
         {children}
       </DialogContent>
       <DialogActions>
-        <Button onClick={onClose} color="inherit">
+        <Button onClick={onClose} color="inherit" disabled={saving}>
           Cancel
         </Button>
-        <Button onClick={onSave} variant="contained" color="primary" disabled={saveDisabled}>
-          Save
+        <Button onClick={onSave} variant="contained" color="primary" disabled={saveDisabled || saving}>
+          {saving ? savingLabel : 'Save'}
         </Button>
       </DialogActions>
     </Dialog>
