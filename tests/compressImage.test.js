@@ -59,3 +59,13 @@ test('rechaza HEIC ilegible, GIF grande y resultado sobre 10 MiB', async () => {
   await assert.rejects(compressImage(file('animado.gif', 'image/gif', 2_000_000), harness(2000, 1000, []).options), { code: 'animatedGif' });
   await assert.rejects(compressImage(file('grande.png', 'image/png', 12_000_000), harness(2000, 1000, Array(6).fill(11_000_000)).options), { code: 'tooLarge' });
 });
+
+test('usa dimensiones ya orientadas del decodificador para foto vertical', async () => {
+  const oldFile = globalThis.File;
+  globalThis.File = class { constructor(parts, name, options) { this.size = parts[0].size; this.name = name; this.type = options.type; } };
+  try {
+    const h = harness(3000, 4000, [500_000]);
+    await compressImage(file('iphone.jpg', 'image/jpeg', 4_000_000), h.options);
+    assert.deepEqual([h.calls[0].width, h.calls[0].height], [1440, 1920]);
+  } finally { globalThis.File = oldFile; }
+});

@@ -32,6 +32,7 @@ const ApartmentForm = ({ open, onClose }) => {
     const [existingImages, setExistingImages] = React.useState([]);
     const [uploadError, setUploadError] = React.useState('');
     const imageQueue = useImageFiles({ limit: 30 });
+    const { resetFiles } = imageQueue;
     const newImages = imageQueue.files;
 
     useEffect(() => {
@@ -61,9 +62,9 @@ const ApartmentForm = ({ open, onClose }) => {
             });
             setExistingImages([]);
         }
-        imageQueue.resetFiles();
+        resetFiles();
         setUploadError('');
-    }, [selectedApartment]);
+    }, [selectedApartment, resetFiles]);
 
     const handleChange = (e) => {
         const { name, value } = e.target;
@@ -227,6 +228,7 @@ const ApartmentForm = ({ open, onClose }) => {
                                 done={imageQueue.done}
                                 total={imageQueue.total}
                                 issues={imageQueue.issues}
+                                clearIssues={imageQueue.clearIssues}
                             />
                         </Grid>
                     </Grid>

@@ -278,6 +278,7 @@ const ServicesPage = () => {
             done={imageQueue.done}
             total={imageQueue.total}
             issues={imageQueue.issues}
+            clearIssues={imageQueue.clearIssues}
           />
         </Box>
       </>

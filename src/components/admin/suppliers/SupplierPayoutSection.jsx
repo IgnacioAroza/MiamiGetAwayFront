@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useRef, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import {
     Box, Button, Chip, CircularProgress, Dialog, DialogActions,
@@ -252,11 +252,11 @@ const SupplierPayoutSection = ({ reservationId, nights = 0 }) => {
         imageQueue.addFiles(files);
     };
 
-    const handleDrop = useCallback((e) => {
+    const handleDrop = (e) => {
         e.preventDefault();
         setIsDragOver(false);
         addFiles(e.dataTransfer.files);
-    }, [imageQueue]);
+    };
 
     // ── handlers: payment ──────────────────────────────────────────────────────
     const handleRegisterPayment = async () => {

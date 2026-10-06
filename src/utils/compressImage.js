@@ -60,7 +60,8 @@ export async function compressImage(file, options = {}) {
     }
     canvas.width = canvas.height = 0;
     if (blob.size > maxBytes) throw new ImageProcessingError('tooLarge');
-    return new File([blob], outputName(file.name, type), { type, lastModified: file.lastModified });
+    const actualType = blob.type || type;
+    return new File([blob], outputName(file.name, actualType), { type: actualType, lastModified: file.lastModified });
   } finally {
     bitmap?.close?.();
   }

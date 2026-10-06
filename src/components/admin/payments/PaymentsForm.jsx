@@ -55,6 +55,7 @@ const PaymentForm = ({ open, onClose }) => {
         client_id: ''
     });
     const imageQueue = useImageFiles({ limit: 1 });
+    const { resetFiles } = imageQueue;
     const receiptImage = imageQueue.files[0] || null;
     const [removeReceiptImage, setRemoveReceiptImage] = useState(false);
 
@@ -85,10 +86,10 @@ const PaymentForm = ({ open, onClose }) => {
                 client_id: ''
             });
         }
-        imageQueue.resetFiles();
+        resetFiles();
         setRemoveReceiptImage(false);
         if (fileInputRef.current) fileInputRef.current.value = '';
-    }, [selectedPayment]);
+    }, [selectedPayment, resetFiles]);
 
     // Validación del formulario
     const validateForm = () => {

@@ -3,6 +3,7 @@
     "select": "Select images",
     "reorder": "Drag images to change their order",
     "processing": "Processing images {{done}}/{{total}}…",
+    "dismiss": "Dismiss",
     "errors": {
       "limit": "Maximum {{limit}} files",
       "tooLarge": "Exceeds the 10 MB limit",

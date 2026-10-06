@@ -3,6 +3,7 @@
     "select": "Seleccionar imágenes",
     "reorder": "Arrastrá las imágenes para cambiar el orden",
     "processing": "Procesando imágenes {{done}}/{{total}}…",
+    "dismiss": "Entendido",
     "errors": {
       "limit": "Máximo {{limit}} archivos",
       "tooLarge": "Supera el límite de 10 MB",

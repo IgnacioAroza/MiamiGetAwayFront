@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useId, useState } from 'react';
 import { Box, Button, IconButton, Typography } from '@mui/material';
 import DeleteIcon from '@mui/icons-material/Delete';
 import DragIndicatorIcon from '@mui/icons-material/DragIndicator';
@@ -62,8 +62,9 @@ const SortableThumbnail = ({ id, src, file, onRemove }) => {
   );
 };
 
-const ImageUploader = ({ images, newImages, onImageUpload, onRemoveImage, onReorder, processing, done, total, issues = [] }) => {
+const ImageUploader = ({ images, newImages, onImageUpload, onRemoveImage, onReorder, processing, done, total, issues = [], clearIssues }) => {
   const { t } = useTranslation();
+  const inputId = useId();
   const sensors = useSensors(useSensor(PointerSensor, { activationConstraint: { distance: 5 } }));
 
   const items = [
@@ -93,12 +94,12 @@ const ImageUploader = ({ images, newImages, onImageUpload, onRemoveImage, onReor
       <input
         accept="image/*"
         style={{ display: 'none' }}
-        id="raised-button-file"
+        id={inputId}
         multiple
         type="file"
         onChange={event => { onImageUpload(event); event.target.value = ''; }}
       />
-      <label htmlFor="raised-button-file">
+      <label htmlFor={inputId}>
         <Button variant="contained" component="span" sx={{ mt: 2 }}>
           {t('imageUpload.select')}
         </Button>
@@ -123,7 +124,7 @@ const ImageUploader = ({ images, newImages, onImageUpload, onRemoveImage, onReor
           </Box>
         </SortableContext>
       </DndContext>
-      <ImageUploadFeedback processing={processing} done={done} total={total} issues={issues} />
+      <ImageUploadFeedback processing={processing} done={done} total={total} issues={issues} clearIssues={clearIssues} />
     </Box>
   );
 };
