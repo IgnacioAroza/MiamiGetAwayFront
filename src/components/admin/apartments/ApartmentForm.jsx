@@ -9,10 +9,12 @@ import {
     TextField,
     Grid,
     Typography,
-    Divider
+    Divider,
+    Alert
 } from '@mui/material';
 import { createAdminApartment, updateAdminApartment, selectSelectedApartment } from '../../../redux/adminApartmentSlice';
 import ImageUploader from '../../images/ImageUploader';
+import useImageFiles from '../../../hooks/useImageFiles';
 
 const ApartmentForm = ({ open, onClose }) => {
     const dispatch = useDispatch();
@@ -28,7 +30,10 @@ const ApartmentForm = ({ open, onClose }) => {
         price: 0
     });
     const [existingImages, setExistingImages] = React.useState([]);
-    const [newImages, setNewImages] = React.useState([]);
+    const [uploadError, setUploadError] = React.useState('');
+    const imageQueue = useImageFiles({ limit: 30 });
+    const { resetFiles } = imageQueue;
+    const newImages = imageQueue.files;
 
     useEffect(() => {
         if (selectedApartment) {
@@ -57,8 +62,9 @@ const ApartmentForm = ({ open, onClose }) => {
             });
             setExistingImages([]);
         }
-        setNewImages([]);
-    }, [selectedApartment]);
+        resetFiles();
+        setUploadError('');
+    }, [selectedApartment, resetFiles]);
 
     const handleChange = (e) => {
         const { name, value } = e.target;
@@ -69,13 +75,12 @@ const ApartmentForm = ({ open, onClose }) => {
     };
 
     const handleImageUpload = (e) => {
-        const files = Array.from(e.target.files);
-        setNewImages(prev => [...prev, ...files]);
+        imageQueue.addFiles(e.target.files, existingImages.length);
     };
 
     const handleRemoveImage = (index, isNewImage) => {
         if (isNewImage) {
-            setNewImages(prev => prev.filter((_, i) => i !== index - existingImages.length));
+            imageQueue.removeFile(index - existingImages.length);
         } else {
             setExistingImages(prev => prev.filter((_, i) => i !== index));
         }
@@ -83,11 +88,13 @@ const ApartmentForm = ({ open, onClose }) => {
 
     const handleReorderImages = (reorderedImages, reorderedNewImages) => {
         setExistingImages(reorderedImages);
-        setNewImages(reorderedNewImages);
+        imageQueue.setFiles(reorderedNewImages);
     };
 
     const handleSubmit = async (e) => {
         e.preventDefault();
+        if (!imageQueue.canSubmit()) return;
+        setUploadError('');
         try {
             const formDataToSend = new FormData();
             Object.keys(formData).forEach(key => {
@@ -109,7 +116,7 @@ const ApartmentForm = ({ open, onClose }) => {
             }
             onClose();
         } catch (error) {
-            console.error('Error al guardar:', error);
+            setUploadError(typeof error === 'string' ? error : error?.message || '');
         }
     };
 
@@ -120,6 +127,7 @@ const ApartmentForm = ({ open, onClose }) => {
             </DialogTitle>
             <form onSubmit={handleSubmit}>
                 <DialogContent>
+                    {uploadError && <Alert severity="error" sx={{ mb: 2 }}>{uploadError}</Alert>}
                     <Grid container spacing={2}>
                         <Grid item xs={6}>
                             <TextField
@@ -216,13 +224,18 @@ const ApartmentForm = ({ open, onClose }) => {
                                 onImageUpload={handleImageUpload}
                                 onRemoveImage={handleRemoveImage}
                                 onReorder={handleReorderImages}
+                                processing={imageQueue.processing}
+                                done={imageQueue.done}
+                                total={imageQueue.total}
+                                issues={imageQueue.issues}
+                                clearIssues={imageQueue.clearIssues}
                             />
                         </Grid>
                     </Grid>
                 </DialogContent>
                 <DialogActions>
                     <Button onClick={onClose}>Cancel</Button>
-                    <Button type="submit" variant="contained" color="primary">
+                    <Button type="submit" variant="contained" color="primary" disabled={imageQueue.processing || imageQueue.issues.length > 0}>
                         {selectedApartment ? 'Update' : 'Create'}
                     </Button>
                 </DialogActions>

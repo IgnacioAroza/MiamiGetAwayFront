@@ -10,7 +10,8 @@ import {
 const FormDialog = ({ 
   open, 
   onClose, 
-  onSave, 
+  onSave,
+  saveDisabled = false,
   children, 
   title = 'Edit' 
 }) => {
@@ -35,7 +36,7 @@ const FormDialog = ({
         <Button onClick={onClose} color="inherit">
           Cancel
         </Button>
-        <Button onClick={onSave} variant="contained" color="primary">
+        <Button onClick={onSave} variant="contained" color="primary" disabled={saveDisabled}>
           Save
         </Button>
       </DialogActions>

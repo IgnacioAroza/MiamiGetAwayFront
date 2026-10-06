@@ -1,4 +1,20 @@
 {
+  "imageUpload": {
+    "select": "Seleccionar imágenes",
+    "reorder": "Arrastrá las imágenes para cambiar el orden",
+    "processing": "Procesando imágenes {{done}}/{{total}}…",
+    "dismiss": "Entendido",
+    "errors": {
+      "limit": "Máximo {{limit}} archivos",
+      "tooLarge": "Supera el límite de 10 MB",
+      "heic": "Este navegador no puede abrir HEIC. Convertí la foto a JPG",
+      "decode": "No se pudo abrir la imagen",
+      "encode": "No se pudo comprimir la imagen",
+      "animatedGif": "No se puede comprimir un GIF animado sin perder la animación",
+      "unsupported": "Formato no admitido",
+      "uploadGroup": "Falló la carga de {{names}}: {{reason}}"
+    }
+  },
   "general": {
     "welcome": "Miami Get Away",
     "loading": "Cargando...",
