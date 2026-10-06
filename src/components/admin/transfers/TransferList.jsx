@@ -26,6 +26,8 @@ import DeleteDialog from '../dialogs/DeleteDialog';
 import useDeviceDetection from '../../../hooks/useDeviceDetection';
 import TransferInquiryList from './InquiryList';
 import useImageFiles from '../../../hooks/useImageFiles';
+import useSubmitLock from '../../../hooks/useSubmitLock';
+import { useTranslation } from 'react-i18next';
 import ImageUploadFeedback from '../../images/ImageUploadFeedback';
 
 const CATEGORIES = ['sedan', 'suv', 'van'];
@@ -123,7 +125,8 @@ const TransferList = () => {
     const [form, setForm] = useState(emptyForm);
     const imageQueue = useImageFiles({ limit: 20 });
     const imageFiles = imageQueue.files;
-    const [saving, setSaving] = useState(false);
+    const { t } = useTranslation();
+    const { submitting: saving, run } = useSubmitLock('transferVehicle');
     const [uploadError, setUploadError] = useState('');
     const [page, setPage] = useState(0);
     const [rowsPerPage, setRowsPerPage] = useState(10);
@@ -187,30 +190,28 @@ const TransferList = () => {
         setDeleteOpen(true);
     };
 
-    const handleCreate = async () => {
+    const handleCreate = () => {
         if (!isFormValid() || !imageQueue.canSubmit()) return;
-        setSaving(true);
+        return run(async () => {
         try {
             await dispatch(createVehicle(buildFormData())).unwrap();
             setCreateOpen(false);
         } catch (error) {
             setUploadError(typeof error === 'string' ? error : error?.message || '');
-        } finally {
-            setSaving(false);
         }
+        });
     };
 
-    const handleEdit = async () => {
+    const handleEdit = () => {
         if (!isFormValid() || !selected || !imageQueue.canSubmit()) return;
-        setSaving(true);
+        return run(async () => {
         try {
             await dispatch(updateVehicle({ id: selected.id, data: buildFormData() })).unwrap();
             setEditOpen(false);
         } catch (error) {
             setUploadError(typeof error === 'string' ? error : error?.message || '');
-        } finally {
-            setSaving(false);
         }
+        });
     };
 
     const handleDelete = async () => {
@@ -464,7 +465,7 @@ const TransferList = () => {
                     )}
 
                     {/* Create dialog */}
-                    <Dialog open={createOpen} onClose={() => setCreateOpen(false)} {...dialogProps}>
+                    <Dialog open={createOpen} onClose={() => !saving && setCreateOpen(false)} {...dialogProps}>
                         <DialogTitle sx={{ borderBottom: '1px solid #333', display: 'flex', alignItems: 'center', gap: 1 }}>
                             <DirectionsCarIcon sx={{ color: '#4fc3f7' }} />
                             New Vehicle
@@ -478,7 +479,7 @@ const TransferList = () => {
                             />
                         </DialogContent>
                         <DialogActions sx={{ borderTop: '1px solid #333', px: 3, py: 2 }}>
-                            <Button onClick={() => setCreateOpen(false)} sx={{ color: '#aaa' }}>Cancel</Button>
+                            <Button onClick={() => setCreateOpen(false)} disabled={saving} sx={{ color: '#aaa' }}>Cancel</Button>
                             <Button
                                 onClick={handleCreate}
                         disabled={saving || !isFormValid() || imageQueue.processing || imageQueue.issues.length > 0}
@@ -486,13 +487,13 @@ const TransferList = () => {
                                 sx={{ bgcolor: '#4fc3f7', color: '#000', '&:hover': { bgcolor: '#0288d1', color: '#fff' } }}
                                 startIcon={saving ? <CircularProgress size={14} color="inherit" /> : null}
                             >
-                                {saving ? 'Saving…' : 'Create'}
+                                {saving ? t('imageUpload.saving') : 'Create'}
                             </Button>
                         </DialogActions>
                     </Dialog>
 
                     {/* Edit dialog */}
-                    <Dialog open={editOpen} onClose={() => setEditOpen(false)} {...dialogProps}>
+                    <Dialog open={editOpen} onClose={() => !saving && setEditOpen(false)} {...dialogProps}>
                         <DialogTitle sx={{ borderBottom: '1px solid #333', display: 'flex', alignItems: 'center', gap: 1 }}>
                             <EditIcon sx={{ color: '#4fc3f7' }} />
                             Edit Vehicle
@@ -506,7 +507,7 @@ const TransferList = () => {
                             />
                         </DialogContent>
                         <DialogActions sx={{ borderTop: '1px solid #333', px: 3, py: 2 }}>
-                            <Button onClick={() => setEditOpen(false)} sx={{ color: '#aaa' }}>Cancel</Button>
+                            <Button onClick={() => setEditOpen(false)} disabled={saving} sx={{ color: '#aaa' }}>Cancel</Button>
                             <Button
                                 onClick={handleEdit}
                         disabled={saving || !isFormValid() || imageQueue.processing || imageQueue.issues.length > 0}
@@ -514,7 +515,7 @@ const TransferList = () => {
                                 sx={{ bgcolor: '#4fc3f7', color: '#000', '&:hover': { bgcolor: '#0288d1', color: '#fff' } }}
                                 startIcon={saving ? <CircularProgress size={14} color="inherit" /> : null}
                             >
-                                {saving ? 'Saving…' : 'Save Changes'}
+                                {saving ? t('imageUpload.saving') : 'Save Changes'}
                             </Button>
                         </DialogActions>
                     </Dialog>

@@ -12,6 +12,8 @@ import ApartmentForm from '../apartments/ApartmentForm';
 import ImageUploader from '../../images/ImageUploader';
 import AddIcon from '@mui/icons-material/Add';
 import useImageFiles from '../../../hooks/useImageFiles';
+import useSubmitLock from '../../../hooks/useSubmitLock';
+import { useTranslation } from 'react-i18next';
 
 import {
   setSelectedService,
@@ -36,6 +38,8 @@ const ServicesPage = () => {
   const [dialogOpen, setDialogOpen] = useState(false);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [itemToDelete, setItemToDelete] = useState(null);
+  const { t } = useTranslation();
+  const { submitting, run } = useSubmitLock('service');
   const imageQueue = useImageFiles({ limit: 30 });
   const newImages = imageQueue.files;
   const [openSnackbar, setOpenSnackbar] = useState(false);
@@ -112,9 +116,10 @@ const ServicesPage = () => {
     }
   };
 
-  const handleDialogSave = async (event) => {
+  const handleDialogSave = (event) => {
     event.preventDefault();
     if (!imageQueue.canSubmit()) return;
+    return run(async () => {
     try {
       // Obtener los datos del formulario según el tipo de servicio
       let formData = new FormData();
@@ -166,6 +171,7 @@ const ServicesPage = () => {
       console.error('Error al guardar:', error);
       setOpenSnackbar(true);
     }
+    });
   };
 
   const handleCreateNew = () => {
@@ -387,6 +393,8 @@ const ServicesPage = () => {
           onClose={() => { imageQueue.resetFiles(); setDialogOpen(false); }}
           onSave={handleDialogSave}
           saveDisabled={imageQueue.processing || imageQueue.issues.length > 0}
+          saving={submitting}
+          savingLabel={t('imageUpload.saving')}
           title={currentItem?.id ? 'Edit' : 'Create New'}
         >
           {renderForm()}

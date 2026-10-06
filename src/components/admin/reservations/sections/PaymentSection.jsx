@@ -5,6 +5,8 @@ import reservationService from '../../../../services/reservationService';
 import { useToast } from '../../../../hooks/useToast';
 import ToastNotification from '../../../common/ToastNotification';
 import useImageFiles from '../../../../hooks/useImageFiles';
+import useSubmitLock from '../../../../hooks/useSubmitLock';
+import { useTranslation } from 'react-i18next';
 import ImageUploadFeedback from '../../../images/ImageUploadFeedback';
 
 const PaymentSection = ({ formData, onChange, onPaymentRegistered, onInitialPaymentChange, initialPaymentData }) => {
@@ -14,7 +16,8 @@ const PaymentSection = ({ formData, onChange, onPaymentRegistered, onInitialPaym
         paymentMethod: initialPaymentData?.paymentMethod || 'cash',
         paymentNotes: initialPaymentData?.notes || ''
     });
-    const [isLoading, setIsLoading] = useState(false);
+    const { t } = useTranslation();
+    const { submitting: isLoading, run } = useSubmitLock('reservationPayment');
     const imageQueue = useImageFiles({ limit: 1 });
     const receiptImage = imageQueue.files[0] || null;
     const fileInputRef = useRef(null);
@@ -53,7 +56,7 @@ const PaymentSection = ({ formData, onChange, onPaymentRegistered, onInitialPaym
         }
     };
 
-    const handleRegisterPayment = async () => {
+    const handleRegisterPayment = () => {
         if (!imageQueue.canSubmit()) return;
         if (!paymentData.paymentAmount || paymentData.paymentAmount <= 0) {
             warning('Please enter a valid payment amount');
@@ -79,7 +82,7 @@ const PaymentSection = ({ formData, onChange, onPaymentRegistered, onInitialPaym
             return;
         }
 
-        setIsLoading(true);
+        return run(async () => {
         try {
             const paymentPayload = {
                 amount: parseFloat(paymentData.paymentAmount),
@@ -128,9 +131,8 @@ const PaymentSection = ({ formData, onChange, onPaymentRegistered, onInitialPaym
             console.error('Error registering payment:', err);
             const msg = typeof err === 'string' ? err : (err?.message || 'Error registering payment');
             error(msg);
-        } finally {
-            setIsLoading(false);
         }
+        });
     };
     return (
         <Box>            
@@ -254,7 +256,7 @@ const PaymentSection = ({ formData, onChange, onPaymentRegistered, onInitialPaym
                             py: 1.5
                         }}
                     >
-                        {isLoading ? 'Processing...' : 
+                        {isLoading ? t('imageUpload.saving') : 
                          isNewReservation ? 'Add Initial Payment' : 
                          'Register Payment'}
                     </Button>

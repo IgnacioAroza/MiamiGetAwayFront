@@ -18,6 +18,8 @@ import { useToast } from '../../../hooks/useToast';
 import ToastNotification from '../../common/ToastNotification';
 import ReceiptLightbox from '../../common/ReceiptLightbox';
 import useImageFiles from '../../../hooks/useImageFiles';
+import useSubmitLock from '../../../hooks/useSubmitLock';
+import { useTranslation } from 'react-i18next';
 import ImageUploadFeedback from '../../images/ImageUploadFeedback';
 
 // ─── helpers ──────────────────────────────────────────────────────────────────
@@ -63,7 +65,8 @@ const SupplierPayoutView = ({ reservationId, reservation }) => {
     const [data, setData] = useState(null);          // { assignment, payments }
     const [loading, setLoading] = useState(true);
     const [dialogOpen, setDialogOpen] = useState(false);
-    const [saving, setSaving] = useState(false);
+    const { t } = useTranslation();
+    const { submitting: saving, run } = useSubmitLock('supplierPayment');
     const [form, setForm] = useState({ amount: '', method: 'cash', date: '', referenceNotes: '' });
     const imageQueue = useImageFiles({ limit: 5, allowPdf: true });
     const receiptFiles = imageQueue.files;
@@ -118,9 +121,9 @@ const SupplierPayoutView = ({ reservationId, reservation }) => {
         setDialogOpen(true);
     };
 
-    const handleRegister = async () => {
+    const handleRegister = () => {
         if (!form.amount || isNaN(Number(form.amount)) || !imageQueue.canSubmit()) return;
-        setSaving(true);
+        return run(async () => {
         try {
             await supplierService.createSupplierPayment(
                 reservationId,
@@ -132,9 +135,8 @@ const SupplierPayoutView = ({ reservationId, reservation }) => {
             await load();
         } catch (error) {
             showToast(typeof error === 'string' ? error : error?.message || 'Error registering payment', 'error');
-        } finally {
-            setSaving(false);
         }
+        });
     };
 
     return (
@@ -448,7 +450,7 @@ const SupplierPayoutView = ({ reservationId, reservation }) => {
                         disabled={saving || !form.amount || imageQueue.processing || imageQueue.issues.length > 0}
                         sx={{ bgcolor: '#6c5dd3', '&:hover': { bgcolor: '#5a4dc0' } }}
                     >
-                        {saving ? <CircularProgress size={18} sx={{ color: '#fff' }} /> : 'Register'}
+                        {saving ? <><CircularProgress size={18} sx={{ color: '#fff', mr: 1 }} />{t('imageUpload.saving')}</> : 'Register'}
                     </Button>
                 </DialogActions>
             </Dialog>

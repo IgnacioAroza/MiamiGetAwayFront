@@ -15,9 +15,13 @@ import {
 import { createAdminApartment, updateAdminApartment, selectSelectedApartment } from '../../../redux/adminApartmentSlice';
 import ImageUploader from '../../images/ImageUploader';
 import useImageFiles from '../../../hooks/useImageFiles';
+import useSubmitLock from '../../../hooks/useSubmitLock';
+import { useTranslation } from 'react-i18next';
 
 const ApartmentForm = ({ open, onClose }) => {
     const dispatch = useDispatch();
+    const { t } = useTranslation();
+    const { submitting, run } = useSubmitLock('apartment');
     const selectedApartment = useSelector(selectSelectedApartment);
     const [formData, setFormData] = React.useState({
         name: '',
@@ -91,9 +95,10 @@ const ApartmentForm = ({ open, onClose }) => {
         imageQueue.setFiles(reorderedNewImages);
     };
 
-    const handleSubmit = async (e) => {
+    const handleSubmit = (e) => {
         e.preventDefault();
         if (!imageQueue.canSubmit()) return;
+        return run(async () => {
         setUploadError('');
         try {
             const formDataToSend = new FormData();
@@ -118,10 +123,11 @@ const ApartmentForm = ({ open, onClose }) => {
         } catch (error) {
             setUploadError(typeof error === 'string' ? error : error?.message || '');
         }
+        });
     };
 
     return (
-        <Dialog open={open} onClose={onClose} maxWidth="md" fullWidth>
+        <Dialog open={open} onClose={submitting ? undefined : onClose} maxWidth="md" fullWidth>
             <DialogTitle>
                 {selectedApartment ? 'Edit Apartment' : 'New Apartment'}
             </DialogTitle>
@@ -234,9 +240,9 @@ const ApartmentForm = ({ open, onClose }) => {
                     </Grid>
                 </DialogContent>
                 <DialogActions>
-                    <Button onClick={onClose}>Cancel</Button>
-                    <Button type="submit" variant="contained" color="primary" disabled={imageQueue.processing || imageQueue.issues.length > 0}>
-                        {selectedApartment ? 'Update' : 'Create'}
+                    <Button onClick={onClose} disabled={submitting}>Cancel</Button>
+                    <Button type="submit" variant="contained" color="primary" disabled={submitting || imageQueue.processing || imageQueue.issues.length > 0}>
+                        {submitting ? t('imageUpload.saving') : selectedApartment ? 'Update' : 'Create'}
                     </Button>
                 </DialogActions>
             </form>

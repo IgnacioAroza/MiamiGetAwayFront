@@ -27,6 +27,8 @@ import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 import { enUS } from 'date-fns/locale';
 import { createPayment, updatePayment, fetchAllPayments } from '../../../redux/reservationPaymentSlice';
 import useImageFiles from '../../../hooks/useImageFiles';
+import useSubmitLock from '../../../hooks/useSubmitLock';
+import { useTranslation } from 'react-i18next';
 import ImageUploadFeedback from '../../images/ImageUploadFeedback';
 
 const PAYMENT_METHODS = [
@@ -42,7 +44,10 @@ const PAYMENT_METHODS = [
 const PaymentForm = ({ open, onClose }) => {
     const dispatch = useDispatch();
     const selectedPayment = useSelector(state => state.reservationPayments.selectedPayment);
-    const loading = useSelector(state => state.reservationPayments.loading);
+    const reduxLoading = useSelector(state => state.reservationPayments.loading);
+    const { t } = useTranslation();
+    const { submitting, run } = useSubmitLock('reservationPayment');
+    const loading = reduxLoading || submitting;
     const fileInputRef = useRef(null);
 
     const [formData, setFormData] = useState({
@@ -148,7 +153,7 @@ const PaymentForm = ({ open, onClose }) => {
         }
     };
 
-    const handleSubmit = async (event) => {
+    const handleSubmit = (event) => {
         event.preventDefault();
         if (!imageQueue.canSubmit()) return;
         
@@ -168,6 +173,7 @@ const PaymentForm = ({ open, onClose }) => {
             removeReceiptImage: removeReceiptImage || undefined,
         };
 
+        return run(async () => {
         try {
             if (selectedPayment) {
                 await dispatch(updatePayment({
@@ -197,6 +203,7 @@ const PaymentForm = ({ open, onClose }) => {
                 submit: typeof error === 'string' ? error : (error?.message || 'Error processing payment')
             }));
         }
+        });
     };
 
     const handleClose = () => {
@@ -219,7 +226,7 @@ const PaymentForm = ({ open, onClose }) => {
     return (
         <Dialog 
             open={open} 
-            onClose={handleClose}
+            onClose={submitting ? undefined : handleClose}
             maxWidth="sm"
             fullWidth
         >
@@ -405,7 +412,10 @@ const PaymentForm = ({ open, onClose }) => {
                         disabled={loading || imageQueue.processing || imageQueue.issues.length > 0}
                     >
                         {loading ? (
-                            <CircularProgress size={24} />
+                            <>
+                                <CircularProgress size={20} sx={{ mr: submitting ? 1 : 0 }} />
+                                {submitting && t('imageUpload.saving')}
+                            </>
                         ) : (
                             selectedPayment ? 'Update' : 'Create'
                         )}
