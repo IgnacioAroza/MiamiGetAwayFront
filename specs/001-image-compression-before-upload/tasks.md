@@ -14,6 +14,6 @@ Cada tarea de implementación termina con tests pertinentes, `npm run build` y u
 | Hecha `d8359a7` | 8 | Pagos a proveedor en ambas vistas: máximo 5; comprimir imágenes y preservar PDF | 4, 5, 6, 9 | Tests de selección mixta, tandas, máximo 5 y estados |
 | Hecha `040d800` | 9 | Propagar `details` sin perder el mensaje general; mostrar nombre y motivo por imagen en cada formulario | 10 | Tests con errores indexados, nombrados y generales simulados; ningún request real |
 | Hecha `bc77466` | 10 | Textos ES/EN, barrido de formularios y regresión automatizada | 4, 5, 6, 7, 8, 9, 10, 11 | `npm test` y `npm run build` verdes |
-| Sigue | 11 | Prueba manual aislada en navegador con fotos reales o fixtures; tabla RF-1..RF-11 | 1–11 | Sin requests al backend; documentar resultados y cualquier límite |
+| Hecha | 11 | Prueba manual aislada en navegador con fixtures; tabla RF-1..RF-11 | 1–11 | Chrome con 0 requests a `/api/`; resultados y límites en `evidence.md` |
 
 Publicación en producción pendiente: esta tarea prohíbe pushear.
