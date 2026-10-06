@@ -450,7 +450,7 @@ const SupplierPayoutView = ({ reservationId, reservation }) => {
                         disabled={saving || !form.amount || imageQueue.processing || imageQueue.issues.length > 0}
                         sx={{ bgcolor: '#6c5dd3', '&:hover': { bgcolor: '#5a4dc0' } }}
                     >
-                        {saving ? <><CircularProgress size={18} sx={{ color: '#fff', mr: 1 }} />{t('imageUpload.saving')}</> : 'Register'}
+                        {saving ? <><CircularProgress size={18} sx={{ color: '#fff', mr: 1 }} />{t('imageUpload.saving', { lng: 'en' })}</> : 'Register'}
                     </Button>
                 </DialogActions>
             </Dialog>

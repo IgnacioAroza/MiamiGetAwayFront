@@ -701,7 +701,7 @@ const SupplierPayoutSection = ({ reservationId, nights = 0 }) => {
                             textTransform: 'none', py: 1.2, fontWeight: 600,
                         }}
                     >
-                        {registeringPayment ? t('imageUpload.saving') : '+ Register Payout'}
+                        {registeringPayment ? t('imageUpload.saving', { lng: 'en' }) : '+ Register Payout'}
                     </Button>
                 </>
             )}

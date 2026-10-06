@@ -2,7 +2,7 @@ import { Alert, Box, Button, LinearProgress, Typography } from '@mui/material';
 import { useTranslation } from 'react-i18next';
 
 export default function ImageUploadFeedback({ processing, done = 0, total = 0, issues = [], clearIssues }) {
-  const { t } = useTranslation();
+  const { t } = useTranslation(undefined, { lng: 'en' });
   if (!processing && !issues.length) return null;
   return <Box sx={{ mt: 1 }}>
     {processing && <>

@@ -4,12 +4,12 @@ Estado actual del proyecto. Leer al inicio de cada sesión antes de tocar códig
 
 ---
 
-## Estado de ramas (al 2026-07-23)
+## Estado de ramas (al 2026-10-06)
 
 | Rama | Estado |
 |------|--------|
-| `main` | Producción — PR #42 mergeado (imágenes apartamentos + drag reorder). Alineada con `development` |
-| `development` | Alineada con `main` (mismo commit `7358855`) |
+| `main` | Producción — release #46 (bloqueo del doble envío). Incluye spec 001 de compresión de imágenes (#44) |
+| `development` | Un paso adelante de `main`: #47 (textos de carga en inglés en el admin) + docs de la sesión 2026-10-06. Release a `main` pendiente |
 | `feature/investments` | Eliminada — mergeada a `main` (PR #35) |
 | `feature/experiences` | Eliminada — mergeada a `main` (PR #36) |
 | `feature/transfers` | Eliminada — mergeada a `main` (PR #37, 2026-06-19) |
@@ -80,7 +80,10 @@ Estado actual del proyecto. Leer al inicio de cada sesión antes de tocar códig
 
 - **API client:** Siempre `src/utils/api.js`. Nunca `axios.create()` nuevo
 - **FormData + números:** Si no hay file upload, usar JSON. `FormData.append` convierte a string y Zod rechaza `z.number()`
-- **Imágenes:** Campo `images` en `multipart/form-data`, máx 30 archivos. No setear `Content-Type` manualmente
+- **Imágenes:** Campo `images` en `multipart/form-data`, máx 30 archivos (traslados 20, comprobantes de proveedor 5, pago de reserva 1). No setear `Content-Type` manualmente
+- **Compresión obligatoria antes de subir (2026-10-06):** toda imagen que el admin selecciona pasa por `useImageFiles` + `compressImage` (1920 px máx, ~1 MB). Un formulario nuevo con imágenes tiene que usarlos, no mandar los `File` originales. HEIC se rechaza con mensaje. Ver `memory/2026-10-06.md`
+- **Doble envío:** todo submit que mande imágenes al backend usa `useSubmitLock` (lock en el handler, liberado en `finally`), no solo `disabled` en el botón
+- **Admin en inglés:** el admin tiene textos fijos en inglés, pero i18n arranca en `es`. Los textos de i18n usados en el admin se fuerzan con `t(key, { lng: 'en' })` / `useTranslation(undefined, { lng: 'en' })`
 - **Auth admin:** JWT en `localStorage.adminToken`. Interceptor de `api.js` inyecta el header y maneja 401
 - **Suppliers:** Totales en `assignment.calculated.*` — nunca calcular localmente. `supplier_status` viene del objeto reserva. Métodos de pago válidos: `cash`, `card`, `transfer`, `paypal`, `zelle`, `stripe`, `other` (`wire` eliminado desde 2026-06-23)
 - **Datos de JOIN en normalizers:** Antes de hacer fetches secundarios, verificar si el backend ya incluye el campo en la respuesta principal vía JOIN. `clientName/clientLastname/clientEmail` en `/reservation-payments`, `apartmentName/apartmentAddress` en `/reservations` — todos ya venían del back. Fix: agregar al normalizer y eliminar los fetches secundarios.
@@ -102,6 +105,7 @@ Estado actual del proyecto. Leer al inicio de cada sesión antes de tocar códig
 
 ## Sesiones anteriores (detalle)
 
+- [2026-10-06](memory/2026-10-06.md) — Spec 001: compresión de imágenes antes de subir (#44), `npm audit` de 13 a 2 moderate (react-router v7 pendiente), bloqueo del doble envío con `useSubmitLock` (#45/#46), textos de carga en inglés en el admin (#47). Contexto: OOM kills del backend en Render
 - [2026-07-23](memory/2026-07-23.md) — Fix imágenes de apartamentos (no se mostraban/borraban), contrato `existingImages` como JSON, fix blank screen al crear/editar yates, drag and drop para reordenar imágenes (PR #42, requiere PR #46 del backend); más tarde: investigación de aspect ratio en `ImageCarousel` (revertida) y orden "más recientes primero" en el admin de apartamentos (sin PR aún)
 - [2026-06-25](memory/2026-06-25.md) — PUT→PATCH en reservationService, dead code cleanup (updateReservation thunk), error handling global en todos los slices y componentes (PR #40, PR #41)
 - [2026-06-24](memory/2026-06-24.md) — N+1 fix en PaymentsList y ReservationList, columna Reservation en pagos, historial de pagos a suppliers (`/admin/suppliers/:id`), filas clickeables en SupplierList (PR #39)

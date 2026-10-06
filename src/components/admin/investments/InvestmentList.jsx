@@ -469,7 +469,7 @@ const InvestmentList = () => {
                         sx={{ bgcolor: '#6c5dd3', '&:hover': { bgcolor: '#7c5cbf' } }}
                         startIcon={saving ? <CircularProgress size={14} color="inherit" /> : null}
                     >
-                        {saving ? t('imageUpload.saving') : 'Create'}
+                        {saving ? t('imageUpload.saving', { lng: 'en' }) : 'Create'}
                     </Button>
                 </DialogActions>
             </Dialog>
@@ -497,7 +497,7 @@ const InvestmentList = () => {
                         sx={{ bgcolor: '#6c5dd3', '&:hover': { bgcolor: '#7c5cbf' } }}
                         startIcon={saving ? <CircularProgress size={14} color="inherit" /> : null}
                     >
-                        {saving ? t('imageUpload.saving') : 'Save Changes'}
+                        {saving ? t('imageUpload.saving', { lng: 'en' }) : 'Save Changes'}
                     </Button>
                 </DialogActions>
             </Dialog>

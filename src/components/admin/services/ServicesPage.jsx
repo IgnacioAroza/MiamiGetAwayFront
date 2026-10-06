@@ -394,7 +394,7 @@ const ServicesPage = () => {
           onSave={handleDialogSave}
           saveDisabled={imageQueue.processing || imageQueue.issues.length > 0}
           saving={submitting}
-          savingLabel={t('imageUpload.saving')}
+          savingLabel={t('imageUpload.saving', { lng: 'en' })}
           title={currentItem?.id ? 'Edit' : 'Create New'}
         >
           {renderForm()}
